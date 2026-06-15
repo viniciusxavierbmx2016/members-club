@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ReviewsSection } from "@/components/reviews-section";
 import { StarRating } from "@/components/star-rating";
 import { formatWhatsappLink } from "@/lib/utils";
+import { CourseBannerCarousel, toBannerSlides, type BannerSlide } from "@/components/course-banner-carousel";
 
 export interface PreviewLesson {
   id: string;
@@ -37,6 +38,7 @@ export interface PreviewCourse {
   thumbnailPosition?: string | null;
   bannerUrl: string | null;
   bannerPosition?: string | null;
+  bannerExtra?: BannerSlide[] | null;
   checkoutUrl: string | null;
   /** E4.4 — curso gratuito: troca "Comprar agora" por "Resgatar acesso". */
   isFree?: boolean;
@@ -256,14 +258,10 @@ export function CoursePreview({
             className="relative w-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-900 shadow-2xl shadow-black/10 dark:shadow-black/40 ring-1 ring-black/5 dark:ring-white/5"
             style={{ aspectRatio: "1125/350" }}
           >
-            <Image
-              src={course.bannerUrl}
+            <CourseBannerCarousel
+              slides={toBannerSlides(course.bannerUrl, course.bannerPosition ?? null, course.bannerExtra)}
               alt={course.title}
-              fill
               sizes="(max-width: 1400px) 100vw, 1400px"
-              className="object-cover"
-              priority
-              style={course.bannerPosition ? (() => { try { const p = JSON.parse(course.bannerPosition); return { objectPosition: `${p.x}% ${p.y}%` }; } catch { return undefined; } })() : undefined}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           </div>

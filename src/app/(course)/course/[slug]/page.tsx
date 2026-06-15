@@ -11,6 +11,7 @@ import {
   type CarouselModule,
 } from "@/components/module-carousel";
 import { CoursePreview } from "@/components/course-preview";
+import { CourseBannerCarousel, toBannerSlides, type BannerSlide } from "@/components/course-banner-carousel";
 import { ModuleListView, type ListModule } from "@/components/module-list-view";
 import { HeadphonesIcon } from "@/components/support-popover";
 import { SkeletonModuleCarousel } from "@/components/ui/skeleton";
@@ -54,6 +55,7 @@ interface CourseDetail {
   thumbnailPosition: string | null;
   bannerUrl: string | null;
   bannerPosition: string | null;
+  bannerExtra?: BannerSlide[] | null;
   checkoutUrl: string | null;
   isFree: boolean;
   price: number | null;
@@ -398,6 +400,8 @@ export default function CourseHomePage() {
           description: course.description,
           thumbnail: course.thumbnail,
           bannerUrl: course.bannerUrl,
+          bannerPosition: course.bannerPosition,
+          bannerExtra: course.bannerExtra,
           checkoutUrl: course.checkoutUrl,
           isFree: course.isFree,
           price: course.price,
@@ -457,14 +461,10 @@ export default function CourseHomePage() {
         <div
           className="relative w-full overflow-hidden bg-gray-100 dark:bg-gray-900 aspect-[16/9] sm:aspect-[10/3] lg:aspect-[75/16]"
         >
-          <Image
-            src={course.bannerUrl}
+          <CourseBannerCarousel
+            slides={toBannerSlides(course.bannerUrl, course.bannerPosition, course.bannerExtra)}
             alt={course.title}
-            fill
             sizes="100vw"
-            className="object-cover"
-            style={course.bannerPosition ? (() => { try { const p = JSON.parse(course.bannerPosition); return { objectPosition: `${p.x}% ${p.y}%` }; } catch { return undefined; } })() : undefined}
-            priority
           />
           {/* Fade parametrizado (7.12) — espelha o molde da vitrine w/[slug]/page.tsx.
               Default (enabled + sem cor) = os 2 gradientes de hoje (byte-idêntico). */}
