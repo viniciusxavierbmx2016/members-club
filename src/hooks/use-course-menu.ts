@@ -4,20 +4,19 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import { useConfirm } from "@/hooks/use-confirm";
 import { fetchJson, useToast } from "@/hooks/use-toast";
 
-/* O menu do curso é editado em DOIS lugares: a página
-   `/producer/courses/[id]/menu` e o `CourseMenuManager` embutido na aba
-   Personalizar. Até o E3.12 os dois carregavam a MESMA lógica em cópias
-   literais — mesmos 6 estados, mesmos 5 handlers, linha por linha.
+/* A camada de dados do editor de menu do curso: estados e handlers.
 
-   ⚠️ Um COMPONENTE só não resolve: a moldura é diferença real (a página tem
-   voltar, título e abas; o embutido tem um spinner e nada em volta). O que dá
-   para ser único é o HANDLER — e é o que vive aqui. As duas telas continuam
-   desenhando o que cada uma precisa.
+   ⓘ HOJE TEM UM CONSUMIDOR SÓ — o `CourseMenuManager`, embutido na aba
+   Personalizar. Nasceu com dois: até o E3.12 a lógica vivia em CÓPIA LITERAL
+   também numa página própria (`/producer/courses/[id]/menu`), que o 9.117
+   removeu por ser rota órfã — sem nenhum ponto de entrada na navegação.
 
-   ⭐ E foi a duplicata que tornou o defeito caro: o `handleDragEnd` fazia
-   `await fetch(...)` sem sequer GUARDAR a resposta. A ordem mudava na tela e
-   não no servidor, e ao recarregar voltava — sem uma palavra. Estava assim nas
-   duas cópias. Consertar uma e esquecer a outra é a família 9.42/9.54/9.57. */
+   ⭐ POR QUE O HOOK FICA, mesmo com um consumidor: foi a duplicata que tornou
+   o defeito caro — o `handleDragEnd` fazia `await fetch(...)` sem sequer
+   GUARDAR a resposta, e estava assim NAS DUAS cópias (consertar uma e esquecer
+   a outra é a família 9.42/9.54/9.57). Com a lógica aqui, o tratamento de erro
+   e o commit-no-blur têm UM lugar, e a tela desenha — separação que continua
+   valendo com uma tela só. */
 
 export interface MenuItem {
   id: string;
