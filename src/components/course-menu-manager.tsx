@@ -21,8 +21,9 @@ import { MENU_ICON_KEYS, MenuIcon } from "@/components/menu-icons";
 import { useCourseMenu, type MenuItem } from "@/hooks/use-course-menu";
 
 export function CourseMenuManager({ courseId }: { courseId: string }) {
-  /* 9.107 — os 6 estados e os 5 handlers viviam AQUI e, em cópia literal, na
-     página `/producer/courses/[id]/menu`. Agora vivem em `useCourseMenu`. */
+  /* 9.107 — os 6 estados e os 5 handlers viviam AQUI, e em cópia literal numa
+     segunda tela; extraídos para `useCourseMenu`. A segunda tela saiu no 9.117
+     (era rota órfã, sem ponto de entrada) — esta é agora a única. */
   const {
     items, loading, creating, setCreating,
     newLabel, setNewLabel, newIcon, setNewIcon, newUrl, setNewUrl,
