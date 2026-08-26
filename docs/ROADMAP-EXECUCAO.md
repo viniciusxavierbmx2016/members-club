@@ -421,7 +421,7 @@ Roda **em paralelo** às camadas, sem consumir sessão de desenvolvimento:
 | **E3.23 Corrida de escrita por-tecla no menu (9.123)** 🟠 | ✅ **fechada** | `31827c3` | 2026-08-26 |
 | **E3.22 UX de permissão no editor (9.119·9.120·9.121·9.122)** 🟢 | ⬜ pendente — 4 achados do gate do E3.12 (19/08) | — | — |
 | **E3.19 Moderador de live inalcançável (9.116)** 🟠 | ⬜ pendente — **pergunta de dono**; nasceu da investigação do E3.12 | — | — |
-| **E3.20 Rota órfã do editor de menu (9.117)** 🟢 | ⬜ pendente — **decisão de dono** (linkar/remover/documentar); nasceu do E3.12 | — | — |
+| **E3.20 Rota órfã do editor de menu (9.117)** 🟢 | ✅ **fechada** — decisão do dono: **REMOVER** | `a248c79` | 2026-08-26 |
 | E4.1 Toggles Personalizar Curso | ⬜ pendente | — | — |
 | E4.2 PDF na comunidade | ⬜ pendente | — | — |
 | E4.3 Colab assistir aos cursos | ⬜ pendente | — | — |

@@ -35,6 +35,57 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-26 — CAMADA 3, ETAPA E3.20 — A rota órfã removida (9.117)
+
+**Estado antes:** main em `9e3444d`
+
+**O que foi feito:** `/producer/courses/[id]/menu` renderizava e funcionava, mas **nenhum link do
+projeto apontava para ela** — só se chegava digitando a URL. **Decisão do dono: REMOVER.** Saiu o
+arquivo (343 linhas) e o diretório; ficaram os 2 comentários que a citavam, reescritos.
+
+**Arquivos tocados:** `producer/courses/[id]/menu/page.tsx` (**removido**) ·
+`components/course-menu-manager.tsx` · `hooks/use-course-menu.ts` (comentários) — **+14/−357**
+
+**Como foi provado (ANTES de remover):**
+- ⭐ **Paridade funcional total**, recurso a recurso: arrastar · criar · icon · label · url ·
+  enabled · excluir existem **idênticos** na tela viva. O **único** exclusivo era **moldura**
+  (Voltar, título, `/slug`, Pré-visualizar) — e **o layout do editor já entrega os quatro**
+  (`layout.tsx:95/101/113/127`). Era daí que vinha o **layout duplicado** que o gate do 9.123 viu.
+- **Zero órfãos deixados**: todos os imports têm outros consumidores; **hook e as 5 rotas de API do
+  menu seguem vivos** servindo a tela viva.
+- **Ninguém apontava** (grep amplo) · **nada externo expunha** (sem sitemap/robots) · **nenhum item
+  aberto dependia** do arquivo.
+- **Gate humano 2/2 (25/08)**: tela viva íntegra (renomear · ícone · enabled · arrastar · criar ·
+  excluir, persistindo após F5) · **URL órfã → 404 limpo**. Manifesto do build: a rota de página
+  **ausente**; as 3 rotas de **API** do menu presentes, por desenho.
+
+**SHA do merge:** `a248c79`  ·  **Rollback:** `git revert -m 1 a248c79`
+
+**Mudou em produção para quem:** **ninguém que use a navegação** — a tela não tinha entrada. Só
+quem tivesse a URL salva perde o atalho, e chega ao mesmo editor por Personalizar Curso → seção 5.
+
+**Ficou aberto:** nada novo.
+
+**⚠️ LIMITE DECLARADO, não escondido:** se **alguém acessava a URL na mão** é **não verificável** —
+não há log de navegação e o `AuditLog` cobre só **escrita** (19 rotas, nenhuma do menu, sem coluna
+de rota visitada). **Risco aceito**, reversível por revert.
+
+**⭐ O GANHO É DE MANUTENÇÃO, e ele é o motivo real:** fix do menu deixa de ser feito em **duas
+cópias mantidas em simetria** — a frase que apareceu nos commits do E3.12 **e** do 9.123. Barateia
+o 9.106 (lote L6, uma tela a menos) e todo fix futuro. E o comentário do hook passou a registrar
+**por que ele fica com um consumidor só**: a lógica precisa de **um lugar** (tratamento de erro do
+E3.12 + commit-no-blur do 9.123).
+
+**⚠️ Tropeço de ferramenta registrado (virou lição permanente):** após remover a rota, `tsc
+--noEmit` acusou `TS2307` apontando para `.next/types/validator.ts` — **artefato do build
+anterior**, que ainda listava a rota apagada. O `npm run build` regenerou e o typecheck passou.
+**Depois de remover/renomear rota, o typecheck só é confiável APÓS rebuild.**
+
+**Regras conferidas:** §17 ✅ · paridade provada antes de remover ✅ · limite de verificação
+declarado ✅ · escopo (1 remoção + 2 comentários) ✅ · gate humano 2/2 ✅ · papelada ✅
+
+---
+
 ## 2026-08-26 — CAMADA 3, ETAPA E3.23 — A corrida de PATCH por tecla (9.123)
 
 **Estado antes:** main em `704eebc`
