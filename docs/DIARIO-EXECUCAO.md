@@ -35,6 +35,56 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-26 — CAMADA 3, ETAPA E3.23 — A corrida de PATCH por tecla (9.123)
+
+**Estado antes:** main em `704eebc`
+
+**O que foi feito:** os campos de **texto** do editor de menu (`label` e `url`) chamavam `onUpdate`
+**a cada tecla** — N PATCHes em paralelo, e o banco ficava com o que **comitasse por último**, não
+com o digitado por último. Agora o texto vive em **estado local** e vai ao servidor **uma vez**, no
+**blur ou Enter**, seguindo o **molde da casa**. Fecha o E3.23 — o item que o gate do 9.118 pariu.
+
+**Arquivos tocados:** `components/course-menu-manager.tsx` · `producer/courses/[id]/menu/page.tsx`
+— **as 2 cópias, byte-idênticas no bloco** (+106/−8)
+
+**Como foi provado:**
+- **Produção medida ANTES de desenhar** (SELECT-only): **177 MenuItem · 0 truncados · 0 prefixos**;
+  58 cursos com os 3 defaults intocados, **3 itens custom no total**.
+- **Gate humano 5/5 (25/08)**: digitação rápida + blur mantém o texto inteiro · Enter salva ·
+  Escape reverte · regressões (icon, url de item custom, enabled, arrasto, criar, excluir) · **a
+  cópia órfã, pela URL, também curada**.
+
+**SHA do merge:** `31827c3`  ·  **Rollback:** `git revert -m 1 31827c3`
+
+**Mudou em produção para quem:** **ninguém sente**, e é esse o ponto — o menu quase não é editado
+(3 itens custom em 58 cursos). O que muda é que a próxima edição **não pode mais corromper o
+próprio nome**. ⚠️ Trade-off consciente: digitar e dar F5 **sem sair do campo** perde a edição não
+confirmada — **igual ao rename de módulo e de material**: consistência com a casa, não regressão.
+
+**Ficou aberto:** nada novo. Os 2 achados do gate foram **anexados ao 9.117** (rota órfã): a órfã
+renderiza **layout duplicado** (reforça *remover* em vez de *linkar*) e os campos de URL dos itens
+padrão são `disabled` **por desenho** (correto, registrado para não virar item por engano).
+
+**⚠️ RECALIBRAGEM DE SEVERIDADE, feita no fechamento: 🔴 → 🟠.** A **natureza** era grave —
+corrupção de dado **persistido**, que exigiu restauração por script, com a tela mentindo o tempo
+todo. A **incidência** é **nula**. Registrei a distinção no item porque ela é a lição: *cai por
+incidência, não por natureza* — e o número medido em produção é o que autoriza baixar a cor.
+
+**⭐ O MOLDE VEIO DE CASA.** `modules-manager.tsx:437-483` e `lesson-materials.tsx:258-264` já
+faziam exatamente isto desde sempre (estado local · blur/Enter · Escape · só grava se mudou). O fix
+foi **replicar**, não inventar. ⚠️ **Uma adição declarada**: `useEffect` sincronizando o local
+quando o item muda por fora — o molde não precisa porque lá o input **desmonta** ao sair da edição;
+aqui ele vive sempre, e sem isso um PATCH recusado deixaria o campo mentindo depois do rollback.
+
+**⛔ Opção (B) rejeitada com razão escrita** (fila no hook): não reduz o ruído de N PATCHes,
+adiciona maquinário, e protegeria "consumidores futuros" que são exatamente **2** — ambos curados
+por (A). E **abort não serviria**: cancela a espera do cliente, não o processamento no servidor.
+
+**Regras conferidas:** §17 ✅ · incidência medida em produção antes do desenho ✅ · molde da casa
+reusado (as 7 perguntas) ✅ · as 2 cópias em simetria ✅ · gate humano 5/5 ✅ · papelada ✅
+
+---
+
 ## 2026-08-20 — CAMADA 3, ETAPA E3.21 — O cache que fazia o editor mentir (9.118)
 
 **Estado antes:** main em `72c2586`
