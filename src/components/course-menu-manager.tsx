@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   DndContext,
   closestCenter,
@@ -169,6 +171,44 @@ function SortableRow({
   const canDelete = !item.isDefault;
   const canEditUrl = !item.isDefault;
 
+  /* 9.123 — os campos de TEXTO commitam no blur/Enter, não por tecla.
+
+     Antes, `onChange` chamava `onUpdate` direto: um PATCH por tecla, todos
+     voando em paralelo, e o banco ficava com o que COMITASSE por último — não
+     com o digitado por último. Triple-click + "Home E312" gravou "H", com a
+     tela mostrando o texto completo (todos os PATCHes voltam 200, então nem o
+     rollback do hook percebia). Agora o texto vive em estado local enquanto se
+     digita e vai ao servidor UMA vez.
+
+     ⭐ Molde da casa, não invenção: `modules-manager.tsx:437-483` (rename de
+     seção) e `lesson-materials.tsx:262` (rename de material) — estado local ·
+     commit no blur E no Enter · Escape reverte · só dispara se MUDOU.
+
+     ⚠️ `icon` (select) e `enabled` (checkbox) NÃO mudam: disparam 1 PATCH por
+     ação e nunca correram. */
+  const [labelLocal, setLabelLocal] = useState(item.label);
+  const [urlLocal, setUrlLocal] = useState(item.url);
+
+  /* O servidor continua sendo a verdade: quando o item muda por fora — o
+     rollback do hook num PATCH recusado, ou um `load()` — o campo acompanha. */
+  useEffect(() => {
+    setLabelLocal(item.label);
+  }, [item.label]);
+  useEffect(() => {
+    setUrlLocal(item.url);
+  }, [item.url]);
+
+  function commitLabel() {
+    const valor = labelLocal.trim();
+    if (valor && valor !== item.label) onUpdate(item.id, { label: valor });
+    else setLabelLocal(item.label);
+  }
+  function commitUrl() {
+    const valor = urlLocal.trim();
+    if (valor && valor !== item.url) onUpdate(item.id, { url: valor });
+    else setUrlLocal(item.url);
+  }
+
   return (
     <li
       ref={setNodeRef}
@@ -193,15 +233,25 @@ function SortableRow({
 
       <input
         type="text"
-        value={item.label}
-        onChange={(e) => onUpdate(item.id, { label: e.target.value })}
+        value={labelLocal}
+        onChange={(e) => setLabelLocal(e.target.value)}
+        onBlur={commitLabel}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commitLabel();
+          if (e.key === "Escape") setLabelLocal(item.label);
+        }}
         className="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
       />
 
       <input
         type="text"
-        value={item.url}
-        onChange={(e) => onUpdate(item.id, { url: e.target.value })}
+        value={urlLocal}
+        onChange={(e) => setUrlLocal(e.target.value)}
+        onBlur={commitUrl}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commitUrl();
+          if (e.key === "Escape") setUrlLocal(item.url);
+        }}
         disabled={!canEditUrl}
         className="hidden md:block flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
