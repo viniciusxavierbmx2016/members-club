@@ -154,13 +154,54 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
               fs: hideYoutubeChrome ? 0 : 1,
               iv_load_policy: 3,  // hide video annotations
               // F3 phase 3: hide native controls when custom controls take over
-              ...(hideYoutubeChrome ? { controls: 0 } : {}),
+              // 9.126 — REGRA DE PRODUTO: com os controles NOSSOS a aula roda
+              // SEM legenda. O estado de legenda do YouTube é COMPARTILHADO no
+              // navegador (provado no palco: desligar numa aula desligava na
+              // outra), então uma aula podia nascer legendada por causa de
+              // outra — e aqui não há UI para desligar. Quem quiser legenda usa
+              // o chrome nativo, onde a engrenagem dá a escolha (9.124).
+              ...(hideYoutubeChrome ? { controls: 0, cc_load_policy: 0 } : {}),
               ...(origin ? { origin } : {}),
             },
             events: {
               onReady: (e) => {
                 if (cancelled) return;
                 setYtPlayer(e.target as YTPlayer);
+                // SONDA-9126 — REMOVER. Instrumentação de MEDIÇÃO, não fix:
+                // descobre se a API de qualidade responde neste embed. Só no
+                // caminho do chrome nosso; não altera UI nem comportamento.
+                if (hideYoutubeChrome) {
+                  const q = e.target as unknown as {
+                    getAvailableQualityLevels?: () => string[];
+                    setPlaybackQuality?: (v: string) => void;
+                    getPlaybackQuality?: () => string;
+                  };
+                  const tipo = (f: unknown) => typeof f;
+                  console.log("[SONDA-9126] métodos:", {
+                    getAvailableQualityLevels: tipo(q.getAvailableQualityLevels),
+                    setPlaybackQuality: tipo(q.setPlaybackQuality),
+                    getPlaybackQuality: tipo(q.getPlaybackQuality),
+                  });
+                  try {
+                    console.log(
+                      "[SONDA-9126] níveis disponíveis:",
+                      q.getAvailableQualityLevels?.()
+                    );
+                    console.log(
+                      "[SONDA-9126] qualidade ANTES:",
+                      q.getPlaybackQuality?.()
+                    );
+                    q.setPlaybackQuality?.("hd1080");
+                    setTimeout(() => {
+                      console.log(
+                        "[SONDA-9126] qualidade DEPOIS (3s):",
+                        q.getPlaybackQuality?.()
+                      );
+                    }, 3000);
+                  } catch (err) {
+                    console.log("[SONDA-9126] erro ao sondar:", err);
+                  }
+                }
               },
               onStateChange: (e) => {
                 // Custom controls own the ENDED signal when hideYoutubeChrome
