@@ -155,6 +155,19 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
            nada, e a decisão mora num lugar só — quem chamar não precisa
            lembrar da regra.
 
+           SEM TRAVA DE UMA VEZ SÓ (medido por olho humano, 26/08): a
+           primeira versão desligava a legenda uma vez e travava por flag.
+           Não bastou — ao entrar e SAIR da tela cheia o YouTube reinstala a
+           legenda a partir do estado da sessão, e a trava já gasta deixava
+           ninguém para desligar de novo. Agora a chamada acontece em TODA
+           transição para PLAYING. Repetir é seguro não por a API ser
+           comprovadamente idempotente — isso não está documentado e não foi
+           medido — mas porque a proteção abaixo absorve qualquer desfecho:
+           se a chamada repetida lançar, o catch engole e a aula segue.
+           CUSTO ACEITO, por decisão de produto: no chrome nosso a legenda
+           fica permanentemente desligada — não há como o aluno ligá-la aqui,
+           e é essa a intenção.
+
            ⚠️ `unloadModule` é API NÃO DOCUMENTADA. Daí a proteção dupla:
            `typeof` antes de chamar e try/catch por nome de módulo. Se ela
            sumir ou lançar, o aluno perde a desligada automática — nunca a
@@ -172,11 +185,6 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
             }
           }
         };
-        /* Só a chamada do PLAYING é travada por flag: o onReady dispara uma
-           vez por natureza, e sem esta trava pausar/despausar repetiria a
-           desligada a cada retomada. */
-        let legendaDesligadaNoPlay = false;
-
         try {
           const player = new window.YT.Player(playerElId, {
             videoId: video.videoId!,
@@ -214,17 +222,13 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
                 desligarLegenda(e.target);
               },
               onStateChange: (e) => {
-                /* 9.126 — segunda tentativa, na PRIMEIRA vez que o vídeo toca.
-                   O onReady sozinho pode ser cedo demais: ele avisa que o
-                   player está pronto, não que o módulo de legenda já foi
-                   carregado — e não se pode descarregar o que ainda não
-                   existe. O início da reprodução é o momento em que o módulo
-                   certamente já está de pé. Uma vez só (ver a flag). */
-                if (
-                  e.data === window.YT!.PlayerState.PLAYING &&
-                  !legendaDesligadaNoPlay
-                ) {
-                  legendaDesligadaNoPlay = true;
+                /* 9.126 — desliga a legenda a CADA transição para PLAYING,
+                   não só na primeira. O onReady sozinho é cedo demais (avisa
+                   que o player está pronto, não que o módulo de legenda
+                   carregou) e uma única passada não segura: a saída da tela
+                   cheia reinstala a legenda. Ver o bloco do `desligarLegenda`
+                   para o porquê da trava one-shot ter caído. */
+                if (e.data === window.YT!.PlayerState.PLAYING) {
                   desligarLegenda(e.target);
                 }
                 // Custom controls own the ENDED signal when hideYoutubeChrome
