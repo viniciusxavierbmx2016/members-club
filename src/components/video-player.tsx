@@ -350,10 +350,10 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full bg-black overflow-hidden group"
+      className="mc-player-container relative w-full bg-black overflow-hidden group"
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="aspect-video w-full relative">
+      <div className="mc-player-box aspect-video w-full relative">
         {/* YouTube/Vimeo API replaces this element with the iframe */}
         <div id={playerElId} className="absolute inset-0 w-full h-full" />
         {/* F3 phase 3: custom controls layered above the iframe when

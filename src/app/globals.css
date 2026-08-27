@@ -697,3 +697,56 @@ html:not(.dark) .course-customized .text-primary { color: var(--member-primary, 
   caret-color: inherit;
   transition: background-color 9999s ease-in-out 0s;
 }
+
+/* ─── Tela cheia do player (9.129) ───────────────────────────────
+   POR QUE EXISTE: o botão de tela cheia nosso (`video-player.tsx`) promove o
+   CONTAINER, e a caixa do vídeo dentro dele é `aspect-video w-full` — ela
+   deriva a altura da LARGURA e ignora a altura da tela. Em tela cheia a
+   largura vira a do monitor, então numa tela MAIS LARGA que 16:9 a altura
+   calculada estoura e o `overflow-hidden` do container corta.
+
+   MEDIDO POR DISCRIMINAÇÃO (olho humano, 26–27/08) — a mesma aula, o mesmo
+   botão, em dois monitores de proporções OPOSTAS, com sintomas opostos; é
+   isso que prova a causa, em vez de só reobservar o sintoma:
+     LG ultrawide 3440x1440 (2,39 > 16:9): 3440 x 9/16 = 1935px numa tela de
+       1440px  =>  transbordava 495px, ~26% da caixa CORTADOS. Junto ia a
+       barra de controles custom, que é `bottom-0` DA CAIXA e saía da área
+       visível — o aluno ficava sem controle nenhum em tela cheia.
+     MacBook 3456x2234 (1,55 < 16:9): 1944px numa tela de 2234px  =>  NÃO
+       cortava; sobrava tarja preta embaixo.
+
+   O QUE A REGRA FAZ, e por que é só isto: o teto `max-width: 100vh * 16/9`
+   impede que a largura cresça a ponto de a altura DERIVADA passar da tela.
+   Quem continua calculando a altura é o `aspect-video` — o mesmo mecanismo
+   que já governa 100% das aulas fora da tela cheia. Nada de `height`/`width`
+   novo disputando com ele: uma propriedade a mais, e o resto é reuso.
+     ultrawide: teto = 1440 x 16/9 = 2560px  =>  caixa 2560x1440, cabe exata,
+       faixas laterais pretas.
+     MacBook:   teto = 2234 x 16/9 = 3971px > 3456  =>  o teto nem morde,
+       caixa 3456x1944, agora CENTRADA em vez de colada no topo.
+   Os controles custom voltam de graça: eles seguem a caixa, e a caixa passa
+   a caber. O overlay do canto (`absolute`) não é item de flex e não se move.
+
+   ⚠️ ESCOPO: a regra SÓ existe dentro de `:fullscreen`. Fora dele nada muda —
+   nenhuma classe original foi removida e o modo normal segue byte-a-byte.
+   `:-webkit-full-screen` acompanha por causa do Safari, e fica em bloco
+   SEPARADO de propósito: seletor desconhecido invalida a regra inteira, e
+   agrupar os dois mataria a versão padronizada nos navegadores que não
+   conhecem o prefixo. */
+.mc-player-container:fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mc-player-container:fullscreen .mc-player-box {
+  max-width: calc(100vh * 16 / 9);
+}
+
+.mc-player-container:-webkit-full-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mc-player-container:-webkit-full-screen .mc-player-box {
+  max-width: calc(100vh * 16 / 9);
+}
