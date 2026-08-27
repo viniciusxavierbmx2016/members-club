@@ -22,7 +22,7 @@ declare global {
         elOrId: string | HTMLElement,
         opts: YTPlayerOptions
       ) => YTPlayer;
-      PlayerState: { ENDED: number };
+      PlayerState: { ENDED: number; PLAYING: number };
     };
     onYouTubeIframeAPIReady?: () => void;
     Vimeo?: {
@@ -48,6 +48,10 @@ interface YTPlayer extends YTPlayerLike {
   setPlaybackRate: (r: number) => void;
   getIframe: () => HTMLIFrameElement;
   destroy?: () => void;
+  /* 9.126 — API NÃO DOCUMENTADA do IFrame API. Opcional de propósito: o
+     `?` obriga quem chamar a tratar a ausência, que é o modo de falha real
+     (o YouTube pode remover isto sem aviso). */
+  unloadModule?: (name: string) => void;
 }
 
 interface VimeoPlayer {
@@ -134,6 +138,45 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
         const origin =
           typeof window !== "undefined" ? window.location.origin : undefined;
 
+        /* 9.126 — DESLIGAR A LEGENDA, no caminho dos controles NOSSOS.
+
+           POR QUE EXISTE: o estado de legenda do YouTube é COMPARTILHADO
+           entre embeds na mesma sessão do navegador. Provado por olho humano
+           no palco (26/08): a legenda ligava sozinha nas DUAS aulas e
+           desligar numa desligava na outra. E `cc_load_policy: 0` NÃO vence
+           esse estado herdado — o playerVar decide o carregamento inicial,
+           não sobrepõe uma preferência que a sessão já carrega. A desligada
+           precisa ser IMPERATIVA, com o player já pronto.
+
+           REGRA DE PRODUTO: com os controles nossos a aula roda SEM legenda —
+           não há botão CC ali e não haverá. Quem quiser legenda usa o chrome
+           nativo, onde a engrenagem dá a escolha (9.124). Por isso a PRIMEIRA
+           linha aqui é o portão: no chrome nativo o helper volta sem fazer
+           nada, e a decisão mora num lugar só — quem chamar não precisa
+           lembrar da regra.
+
+           ⚠️ `unloadModule` é API NÃO DOCUMENTADA. Daí a proteção dupla:
+           `typeof` antes de chamar e try/catch por nome de módulo. Se ela
+           sumir ou lançar, o aluno perde a desligada automática — nunca a
+           aula. Os dois nomes ("captions" e "cc") porque o YouTube já usou um
+           e outro em versões diferentes do player; um deles pode não existir
+           neste, e falhar num não pode abortar o outro. */
+        const desligarLegenda = (p: YTPlayer) => {
+          if (!hideYoutubeChrome) return;
+          if (typeof p.unloadModule !== "function") return;
+          for (const modulo of ["captions", "cc"]) {
+            try {
+              p.unloadModule(modulo);
+            } catch {
+              /* módulo que este player não conhece — o outro ainda vale */
+            }
+          }
+        };
+        /* Só a chamada do PLAYING é travada por flag: o onReady dispara uma
+           vez por natureza, e sem esta trava pausar/despausar repetiria a
+           desligada a cada retomada. */
+        let legendaDesligadaNoPlay = false;
+
         try {
           const player = new window.YT.Player(playerElId, {
             videoId: video.videoId!,
@@ -154,12 +197,13 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
               fs: hideYoutubeChrome ? 0 : 1,
               iv_load_policy: 3,  // hide video annotations
               // F3 phase 3: hide native controls when custom controls take over
-              // 9.126 — REGRA DE PRODUTO: com os controles NOSSOS a aula roda
-              // SEM legenda. O estado de legenda do YouTube é COMPARTILHADO no
-              // navegador (provado no palco: desligar numa aula desligava na
-              // outra), então uma aula podia nascer legendada por causa de
-              // outra — e aqui não há UI para desligar. Quem quiser legenda usa
-              // o chrome nativo, onde a engrenagem dá a escolha (9.124).
+              // 9.126 — `cc_load_policy: 0` cobre só o caso SEM estado
+              // herdado (sessão limpa): é o pedido de não CARREGAR legenda.
+              // Ele NÃO basta sozinho — medido no palco, a legenda apareceu
+              // assim mesmo quando a sessão do YouTube já estava com legenda
+              // ligada. Quem resolve isso é o `desligarLegenda` mais abaixo;
+              // este playerVar fica porque não custa nada e evita o flash
+              // inicial no caso limpo.
               ...(hideYoutubeChrome ? { controls: 0, cc_load_policy: 0 } : {}),
               ...(origin ? { origin } : {}),
             },
@@ -167,43 +211,22 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
               onReady: (e) => {
                 if (cancelled) return;
                 setYtPlayer(e.target as YTPlayer);
-                // SONDA-9126 — REMOVER. Instrumentação de MEDIÇÃO, não fix:
-                // descobre se a API de qualidade responde neste embed. Só no
-                // caminho do chrome nosso; não altera UI nem comportamento.
-                if (hideYoutubeChrome) {
-                  const q = e.target as unknown as {
-                    getAvailableQualityLevels?: () => string[];
-                    setPlaybackQuality?: (v: string) => void;
-                    getPlaybackQuality?: () => string;
-                  };
-                  const tipo = (f: unknown) => typeof f;
-                  console.log("[SONDA-9126] métodos:", {
-                    getAvailableQualityLevels: tipo(q.getAvailableQualityLevels),
-                    setPlaybackQuality: tipo(q.setPlaybackQuality),
-                    getPlaybackQuality: tipo(q.getPlaybackQuality),
-                  });
-                  try {
-                    console.log(
-                      "[SONDA-9126] níveis disponíveis:",
-                      q.getAvailableQualityLevels?.()
-                    );
-                    console.log(
-                      "[SONDA-9126] qualidade ANTES:",
-                      q.getPlaybackQuality?.()
-                    );
-                    q.setPlaybackQuality?.("hd1080");
-                    setTimeout(() => {
-                      console.log(
-                        "[SONDA-9126] qualidade DEPOIS (3s):",
-                        q.getPlaybackQuality?.()
-                      );
-                    }, 3000);
-                  } catch (err) {
-                    console.log("[SONDA-9126] erro ao sondar:", err);
-                  }
-                }
+                desligarLegenda(e.target);
               },
               onStateChange: (e) => {
+                /* 9.126 — segunda tentativa, na PRIMEIRA vez que o vídeo toca.
+                   O onReady sozinho pode ser cedo demais: ele avisa que o
+                   player está pronto, não que o módulo de legenda já foi
+                   carregado — e não se pode descarregar o que ainda não
+                   existe. O início da reprodução é o momento em que o módulo
+                   certamente já está de pé. Uma vez só (ver a flag). */
+                if (
+                  e.data === window.YT!.PlayerState.PLAYING &&
+                  !legendaDesligadaNoPlay
+                ) {
+                  legendaDesligadaNoPlay = true;
+                  desligarLegenda(e.target);
+                }
                 // Custom controls own the ENDED signal when hideYoutubeChrome
                 // is on — skip here so handleEnded isn't fired twice.
                 if (
