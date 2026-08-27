@@ -35,6 +35,67 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-27 — CAMADA 3, ETAPA E3.29 — A tela cheia que cortava o vídeo (9.129)
+
+**Estado antes:** main em `21574e6`
+
+**O que foi feito:** o botão de tela cheia nosso promove o **container**, mas quem dimensiona o
+vídeo é a caixa `aspect-video w-full` um nível abaixo — ela **deriva a altura da LARGURA** e ignora
+a altura da tela. Em monitor mais largo que 16:9 a altura calculada estourava e o `overflow-hidden`
+cortava, levando junto a **barra de controles custom**. O fix acrescenta 2 classes estáveis e uma
+regra que **só existe dentro do `:fullscreen`**: o container centraliza e a caixa ganha teto
+`max-width: calc(100vh * 16/9)`. Fora da tela cheia **a regra não existe**.
+
+**Arquivos tocados:** `components/video-player.tsx` (+2 classes, nada removido) ·
+`app/globals.css` (bloco novo) · `PLANO-MESTRE.md` · `ROADMAP-EXECUCAO.md`
+
+**Como foi provado:**
+- ⭐ **PROVA POR DISCRIMINAÇÃO, não reobservação**: a **mesma** aula, o **mesmo** botão, em dois
+  monitores de lados **opostos** de 16:9, com sintomas **opostos** —
+  **LG ultrawide 3440×1440 (2,39)**: `3440×9/16 = 1935px` numa tela de `1440px` ⇒ cortava **495px
+  (~26%)** e os controles sumiam junto; **MacBook 3456×2234 (1,55)**: `1944px` em `2234px` ⇒ **não
+  cortava**. A inversão prevista **é** a prova da mecânica.
+- **Gate humano 5/5 (27/08)**: ultrawide inteiro e centralizado **com os controles de volta** ✅ ·
+  MacBook centralizado ✅ · **modo normal idêntico nos dois monitores** ✅ · chrome nativo
+  inalterado ✅.
+- **Artefato**: `max-width:177.778vh` e os 2 blocos (`:fullscreen` + `-webkit-`) no CSS **servido**,
+  com marcador positivo (`.mc-tour-popover`, 17) **no mesmo arquivo** — zero não-tautológico.
+
+**SHA do merge:** `b9bf7c6`  ·  **Rollback:** `git revert -m 1 b9bf7c6`
+
+**Mudou em produção para quem:** as **1.958 aulas** que usam o botão nosso (845 YouTube com o flag
+· 998 Panda · 115 Vimeo) — **só em tela cheia**. Modo normal: **zero efeito**, a regra não existe
+fora do `:fullscreen` e nenhuma classe original foi removida. As 261 aulas de chrome nativo não
+passam por este botão.
+
+**Ficou aberto:** nada novo. **Risco residual declarado**: a prova visual cobriu **YouTube** —
+Vimeo **não foi semeado por decisão de conduta** (a demo oficial da Vimeo dá **404**, verificado por
+sonda oEmbed, e o único ID real do repo é **conteúdo de produtor**, que não vira dado de teste).
+Mitigante: a regra atua na caixa **compartilhada pelos 3 provedores**, e nenhum ramo de provedor a
+toca.
+
+**⚠️ AUTOCRÍTICA — eu quase embarquei uma regra que não sabia provar.** A 1ª versão do CSS era
+`height:100%; width:auto; max-width:100%`, e ela depende de o navegador **recalcular a outra
+dimensão** quando o teto morde — comportamento de spec que eu **não conseguia afirmar com certeza**.
+Troquei **antes de compilar** por uma regra que **reusa o mecanismo já provado em 100% das aulas**:
+o `aspect-video` segue calculando a altura, e a regra só **limita a largura**. **Lição: quando o
+desenho depende de um comportamento que eu não consigo provar, o caminho é reusar o mecanismo que
+já está provado — não testar o incerto em produção.**
+
+**⭐ LIÇÃO DE MÉTODO — PROVA POR DISCRIMINAÇÃO.** Quando existirem **dois ambientes em que a
+hipótese prevê comportamentos OPOSTOS**, o gate usa **os dois**. Rodar só onde o defeito aparece é
+reobservar o sintoma; ver a **inversão prevista** é provar a causa. O dado que virou a chave
+(`system_profiler SPDisplaysDataType`) era trivial e estava disponível desde o início — o laudo
+tinha registrado a lacuna honestamente ("falta a proporção do monitor") e foi ela que fechou o caso.
+
+**ⓘ NOTA DE FERRAMENTA:** os CSS compilados ficam em **`.next/static/chunks/*.css`**, não em
+`.next/static/css/`. Grep no caminho errado devolve "NENHUM" e **parece fix ausente** — mesma
+armadilha de diretório do 9.84. `find .next -name "*.css"` antes de concluir.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ✅ · papelada ✅
+
+---
+
 ## 2026-08-27 — CAMADA 3, ETAPA E3.26 — A legenda que ligava sozinha (9.126)
 
 **Estado antes:** main em `84de33c`
