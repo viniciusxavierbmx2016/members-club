@@ -424,6 +424,7 @@ Roda **em paralelo** às camadas, sem consumir sessão de desenvolvimento:
 | **E3.26 Player: legenda liga sozinha (9.126)** 🟠 | ⬜ pendente — hipótese **não confirmada**; 845 aulas | — | — |
 | **E3.27 `buildEmbedUrl` código morto (9.127)** 🟢 | ⬜ pendente — armadilha para quem ajustar embed | — | — |
 | **E3.28 Provedor não suportado não avisa (9.128)** 🟠 | ⬜ pendente — a mecânica do "não dá vídeo" | — | — |
+| **E3.29 Player: tela cheia dá zoom e corta (9.129)** 🟠 | ⬜ pendente — achado do gate do 9.126; **1.958 aulas** (845 YT+flag · 998 Panda · 115 Vimeo); pré-existente | — | — |
 | **E3.22 UX de permissão no editor (9.119·9.120·9.121·9.122)** 🟢 | ⬜ pendente — 4 achados do gate do E3.12 (19/08) | — | — |
 | **E3.19 Moderador de live inalcançável (9.116)** 🟠 | ⬜ pendente — **pergunta de dono**; nasceu da investigação do E3.12 | — | — |
 | **E3.20 Rota órfã do editor de menu (9.117)** 🟢 | ✅ **fechada** — decisão do dono: **REMOVER** | `a248c79` | 2026-08-26 |
