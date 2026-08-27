@@ -146,7 +146,12 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
               rel: 0,
               playsinline: 1,
               disablekb: 1,       // disable YouTube keyboard shortcuts
-              fs: 0,              // hide native fullscreen button (we have our own)
+              // Tela cheia: nossa quando escondemos o chrome, DELE quando o
+              // chrome nativo aparece. Antes era `fs: 0` sempre — o botão
+              // nativo era desligado mesmo nas aulas em que o nosso overlay
+              // (agora condicional, ver o render) nem chega a renderizar, e a
+              // aula ficava sem NENHUM caminho para tela cheia.
+              fs: hideYoutubeChrome ? 0 : 1,
               iv_load_policy: 3,  // hide video annotations
               // F3 phase 3: hide native controls when custom controls take over
               ...(hideYoutubeChrome ? { controls: 0 } : {}),
@@ -295,7 +300,21 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
         )}
       </div>
 
-      {/* Custom controls overlay */}
+      {/* Overlay de velocidade + tela cheia.
+
+          ⚠️ NÃO renderiza quando o chrome NATIVO do YouTube está visível. Ele
+          nasceu sem condição nenhuma e colidia: o YouTube agrupa volume, CC e
+          ENGRENAGEM no topo direito — exatamente onde este overlay se
+          posiciona (`top-3 right-3`). Os dois conjuntos disputavam o hover, e
+          o menu do "1x" (que abre para baixo, `absolute right-0`) cobria a
+          engrenagem — o ÚNICO caminho para qualidade e legenda.
+
+          Não duplicamos o que o provedor já oferece: com o chrome nativo à
+          mostra, o YouTube já dá velocidade E tela cheia (esta última voltou
+          com `fs: 1`, acima). Vimeo, Panda e as aulas com hideYoutubeChrome
+          seguem exatamente como estavam — para Panda este overlay é o único
+          controle de velocidade que existe. */}
+      {!(video.provider === "youtube" && !hideYoutubeChrome) && (
       <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition">
         <div className="relative">
           <button
@@ -343,6 +362,7 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
           </svg>
         </button>
       </div>
+      )}
     </div>
   );
 }
