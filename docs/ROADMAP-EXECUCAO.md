@@ -421,7 +421,7 @@ Roda **em paralelo** às camadas, sem consumir sessão de desenvolvimento:
 | **E3.23 Corrida de escrita por-tecla no menu (9.123)** 🟠 | ✅ **fechada** | `31827c3` | 2026-08-26 |
 | **E3.24 Player: overlay × chrome nativo (9.124)** 🟠 | ✅ **fechada** | `caf66fe` | 2026-08-27 |
 | **E3.25 Player: velocidade inoperante no Panda (9.125)** 🟠 | ⬜ pendente — falso sucesso em 998 aulas | — | — |
-| **E3.26 Player: legenda liga sozinha (9.126)** 🟠 | ⬜ pendente — hipótese **não confirmada**; 845 aulas | — | — |
+| **E3.26 Player: legenda liga sozinha (9.126)** 🟠 | ✅ **fechada** — causa: estado do YouTube **compartilhado entre embeds**; `unloadModule` no ready e a cada PLAYING | `f03b392` | 2026-08-27 |
 | **E3.27 `buildEmbedUrl` código morto (9.127)** 🟢 | ⬜ pendente — armadilha para quem ajustar embed | — | — |
 | **E3.28 Provedor não suportado não avisa (9.128)** 🟠 | ⬜ pendente — a mecânica do "não dá vídeo" | — | — |
 | **E3.29 Player: tela cheia dá zoom e corta (9.129)** 🟠 | ⬜ pendente — achado do gate do 9.126; **1.958 aulas** (845 YT+flag · 998 Panda · 115 Vimeo); pré-existente | — | — |

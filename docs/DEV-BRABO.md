@@ -20,6 +20,17 @@ eficiência.
 **condições de PARE explícitas** em cada fase · e o **relatório final com
 "COMANDOS EXECUTADOS"**, que torna a revisão pós-hoc possível.
 
+**(d) A prova de alvo tem que DISCRIMINAR** (lição de 27/08, achada em
+execução). Provar o alvo do palco por `curl` em `/w/<slug>` **sem seguir o
+redirect é uma prova VAZIA**: essa rota manda para `/login` **antes** de
+consultar o banco, então um slug que existe no staging e um que só existe em
+produção devolvem **os dois `307`** — a sonda parece verde e não olhou dado
+nenhum. **Receita correta:** `curl -L` até a página final — o slug do staging
+tem de renderizar **`Login · Staging Teste`** (nome que **vem do banco**) e um
+slug só de produção tem de dar **`404`**. É o mesmo defeito de método do
+"roteiro que passa por vacuidade": **antes de acreditar num resultado, conferir
+que a sonda é capaz de produzir o resultado OPOSTO.**
+
 ---
 
 Antes de executar qualquer ação, faça perguntas para entender completamente o contexto atual, o estado do sistema e possíveis dependências.

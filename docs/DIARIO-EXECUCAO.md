@@ -35,6 +35,71 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-27 — CAMADA 3, ETAPA E3.26 — A legenda que ligava sozinha (9.126)
+
+**Estado antes:** main em `84de33c`
+
+**O que foi feito:** nas aulas com `hideYoutubeChrome=true` a legenda do YouTube aparecia sozinha —
+e ali **não há botão de CC**, então o aluno não tinha como desligar. A causa **não era nossa**: o
+estado de legenda do YouTube é **compartilhado entre embeds** na sessão do navegador. O fix desliga
+de forma **imperativa** — `unloadModule("captions")` e `unloadModule("cc")` no `onReady` **e a cada
+transição para PLAYING** — só no caminho do chrome nosso, protegido por `typeof` + `try/catch` por
+módulo, porque `unloadModule` é **API não documentada** e não pode derrubar a aula.
+
+**Arquivos tocados:** `components/video-player.tsx` — **só ele** (+72/−2) · `PLANO-MESTRE.md` ·
+`ROADMAP-EXECUCAO.md` · `DEV-BRABO.md`
+
+**Como foi provado:**
+- **Palco pareado** (o mesmo do 9.124): 2 aulas, **mesmo vídeo**, diferindo **só no flag**.
+- **Roteiro que não passa por vacuidade**: a legenda foi **PLANTADA** na aula de chrome nativo
+  antes do teste — sem plantar, ela não apareceria de qualquer jeito e o teste passaria sem
+  exercitar a condição.
+- **Gate humano 4/4 (26/08)**: plantada no nativo ✅ · **sumiu** no nosso ✅ · **segue sumida ao
+  sair da tela cheia sem pausar** ✅ · **e pausando/despausando** ✅. Engrenagem do nativo intacta.
+- **Artefato**: `unloadModule` presente e `SONDA-9126` = **0** no chunk **servido**, com marcador
+  positivo de controle no mesmo arquivo (zero não-tautológico).
+
+**SHA do merge:** `f03b392`  ·  **Rollback:** `git revert -m 1 f03b392`
+
+**Mudou em produção para quem:** as **845 aulas** YouTube com `hideYoutubeChrome=true` — a legenda
+não aparece mais sozinha. As **261** de chrome nativo, **998** Panda e **115** Vimeo: comportamento
+inalterado (o portão é a primeira linha do helper).
+
+**Ficou aberto:** **9.129** 🟠 / **E3.29** — tela cheia do chrome próprio **dá zoom e corta o
+vídeo** (`toggleFullscreen` põe o **container** em fullscreen, não o player; **1.958 aulas**).
+Pré-existente, **não é regressão**; registrado **sem fix** nesta rodada.
+
+**⚠️ MEU DESENHO REPROVOU NO GATE — e o gate estava certo.** A primeira versão desligava a legenda
+**uma vez só**, com flag. Passou em tudo, **menos** ao sair da tela cheia: o YouTube **reinstala** a
+legenda, e a trava já gasta não deixava ninguém para desligar de novo. **Lição permanente: trava de
+"uma vez só" pressupõe que o estado só é instalado uma vez — quando quem instala é um terceiro que
+pode reinstalar, a trava deixa de ser economia e vira o defeito.** Correção: desligar a cada
+PLAYING; repetir é seguro porque a proteção absorve qualquer desfecho.
+
+**⭐ QUALIDADE DE VÍDEO: encerrada como IMPOSSÍVEL, com medida — não reabrir.** Era o outro pedido
+de cliente da frente de vídeo. Uma sonda temporária no **nosso** player mediu: os 3 métodos
+existem, mas `getAvailableQualityLevels()` devolve `[]` e `getPlaybackQuality()` fica `"unknown"`
+**antes e depois** de `setPlaybackQuality("hd1080")` — bate com a documentação oficial (funções
+viraram no-op, `suggestedQuality` ignorado). **Não dá para forçar qualidade por API em plataforma
+nenhuma**; o único caminho é a **engrenagem nativa** (flag desligado, 9.124). A instrumentação foi
+**removida antes do merge**.
+
+**⚠️ MÉTODO — uma prova minha era VAZIA e eu mesmo a peguei.** Eu vinha "provando" o alvo do palco
+com `curl` em `/w/staging-teste` (200/307) × `/w/orion-academy` (404). Essa rota **redireciona para
+`/login` antes de consultar o banco**: os dois davam **307**, e a sonda nunca olhou dado nenhum.
+Receita correta, agora lei em `DEV-BRABO §(d)`: **`curl -L` até a página final** — staging tem de
+renderizar **`Login · Staging Teste`** (nome vindo do banco) e um slug só de produção tem de dar
+**404**.
+
+**⚠️ Duas correções de afirmação minha:** (i) o `YouTubeCustomControls` **não** tem tela cheia
+própria (`grep ullscreen`: zero) — o botão do overlay é o **único** caminho, o que **ampliou o
+alcance do 9.129**; (ii) um comentário meu dizia que o caminho nativo "não passa" pelo helper —
+**passa** e volta no portão; corrigido no commit do fix.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ✅ · papelada ✅
+
+---
+
 ## 2026-08-27 — CAMADA 3, ETAPA E3.24 — O overlay que tapava a engrenagem (9.124)
 
 **Estado antes:** main em `a914c33`
