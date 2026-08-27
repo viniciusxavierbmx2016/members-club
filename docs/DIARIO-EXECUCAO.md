@@ -35,6 +35,62 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-27 — CAMADA 3, ETAPA E3.24 — O overlay que tapava a engrenagem (9.124)
+
+**Estado antes:** main em `a914c33`
+
+**O que foi feito:** o overlay de velocidade + tela cheia (`video-player.tsx:299`) **não tinha gate
+nenhum** — renderizava em 100% dos vídeos, nos 3 provedores. Neste embed o YouTube agrupa **volume,
+CC e ENGRENAGEM no topo direito**, exatamente onde o overlay se posiciona: os dois conjuntos
+disputavam o hover e **o menu do "1x" cobria a engrenagem** — o único caminho do aluno para
+**qualidade e legenda**. Agora ele não renderiza quando `youtube && !hideYoutubeChrome`, e o
+`fs` volta a `1` nesse caso.
+
+**Arquivos tocados:** `components/video-player.tsx` — **só ele** (+22/−2)
+
+**Como foi provado:**
+- **Palco pareado**: 2 aulas com **o mesmo vídeo do print**, diferindo **apenas no flag** — o
+  controle experimental que isola a variável.
+- **Gate humano 6/6 (26/08)**: botões sumiram · engrenagem livre com **Qualidade 1440p /
+  Velocidade / Legendas** · **fullscreen nativo de volta** · sem flicker · regressão do chrome
+  nosso idêntica · fullscreen nosso ok.
+
+**SHA do merge:** `caf66fe`  ·  **Rollback:** `git revert -m 1 caf66fe`
+
+**Mudou em produção para quem:** as **261 aulas** YouTube com `hideYoutubeChrome=false` — o aluno
+recupera acesso a **qualidade e legenda**. **845** (flag ligado), **998** Panda e **115** Vimeo:
+byte-a-byte iguais.
+
+**Ficou aberto:** **9.125** 🟠 (velocidade inoperante no Panda) · **9.126** 🟠 (Bug B, legenda
+sozinha) · **9.127** 🟢 (`buildEmbedUrl` morto) · **9.128** 🟠 (provedor não suportado não avisa) —
+grupos **E3.25** a **E3.28**.
+
+**⚠️ EU DEDUZI ERRADO, E SÓ O OLHO HUMANO CORRIGIU.** Meu laudo afirmava que a engrenagem do
+YouTube fica na **barra inferior** e que portanto **não havia colisão geométrica** — cheguei a
+registrar "cobre o cabeçalho, não a engrenagem". A medição no palco mostrou o oposto: **neste embed
+o agrupamento é no topo direito**. Se eu tivesse desenhado o fix pela dedução, ele teria mirado o
+lugar errado. **Lição: geometria de player de terceiro não se deduz do nosso CSS** — o chrome dele
+vive dentro do iframe e só se conhece observando.
+
+**⚠️ E o laudo inicial estava incompleto:** eu li o `video-player.tsx` **até a metade** e afirmei
+que a única camada nossa era o `YouTubeCustomControls` (gateado). O overlay `:299` — **sem gate** —
+só apareceu na segunda passada, e era ele o dono dos botões do print.
+
+**⭐ Os dois pontos do fix são indivisíveis:** era `fs: 0` **sempre**. Esconder o overlay sem
+devolver `fs: 1` deixaria as 261 aulas **sem nenhum caminho para tela cheia** — trocaria um defeito
+por outro. E a condição é **estreita de propósito** (`youtube && !hideYoutubeChrome`, não "esconder
+quando há chrome nativo"): em **Panda este overlay é o único controle de velocidade** que existe —
+ainda que, como o 9.125 registra, ele **não funcione** lá.
+
+**Nota de palco:** o módulo **"Palco 9.player"** (curso-teste) fica no staging com **2 aulas
+pareadas** — mesmo vídeo, só o flag difere. É palco reutilizável de player: qualquer mexida no
+`video-player` se compara nele em segundos.
+
+**Regras conferidas:** §17 ✅ · medição humana antes do desenho ✅ · escopo de 1 arquivo ✅ ·
+preservação verificada no diff (6 pontos intocados) ✅ · gate humano 6/6 ✅ · papelada ✅
+
+---
+
 ## 2026-08-26 — CAMADA 3, ETAPA E3.20 — A rota órfã removida (9.117)
 
 **Estado antes:** main em `9e3444d`

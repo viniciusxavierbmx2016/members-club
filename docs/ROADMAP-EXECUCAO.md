@@ -419,6 +419,11 @@ Roda **em paralelo** às camadas, sem consumir sessão de desenvolvimento:
 | **E3.18 Contato de suporte no payload (9.115)** 🟢 | ⬜ pendente — nasceu do E3.15 | — | — |
 | **E3.21 Cache do menu mente após salvar (9.118)** 🟠 | ✅ **fechada** | `c427b6a` | 2026-08-20 |
 | **E3.23 Corrida de escrita por-tecla no menu (9.123)** 🟠 | ✅ **fechada** | `31827c3` | 2026-08-26 |
+| **E3.24 Player: overlay × chrome nativo (9.124)** 🟠 | ✅ **fechada** | `caf66fe` | 2026-08-27 |
+| **E3.25 Player: velocidade inoperante no Panda (9.125)** 🟠 | ⬜ pendente — falso sucesso em 998 aulas | — | — |
+| **E3.26 Player: legenda liga sozinha (9.126)** 🟠 | ⬜ pendente — hipótese **não confirmada**; 845 aulas | — | — |
+| **E3.27 `buildEmbedUrl` código morto (9.127)** 🟢 | ⬜ pendente — armadilha para quem ajustar embed | — | — |
+| **E3.28 Provedor não suportado não avisa (9.128)** 🟠 | ⬜ pendente — a mecânica do "não dá vídeo" | — | — |
 | **E3.22 UX de permissão no editor (9.119·9.120·9.121·9.122)** 🟢 | ⬜ pendente — 4 achados do gate do E3.12 (19/08) | — | — |
 | **E3.19 Moderador de live inalcançável (9.116)** 🟠 | ⬜ pendente — **pergunta de dono**; nasceu da investigação do E3.12 | — | — |
 | **E3.20 Rota órfã do editor de menu (9.117)** 🟢 | ✅ **fechada** — decisão do dono: **REMOVER** | `a248c79` | 2026-08-26 |
