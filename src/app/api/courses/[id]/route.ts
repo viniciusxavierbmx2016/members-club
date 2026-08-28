@@ -154,6 +154,12 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
         }),
         isPublished: true,
         showInStore: true,
+        /* E4.4 — precisa estar AQUI, e não é opcional: o `CourseForm` devolve o
+           payload INTEIRO no PUT (ver o aviso do recorte comercial acima). Sem
+           o campo na leitura, o estado do form nasceria `false` e o PRIMEIRO
+           "Salvar" de um curso gratuito o tornaria PAGO — a mesma armadilha do
+           9.112, na direção contrária. */
+        isFree: true,
         certificateEnabled: true,
         communityEnabled: true,
         lessonCommentsEnabled: true,
@@ -173,6 +179,9 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
         showAccessBadge: true,
         supportButtonColor: true,
         supportButtonImage: true,
+        /* E4.4 — quantos alunos o curso já tem. Serve ao AVISO de virar
+           gratuito (R4). Contagem, não lista: nenhum dado de aluno sai daqui. */
+        _count: { select: { enrollments: true } },
         memberBgColor: true,
         memberSidebarColor: true,
         memberHeaderColor: true,
@@ -293,6 +302,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
       priceCurrency,
       isPublished,
       showInStore,
+      isFree,
       certificateEnabled,
       communityEnabled,
       lessonCommentsEnabled,
@@ -444,6 +454,9 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
           }),
         ...(isPublished !== undefined && { isPublished: Boolean(isPublished) }),
         ...(showInStore !== undefined && { showInStore: Boolean(showInStore) }),
+        // E4.4 — a metade gêmea da leitura acima: ler sem gravar (ou o inverso)
+        // é o que faz o form apagar campo sem ninguém perceber.
+        ...(isFree !== undefined && { isFree: Boolean(isFree) }),
         ...(certificateEnabled !== undefined && {
           certificateEnabled: Boolean(certificateEnabled),
         }),

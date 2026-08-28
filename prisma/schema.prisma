@@ -227,6 +227,13 @@ model Course {
   externalProductId               String?   @unique
   isPublished                     Boolean   @default(false)
   showInStore                     Boolean   @default(true)
+  /// E4.4 — curso GRATUITO: o aluno resgata o acesso sem passar por gateway.
+  /// Campo NOVO e não reuso, e a decisão foi medida: `showInStore` significa
+  /// "aparece na loja", não "é de graça"; e usar `checkoutUrl`/`price` vazios
+  /// como sinal LIBERARIA DE GRAÇA 20 e 32 dos 60 cursos de produção (33% e
+  /// 53%), que estão sem esses campos por outros motivos.
+  /// `false` para todo o acervo: nenhum curso existente vira gratuito.
+  isFree                          Boolean   @default(false)
   certificateEnabled              Boolean   @default(true)
   communityEnabled                Boolean   @default(true)
   lessonCommentsEnabled           Boolean   @default(true)
@@ -364,6 +371,43 @@ model Lesson {
   @@index([moduleId, order])
 }
 
+/// E4.4 — DE ONDE veio a matrícula. Sem isto não há como preservar o acesso de
+/// quem entrou de graça quando o curso vira pago (D4), nem impedir que o revoke
+/// de um gateway cancele uma matrícula gratuita (R5), nem separar gratuito de
+/// pagante no relatório (R6).
+///
+/// Os cinco primeiros são os cinco caminhos que HOJE escrevem Enrollment;
+/// FREE_CLAIM é o que nasce nesta frente.
+enum EnrollmentOrigin {
+  /// Compra confirmada por webhook de gateway (`lib/webhook-helpers.ts`,
+  /// `lib/gateways/process-webhook.ts`).
+  PURCHASE
+  /// Produtor adicionando aluno na tela do curso
+  /// (`api/courses/[id]/students`).
+  PRODUCER_MANUAL
+  /// Importação em massa (`api/producer/students/import`).
+  IMPORT
+  /// Painel de alunos do produtor (`api/producer/students/[id]/enrollments`).
+  PRODUCER_PANEL
+  /// Automação (`lib/automation-engine.ts`).
+  AUTOMATION
+  /// Resgate de curso gratuito — o caminho que esta frente cria.
+  FREE_CLAIM
+  /// Origem NÃO REGISTRADA. Vale para as linhas criadas antes desta migração
+  /// e para a janela até os cinco escritores passarem a gravar a origem
+  /// (fatia seguinte — esta é schema-only, zero runtime).
+  ///
+  /// ⚠️ Escolhido de propósito em vez de PURCHASE: as 22 mil linhas existentes
+  /// NÃO são todas compra — há importação, produtor à mão e automação
+  /// misturados, e não há dado que os separe depois do fato. Carimbar PURCHASE
+  /// seria inventar um passado. É o mesmo princípio do `updatedAt` deste
+  /// model: "um campo que mente é pior que um campo ausente".
+  ///
+  /// ⚠️ Linha nova com UNKNOWN depois da fatia de runtime = escritor esquecido.
+  /// Dá para separar do legado por `createdAt` vs a data da migração.
+  UNKNOWN
+}
+
 model Enrollment {
   id              String           @id @default(uuid())
   userId          String
@@ -404,6 +448,10 @@ model Enrollment {
   // é esperada. Não "conserte" acrescentando @@index — isso criaria um índice
   // completo duplicado ao lado do parcial.
   accessEmailPending Boolean       @default(false)
+
+  /// E4.4 — ver o enum acima. NOT NULL com default para preencher o acervo na
+  /// própria migração, sem backfill — molde do `accessEmailPending`.
+  origin             EnrollmentOrigin @default(UNKNOWN)
 
   user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   course    Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)

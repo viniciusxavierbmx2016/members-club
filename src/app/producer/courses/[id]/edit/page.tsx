@@ -32,6 +32,8 @@ interface CourseData {
   externalProductId: string | null;
   isPublished: boolean;
   showInStore: boolean;
+  isFree: boolean;
+  _count?: { enrollments: number };
   supportEmail: string | null;
   supportWhatsapp: string | null;
   featured: boolean;
@@ -105,6 +107,8 @@ function EditCoursePageInner(
         priceCurrency: course.priceCurrency || "BRL",
         isPublished: course.isPublished,
         showInStore: course.showInStore,
+        isFree: course.isFree,
+        enrollmentCount: course._count?.enrollments ?? 0,
         supportEmail: course.supportEmail || "",
         supportWhatsapp: course.supportWhatsapp || "",
         featured: course.featured,

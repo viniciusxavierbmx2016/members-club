@@ -591,6 +591,8 @@ export const createCourseSchema = z
     externalProductId: z.string().max(200).optional().nullable(),
     isPublished: z.boolean().optional(),
     showInStore: z.boolean().optional(),
+    // E4.4 — curso gratuito: o aluno resgata sem gateway.
+    isFree: z.boolean().optional(),
     featured: z.boolean().optional(),
     category: z.string().max(100).optional().nullable(),
     workspaceId: z.string().max(100).optional(),

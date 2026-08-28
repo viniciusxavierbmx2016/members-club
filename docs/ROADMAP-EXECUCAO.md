@@ -428,6 +428,7 @@ Roda **em paralelo** às camadas, sem consumir sessão de desenvolvimento:
 | **E3.29 Player: tela cheia dá zoom e corta (9.129)** 🟠 | ✅ **fechada** — causa provada por **discriminação** em 2 monitores; regra só dentro do `:fullscreen` | `b9bf7c6` | 2026-08-27 |
 | **E3.30 Anexo de suporte sem validação real de tipo (9.130)** 🟠 | ⬜ pendente — achado da frente de PDF na comunidade; **qualquer autenticado**, MIME e extensão escolhidos pelo cliente | — | — |
 | **E3.31 Dívidas da frente de anexos (9.131·9.132·9.133·9.134)** 🟢 | ⬜ pendente — 4 itens registrados **sem fix** no fechamento do E4.2 | — | — |
+| **E3.32 Achados do laudo E4.4 (9.135 🔴 · 9.136 🟠)** | ⬜ pendente — **um deles é 🔴**: rota pública que cria ADMIN | — | — |
 | **E3.22 UX de permissão no editor (9.119·9.120·9.121·9.122)** 🟢 | ⬜ pendente — 4 achados do gate do E3.12 (19/08) | — | — |
 | **E3.19 Moderador de live inalcançável (9.116)** 🟠 | ⬜ pendente — **pergunta de dono**; nasceu da investigação do E3.12 | — | — |
 | **E3.20 Rota órfã do editor de menu (9.117)** 🟢 | ✅ **fechada** — decisão do dono: **REMOVER** | `a248c79` | 2026-08-26 |
