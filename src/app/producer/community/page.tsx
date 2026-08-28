@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { CustomSelect } from "@/components/custom-select";
+import { formatFileSize } from "@/lib/file-display";
 import { HelpTooltip } from "@/components/help-tooltip";
 import { ImageLightbox } from "@/components/image-lightbox";
 import type {
@@ -20,6 +21,21 @@ export default function AdminCommunityPage() {
   const [posts, setPosts] = useState<AdminPost[]>([]);
   const [courses, setCourses] = useState<CourseOption[]>([]);
   const [courseFilter, setCourseFilter] = useState<string>("");
+  // Consumo de anexos do workspace. Silencioso de propósito: se o endpoint
+  // falhar, `uso` fica null e o cabeçalho só não mostra a barra — moderação não
+  // pode cair por causa de um número informativo (§ fail-closed é para ACESSO,
+  // não para o cosmético).
+  const [uso, setUso] = useState<{
+    usedBytes: number;
+    limitBytes: number;
+    usedPercent: number;
+  } | null>(null);
+  useEffect(() => {
+    fetch("/api/producer/community/attachments-usage")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.usage) setUso(d.usage); })
+      .catch(() => {});
+  }, []);
   const [groupFilter, setGroupFilter] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [subTab, setSubTab] = useState<"posts" | "groups" | "pending">("posts");
@@ -255,6 +271,31 @@ export default function AdminCommunityPage() {
           <p className="text-sm text-gray-500 mt-1">
             Postagens de todos os cursos
           </p>
+          {/* CONSUMO DOS ANEXOS (etapa 5). Aqui e não numa tela nova: é o
+              cabeçalho da tela que já é sobre a comunidade, e o número é do
+              workspace inteiro — o mesmo escopo do "Postagens de todos os
+              cursos" logo acima. A barra só aparece quando o endpoint responde;
+              falha dele não pode tirar a tela de moderação do ar. */}
+          {uso && (
+            <div className="mt-2 max-w-xs">
+              <div className="flex items-baseline justify-between gap-2 text-xs text-gray-500">
+                <span>
+                  {formatFileSize(uso.usedBytes)} de {formatFileSize(uso.limitBytes)} em anexos
+                </span>
+                <span className="tabular-nums">{uso.usedPercent}%</span>
+              </div>
+              <div className="mt-1 h-1.5 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    uso.usedPercent >= 90 ? "bg-red-500" : uso.usedPercent >= 70 ? "bg-amber-500" : "bg-blue-500"
+                  }`}
+                  // Piso de 2% para que "usado, mas pouco" não desenhe uma
+                  // barra invisível e pareça zero.
+                  style={{ width: `${Math.min(100, Math.max(uso.usedBytes > 0 ? 2 : 0, uso.usedPercent))}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
         <CustomSelect
           value={courseFilter}

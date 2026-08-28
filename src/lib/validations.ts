@@ -754,6 +754,10 @@ export const updateLessonSchema = z
 export const updatePostSchema = z.object({
   content: z.string().min(1).max(20000),
   type: z.enum(["FREE", "QUESTION", "RESULT", "FEEDBACK"]).optional(),
+  // Anexos etapa 3/4: os ids a ACRESCENTAR ao post. Edição não remove anexo
+  // (removê-los é decisão de produto ainda não pedida); o teto de 5 conta os
+  // que o post já tem — ver `lib/community-attachment-adoption.ts`.
+  attachmentIds: z.array(idString).max(5).optional(),
 });
 
 // ─── Producer — lesson materials ───────────────────────────────────
@@ -774,6 +778,12 @@ export const createPostSchema = z
     courseSlug: z.string().min(1).max(255).optional(),
     groupId: idString.optional().nullable(),
     type: z.enum(["FREE", "QUESTION", "RESULT", "FEEDBACK"]).optional(),
+    /* Anexos (etapa 3/4): ids JÁ confirmados por
+       `community/attachments/confirm`. O `.max(5)` aqui é a primeira barreira,
+       barata; a régua de verdade — dono, estado, não-adotado-antes e o teto de
+       2GB do workspace REAL — mora em `lib/community-attachment-adoption.ts`,
+       porque as duas portas (criar e editar post) precisam da MESMA regra. */
+    attachmentIds: z.array(idString).max(5).optional(),
   })
   .refine((d) => Boolean(d.courseId || d.courseSlug), {
     message: "courseId ou courseSlug obrigatório",

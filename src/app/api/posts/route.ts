@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { collaboratorCanActOnCourse, mensagemDeEntradaNegada } from "@/lib/collaborator";
+import { checarLeituraDaComunidade } from "@/lib/community-read-access";
+import {
+  adotarAnexos,
+  validarAnexosParaAdocao,
+} from "@/lib/community-attachment-adoption";
 import { GAMIFICATION, getLevelForPoints } from "@/lib/utils";
 import { sanitizeHtml, hasPostContent } from "@/lib/sanitize-html";
 import { PostType } from "@prisma/client";
@@ -47,47 +52,17 @@ export async function GET(request: Request) {
       );
     }
 
-    if (!course.communityEnabled) {
-      return NextResponse.json(
-        { error: "Comunidade desativada neste curso" },
-        { status: 403 }
-      );
+    /* O gate de LEITURA saiu daqui para `lib/community-read-access.ts` quando o
+       download de anexo precisou do mesmo critério — a alternativa era uma
+       TERCEIRA cópia. Lógica e ORDEM provadas idênticas; a única diferença é
+       que a recusa volta como dado e quem responde é este arquivo. ⚠️ O POST
+       abaixo AINDA tem a cópia dele: publicar não é ler, e unificar os dois é
+       item próprio. */
+    const acesso = await checarLeituraDaComunidade(user, course);
+    if (!acesso.ok) {
+      return NextResponse.json({ error: acesso.erro }, { status: acesso.status });
     }
-
-    const isStaffOwner =
-      user.role === "ADMIN" ||
-      (user.role === "PRODUCER" &&
-        (course.ownerId === user.id ||
-          course.workspace.ownerId === user.id));
-    let collabAllowed = false;
-    // C6: drop the role gate. collaboratorCanActOnCourse itself returns
-    // false when there's no ACCEPTED Collaborator row, so STUDENT without
-    // collab elevation is a no-op (and STUDENT-with-Collab now passes).
-    if (!isStaffOwner) {
-      // ENTRADA na comunidade (VER o feed): além da permissão de comunidade,
-      // exige ACCESS_MEMBER_AREA (9.78). Moderação pelo PAINEL não passa aqui.
-      collabAllowed = await collaboratorCanActOnCourse(
-        user.id,
-        course.id,
-        ["MANAGE_COMMUNITY", "REPLY_COMMENTS"],
-        { requireMemberAccess: true }
-      );
-    }
-    if (!isStaffOwner && !collabAllowed) {
-      const enrollment = await prisma.enrollment.findUnique({
-        where: {
-          userId_courseId: { userId: user.id, courseId: course.id },
-        },
-      });
-      if (!enrollment || enrollment.status !== "ACTIVE") {
-        // 9.79 — distingue "nunca teve vínculo" de "perdeu ACCESS_MEMBER_AREA".
-        // A consulta extra roda SÓ aqui, no caminho de falha.
-        return NextResponse.json(
-          { error: await mensagemDeEntradaNegada(user.id, course.id) },
-          { status: 403 }
-        );
-      }
-    }
+    const { isStaffOwner, collabAllowed } = acesso;
 
     await ensureDefaultGroup(course.id);
 
@@ -132,6 +107,16 @@ export async function GET(request: Request) {
           user: { select: { id: true, name: true, avatarUrl: true, role: true } },
           group: { select: { id: true, name: true, slug: true, permission: true } },
           likes: { where: { userId: user.id }, select: { id: true } },
+          /* ANEXOS (etapa 5) — o feed não os devolvia. `select` explícito e SÓ os
+             campos que a tela usa: nada de `storagePath`, que é caminho de
+             Storage e não tem por que sair do servidor (lição 9.97/9.112).
+             Só CONFIRMED aparece: PENDING é rascunho. */
+          attachments: {
+            where: { status: "CONFIRMED" as const },
+            select: { id: true, fileName: true, fileSize: true, mimeType: true },
+            orderBy: { createdAt: "asc" as const },
+          },
+
           _count: {
             select: {
               likes: true,
@@ -155,6 +140,7 @@ export async function GET(request: Request) {
       liked: p.likes.length > 0,
       likeCount: p._count.likes,
       commentCount: p._count.comments,
+      attachments: p.attachments,
     }));
 
     return NextResponse.json({
@@ -320,21 +306,98 @@ export async function POST(request: Request) {
     const moderationOn = course.communityModerationEnabled;
     const postStatus = !moderationOn || staff ? "APPROVED" : "PENDING";
 
-    const post = await prisma.post.create({
-      data: {
-        content: sanitized,
-        type: postType,
+    /* ANEXOS (etapa 3/4) — a lista é validada ANTES de o post existir, para que
+       uma lista ruim não deixe um post publicado sem os anexos que o autor
+       anexou (falso sucesso, família do 9.107). ⭐ E é aqui que o teto de 2GB
+       vira TRAVA REAL: o workspace vem do curso do post, não do `courseId` que
+       o cliente declarou lá no `authorize` — lá é barreira de boa-fé, e está
+       dito no comentário daquela rota. */
+    const attachmentIds = v.data.attachmentIds ?? [];
+    if (attachmentIds.length > 0) {
+      const check = await validarAnexosParaAdocao({
         userId: user.id,
-        courseId: course.id,
-        groupId: finalGroupId,
-        status: postStatus,
-      },
-      include: {
-        user: { select: { id: true, name: true, avatarUrl: true, role: true } },
-        group: { select: { id: true, name: true, slug: true, permission: true } },
-        _count: { select: { likes: true, comments: true } },
-      },
-    });
+        attachmentIds,
+        workspaceId: course.workspaceId,
+      });
+      if (!check.ok) {
+        return NextResponse.json({ error: check.erro }, { status: check.status });
+      }
+    }
+
+    /* Criar o post e PRENDER os anexos na MESMA transação. Se a adoção falhar
+       — outra requisição levou o anexo entre a validação e agora —, o post
+       volta atrás junto. Meio post publicado é pior que post nenhum. */
+    let post;
+    try {
+      post = await prisma.$transaction(async (tx) => {
+        const criado = await tx.post.create({
+          data: {
+            content: sanitized,
+            type: postType,
+            userId: user.id,
+            courseId: course.id,
+            groupId: finalGroupId,
+            status: postStatus,
+          },
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true, role: true } },
+            group: { select: { id: true, name: true, slug: true, permission: true } },
+            _count: { select: { likes: true, comments: true } },
+            // Mesmo conjunto do GET: a tela empurra o post devolvido pelo POST
+            // na MESMA lista que o GET preenche, e formas diferentes ali seriam
+            // uma lista com dois tipos de item (lição do `materials/route.ts:12-15`).
+            attachments: {
+              where: { status: "CONFIRMED" as const },
+              select: { id: true, fileName: true, fileSize: true, mimeType: true },
+              orderBy: { createdAt: "asc" as const },
+            },
+          },
+        });
+        await adotarAnexos(tx, {
+          postId: criado.id,
+          userId: user.id,
+          attachmentIds,
+        });
+
+        /* ⚠️ RELEITURA, e ela é obrigatória: o `include` acima resolveu no
+           instante do `create`, quando NENHUM anexo tinha `postId` ainda — a
+           adoção acontece na linha de cima. Sem isto o POST responde sempre
+           `attachments: []`, o anexo só aparece depois de um reload (quando o
+           GET lê o estado já adotado), e a tela parece ter engolido o arquivo.
+           Foi o único pendente do gate da etapa 5.
+
+           Só relê QUANDO HÁ anexo: o post sem anexo — a esmagadora maioria —
+           segue com exatamente uma consulta, como antes. E relê DENTRO da
+           transação, no mesmo `tx`, para enxergar a adoção que ainda não foi
+           commitada. */
+        if (attachmentIds.length === 0) return criado;
+        const comAnexos = await tx.post.findUnique({
+          where: { id: criado.id },
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true, role: true } },
+            group: { select: { id: true, name: true, slug: true, permission: true } },
+            _count: { select: { likes: true, comments: true } },
+            attachments: {
+              where: { status: "CONFIRMED" as const },
+              select: { id: true, fileName: true, fileSize: true, mimeType: true },
+              orderBy: { createdAt: "asc" as const },
+            },
+          },
+        });
+        // `criado` como último recurso: a linha ACABOU de ser criada nesta
+        // transação, então `null` aqui é impossível — mas devolver o post sem
+        // os anexos é melhor que estourar depois de ele já existir.
+        return comAnexos ?? criado;
+      });
+    } catch (e) {
+      // A adoção falhou por CORRIDA (o `postId: null` do updateMany não casou):
+      // alguém prendeu o anexo entre a validação e o commit. A transação já
+      // desfez o post; a resposta é a mesma frase indistinguível de sempre.
+      if (e instanceof Error && e.message === "ANEXO_INDISPONIVEL") {
+        return NextResponse.json({ error: "Anexo não encontrado." }, { status: 400 });
+      }
+      throw e;
+    }
 
     let pointsAwarded = 0;
     let leveledUp = false;
@@ -401,6 +464,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
+        /* ⚠️ ESTE OBJETO É MONTADO À MÃO, campo a campo — e é por isso que
+           `attachments` precisa estar escrito aqui. Pôr o campo no `include`
+           da consulta NÃO basta: o `include` alimenta a variável `post`, e é
+           ESTA lista que decide o que sai na resposta. Foi exatamente o que
+           deixou o anexo invisível até o reload — o GET trazia, o POST não.
+
+           QUEM ACRESCENTAR CAMPO NOVO AO GET DO FEED TEM DE LEMBRAR DAQUI. O
+           cliente empurra o post devolvido pelo POST na MESMA lista que o GET
+           preenche; um campo a menos aqui é um item de lista com forma
+           diferente dos vizinhos.
+
+           `?? []` de propósito: AUSENTE e VAZIO se comportam diferente no
+           cliente, e foi essa diferença que produziu o defeito. Post sem anexo
+           devolve array vazio, nunca campo faltando. */
         post: {
           id: post.id,
           content: post.content,
@@ -413,6 +490,9 @@ export async function POST(request: Request) {
           liked: false,
           likeCount: 0,
           commentCount: 0,
+          // Mesmo shape do GET (`:143`): mesmos campos, mesma posição, sem
+          // `storagePath`.
+          attachments: post.attachments ?? [],
         },
         pointsAwarded,
         leveledUp,

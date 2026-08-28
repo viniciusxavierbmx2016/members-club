@@ -10,6 +10,9 @@ import { ScrollableTabs } from "@/components/scrollable-tabs";
 import { hasPostContent } from "@/lib/sanitize-html";
 import { useUserStore } from "@/stores/user-store";
 
+import { PostAttachmentPicker } from "@/components/post-attachment-picker";
+import type { PostAttachmentItem } from "@/components/post-attachments";
+
 const RichTextEditor = dynamic(
   () => import("@/components/rich-text-editor"),
   {
@@ -107,6 +110,10 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState("");
+  // Anexos JÁ confirmados, esperando a publicação. Vivem aqui e não dentro do
+  // seletor porque é o `submitPost` que os envia — mesmo motivo de `content`
+  // morar na página e não no editor.
+  const [anexos, setAnexos] = useState<PostAttachmentItem[]>([]);
   const [type, setType] = useState<PostItem["type"]>("FREE");
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -306,6 +313,9 @@ export default function CommunityPage() {
           type,
           courseSlug: params.slug,
           groupId: activeGroup || undefined,
+          // A ADOÇÃO (etapa 3): é o servidor que prende cada anexo ao post,
+          // dentro da mesma transação que o cria.
+          attachmentIds: anexos.length > 0 ? anexos.map((a) => a.id) : undefined,
         }),
       });
       if (!res.ok) {
@@ -327,6 +337,7 @@ export default function CommunityPage() {
       setPosts((prev) => [body.post, ...prev]);
       setContent("");
       setType("FREE");
+      setAnexos([]);
       setComposerOpen(false);
       if (user && body.user) {
         setUser({
@@ -603,6 +614,12 @@ export default function CommunityPage() {
             surfaceClassName="bg-gray-50 dark:bg-[#141416]"
             minHeight="88px"
           />
+          <PostAttachmentPicker
+            courseId={course?.id}
+            attachments={anexos}
+            onChange={setAnexos}
+            disabled={submitting}
+          />
           <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
             <div className="flex flex-wrap gap-1.5">
               {POST_TYPES.map((t) => (
@@ -637,6 +654,11 @@ export default function CommunityPage() {
           </div>
           {!hasPostContent(content) && !submitting && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              {/* ⚠️ Anexo NÃO conta como conteúdo, e isso é decisão do servidor,
+                  não da tela: `hasPostContent` (a régua única, client E server)
+                  aceita texto ou imagem no corpo. Post que fosse só um arquivo
+                  seria rejeitado pela API — então a dica diz a verdade em vez
+                  de deixar o aluno tentar e levar erro. */}
               Escreva algo ou adicione uma imagem para publicar.
             </p>
           )}

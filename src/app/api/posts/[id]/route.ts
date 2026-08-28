@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { collaboratorCanActOnCourse } from "@/lib/collaborator";
+import { createAdminClient, COMMUNITY_ATTACHMENTS_BUCKET } from "@/lib/supabase-admin";
+import {
+  adotarAnexos,
+  validarAnexosParaAdocao,
+} from "@/lib/community-attachment-adoption";
 import { sanitizeHtml, hasPostContent } from "@/lib/sanitize-html";
 import { PostType } from "@prisma/client";
 import { updatePostSchema, validateBody } from "@/lib/validations";
@@ -41,6 +46,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     const v = validateBody(updatePostSchema, raw);
     if (!v.success) return v.error;
     const { content, type } = v.data;
+    const attachmentIds = v.data.attachmentIds ?? [];
 
     const data: Record<string, unknown> = {};
     if (content !== undefined) {
@@ -60,15 +66,61 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
       data.type = type;
     }
 
-    const updated = await prisma.post.update({
-      where: { id: params.id },
-      data,
-      include: {
-        user: { select: { id: true, name: true, avatarUrl: true, role: true } },
-        group: { select: { id: true, name: true, slug: true, permission: true } },
-        _count: { select: { likes: true, comments: true } },
-      },
-    });
+    /* ANEXOS na edição (etapa 3/4) — ACRESCENTA, nunca remove: tirar anexo de
+       post é decisão de produto ainda não pedida, e implementá-la de carona
+       seria inventar comportamento. O teto de 5 conta os que o post JÁ tem, e o
+       teto de 2GB usa o workspace REAL do post.
+
+       ⚠️ `userId: user.id` na validação, e não `post.userId`: quem edita pode
+       ser um moderador com MANAGE_COMMUNITY (ver o `canEdit` acima). Ele só
+       consegue prender anexos que ELE mesmo subiu — nunca os de terceiros. */
+    if (attachmentIds.length > 0) {
+      const curso = await prisma.course.findUnique({
+        where: { id: post.courseId },
+        select: { workspaceId: true },
+      });
+      if (!curso) {
+        return NextResponse.json({ error: "Curso não encontrado" }, { status: 404 });
+      }
+      const jaNoPost = await prisma.postAttachment.count({
+        where: { postId: post.id },
+      });
+      const check = await validarAnexosParaAdocao({
+        userId: user.id,
+        attachmentIds,
+        workspaceId: curso.workspaceId,
+        jaNoPost,
+      });
+      if (!check.ok) {
+        return NextResponse.json({ error: check.erro }, { status: check.status });
+      }
+    }
+
+    let updated;
+    try {
+      updated = await prisma.$transaction(async (tx) => {
+        const u = await tx.post.update({
+          where: { id: params.id },
+          data,
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true, role: true } },
+            group: { select: { id: true, name: true, slug: true, permission: true } },
+            _count: { select: { likes: true, comments: true } },
+          },
+        });
+        await adotarAnexos(tx, {
+          postId: u.id,
+          userId: user.id,
+          attachmentIds,
+        });
+        return u;
+      });
+    } catch (e) {
+      if (e instanceof Error && e.message === "ANEXO_INDISPONIVEL") {
+        return NextResponse.json({ error: "Anexo não encontrado." }, { status: 400 });
+      }
+      throw e;
+    }
 
     return NextResponse.json({ post: updated });
   } catch (error) {
@@ -113,7 +165,44 @@ export async function DELETE(_request: Request, props: { params: Promise<{ id: s
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
+    /* ANEXOS (etapa 4/4) — o Cascade leva a LINHA, nunca o OBJETO. Medido na
+       etapa 3: depois de apagar o post, `info()` no path ainda devolvia o
+       arquivo. Aqui os objetos vão junto.
+
+       ⚠️ ORDEM ESCOLHIDA: banco PRIMEIRO, Storage depois — e é o INVERSO do
+       único precedente do sistema (`producer/lessons/[id]/materials/[materialId]`,
+       que remove o objeto antes do `delete`). A inversão é deliberada: se o
+       objeto sai primeiro e o `delete` falha, sobra um post VIVO apontando para
+       arquivo inexistente — o aluno clica e não baixa nada, e ninguém sabe por
+       quê. Na ordem daqui, a falha deixa no máximo um objeto órfão, invisível
+       para todo mundo e recolhido pela rotina de limpeza. Órfão temporário é
+       barato; anexo quebrado, não. */
+    const caminhos = (
+      await prisma.postAttachment.findMany({
+        where: { postId: params.id },
+        select: { storagePath: true },
+      })
+    ).map((a) => a.storagePath);
+
     await prisma.post.delete({ where: { id: params.id } });
+
+    // BEST-EFFORT, como o molde: falha de Storage não pode derrubar a exclusão
+    // do post nem virar erro na cara do usuário — o post JÁ foi apagado, e
+    // devolver 500 aqui faria o cliente achar que nada aconteceu. Vai para o
+    // log do servidor, e a rotina de órfãos é a segunda rede.
+    if (caminhos.length > 0) {
+      try {
+        const supabase = createAdminClient();
+        const { error } = await supabase.storage
+          .from(COMMUNITY_ATTACHMENTS_BUCKET)
+          .remove(caminhos);
+        if (error) {
+          console.error("[post delete] anexos não removidos:", params.id, error.message);
+        }
+      } catch (e) {
+        console.error("[post delete] anexos não removidos:", params.id, e);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

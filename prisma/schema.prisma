@@ -35,6 +35,7 @@ model User {
   enrollments          Enrollment[]
   progress             LessonProgress[]
   posts                Post[]
+  postAttachments      PostAttachment[]
   comments             Comment[]
   lessonComments       LessonComment[]
   likes                Like[]
@@ -494,6 +495,7 @@ model Post {
   group    CommunityGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
   comments Comment[]
   likes    Like[]
+  attachments PostAttachment[]
 
   @@index([courseId, status, createdAt])
   @@index([groupId, createdAt])
@@ -542,6 +544,50 @@ model Like {
 
   @@unique([userId, postId])
   @@index([postId])
+}
+
+// Estado do anexo. O objeto chega ao Storage ANTES de o post existir (upload
+// direto por signed URL), entao a linha nasce PENDING e sem post. So vira
+// CONFIRMED quando um post a adota. E a trava do item 9.104, que mediu 10
+// objetos ORFAOS no bucket `materials` justamente porque la o objeto e gravado
+// antes do registro e ninguem confere depois.
+enum AttachmentStatus {
+  PENDING
+  CONFIRMED
+}
+
+model PostAttachment {
+  id String @id @default(uuid())
+
+  // NULAVEL DE PROPOSITO: no upload direto o arquivo sobe antes de o post
+  // existir. postId nulo + PENDING = anexo orfao, alvo da futura limpeza.
+  // Com o post apagado o anexo vai junto (Cascade, padrao da casa).
+  postId String?
+  userId String
+
+  // O PATH PURO do objeto no bucket, NUNCA a URL. E a licao do item 9.97:
+  // `LessonMaterial.fileUrl` nasceu guardando `getPublicUrl(...)` e, com o
+  // bucket privado, virou um path disfarcado de URL que DOIS lugares desmontam
+  // por regex. Aqui nasce certo.
+  storagePath String
+  fileName    String
+  fileSize    Int
+  mimeType    String
+
+  status    AttachmentStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // postId: lista os anexos de um post E e a chave de juncao da soma por
+  // workspace (-> Post.courseId -> Course.workspaceId, os dois ja indexados).
+  // Indice em FK que faz Cascade nao e luxo: o Postgres NAO indexa FK sozinho,
+  // e sem ele o delete em cascata vira varredura.
+  @@index([postId])
+  @@index([userId])
+  // Acha os PENDING velhos para limpar — a consulta da rotina de orfaos.
+  @@index([status, createdAt])
 }
 
 model LessonComment {
