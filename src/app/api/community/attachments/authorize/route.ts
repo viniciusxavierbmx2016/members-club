@@ -11,6 +11,7 @@ import {
   COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES,
 } from "@/lib/community-attachments-constants";
 import { createAdminClient, COMMUNITY_ATTACHMENTS_BUCKET } from "@/lib/supabase-admin";
+import { bytesUsadosNoWorkspace } from "@/lib/community-attachments-usage";
 
 /* POST /api/community/attachments/authorize   — etapa 2/4, rota A de duas.
 
@@ -112,14 +113,7 @@ export async function POST(request: Request) {
        existe e o workspace deixa de ser declaração. Esta aqui é a barreira de
        boa-fé, que é o que impede o estouro por descuido — a esmagadora maioria
        dos casos. */
-    const usado = await prisma.postAttachment.aggregate({
-      where: {
-        status: "CONFIRMED",
-        post: { course: { workspaceId } },
-      },
-      _sum: { fileSize: true },
-    });
-    const jaUsado = usado._sum.fileSize ?? 0;
+    const jaUsado = await bytesUsadosNoWorkspace(workspaceId);
     if (jaUsado + fileSize > COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES) {
       // Sem números internos na resposta (§9): o aluno não precisa saber quanto
       // o workspace consumiu, e o produtor vê isso na tela dele.

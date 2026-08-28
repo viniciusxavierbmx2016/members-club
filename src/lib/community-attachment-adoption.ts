@@ -4,6 +4,7 @@ import {
   COMMUNITY_ATTACHMENT_MAX_PER_POST,
   COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES,
 } from "@/lib/community-attachments-constants";
+import { bytesUsadosNoWorkspace } from "@/lib/community-attachments-usage";
 
 /* ADOÇÃO de anexos por um post da comunidade — etapa 3/4.
 
@@ -67,11 +68,8 @@ export async function validarAnexosParaAdocao(params: {
   // ainda têm postId nulo, então não aparecem na soma do workspace — por isso
   // eles são somados à parte.
   const bytes = anexos.reduce((s, a) => s + a.fileSize, 0);
-  const usado = await prisma.postAttachment.aggregate({
-    where: { status: "CONFIRMED", post: { course: { workspaceId } } },
-    _sum: { fileSize: true },
-  });
-  if ((usado._sum.fileSize ?? 0) + bytes > COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES) {
+  const jaUsado = await bytesUsadosNoWorkspace(workspaceId);
+  if (jaUsado + bytes > COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES) {
     // Sem números internos na resposta (§9).
     return {
       ok: false,

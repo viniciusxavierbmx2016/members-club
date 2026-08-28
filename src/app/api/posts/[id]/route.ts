@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { collaboratorCanActOnCourse } from "@/lib/collaborator";
+import { createAdminClient, COMMUNITY_ATTACHMENTS_BUCKET } from "@/lib/supabase-admin";
 import {
   adotarAnexos,
   validarAnexosParaAdocao,
@@ -164,7 +165,44 @@ export async function DELETE(_request: Request, props: { params: Promise<{ id: s
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
+    /* ANEXOS (etapa 4/4) — o Cascade leva a LINHA, nunca o OBJETO. Medido na
+       etapa 3: depois de apagar o post, `info()` no path ainda devolvia o
+       arquivo. Aqui os objetos vão junto.
+
+       ⚠️ ORDEM ESCOLHIDA: banco PRIMEIRO, Storage depois — e é o INVERSO do
+       único precedente do sistema (`producer/lessons/[id]/materials/[materialId]`,
+       que remove o objeto antes do `delete`). A inversão é deliberada: se o
+       objeto sai primeiro e o `delete` falha, sobra um post VIVO apontando para
+       arquivo inexistente — o aluno clica e não baixa nada, e ninguém sabe por
+       quê. Na ordem daqui, a falha deixa no máximo um objeto órfão, invisível
+       para todo mundo e recolhido pela rotina de limpeza. Órfão temporário é
+       barato; anexo quebrado, não. */
+    const caminhos = (
+      await prisma.postAttachment.findMany({
+        where: { postId: params.id },
+        select: { storagePath: true },
+      })
+    ).map((a) => a.storagePath);
+
     await prisma.post.delete({ where: { id: params.id } });
+
+    // BEST-EFFORT, como o molde: falha de Storage não pode derrubar a exclusão
+    // do post nem virar erro na cara do usuário — o post JÁ foi apagado, e
+    // devolver 500 aqui faria o cliente achar que nada aconteceu. Vai para o
+    // log do servidor, e a rotina de órfãos é a segunda rede.
+    if (caminhos.length > 0) {
+      try {
+        const supabase = createAdminClient();
+        const { error } = await supabase.storage
+          .from(COMMUNITY_ATTACHMENTS_BUCKET)
+          .remove(caminhos);
+        if (error) {
+          console.error("[post delete] anexos não removidos:", params.id, error.message);
+        }
+      } catch (e) {
+        console.error("[post delete] anexos não removidos:", params.id, e);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
