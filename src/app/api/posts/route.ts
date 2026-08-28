@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { collaboratorCanActOnCourse, mensagemDeEntradaNegada } from "@/lib/collaborator";
+import { checarLeituraDaComunidade } from "@/lib/community-read-access";
 import {
   adotarAnexos,
   validarAnexosParaAdocao,
@@ -51,47 +52,17 @@ export async function GET(request: Request) {
       );
     }
 
-    if (!course.communityEnabled) {
-      return NextResponse.json(
-        { error: "Comunidade desativada neste curso" },
-        { status: 403 }
-      );
+    /* O gate de LEITURA saiu daqui para `lib/community-read-access.ts` quando o
+       download de anexo precisou do mesmo critério — a alternativa era uma
+       TERCEIRA cópia. Lógica e ORDEM provadas idênticas; a única diferença é
+       que a recusa volta como dado e quem responde é este arquivo. ⚠️ O POST
+       abaixo AINDA tem a cópia dele: publicar não é ler, e unificar os dois é
+       item próprio. */
+    const acesso = await checarLeituraDaComunidade(user, course);
+    if (!acesso.ok) {
+      return NextResponse.json({ error: acesso.erro }, { status: acesso.status });
     }
-
-    const isStaffOwner =
-      user.role === "ADMIN" ||
-      (user.role === "PRODUCER" &&
-        (course.ownerId === user.id ||
-          course.workspace.ownerId === user.id));
-    let collabAllowed = false;
-    // C6: drop the role gate. collaboratorCanActOnCourse itself returns
-    // false when there's no ACCEPTED Collaborator row, so STUDENT without
-    // collab elevation is a no-op (and STUDENT-with-Collab now passes).
-    if (!isStaffOwner) {
-      // ENTRADA na comunidade (VER o feed): além da permissão de comunidade,
-      // exige ACCESS_MEMBER_AREA (9.78). Moderação pelo PAINEL não passa aqui.
-      collabAllowed = await collaboratorCanActOnCourse(
-        user.id,
-        course.id,
-        ["MANAGE_COMMUNITY", "REPLY_COMMENTS"],
-        { requireMemberAccess: true }
-      );
-    }
-    if (!isStaffOwner && !collabAllowed) {
-      const enrollment = await prisma.enrollment.findUnique({
-        where: {
-          userId_courseId: { userId: user.id, courseId: course.id },
-        },
-      });
-      if (!enrollment || enrollment.status !== "ACTIVE") {
-        // 9.79 — distingue "nunca teve vínculo" de "perdeu ACCESS_MEMBER_AREA".
-        // A consulta extra roda SÓ aqui, no caminho de falha.
-        return NextResponse.json(
-          { error: await mensagemDeEntradaNegada(user.id, course.id) },
-          { status: 403 }
-        );
-      }
-    }
+    const { isStaffOwner, collabAllowed } = acesso;
 
     await ensureDefaultGroup(course.id);
 
