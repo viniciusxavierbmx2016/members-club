@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient, STORAGE_BUCKET } from "@/lib/supabase-admin";
+/* ANEXOS etapa 2/4 — o gate saiu daqui para `lib/community-upload-access.ts`
+   quando a SEGUNDA porta (`community/attachments/authorize`) apareceu. A lógica
+   é byte-a-byte a mesma; o motivo da extração está no cabeçalho do arquivo
+   novo, e o molde é o `lib/upload-access.ts`: paridade mantida por cópia é a
+   receita do 9.42/9.54/9.57. */
+import { hasRealPlatformLink } from "@/lib/community-upload-access";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -51,57 +56,6 @@ const SIGNATURES: {
 
 function sniff(buffer: Buffer): { mime: string; ext: string } | null {
   return SIGNATURES.find((s) => s.matches(buffer)) ?? null;
-}
-
-/* ───── Vínculo real com a plataforma ─────
-   Esta rota NÃO sabe em que curso a imagem vai ser usada: o objeto gravado é
-   `community/{userId}/…`, sem curso nenhum no caminho, e o editor que a chama é
-   compartilhado por cinco superfícies (post, comentário, resposta, edição de
-   post e — fora da comunidade — a descrição da aula no painel do produtor).
-   Exigir matrícula "no curso X" seria, portanto, um obstáculo e não uma
-   fronteira: quem tem matrícula em qualquer curso declararia esse curso.
-
-   A fronteira de CONTEXTO continua onde ela de fato existe: publicar
-   (`posts/route.ts`) e comentar (`posts/[id]/comments/route.ts`) exigem
-   matrícula ACTIVE ou permissão de comunidade NAQUELE curso. Uma imagem subida
-   fora de contexto nasce órfã.
-
-   O que se fecha aqui é o que estava aberto: conta recém-criada, sem nenhum
-   vínculo, usando um bucket público como hospedagem gratuita. */
-const UPLOAD_PERMISSIONS = ["MANAGE_COMMUNITY", "REPLY_COMMENTS", "MANAGE_LESSONS"];
-
-async function hasRealPlatformLink(user: {
-  id: string;
-  role: string;
-}): Promise<boolean> {
-  // ADMIN e dono ANTES do vínculo (lição 9.63: há PRODUCER em produção que
-  // também carrega linha de Collaborator — consultar o vínculo primeiro daria
-  // a resposta do papel errado).
-  if (user.role === "ADMIN") return true;
-  if (user.role === "PRODUCER") {
-    const [workspaces, courses] = await Promise.all([
-      prisma.workspace.count({ where: { ownerId: user.id } }),
-      prisma.course.count({ where: { ownerId: user.id } }),
-    ]);
-    if (workspaces > 0 || courses > 0) return true;
-  }
-
-  const enrollments = await prisma.enrollment.count({
-    where: { userId: user.id, status: "ACTIVE" },
-  });
-  if (enrollments > 0) return true;
-
-  // Colaborador ACCEPTED com alguma das permissões que realmente usam este
-  // editor. A união dos cinco call-sites, não um palpite: comunidade escreve
-  // com MANAGE_COMMUNITY/REPLY_COMMENTS, a descrição da aula com MANAGE_LESSONS.
-  const collaborations = await prisma.collaborator.count({
-    where: {
-      userId: user.id,
-      status: "ACCEPTED",
-      permissions: { hasSome: UPLOAD_PERMISSIONS },
-    },
-  });
-  return collaborations > 0;
 }
 
 export async function POST(request: Request) {

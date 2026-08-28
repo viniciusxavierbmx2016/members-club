@@ -67,6 +67,32 @@ export const COMMUNITY_ATTACHMENT_MAX_FILE_SIZE = 50 * 1024 * 1024;
     `@@index([postId])` do model novo, a cadeia inteira é indexada. */
 export const COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES = 2 * 1024 * 1024 * 1024;
 
+/** MIME validado -> extensão que o SERVIDOR grava no path.
+
+    Por que existe: o molde de materiais monta o path com
+    `sanitizeFileName(fileName)` e, com isso, **o cliente escolhe a extensão**
+    gravada no bucket — é exatamente a queixa (2) do item 9.130 contra a rota
+    de anexo de suporte. Aqui a extensão sai do mimeType JÁ VALIDADO contra a
+    allow-list acima, então nenhum byte do nome enviado decide o sufixo.
+    ⚠️ Isto não torna o arquivo confiável (o mimeType ainda é declaração — ver
+    o buraco assumido no topo); torna o CAMINHO previsível e sem surpresa. */
+export const COMMUNITY_ATTACHMENT_EXT_BY_MIME: Record<string, string> = {
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/vnd.ms-excel": "xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+  "text/csv": "csv",
+  "text/plain": "txt",
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+
 /** Bucket PRIVADO, exclusivo destes anexos. Não reusa `thumbnails` (público, e
     compartilhado por 6 rotas) nem `materials` (do produtor, teto e allow-list
     diferentes). Mesmo valor de `COMMUNITY_ATTACHMENTS_BUCKET` em
