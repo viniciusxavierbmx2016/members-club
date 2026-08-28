@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { collaboratorCanActOnCourse, mensagemDeEntradaNegada } from "@/lib/collaborator";
+import {
+  adotarAnexos,
+  validarAnexosParaAdocao,
+} from "@/lib/community-attachment-adoption";
 import { GAMIFICATION, getLevelForPoints } from "@/lib/utils";
 import { sanitizeHtml, hasPostContent } from "@/lib/sanitize-html";
 import { PostType } from "@prisma/client";
@@ -320,21 +324,61 @@ export async function POST(request: Request) {
     const moderationOn = course.communityModerationEnabled;
     const postStatus = !moderationOn || staff ? "APPROVED" : "PENDING";
 
-    const post = await prisma.post.create({
-      data: {
-        content: sanitized,
-        type: postType,
+    /* ANEXOS (etapa 3/4) — a lista é validada ANTES de o post existir, para que
+       uma lista ruim não deixe um post publicado sem os anexos que o autor
+       anexou (falso sucesso, família do 9.107). ⭐ E é aqui que o teto de 2GB
+       vira TRAVA REAL: o workspace vem do curso do post, não do `courseId` que
+       o cliente declarou lá no `authorize` — lá é barreira de boa-fé, e está
+       dito no comentário daquela rota. */
+    const attachmentIds = v.data.attachmentIds ?? [];
+    if (attachmentIds.length > 0) {
+      const check = await validarAnexosParaAdocao({
         userId: user.id,
-        courseId: course.id,
-        groupId: finalGroupId,
-        status: postStatus,
-      },
-      include: {
-        user: { select: { id: true, name: true, avatarUrl: true, role: true } },
-        group: { select: { id: true, name: true, slug: true, permission: true } },
-        _count: { select: { likes: true, comments: true } },
-      },
-    });
+        attachmentIds,
+        workspaceId: course.workspaceId,
+      });
+      if (!check.ok) {
+        return NextResponse.json({ error: check.erro }, { status: check.status });
+      }
+    }
+
+    /* Criar o post e PRENDER os anexos na MESMA transação. Se a adoção falhar
+       — outra requisição levou o anexo entre a validação e agora —, o post
+       volta atrás junto. Meio post publicado é pior que post nenhum. */
+    let post;
+    try {
+      post = await prisma.$transaction(async (tx) => {
+        const criado = await tx.post.create({
+          data: {
+            content: sanitized,
+            type: postType,
+            userId: user.id,
+            courseId: course.id,
+            groupId: finalGroupId,
+            status: postStatus,
+          },
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true, role: true } },
+            group: { select: { id: true, name: true, slug: true, permission: true } },
+            _count: { select: { likes: true, comments: true } },
+          },
+        });
+        await adotarAnexos(tx, {
+          postId: criado.id,
+          userId: user.id,
+          attachmentIds,
+        });
+        return criado;
+      });
+    } catch (e) {
+      // A adoção falhou por CORRIDA (o `postId: null` do updateMany não casou):
+      // alguém prendeu o anexo entre a validação e o commit. A transação já
+      // desfez o post; a resposta é a mesma frase indistinguível de sempre.
+      if (e instanceof Error && e.message === "ANEXO_INDISPONIVEL") {
+        return NextResponse.json({ error: "Anexo não encontrado." }, { status: 400 });
+      }
+      throw e;
+    }
 
     let pointsAwarded = 0;
     let leveledUp = false;

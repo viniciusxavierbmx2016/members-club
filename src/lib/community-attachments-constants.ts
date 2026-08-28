@@ -67,6 +67,17 @@ export const COMMUNITY_ATTACHMENT_MAX_FILE_SIZE = 50 * 1024 * 1024;
     `@@index([postId])` do model novo, a cadeia inteira é indexada. */
 export const COMMUNITY_ATTACHMENT_MAX_WORKSPACE_BYTES = 2 * 1024 * 1024 * 1024;
 
+/** Teto de anexos POR POST.
+
+    Por que existe e por que 5: sem teto, um post vira depósito — e como o
+    upload é direto ao Storage, o custo de anexar é do servidor apenas no
+    metadado, então nada segura o volume por post. Cinco cobre o caso real
+    (contrato + anexos, ou algumas fotos) e mantém o feed legível; é o mesmo
+    número que o anexo de mensagem de ticket já usa como limite por mensagem
+    (`support/attachments/upload/route.ts:21`, "Per-message limit (5 files)").
+    Escolher o número que a casa já usa evita inventar uma segunda régua. */
+export const COMMUNITY_ATTACHMENT_MAX_PER_POST = 5;
+
 /** MIME validado -> extensão que o SERVIDOR grava no path.
 
     Por que existe: o molde de materiais monta o path com
