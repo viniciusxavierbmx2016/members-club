@@ -358,7 +358,36 @@ export async function POST(request: Request) {
           userId: user.id,
           attachmentIds,
         });
-        return criado;
+
+        /* ⚠️ RELEITURA, e ela é obrigatória: o `include` acima resolveu no
+           instante do `create`, quando NENHUM anexo tinha `postId` ainda — a
+           adoção acontece na linha de cima. Sem isto o POST responde sempre
+           `attachments: []`, o anexo só aparece depois de um reload (quando o
+           GET lê o estado já adotado), e a tela parece ter engolido o arquivo.
+           Foi o único pendente do gate da etapa 5.
+
+           Só relê QUANDO HÁ anexo: o post sem anexo — a esmagadora maioria —
+           segue com exatamente uma consulta, como antes. E relê DENTRO da
+           transação, no mesmo `tx`, para enxergar a adoção que ainda não foi
+           commitada. */
+        if (attachmentIds.length === 0) return criado;
+        const comAnexos = await tx.post.findUnique({
+          where: { id: criado.id },
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true, role: true } },
+            group: { select: { id: true, name: true, slug: true, permission: true } },
+            _count: { select: { likes: true, comments: true } },
+            attachments: {
+              where: { status: "CONFIRMED" as const },
+              select: { id: true, fileName: true, fileSize: true, mimeType: true },
+              orderBy: { createdAt: "asc" as const },
+            },
+          },
+        });
+        // `criado` como último recurso: a linha ACABOU de ser criada nesta
+        // transação, então `null` aqui é impossível — mas devolver o post sem
+        // os anexos é melhor que estourar depois de ele já existir.
+        return comAnexos ?? criado;
       });
     } catch (e) {
       // A adoção falhou por CORRIDA (o `postId: null` do updateMany não casou):
