@@ -35,6 +35,68 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-28 — CAMADA 4, ETAPA E4.2 — Ativação em PRODUÇÃO dos anexos
+
+**Estado antes:** main em `cfa1128` · produção **sem** a tabela, **com** o código deployado
+
+**O que foi feito:** `npx prisma migrate deploy` em produção (aditivo: cria `PostAttachment` e
+o enum `AttachmentStatus`, não altera nada existente) e criação do bucket privado
+`community-attachments` (50MB). O recurso passou a existir de ponta a ponta para os produtores.
+
+**Arquivos tocados:** nenhum de código. Só banco e Storage de produção, mais os docs.
+
+**Como foi provado:**
+- **Prova de alvo impressa** (`wyamxwmdgbvqrfcqfbyh`) antes de **cada** escrita.
+- `migrate status` antes: **exatamente uma** migração pendente, a nossa — nenhuma outra.
+- Verificação pelo `information_schema`/`pg_catalog`, **não pela saída do comando**: 9 colunas,
+  enum `PENDING, CONFIRMED`, 4 índices, 2 FKs `ON DELETE CASCADE`.
+- **Nada existente alterado**: **60 → 61** tabelas; `Post` 9 → 9 colunas, `Comment` 7 → 7.
+- Bucket: criado privado, `52428800`, **verificado por releitura**; os 4 buckets antigos
+  comparados **um a um** com o estado anterior → **todos intactos**.
+- Rotas em produção: as 4 novas + o feed respondem **401** (rota existe, gate age), com
+  **controle** de caminho inexistente devolvendo **404**.
+- `PostAttachment` em produção: **0** — nenhum dado de teste foi criado lá.
+
+**SHA do merge:** `f13a8a6` (código) · esta entrada documenta a ATIVAÇÃO, que não tem SHA de
+código  ·  **Rollback:** a migração é aditiva; reverter seria `DROP TABLE "PostAttachment"` +
+`DROP TYPE "AttachmentStatus"` — mas ⚠️ **o código em produção já consulta a tabela**, então
+derrubá-la recria a quebra. Rollback real = `git revert -m 1 f13a8a6` **antes** do DROP.
+
+**Mudou em produção para quem:** todos os workspaces com comunidade ativa — **12 de 39**, 20% dos
+cursos. O aluno passa a ver o botão de anexo; o produtor, a barra de consumo.
+
+**🔴 A MIGRAÇÃO CUROU UMA QUEBRA ATIVA QUE EU MESMO CRIEI.** O merge foi empurrado **antes** da
+migração, e a Vercel faz deploy no push. Resultado: o código foi para produção com o GET do feed
+consultando `attachments` numa tabela que não existia. Medido antes de aplicar: `SELECT` em
+`PostAttachment` → `42P01 relation "PostAttachment" does not exist`, com as rotas novas já
+respondendo 401 (deployadas) e a rota de controle dando 404. **Todo aluno autenticado que abrisse
+a comunidade batia nisso.** ⚠️ **O runbook da casa manda o inverso — migração ANTES do push** —, e
+a regra existe exatamente para isto. A ordem se inverteu porque merge e migração vieram em
+**comandos separados**, e a janela entre os dois virou indisponibilidade real. **Lição: feature
+que toca schema tem de ter o `migrate deploy` no MESMO comando do merge, e antes do push.**
+
+**⚠️ NÃO VERIFICADO — `CRON_SECRET` na Vercel.** O `.env` local não o tem (é variável de
+ambiente da Vercel, não local) e **não há CLI da Vercel instalado** aqui para listar os nomes.
+Minha tentativa de evidência indireta **falhou e vale registrar**: argumentei que o cron de
+billing rodando provaria o segredo, mas **0 de 119 subscriptions têm `currentPeriodEnd`** — o que
+bate com o item já aberto de que aquele cron pode nunca ter produzido efeito. ⇒ **A rota é
+fail-closed**: sem o segredo ela responde 401 e a limpeza simplesmente **não roda** (nada quebra,
+o lixo só acumula). Chamadas externas a `/api/cron/*` levam **403 do Cloudflare** — provado com
+controle no `/api/cron/pending`, que se comporta igual. **Confirmar no painel da Vercel.**
+
+**O que vigiar nos primeiros dias:** (1) os **primeiros uploads reais** — se `authorize` e
+`confirm` casam, e se algum `confirm` recusa por divergência; (2) o **cron das 04:00 UTC** — se
+roda e o que ele relata (o `dryRun=1` mostra sem apagar); (3) o **consumo dos workspaces**, para
+saber se 2GB é folgado ou apertado no uso real; (4) **linhas PENDING acumulando** — sinal de
+upload que começa e não termina.
+
+**Ficou aberto:** 9.131 · 9.132 · 9.133 · 9.134 (grupo E3.31) · e a confirmação do `CRON_SECRET`.
+
+**Regras conferidas:** §17 respondido ✅ · prova de alvo em toda escrita ✅ · gate humano ✅ ·
+papelada ✅
+
+---
+
 ## 2026-08-28 — CAMADA 4, ETAPA E4.2 — Anexos na comunidade (5 etapas)
 
 **Estado antes:** main em `145882d`
