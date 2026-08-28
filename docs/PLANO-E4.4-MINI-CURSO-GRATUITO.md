@@ -97,7 +97,7 @@
 
 | # | Etapa | Gate para fechar |
 |---|---|---|
-| **1** | **Fundação de schema**: chave gratuito/pago no `Course` + marca de **origem** no `Enrollment`. Migração aditiva, zero runtime | Migração aplicada em staging com prova por `information_schema`; prova dupla em produção (não existe lá); `Post`/`Enrollment` sem colunas alteradas |
+| **1** ✅ | **FEITA (merge `35d440d`, 28/08, já em produção).** Fundação de schema: `Course.isFree` + `Enrollment.origin`/`EnrollmentOrigin`. Migração aditiva, zero runtime | Migração aplicada em staging com prova por `information_schema`; prova dupla em produção (não existe lá); `Post`/`Enrollment` sem colunas alteradas |
 | **2** | **Cadastro público** (rota + tela): recusa e-mail existente (D5), WhatsApp obrigatório (D7), sem verificação (D6). **NÃO reusar `/api/auth/register`** (DIV-4) | Provas por API: e-mail novo cria; e-mail existente **recusa** com a frase da casa; sem WhatsApp recusa; rate-limit ativo |
 | **3** | **"Resgatar acesso"** (D3) + a rota que cria a matrícula gratuita (D2), marcando a origem | Matrícula nasce ACTIVE com origem correta; **sem passar pelo ramo que rotaciona senha** (DIV-1); idempotente (resgatar duas vezes não duplica) |
 | **4** | **Vitrine + cadeado** (D8): curso pago mostra cadeado que leva à página do curso; gratuito mostra "Resgatar" | Visitante deslogado, aluno sem matrícula e aluno matriculado veem o correto; o critério do `locked` passa a considerar gratuidade |
@@ -144,3 +144,32 @@ login em /w/[slug]/login  →  vitrine (init: enrolledCourses × storeCourses)
 
 **O que a demanda toca**: o começo (uma entrada nova, sem gateway) e a vitrine (o cadeado).
 **O miolo — credencial, matrícula, gates — é reuso.**
+
+---
+
+## 6. Etapa 1 — o que ficou decidido na prática (28/08, merge `35d440d`)
+
+**(i) A condição de PARE não disparou, e a evidência é o oposto de "quase serve".**
+O comando mandava parar se algum campo existente já servisse. Medi em produção: `showInStore`
+significa *"aparece na loja"*, não *"é de graça"*; e usar `checkoutUrl`/`price` vazios como sinal
+**liberaria de graça 20 a 32 cursos pagos reais** — **20 de 60 (33%)** sem `checkoutUrl` e
+**32 (53%)** sem preço, por outros motivos. Campo novo, `@default(false)`.
+
+**(ii) O default do legado é `UNKNOWN`, não `PURCHASE`.** As **28.829** matrículas de produção
+**não são todas compra** — importação, produtor à mão e automação misturados, e nenhum dado os
+separa depois do fato. `UNKNOWN` significa *"origem não registrada"*, verdade tanto para o legado
+quanto para a janela até a fatia de runtime ligar os cinco escritores. Mesmo princípio do
+`updatedAt` do próprio model: **um campo que mente é pior que um campo ausente**. Linha nova com
+`UNKNOWN` depois daquela fatia = escritor esquecido, separável por `createdAt`.
+
+**(iii) ⚠️ Leitura e escrita tiveram que entrar JUNTAS.** O comentário do próprio GET do curso
+avisa que *"o `CourseForm` devolve o payload INTEIRO no PUT"*. Sem `isFree` na **leitura**, o
+estado do form nasceria `false` e o **primeiro "Salvar" de um curso gratuito o tornaria PAGO** — a
+armadilha do 9.112 na direção contrária. GET, PUT e POST de criação entraram no mesmo commit.
+
+**(iv) O aviso do R4 é honesto sobre o que não sabemos.** Ao ligar "Gratuito" num curso com
+alunos, o bloco mostra a contagem e diz, na tela: *"não é possível saber aqui quantos desses
+alunos compraram — as matrículas anteriores não registram a origem"*.
+
+**Provado em produção depois da migração:** `isFree=true` em **0** cursos · origem ≠ `UNKNOWN` em
+**0** matrículas · **61 → 61** tabelas, `Course` 52→53 e `Enrollment` 9→10 colunas.

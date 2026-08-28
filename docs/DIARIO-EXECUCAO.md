@@ -35,6 +35,61 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-28 — CAMADA 4, ETAPA E4.4 (etapa 1 de 8) — Chave gratuito/pago e origem da matrícula
+
+**Estado antes:** main em `c526879`
+
+**O que foi feito:** a fundação do mini curso gratuito. Dois campos (`Course.isFree` e
+`Enrollment.origin` + enum `EnrollmentOrigin`), o Toggle "Gratuito" na tela do produtor e o aviso
+do risco R4. **Sem efeito para o aluno** — nenhum escritor grava a origem ainda e nenhum gate
+consulta `isFree`.
+
+**Arquivos tocados:** 9 arquivos, **+148/−0**. Nada no caminho do aluno.
+
+**Como foi provado:**
+- **Gate humano 5/5 (28/08)**, incluindo a regressão da visão do aluno.
+- **Por diff**: `app/w/`, `app/(course)/`, `lib/auth.ts`, `lib/lesson-access.ts`,
+  `lib/community-read-access.ts` e `api/w/` com **zero ocorrências**.
+- **Por API em staging**: `isFree` persistiu nos dois sentidos (4 idas e voltas); o `_count` traz
+  a contagem certa (5 no `curso-teste`, 0 no `curso-corrida-923`); o shape do aluno é o mesmo —
+  as listas `enrolled` e `store` **não trazem `isFree`**.
+- **Em produção, depois da migração**: `isFree=true` em **0** cursos · origem ≠ `UNKNOWN` em
+  **0** matrículas.
+
+**SHA do merge:** `35d440d`  ·  **Rollback:** `git revert -m 1 35d440d`. ⚠️ A migração é aditiva;
+derrubar as colunas exigiria o revert do código **antes** do DROP, porque o PUT/GET já as citam.
+
+**Mudou em produção para quem:** ninguém ainda **sente** a mudança. O produtor **vê** o toggle
+novo na tela de edição do curso; o aluno não vê nada. **66 cursos** e **28.829 matrículas**
+receberam os defaults.
+
+**⭐ A ORDEM DO RUNBOOK FOI CUMPRIDA DESTA VEZ.** Depois do incidente de 27/08 (merge empurrado
+antes da migração, o que quebrou a comunidade em produção pela janela entre os dois comandos),
+esta etapa fez: merge **local** → portão verde → **`migrate deploy` em produção** → **só então
+`git push`**. Quando a Vercel deployou, a coluna já existia. **Zero janela de quebra.**
+
+**⭐ TRÊS DECISÕES QUE VALEM MAIS QUE O CÓDIGO:**
+**(1)** Não reusei campo existente, e a decisão foi **medida**: `checkoutUrl`/`price` vazios
+liberariam de graça **20 a 32 cursos pagos reais** (33% e 53% do acervo estão assim por outros
+motivos).
+**(2)** O default do legado é **`UNKNOWN`**, não `PURCHASE`: as 28.829 matrículas não são todas
+compra, e **carimbar `PURCHASE` seria inventar um passado**.
+**(3)** Leitura e escrita entraram **juntas** — sem `isFree` no GET, o `CourseForm` (que devolve o
+payload inteiro no PUT) faria o **primeiro "Salvar" tornar PAGO um curso gratuito**.
+
+**⚠️ O QUE VIGIAR:** **nenhum curso de produção deve virar `isFree=true` sem o produtor mandar.**
+A consulta de vigia é uma linha: `SELECT count(*) FROM "Course" WHERE "isFree" = true` — hoje
+**0**. Qualquer número diferente de zero sem uma ação do produtor por trás é sinal de que algum
+caminho de escrita está mandando o campo sem querer (o risco que a decisão (3) fechou).
+
+**Ficou aberto:** **9.135** 🔴 (rota pública que cria ADMIN — **veredito em aberto**, precisa de
+medição) · **9.136** 🟠 (produtor à mão reseta senha) — grupo **E3.32**. E as **7 etapas
+restantes** da E4.4.
+
+**Regras conferidas:** §17 respondido ✅ · migração antes do push ✅ · gate humano ✅ · papelada ✅
+
+---
+
 ## 2026-08-28 — CAMADA 4, ETAPA E4.2 — Ativação em PRODUÇÃO dos anexos
 
 **Estado antes:** main em `cfa1128` · produção **sem** a tabela, **com** o código deployado
