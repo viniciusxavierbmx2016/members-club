@@ -18,6 +18,8 @@ const RichTextEditor = dynamic(
   }
 );
 
+import { PostAttachments, type PostAttachmentItem } from "@/components/post-attachments";
+
 export interface PostAuthor {
   id: string;
   name: string;
@@ -37,6 +39,7 @@ export interface PostItem {
   likeCount: number;
   commentCount: number;
   group?: { id: string; name: string; slug: string; permission: string } | null;
+  attachments?: PostAttachmentItem[];
 }
 
 export interface CommentItem {
@@ -608,6 +611,12 @@ export const PostCard = memo(function PostCard({
           }}
         />
       )}
+
+      {/* Anexos (etapa 5) — depois do conteúdo, antes do rodapé de ações. O
+          componente devolve null quando a lista está vazia, então o post sem
+          anexo fica byte-a-byte como era. Fora do ternário de propósito: o
+          anexo continua visível enquanto o autor edita o texto. */}
+      <PostAttachments attachments={post.attachments ?? []} />
 
       {/* Rodapé sem régua: o espaçamento separa. Uma linha a menos por cartão
           num feed de N cartões é subtração real, não estética. */}

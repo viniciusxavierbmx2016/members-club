@@ -107,6 +107,16 @@ export async function GET(request: Request) {
           user: { select: { id: true, name: true, avatarUrl: true, role: true } },
           group: { select: { id: true, name: true, slug: true, permission: true } },
           likes: { where: { userId: user.id }, select: { id: true } },
+          /* ANEXOS (etapa 5) — o feed não os devolvia. `select` explícito e SÓ os
+             campos que a tela usa: nada de `storagePath`, que é caminho de
+             Storage e não tem por que sair do servidor (lição 9.97/9.112).
+             Só CONFIRMED aparece: PENDING é rascunho. */
+          attachments: {
+            where: { status: "CONFIRMED" as const },
+            select: { id: true, fileName: true, fileSize: true, mimeType: true },
+            orderBy: { createdAt: "asc" as const },
+          },
+
           _count: {
             select: {
               likes: true,
@@ -130,6 +140,7 @@ export async function GET(request: Request) {
       liked: p.likes.length > 0,
       likeCount: p._count.likes,
       commentCount: p._count.comments,
+      attachments: p.attachments,
     }));
 
     return NextResponse.json({
@@ -332,6 +343,14 @@ export async function POST(request: Request) {
             user: { select: { id: true, name: true, avatarUrl: true, role: true } },
             group: { select: { id: true, name: true, slug: true, permission: true } },
             _count: { select: { likes: true, comments: true } },
+            // Mesmo conjunto do GET: a tela empurra o post devolvido pelo POST
+            // na MESMA lista que o GET preenche, e formas diferentes ali seriam
+            // uma lista com dois tipos de item (lição do `materials/route.ts:12-15`).
+            attachments: {
+              where: { status: "CONFIRMED" as const },
+              select: { id: true, fileName: true, fileSize: true, mimeType: true },
+              orderBy: { createdAt: "asc" as const },
+            },
           },
         });
         await adotarAnexos(tx, {
