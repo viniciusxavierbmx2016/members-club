@@ -464,6 +464,20 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
+        /* ⚠️ ESTE OBJETO É MONTADO À MÃO, campo a campo — e é por isso que
+           `attachments` precisa estar escrito aqui. Pôr o campo no `include`
+           da consulta NÃO basta: o `include` alimenta a variável `post`, e é
+           ESTA lista que decide o que sai na resposta. Foi exatamente o que
+           deixou o anexo invisível até o reload — o GET trazia, o POST não.
+
+           QUEM ACRESCENTAR CAMPO NOVO AO GET DO FEED TEM DE LEMBRAR DAQUI. O
+           cliente empurra o post devolvido pelo POST na MESMA lista que o GET
+           preenche; um campo a menos aqui é um item de lista com forma
+           diferente dos vizinhos.
+
+           `?? []` de propósito: AUSENTE e VAZIO se comportam diferente no
+           cliente, e foi essa diferença que produziu o defeito. Post sem anexo
+           devolve array vazio, nunca campo faltando. */
         post: {
           id: post.id,
           content: post.content,
@@ -476,6 +490,9 @@ export async function POST(request: Request) {
           liked: false,
           likeCount: 0,
           commentCount: 0,
+          // Mesmo shape do GET (`:143`): mesmos campos, mesma posição, sem
+          // `storagePath`.
+          attachments: post.attachments ?? [],
         },
         pointsAwarded,
         leveledUp,
