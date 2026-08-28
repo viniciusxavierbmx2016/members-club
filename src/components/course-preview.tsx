@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ReviewsSection } from "@/components/reviews-section";
@@ -37,6 +38,8 @@ export interface PreviewCourse {
   bannerUrl: string | null;
   bannerPosition?: string | null;
   checkoutUrl: string | null;
+  /** E4.4 — curso gratuito: troca "Comprar agora" por "Resgatar acesso". */
+  isFree?: boolean;
   price: number | null;
   priceCurrency: string | null;
   ratingAverage: number;
@@ -109,7 +112,91 @@ export function CoursePreview({
 
   const whatsappHref = formatWhatsappLink(course.supportWhatsapp);
 
-  const checkoutCta = course.checkoutUrl ? (
+  /* E4.4 — RESGATE. Um botão só, usado nos DOIS pontos de CTA desta tela.
+     Definir aqui e reusar é a lição do 9.42/9.54/9.57: dois botões com a mesma
+     regra divergem no dia em que alguém mexe num só, e a divergência nasce
+     invisível. A confirmação é decisão do dono (D3): matricular no primeiro
+     clique seria acesso concedido por engano, e desfazer exige o produtor. */
+  const [resgatando, setResgatando] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
+  const [erroResgate, setErroResgate] = useState("");
+
+  async function resgatar() {
+    setErroResgate("");
+    setResgatando(true);
+    try {
+      const res = await fetch(`/api/courses/${course.id}/claim`, { method: "POST" });
+      if (!res.ok) {
+        // Régua do E3.12: a frase que o aluno lê é a do SERVIDOR.
+        const d = await res.json().catch(() => ({}));
+        setErroResgate(d.error || "Não foi possível resgatar o acesso.");
+        return;
+      }
+      // Recarrega na MESMA url: com a matrícula criada, a página deixa de
+      // renderizar o preview e entra no curso. Sem rota nova.
+      window.location.reload();
+    } catch {
+      /* `fetch` REJEITA (rede/CORS/servidor fora) sem existir `res` — só o
+         try/catch pega. Sem isto o aluno leria "Failed to fetch" (9.79). */
+      setErroResgate("Não foi possível resgatar agora. Verifique sua conexão e tente de novo.");
+    } finally {
+      setResgatando(false);
+    }
+  }
+
+  const resgateCta = (
+    <button
+      type="button"
+      onClick={() => setConfirmando(true)}
+      disabled={resgatando}
+      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-500 hover:to-emerald-500 text-white text-[15px] font-semibold rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 transition-[colors,box-shadow] duration-200 disabled:opacity-60"
+    >
+      {resgatando ? "Resgatando\u2026" : "Resgatar acesso"}
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </button>
+  );
+
+  const modalResgate = confirmando ? (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      onClick={() => !resgatando && setConfirmando(false)}
+    >
+      <div
+        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white">Resgatar acesso</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          Você vai receber acesso a{" "}
+          <strong className="font-medium text-gray-900 dark:text-white">{course.title}</strong>. É
+          gratuito.
+        </p>
+        {erroResgate && <p className="text-xs text-red-500 mt-3">{erroResgate}</p>}
+        <div className="flex gap-2 mt-5">
+          <button
+            type="button"
+            onClick={() => setConfirmando(false)}
+            disabled={resgatando}
+            className="flex-1 px-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={resgatar}
+            disabled={resgatando}
+            className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-60"
+          >
+            {resgatando ? "Resgatando\u2026" : "Confirmar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
+  const checkoutCta = course.isFree ? resgateCta : course.checkoutUrl ? (
     <a
       href={course.checkoutUrl}
       target="_blank"
@@ -148,6 +235,7 @@ export function CoursePreview({
 
   return (
     <div className="relative min-h-screen pb-28 lg:pb-0">
+      {modalResgate}
       {/* Back link */}
       <div className="px-4 sm:px-6 lg:px-10 pt-5 max-w-[1400px] mx-auto w-full">
         <Link
@@ -416,7 +504,10 @@ export function CoursePreview({
             )}
           </div>
           <div className="flex-shrink-0">
-            {course.checkoutUrl ? (
+            {/* E4.4 — o MESMO botão do CTA de cima, não uma cópia. */}
+            {course.isFree ? (
+              resgateCta
+            ) : course.checkoutUrl ? (
               <a
                 href={course.checkoutUrl}
                 target="_blank"
