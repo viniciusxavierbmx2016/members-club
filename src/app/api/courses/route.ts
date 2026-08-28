@@ -257,6 +257,7 @@ export async function POST(request: Request) {
       checkoutUrl,
       isPublished,
       showInStore,
+      isFree,
       featured,
       category,
       supportEmail,
@@ -327,6 +328,8 @@ export async function POST(request: Request) {
         checkoutUrl: checkoutUrl || null,
         isPublished: Boolean(isPublished),
         showInStore: showInStore !== false,
+        // E4.4 — curso nasce PAGO por padrão; gratuito é escolha explícita.
+        isFree: isFree === true,
         order: (lastCourse?.order ?? -1) + 1,
         featured: Boolean(featured),
         category: typeof category === "string" && category.trim() ? category.trim() : null,

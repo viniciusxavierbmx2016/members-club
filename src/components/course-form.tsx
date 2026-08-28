@@ -28,6 +28,9 @@ interface CourseFormData {
   priceCurrency: string;
   isPublished: boolean;
   showInStore: boolean;
+  isFree: boolean;
+  /** Quantos alunos o curso já tem — alimenta o aviso de virar gratuito. */
+  enrollmentCount?: number;
   featured: boolean;
   category: string;
   supportEmail: string;
@@ -106,6 +109,10 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
   );
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? false);
   const [showInStore, setShowInStore] = useState(initial?.showInStore ?? true);
+  const [isFree, setIsFree] = useState(initial?.isFree ?? false);
+  /* O aviso do R4: só aparece quando o produtor ESTÁ virando um curso que já
+     tem gente para gratuito. Some sozinho se ele voltar atrás. */
+  const [avisoGratuito, setAvisoGratuito] = useState(false);
   const [featured, setFeatured] = useState(initial?.featured ?? false);
   const [category, setCategory] = useState(initial?.category || "");
   const [categories, setCategories] = useState<string[]>([]);
@@ -192,6 +199,7 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
       priceCurrency: priceCurrency || "BRL",
       isPublished,
       showInStore,
+      isFree,
       featured,
       category: category.trim() || null,
       supportEmail: supportEmail.trim(),
@@ -453,6 +461,19 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
             />
             <div className="flex items-start gap-0">
               <Toggle
+                checked={isFree}
+                onChange={(v) => {
+                  setIsFree(v);
+                  // Só avisa ao LIGAR, e só se já houver gente dentro.
+                  setAvisoGratuito(v && (initial?.enrollmentCount ?? 0) > 0);
+                }}
+                label="Gratuito"
+                description="O aluno resgata sem pagar"
+              />
+              <HelpTooltip text="Curso gratuito: o aluno entra pela vitrine e resgata o acesso, sem passar por checkout. Curso pago continua exigindo compra." />
+            </div>
+            <div className="flex items-start gap-0">
+              <Toggle
                 checked={featured}
                 onChange={setFeatured}
                 label="Destaque"
@@ -461,6 +482,29 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
             </div>
           </div>
         </div>
+
+        {/* AVISO do risco R4 — o produtor está abrindo de graça um curso que já
+            tem alunos. A frase é DELIBERADAMENTE imprecisa sobre "quantos
+            pagaram": as matrículas antigas não guardam a origem (o campo
+            `Enrollment.origin` nasceu agora e o acervo ficou UNKNOWN), então
+            afirmar "N pagantes" seria inventar precisão que não temos. Diz o
+            que se sabe: o total de matriculados. */}
+        {avisoGratuito && (
+          <div className="mt-4 rounded-xl border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4">
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+              Este curso já tem {initial?.enrollmentCount} aluno
+              {initial?.enrollmentCount === 1 ? "" : "s"} com acesso.
+            </p>
+            <p className="text-xs text-amber-800/80 dark:text-amber-200/70 mt-1">
+              Ao salvar como gratuito, novos alunos passam a entrar sem pagar.
+              Quem já tem acesso continua com ele.{" "}
+              <strong className="font-medium">
+                Não é possível saber aqui quantos desses alunos compraram
+              </strong>{" "}
+              — as matrículas anteriores não registram a origem.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* SEÇÃO 4 — Suporte */}
