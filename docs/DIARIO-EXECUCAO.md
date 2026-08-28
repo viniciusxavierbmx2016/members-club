@@ -35,6 +35,74 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-28 — CAMADA 4, ETAPA E4.2 — Anexos na comunidade (5 etapas)
+
+**Estado antes:** main em `145882d`
+
+**O que foi feito:** a demanda de cliente #3. O aluno passa a anexar PDF e documentos
+a um post da comunidade; o produtor vê quanto o workspace consumiu. Entregue em **5 etapas**,
+cada uma com gate próprio: fundação (schema + migração + constantes + bucket privado) → upload
+(`authorize` + `confirm`) → adoção pelo post + download protegido → limpeza de órfãos + consumo
+→ a tela. O arquivo vai **direto do browser para o Storage** porque a função da Vercel corta o
+corpo em ~4,5MB e o teto pedido é 50MB.
+
+**Arquivos tocados:** 26 arquivos, **+1843/−136** — 12 novos (5 libs, 3 componentes, 4 rotas),
+o resto alterações pontuais. Nada fora do escopo das 5 etapas (conferido arquivo a arquivo).
+
+**Como foi provado:**
+- **Gate humano 3/3 (27/08)** no re-gate, depois de **7/7** nas etapas anteriores.
+- **Provas por API em staging**, cada etapa com as suas: a mentira do cliente (declarou 69 bytes
+  de PDF, enviou 5004 começando com `MZ`) foi **recusada, o objeto apagado e a linha removida**,
+  com **controle positivo** (o objeto do caminho feliz continuou lá) · anexo de outro usuário,
+  anexo em dois posts e 6 anexos → recusados · download: 401 sem sessão, 404 sem acesso, 404 para
+  anexo PENDING, e **moderação** com 3 personas sobre o mesmo anexo (404/302/302) mais o
+  **controle positivo** de aprovar pela rota real e ver o 404 virar 302 · a rotina de limpeza
+  com **intruso plantado** que sobreviveu.
+- **Comparação automática POST × GET** do mesmo post, com e sem anexo: **zero diferenças**.
+
+**SHA do merge:** `f13a8a6`  ·  **Rollback:** `git revert -m 1 f13a8a6`
+
+**Mudou em produção para quem:** ⚠️ **NINGUÉM AINDA.** O código está em `main`, mas a tabela
+`PostAttachment`, o enum `AttachmentStatus` e o bucket `community-attachments` existem **só no
+STAGING**. **A migração de produção é comando separado** — até lá, o botão de anexo não tem
+onde gravar.
+
+**Ficou aberto:** **9.131** (shape do PUT sem `attachments`) · **9.132** (mensagem crua do Zod
+no limite de 5) · **9.133** (upload sem barra de progresso, e o teto aqui é 50MB) · **9.134** (o
+POST de post ainda com a cópia do gate de leitura) — grupo **E3.31**, todos 🟢 e registrados
+**sem fix**.
+
+**⭐ O QUE FOI ASSUMIDO DE OLHOS ABERTOS:** indo direto ao Storage, o servidor **nunca vê os
+bytes**, e o SDK não deixa ler só o cabeçalho do arquivo. A allow-list filtra **declaração**. As
+três mitigações estão escritas no código, não só aqui: bucket privado · confirmação pós-upload
+comparando tamanho e tipo **reais** via `info()` · download só por rota nossa, signed URL de
+900s e `Content-Disposition: attachment` para o navegador não renderizar.
+
+**⚠️ EU ERREI DUAS VEZES NO MESMO SINTOMA, e a lição vale mais que o fix.** O anexo não aparecia
+no post recém-publicado. Acrescentei `attachments` ao `include` do POST e **afirmei no commit**
+que a resposta o devolvia — sem conferir o `NextResponse.json` **110 linhas abaixo**, que monta o
+objeto **à mão** e não incluía o campo. No diagnóstico seguinte conferi o **cliente** (inocente) e
+concluí "servidor", mas não olhei o construtor **dentro** do servidor. Só na terceira rodada
+apareceu. **Lição: `include` alimenta a variável; quem decide o que SAI é o construtor da
+resposta — conferir os dois.** E a varredura que fiz no fim mostrou que aquele era o **único**
+construtor manual do módulo: se eu a tivesse feito antes, teria fechado em minutos.
+
+**⚠️ Corolário:** campo **AUSENTE ≠ campo VAZIO**. A resposta não vinha com `[]`, vinha **sem a
+chave** — e no cliente os dois viram o mesmo valor só *depois* de o dado já ter sido perdido.
+
+**🔴 REGRA DE PALCO NOVA, e essa quase custou caro:** com o palco de pé, **nunca** rodar
+`npm run build`. Ele usa o `.env` de **produção**, troca o `.next` **sob o servidor** (foi o
+`ChunkLoadError` que travou o gate) **e carimba a URL de produção no bundle do cliente** — medido:
+**2 chunks apontando para produção, 0 para staging**. Como o seletor sobe o arquivo **direto**
+para `NEXT_PUBLIC_SUPABASE_URL`, **se o gate tivesse conseguido anexar naquele estado, o arquivo
+teria ido para o Supabase de PRODUÇÃO.** O `ChunkLoadError` impediu por acidente. **Ordem
+correta**: derrubar → portão → commit → **build de staging por último** → servidor depois. E
+conferir o REF nos chunks toda vez.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ✅ · papelada ✅
+
+---
+
 ## 2026-08-27 — CAMADA 3, ETAPA E3.29 — A tela cheia que cortava o vídeo (9.129)
 
 **Estado antes:** main em `21574e6`
