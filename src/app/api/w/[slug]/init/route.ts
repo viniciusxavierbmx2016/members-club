@@ -295,9 +295,25 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
         notifications: { unread: unreadCount },
       },
       {
-        headers: {
-          "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
-        },
+        /* E4.4 2-C — era `private, max-age=30, stale-while-revalidate=60`, e os
+           30 segundos de licença ao cache do NAVEGADOR faziam a vitrine mentir
+           no caminho principal do funil: o aluno resgatava um curso gratuito,
+           voltava, e o curso continuava em "Outros cursos" — só migrava depois
+           de um refresh forçado. MEDIDO no palco: o servidor responde certo
+           IMEDIATAMENTE (o `curl`, que não tem cache, já traz o curso em
+           `enrolled` no instante seguinte ao resgate). O estado velho era só a
+           resposta guardada no browser.
+
+           É o mesmo defeito do 9.118 (o menu do curso), e o mesmo remédio:
+           `no-store`. Cache de leitura na frente de uma tela que a própria
+           navegação MUTA é uma armadilha — nenhuma mutação consegue furá-lo,
+           porque cache de navegador não é invalidável pelo servidor.
+
+           ⚠️ Conferido antes de mexer, como o 9.118 ensinou: o ÚNICO consumidor
+           desta rota é `app/w/[slug]/page.tsx:135`, a própria vitrine. Os
+           outros dois "hits" do grep são strings de LOG dentro deste arquivo.
+           Ninguém mais se beneficiava do cache. */
+        headers: { "Cache-Control": "no-store" },
       }
     );
   } catch (error) {
