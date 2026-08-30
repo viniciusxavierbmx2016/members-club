@@ -35,6 +35,84 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-30 — CAMADA 4, ETAPA E4.4 (etapa 5, cadastro público) — INVESTIGAÇÃO READ-ONLY + REGISTRO DOS ACHADOS
+
+**Estado antes:** main em `7228afc`
+
+**O que foi feito:** duas rodadas no mesmo dia, e **nenhuma linha de código em nenhuma delas**.
+**(1) A investigação** da etapa de MAIOR RISCO do projeto — a única que abre uma porta pública —
+respondendo às 11 perguntas do comando sobre o molde do cadastro: como uma conta nasce hoje, as
+variáveis do e-mail, o vínculo, corrida e falha parcial, rate-limit e abuso, o molde da tela
+pública, workspace inválido e o telefone. **(2) O registro**: os achados viraram **25 itens
+(9.144–9.168)** no `PLANO-MESTRE`, **6 grupos novos (E3.35–E3.40)** no ROADMAP, e uma seção nova
+**§9 "REQUISITOS PROVADOS PARA O CADASTRO"** no plano da E4.4.
+⛔ **NADA FOI CORRIGIDO — decisão explícita do dono.** Nenhum fix, nenhuma migração, nenhuma
+escrita em banco. Tudo volta **depois que a feature do funil fechar**. O registro agora é o que
+impede o item-fantasma (a lição que custou 4 dias no 9.42).
+⭐ **O achado que reordena a fila é o 9.144 🔴**: o import de alunos por CSV entrega a
+**`masterPassword` do workspace** ao aluno (`import/route.ts:255` → e-mail `:401` → coluna "Senha"
+do CSV `:431`), contradizendo a rota irmã, que diz *"never leaves the server"*
+(`students/route.ts:273-274`). **A exposição CRESCE a cada importação** — não é dívida estática, e
+é esse o critério que o põe à frente.
+
+**Arquivos tocados:** **NENHUM de código.** Só documentação: `docs/PLANO-MESTRE.md` ·
+`docs/ROADMAP-EXECUCAO.md` · `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md` · `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:** a investigação, não um gate humano (não houve o que testar).
+- **16 agentes** — 8 leitores (um por dimensão do comando) + **8 verificadores adversariais** que
+  reabriram os arquivos citados para **REFUTAR**. 2,4M tokens, 820 tool calls, 0 erros. Os
+  verificadores **corrigiram os leitores em 9 pontos** (o mais grave: a família
+  `requireMemberAccess` da comunidade, um QUARTO caminho de vínculo que o leitor não viu).
+- **12 conferências minhas** nos arquivos de maior risco, sem intermediário:
+  `workspace-access.ts` · `webhook-helpers.ts` · `rate-limit.ts` · `workspace-auth.ts` ·
+  `proxy.ts` · as 4 rotas de `api/w/[slug]` · `manifest/[slug]` · `claim` ·
+  `producer/students/[id]/enrollments`.
+- ⭐ **REFUTEI uma afirmação dos agentes, e está registrado no 9.146**: o verificador alegou que o
+  `DELETE` de `producer/students/[id]/enrollments` apagava matrícula sem checar workspace —
+  **`:106` chama `assertCanManageCourse(staff, courseId)`**, e o `courseId` é a dimensão correta.
+  Não há furo. *(Prova por leitura, não por plausibilidade.)*
+- **4 rodadas de medição SELECT-only em PRODUÇÃO**, com **prova de alvo DISCRIMINANTE impressa
+  antes de cada uma** (`wyamxwmdgbvqrfcqfbyh` × o staging `wxynnsyartxcvglqwmdw` como controle):
+  constraints reais por `pg_constraint`/`pg_indexes` (não o que o schema "parece dizer") ·
+  duplicidade de e-mail · multi-workspace · personas por role · formatos de telefone ·
+  identidades órfãs do `auth.users` · master password · estado de workspace e subscription.
+  **Duas queries falharam no caminho** (`isExempt`→`exempt`; `text = uuid` sem cast) e foram
+  corrigidas — **nenhuma escrita em nenhum momento**.
+- ⭐ **A medição respondeu 6 incertezas que a leitura tinha deixado em aberto** — entre elas o
+  teto do `listUsers` (4.000 contra **27.342** identidades, com **4 das 5 órfãs fora de qualquer
+  janela**) e a inexistência de índice case-insensitive em `User.email`.
+- **Numeração conferida por `grep -F` literal, com controle positivo E negativo**, antes de
+  escrever (ver a seção do relatório).
+- **Read-only provado**: `git status` limpo em `7228afc` no fim da investigação, **0 sujos**.
+
+**SHA do merge:** — **não houve merge: a etapa não produziu código.** O registro entrou por commit
+direto de documentação sobre `7228afc`, como as duas entradas anteriores da E4.4.
+**Rollback:** `git revert <sha do commit de docs>` — reverte **só documentação**, nada de runtime.
+
+**Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy de runtime.
+
+**Ficou aberto:** **25 itens novos, todos sem fix e por decisão do dono.**
+🔴 **E3.35 — PRIORIDADE DE RETOMADA, marcada para "assim que a E4.4 fechar":** **9.144** (a
+master password no CSV; **MEDIDO: 10 de 39 ws têm master configurada** ⇒ vivo) e **9.135** (a rota
+pública que cria ADMIN — **adendo anexado, veredito SEGUE EM ABERTO**: medir a exposição exige
+ESCRITA em produção e ordem própria do dono).
+🟠 **14 itens** em E3.36 (e-mails que erram destinatário e template: 9.145·9.146·9.152) · E3.37
+(superfícies públicas sem guarda: 9.147·9.148·9.155·9.156) · E3.38 (a falha invisível do fluxo de
+compra: 9.149·9.150·9.153·9.157) · E3.39 (normalização e escopo do dual-auth:
+9.151·9.154·9.158).
+🟢 **10 itens** em E3.40 (9.159–9.168).
+**E o que a etapa 5 ainda deve:** o **desenho** do cadastro, que só começa depois das **11
+perguntas do §9.3 do PLANO-E4.4** — as que só a medição humana responde.
+⭐ **VIGIA da E4.4 reconferida hoje: 0 cursos `isFree`, 0 matrículas `FREE_CLAIM`, 28.929
+`UNKNOWN`.** Segue limpa.
+
+**Regras conferidas:** §17 respondido ✅ · investigação read-only com PROIBIDO respeitado ✅ ·
+`file:line` em toda afirmação ✅ · nenhuma proposta de fix dentro da investigação ✅ · prova de
+alvo impressa antes de **cada** rodada de banco ✅ · numeração com controle positivo e negativo ✅
+· papelada no mesmo fôlego ✅
+
+---
+
 ## 2026-08-30 — CAMADA 4, ETAPA E4.4 (linha 4 da tabela) — Vitrine + cadeado: FECHADA SEM CÓDIGO
 
 **Estado antes:** main em `2f0aabb`

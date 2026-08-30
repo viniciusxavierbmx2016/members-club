@@ -276,3 +276,76 @@ produção, **dois furos que desviam o proxy por inteiro** (o matcher isenta por
 cookie é contado, não validado). Hoje eles **não vazam dado** — as camadas 2 e 3 seguram. Mas a
 linha 2 vai **abrir caminho público novo**, e qualquer desenho que trate o proxy como parede cria
 um furo real. **Gate de verdade mora na rota e na página.**
+
+---
+
+## 9. REQUISITOS PROVADOS PARA O CADASTRO (investigação da etapa 5, 30/08/26)
+
+> **De onde vem esta seção.** Investigação read-only da etapa 5, com **16 agentes** (8 leitores +
+> 8 verificadores adversariais) e **4 rodadas de medição SELECT-only em produção** (alvo
+> `wyamxwmdgbvqrfcqfbyh` impresso em todas). **Zero código, zero banco, zero schema.**
+>
+> **O que mudou de status:** o §8 desta mesma página listava 3 pré-requisitos herdados da linha 4,
+> escritos por dedução. **Agora eles estão MEDIDOS** — e a medição achou mais 8. Os 25 itens que a
+> investigação gerou (**9.144–9.168**) estão no `PLANO-MESTRE`, grupos **E3.35–E3.40** do ROADMAP,
+> **todos sem fix e por decisão do dono: voltam DEPOIS que o funil fechar.**
+
+### 9.1 O que o cadastro é OBRIGADO a fazer
+
+| # | Requisito | A prova (não é opinião) |
+|---|---|---|
+| **R-1** | ⭐ **Criar o VÍNCULO, não só a conta.** | `hasWorkspaceAccess` (`lib/workspace-access.ts:25-57`, lido inteiro, **sem homônimo**) tem **exatamente 3 vias**: matrícula com `status ∈ {ACTIVE, EXPIRED}` · `Collaborator` ACCEPTED · `Workspace.ownerId`. **`CANCELLED` não passa.** Quem tem só conta+credencial **autentica e toma 403** em `api/w/[slug]/login/route.ts:251-259`. **MEDIDO: 679 pessoas em produção já vivem nesse limbo** (credencial + zero matrícula), e 1.336 credenciais existem num ws onde a pessoa não tem matrícula nenhuma. ⚠️ **A trava está CORRETA** (`claim:65-66`) — quem muda é o cadastro. |
+| **R-2** | **Entrar no regex de rota pública do proxy.** | `src/proxy.ts:66` isenta **só** `/^\/w\/[^/]+\/(login\|forgot-password\|reset-password)\/?$/`. Uma rota nova **não está lá** → visitante sem cookie é redirecionado para `/w/{slug}/login` (`:75-86`) e o cadastro nunca abre. ⚠️ **O proxy não protege (9.139) mas ATRAPALHA** — a linha 66 terá de ser tocada. |
+| **R-3** | **`rateLimit` próprio na 1ª linha do handler.** | `src/proxy.ts:59-61` devolve `NextResponse.next()` para **todo** `/api/` (*"auth is enforced per-handler"*) e **não existe `middleware.ts`**. Nenhum freio roda antes do Node. Cobertura atual: **23 de 203 rotas**. ⚠️ A chave é `rl:{ip}:{pathname}` (`lib/rate-limit.ts:94`) ⇒ o teto de 100/60s é **por slug**, e o helper **não é parametrizável** (assinatura `rateLimit(request)`). |
+| **R-4** | **Reusar `ensureUserByEmail` e o par `generateSalt`+`hashPassword`.** | Funil **único**, 6 call-sites, **sem homônima** (`lib/webhook-helpers.ts:37-160`). Hash: `scryptSync(pw, salt, 64)` com salt de 32 bytes (`lib/workspace-auth.ts:14-22`), verificado por `timingSafeEqual`. **Nunca inventar hash paralelo** — é a lição do BUG C. |
+| **R-5** | **Normalizar o e-mail na ESCRITA e na BUSCA, e usar o MESMO valor para Prisma e Supabase.** | `webhook-helpers.ts:44` faz `.trim().toLowerCase()` e usa o mesmo nos dois. ⚠️ **A porta do aluno NÃO faz isso** (item **9.151**): `w/[slug]/login:45` usa `toLowerCase()` sem `trim` e manda o **cru** ao Supabase em `:101`, `:152`, `:203`. ⚠️ **Nenhum schema Zod normaliza** (`grep` de `.trim()/.toLowerCase()/.transform()` em `lib/validations.ts` → zero). ⚠️ **E o banco não protege**: a constraint real é `User_email_key UNIQUE btree(email)` — **case-SENSITIVE**, sem `citext`. |
+| **R-6** | **Carimbar `Enrollment.origin`.** | Hoje **só** o resgate carimba (`api/courses/[id]/claim/route.ts:97`); toda outra matrícula nasce `UNKNOWN` — inclusive as de compra. **MEDIDO: 28.929 matrículas, 100% `UNKNOWN`.** Sem carimbo, D4/R5/R6 continuam sem chão. |
+| **R-7** | **Normalizar o telefone pela régua que os campos de suporte já usam.** | `replace(/\D/g,"")` em `api/workspaces/[id]/route.ts:212`, `api/courses/route.ts:342`, `api/courses/[id]/route.ts:495-496` — e **MEDIDO: 5/5 `supportWhatsapp` preenchidos são só-dígitos**, o contrato funciona. ⚠️ **`User.phone` não participa de régua nenhuma** (item **9.158**): 4 dialetos, 25 linhas de lixo, **70,6% vazio**, escrita **one-shot** (`webhook-helpers.ts:58-60` — telefone errado nunca é corrigido). **D7 exige obrigatório ⇒ o cadastro produziria um 5º formato.** |
+| **R-8** | **Herdar o molde visual, não recriá-lo.** | `WorkspaceAuthShell` + as 4 classes exportadas `authInputCls`/`authLabelCls`/`authErrorCls`/`authSubmitCls` (`components/workspace-auth-shell.tsx:449-461`), com o `select` de 18 campos de `w/[slug]/login/page.tsx:16-38` e `notFound()` em `!workspace \|\| !workspace.isActive`. |
+
+### 9.2 O que o cadastro NÃO deve fazer
+
+| # | Proibição | Por quê |
+|---|---|---|
+| **N-1** | **Não reusar `/api/auth/register`.** | `role: "ADMIN"` **hardcoded** em `api/auth/register/route.ts:57`, handler só com `rateLimit` (item **9.135**, 🔴, veredito em aberto). |
+| **N-2** | **Não usar "tem credencial" como sinal de nada.** | `api/w/[slug]/forgot-password/route.ts:122-143` **CRIA** a `WorkspaceCredential` para qualquer par (user, ws) **anonimamente**, sem checar vínculo. E o repo já proíbe por escrito: *"NUNCA ramificar por 'tem credencial'"* (`api/auth/producer-login/route.ts:15-23`). |
+| **N-3** | **Não confiar no proxy como gate.** | Item **9.139**: matcher isenta por sufixo (`proxy.ts:126`) e o cookie é **contado, não validado** (`:30-43`). |
+| **N-4** | **Não passar pelo ramo que rotaciona senha.** | `api/courses/[id]/students/route.ts:283-301` troca a senha de quem já tem credencial quando `!wasActive && !isStaff` (item **9.136**). ⚠️ **E não passar pelo ramo do import**, que entrega a **master password** (item **9.144** 🔴). |
+| **N-5** | **Não enviar e-mail com senha.** | A pessoa acabou de escolher a dela. É a mesma regra que fechou a etapa 3 (o resgate não manda e-mail porque a pessoa já está logada). |
+| **N-6** | **Não afrouxar `hasWorkspaceAccess`.** | `claim:65-66` diz por quê: *"Sem isto, qualquer usuário logado resgataria o gratuito de qualquer produtor."* Afrouxar abre 22 mil pessoas. |
+| **N-7** | **Não confiar no `upsert` do Prisma contra corrida.** | O molde da casa é `create` + `catch P2002` + **re-busca pela unique que conflitou** (`lib/community-helpers.ts:24-53`, fix do 9.23), e `:14-18` registra que **o upsert foi descartado por prova empírica de emulação no Prisma 5.22**. ⚠️ Hoje há **zero** tratamento de P2002 no fluxo de compra (item **9.157**). |
+| **N-8** | **Não deixar a falha silenciosa.** | 4 rotas da fundação não gravam `WebhookLog` no catch e o Stripe não grava nenhum (item **9.150**) — é o que torna a corrida indetectável. Um cadastro que falhe em silêncio repete o defeito **com uma pessoa olhando a tela**. |
+
+### 9.3 ⚠️ As 11 perguntas que SÓ A MEDIÇÃO HUMANA responde — pré-requisito do desenho
+
+Nenhuma é decidível por leitura de código. **Enquanto não forem respondidas, o desenho da etapa 5
+está apoiado em suposição:**
+
+1. **O `upsert` de `Enrollment` é nativo ou emulado?** (`webhook-helpers.ts:198-202`) — a forma medida no `b935be6` era *unique composta + `update` vazio*; aqui o update não é vazio. **Exige log de SQL** e ver se sai `INSERT ... ON CONFLICT`. A regra da casa proíbe confiar sem isso.
+2. **Qual a ordenação real do `admin.auth.admin.listUsers`?** — decide **quais** 4.000 identidades a recuperação alcança (item **9.153**). ⓘ A conclusão "85% fora do alcance" já vale em qualquer direção; a ordenação decide *quem*.
+3. **`UPSTASH_REDIS_REST_URL/TOKEN` estão setadas na Vercel de produção?** — sem elas o teto é **100 × nº de instâncias** (`lib/rate-limit.ts:18-24`). Os `.env` do repo têm **0 ocorrências**.
+4. **A Vercel/Cloudflare sobrescreve `x-forwarded-for`?** — `getIp` confia no **primeiro** elemento sem allowlist (`lib/rate-limit.ts:27-28`), e o SYSTEM-MAP §5 registra tráfego real chegando **direto na origem**. Se não sobrescreve, a chave do rate-limit é escolhida por quem ataca.
+5. **O projeto Supabase exige confirmação de e-mail?** — é config de dashboard. O código **nunca lê** `email_confirmed_at` (`grep` → zero) e todo caminho servidor passa `email_confirm: true`.
+6. **`supabase.auth.signUp` devolve `data.user` para e-mail já registrado?** — se devolver, um cadastro que copie `register/route.ts:51-59` faz `prisma.user.create` com e-mail existente → **P2002 não tratado → 500**.
+7. **Como o GoTrue trata duas chamadas `createUser` CONCORRENTES com o mesmo e-mail?** — decide se a janela de corrida do `prisma.user.create` chega a abrir. ⚠️ **Sonda com 2 requisições HTTP simultâneas** — o método que reproduziu o 9.23 de primeira. **Sonda de 1 processo SERIALIZA e dá falso-negativo.**
+8. **O GoTrue trata caixa e espaço igual no `signInWithPassword`/`generateLink`?** — é o que decide se o **9.151** é defeito latente ou inerte. Teste: mesmo usuário, e-mail com maiúscula, nas duas rotas.
+9. **Qual o status HTTP efetivo do `notFound()`** para slug inativo? — `curl -I` contra staging. ⓘ Produção tem **0 workspaces inativos**, então o caminho nunca foi exercitado.
+10. **O 503 com PII do produtor sai mesmo?** (item **9.156**) — exige um workspace `SUSPENDED` no **staging**; produção tem **0**.
+11. **O polling de `/lives` dispara de fato na tela pública?** (item **9.164**) — a prova é estrutural (hooks antes do early-return); confirmar exige abrir a tela e olhar a aba Network.
+
+### 9.4 Os números de produção que o desenho herda (medidos em 30/08/26)
+
+```
+Users 27.340 · auth.users 27.342 (5 órfãs, 4 fora do teto de 4.000 do listUsers)
+e-mails duplicados exatos 0 · por caixa 0 · com maiúscula 0   ← o código segura, o banco não
+Um User serve N workspaces: credencial em 2 ws=441 · 3=187 · 4=3 · 10=1  (632 em 2+)
+                            matrícula em 2+ workspaces = 175
+Credencial SEM matrícula no mesmo ws: 1.336 (1.177 pessoas, 15 ws)
+Credencial e ZERO matrícula em lugar nenhum: 679          ← o limbo do 403
+PRODUCER com matrícula ativa: 46 de 124 (43 em ws alheio) · STUDENT-collab (C6): 10
+Workspaces 39 · inativos 0 · com masterPassword 10 · customDomain 0
+Subscriptions: 83 PENDING · 37 ACTIVE (37 isentas) · 0 SUSPENDED · 0 CANCELLED ⇒ 0 bloqueados
+Telefone: 19.307 sem (70,6%) · 7.255 com não-dígito · lixo: 25 linhas
+Cursos 66 · publicados 53 · na loja 64 · sem checkoutUrl 20
+VIGIA E4.4: 0 cursos isFree · 0 matrículas FREE_CLAIM · 28.929 UNKNOWN     ✅ segue limpa
+```
