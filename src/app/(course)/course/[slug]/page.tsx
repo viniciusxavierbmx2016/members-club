@@ -56,6 +56,7 @@ interface CourseDetail {
   bannerUrl: string | null;
   bannerPosition: string | null;
   checkoutUrl: string | null;
+  isFree: boolean;
   price: number | null;
   priceCurrency: string | null;
   certificateEnabled?: boolean;
@@ -399,6 +400,7 @@ export default function CourseHomePage() {
           thumbnail: course.thumbnail,
           bannerUrl: course.bannerUrl,
           checkoutUrl: course.checkoutUrl,
+          isFree: course.isFree,
           price: course.price,
           priceCurrency: course.priceCurrency,
           ratingAverage: course.ratingAverage,
