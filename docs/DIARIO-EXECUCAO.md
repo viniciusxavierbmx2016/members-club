@@ -35,6 +35,67 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-30 — CAMADA 4, ETAPA E4.4 (linha 4 da tabela) — Vitrine + cadeado: FECHADA SEM CÓDIGO
+
+**Estado antes:** main em `2f0aabb`
+
+**O que foi feito:** uma **investigação read-only** das 8 combinações de acesso (deslogado ×
+logado-sem-matrícula × logado-com-matrícula × produtor/staff, para curso gratuito e pago) — e o
+veredito da mesa foi **fechar a etapa sem fix**. Nenhuma linha de código, nenhuma migração, nenhum
+toque em banco. **O que a etapa investigava já está correto**: a vitrine é fechada em **3 camadas
+independentes** (proxy `:75-86` → checagem própria da página `w/[slug]/page.tsx:172-179` → 401 da
+API `init:49`), e a cascata do checkout (`course-preview.tsx:199-234`) cobre **todos** os casos —
+inclusive a célula que preocupava, os **20 de 66** cursos de produção **sem `checkoutUrl`**: `null`
+e `""` são falsy no mesmo ternário, o `<a>` não é construído e o lugar cai em "Entre em contato".
+⭐ **O que a investigação achou foram 3 BLOQUEIOS — e nenhum é da vitrine.** Todos são
+pré-requisitos do **cadastro público** (linha 2), e migraram para lá como requisitos obrigatórios
+de desenho (§8 do plano): **(a) o VÍNCULO** — `hasWorkspaceAccess` exige matrícula, colaboração ou
+posse, e o recém-cadastrado não tem nenhuma; `by-slug/init:101-106` e `claim:68` devolvem **404**.
+⚠️ **A trava está CORRETA** (`claim:65-66`: *"sem isto, qualquer usuário logado resgataria o
+gratuito de qualquer produtor"*), então quem muda é o cadastro: **o vínculo tem de nascer nele**.
+**(b) a PORTA** — `/course/[slug]` deslogado cai em `/producer/login` (`proxy.ts:84`), login de
+produtor para um aluno, com o slug perdido; e o proxy **não consulta banco**, então não sabe qual
+`/w/{slug}/login` seria o certo. **(c) a MENSAGEM** — o modal do resgate tem um só ramo genérico
+(`course-preview.tsx:124-145`): um 401 apareceria como **"Não autenticado"**, sem caminho para o
+login.
+
+**Arquivos tocados:** **NENHUM de código.** Só documentação: `docs/PLANO-MESTRE.md` ·
+`docs/ROADMAP-EXECUCAO.md` · `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md` · `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:** a investigação, não um gate humano (não houve o que testar).
+- **Varredura de 11 agentes** (7 leitores + 4 verificadores adversariais) sobre as 8 perguntas do
+  comando, com `file:line` obrigatório — e **as afirmações de maior risco reconferidas por mim**.
+- ⭐ **Dois furos do proxy MEDIDOS EM PRODUÇÃO por discriminação** (item **9.139**):
+  `/w/<slug>/lives/x` → **307**, `/w/<slug>/lives/x.json` → **200** (só o sufixo muda — o matcher
+  `proxy.ts:126` isenta `.json`); e `Cookie: sb-fake-auth-token=1` → **200** onde sem cookie dá 307
+  (`hasSessionCookie:30-43` conta o cookie, nunca o valida).
+  ⚠️ **Gravidade calibrada pela própria medição**: baixei o corpo dos dois 200 — vem **branding e
+  esqueleto, ZERO curso** (`Meus cursos`=0, `Outros cursos`=0, `course/`=0). As camadas 2 e 3
+  seguram, e o nome do workspace já é público por desenho em `/w/<slug>/login`. **Não é vazamento
+  de dado; é que o proxy não é parede.**
+- **Duas correções minhas, registradas**: (1) afirmei que `isFree` "não chega" ao dashboard — a
+  verificação me refutou e **confirmei no arquivo** que a query da loja não tem `select` e
+  `withRating` faz `...c`, então o campo viaja; (2) minha simulação da cadeia de ternários do proxy
+  **omitiu o retorno antecipado do `/api/`** (`:59-61`), o que invalidava uma linha do resultado.
+- **Read-only provado**: `git status` no fim da investigação = `2f0aabb`, **0 sujos**.
+
+**SHA do merge:** — (não houve merge; a etapa não produziu código)  ·  **Rollback:** não se aplica
+
+**Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy de runtime.
+
+**Ficou aberto:** **9.139** 🟠 (os 2 furos do proxy — ⚠️ **leitura obrigatória antes do cadastro
+público**) · **9.140** 🟢 (card do dashboard sem `isFree`; ⚠️ **é código morto** — a rota `/` nunca é
+servida — e **contradiz o 9.42**, que trata o dashboard como superfície viva; a contradição fica
+registrada, não resolvida) · **9.141** 🟢 (bloco morto após o `return` antecipado) · **9.142** 🟢
+(cascata do checkout duplicada desktop/mobile, **pré-existente**) · **9.143** 🟢 (`checkoutUrl` sem
+validação no servidor). Grupo **E3.34** no ROADMAP. Adendo de família no **9.118**: `/api/courses`
+serve `max-age=60` e tem **3 consumidores reais**, todos telas do painel.
+
+**Regras conferidas:** §17 respondido ✅ · investigação read-only com PROIBIDO respeitado ✅ ·
+`file:line` em toda afirmação ✅ · nenhuma proposta de fix dentro da investigação ✅ · papelada ✅
+
+---
+
 ## 2026-08-30 — CAMADA 4, ETAPA E4.4 (linha 3 da tabela + a etiqueta da linha 4) — Resgate de curso gratuito
 
 **Estado antes:** main em `80c3bb2`

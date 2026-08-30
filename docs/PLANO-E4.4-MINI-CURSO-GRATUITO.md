@@ -98,9 +98,9 @@
 | # | Etapa | Gate para fechar |
 |---|---|---|
 | **1** ✅ | **FEITA (merge `35d440d`, 28/08, já em produção).** Fundação de schema: `Course.isFree` + `Enrollment.origin`/`EnrollmentOrigin`. Migração aditiva, zero runtime | Migração aplicada em staging com prova por `information_schema`; prova dupla em produção (não existe lá); `Post`/`Enrollment` sem colunas alteradas |
-| **2** | **Cadastro público** (rota + tela): recusa e-mail existente (D5), WhatsApp obrigatório (D7), sem verificação (D6). **NÃO reusar `/api/auth/register`** (DIV-4) | Provas por API: e-mail novo cria; e-mail existente **recusa** com a frase da casa; sem WhatsApp recusa; rate-limit ativo |
+| **2** ⚠️ | **Cadastro público** (rota + tela): recusa e-mail existente (D5), WhatsApp obrigatório (D7), sem verificação (D6). **NÃO reusar `/api/auth/register`** (DIV-4). ⚠️ **HERDOU 3 REQUISITOS OBRIGATÓRIOS da linha 4** — ver §8; sem eles o funil não fecha | Além das provas de API: os **3 pré-requisitos do §8** atendidos, e **9.139 lido antes de desenhar** |
 | **3** ✅ | **FEITA (merge `847a63a`, 30/08, já em produção).** **"Resgatar acesso"** (D3) + `POST /api/courses/[id]/claim` (D2), carimbando `FREE_CLAIM` | Matrícula nasce ACTIVE com origem correta; **não passa pelo ramo que rotaciona senha** (DIV-1) e **não envia e-mail** (a pessoa já está logada); idempotente (200 `alreadyEnrolled`); **cancelada NÃO reativa — 409**. Gate humano 6/6 |
-| **4** 🔽 | **Vitrine + cadeado** (D8) — **ENCOLHEU**: a **etiqueta já foi**, junto com a etapa 3 (`CourseCard` com `isFree`: "Gratuito" verde no lugar de "Bloqueado", rodapé "Resgatar acesso"; gate 4/4). **Sobra**: o **visitante DESLOGADO** e o cadeado do curso **pago** levando à página do curso | O que resta provar: deslogado vê o correto (hoje o resgate exige sessão — depende da etapa 2) e o cadeado do pago leva à página do curso |
+| **4** ✅🚫 | **FECHADA SEM CÓDIGO (30/08, investigação read-only).** **Vitrine + cadeado** (D8) — a etiqueta já saíra com a linha 3, e a investigação das 8 combinações **não achou o que corrigir**: a vitrine é fechada em 3 camadas independentes e a cascata do checkout já cobre **todos** os casos, inclusive os **20 de 66** cursos de produção sem `checkoutUrl`. **Os 3 bloqueios que sobraram não são desta linha — são PRÉ-REQUISITOS DA LINHA 2** (cadastro público) e estão escritos abaixo | Nada a provar: **não houve mudança de código**. O laudo está em `DIARIO-EXECUCAO` (30/08) e os achados viraram os itens **9.139–9.143** |
 | **5** | **Gates**: confirmar que os 19 pontos de `ACTIVE` aceitam a matrícula gratuita sem alteração (D10) e que a comunidade funciona (D9) | Persona gratuita: entra na área de membros, assiste, comenta, anexa, baixa material, tira certificado — ou o relatório diz explicitamente o que NÃO deve |
 | **6** | **Proteger a senha de quem já é aluno** (DIV-1): garantir que nenhum caminho do funil rotacione credencial existente | Prova: aluno com credencial resgata curso gratuito → **senha inalterada** (verificar hash antes/depois) |
 | **7** | **Personalização** da tela de cadastro/resgate, no molde dos campos `login*` do `Workspace` (13 campos, `schema`) e dos `member*` do `Course` (8 campos) | Produtor personaliza e a tela reflete; campos são **texto puro**, não HTML (é o que os `login*` já são) |
@@ -217,3 +217,62 @@ rota, então não havia trade-off.
 `FREE_CLAIM` · **28.918** `UNKNOWN`. Enquanto nenhum curso for marcado como gratuito, **o número
 correto dos dois é zero** — qualquer `FREE_CLAIM` sem curso gratuito por trás é escritor carimbando
 origem errada.
+
+---
+
+## 8. Os 3 pré-requisitos do CADASTRO PÚBLICO (herdados da linha 4, 30/08)
+
+A linha 4 fechou **sem código**: a investigação das 8 combinações de acesso não achou o que
+corrigir. **O que ela achou foram três bloqueios — e nenhum deles é da vitrine. Todos são da linha
+2.** Ficam aqui como **requisitos obrigatórios do desenho**, não como sugestões.
+
+### (a) ⭐ O VÍNCULO — o requisito que decide se o funil existe
+
+`hasWorkspaceAccess` (`lib/workspace-access.ts:30-56`) só devolve `true` para quem tem
+**matrícula (ACTIVE ou EXPIRED) em algum curso do workspace**, **`Collaborator` ACCEPTED**, ou é o
+**dono**. Duas portas o consultam e respondem **404** a quem não passa:
+`api/courses/by-slug/[slug]/init:101-106` (a página do curso) e `api/courses/[id]/claim:68` (o
+resgate).
+
+⇒ **O recém-cadastrado não tem nenhum dos três.** Ele não consegue nem ABRIR a página do curso
+gratuito, quanto mais resgatá-lo. É o ovo e a galinha: para resgatar é preciso já ter vínculo, e o
+único jeito de ter vínculo seria a matrícula que o resgate criaria.
+
+⚠️ **E a trava está CORRETA — não é ela que muda.** A própria rota diz por quê
+(`claim:65-66`): *"Sem isto, qualquer usuário logado resgataria o gratuito de qualquer
+produtor."* Afrouxá-la transformaria cada curso gratuito da plataforma em conteúdo aberto a toda a
+base — 22 mil pessoas. **REQUISITO: o vínculo tem de nascer NO CADASTRO** (é o cadastro que sabe a
+qual workspace a pessoa está entrando), **não** ser arrancado do resgate.
+
+### (b) A PORTA — para onde o deslogado é mandado
+
+`/course/<slug>` não é rota pública; sem cookie, `proxy.ts:75-86` cai no último arm (`:84`) e manda
+para **`/producer/login`** — a tela de login do **PRODUTOR**, para um aluno. O **slug do curso se
+perde** (não há `returnTo`/`redirectTo` em nenhum fluxo de login — grep feito). ⓘ Detalhe lido: o
+3º nível daquele ternário é **código morto**, `:83` e `:84` são o literal idêntico.
+
+⚠️ **E há um obstáculo que o registro antigo não menciona**: em `/course/<slug>` **não existe slug
+de workspace na URL**, e o proxy **não consulta banco** — ele não tem como descobrir para qual
+`/w/{slug}/login` mandar. Qualquer desenho que queira "mandar para o login certo" precisa resolver
+isso fora do proxy.
+
+📌 **Já registrado** como candidato de UX em `PLANO-MESTRE.md:362` (*"student deslogado é mandado
+pro `/producer/login` (esquisito)"*), com os 2 pontos de fix nomeados lá. **O que muda agora**: com
+o funil, isso deixa de ser esquisitice interna e vira **a porta de entrada do produto** — é a
+primeira tela de quem vem do Instagram.
+
+### (c) A MENSAGEM — o 401 que aparece cru
+
+`components/course-preview.tsx:124-145` trata a resposta do resgate com **um único ramo genérico**
+(`if (!res.ok)`), que joga `d.error` numa linha vermelha dentro do modal. Um **401** apareceria
+para a pessoa como a frase literal **"Não autenticado"** (`claim/route.ts:40`), com o modal aberto
+e **sem nenhum caminho para o login**. Não existe no repo nenhuma mensagem tipo "faça login para
+resgatar" (grep feito).
+
+---
+
+⚠️ **LEITURA OBRIGATÓRIA ANTES DE DESENHAR A LINHA 2: o item 9.139.** A investigação mediu, em
+produção, **dois furos que desviam o proxy por inteiro** (o matcher isenta por sufixo `.json`; o
+cookie é contado, não validado). Hoje eles **não vazam dado** — as camadas 2 e 3 seguram. Mas a
+linha 2 vai **abrir caminho público novo**, e qualquer desenho que trate o proxy como parede cria
+um furo real. **Gate de verdade mora na rota e na página.**
