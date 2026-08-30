@@ -186,6 +186,10 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
           checkoutUrl: true,
           price: true,
           priceCurrency: true,
+          /* E4.4 2-B — a etiqueta da vitrine. SÓ no select da LOJA: quem já
+             tem o curso não vê etiqueta nenhuma (nem "Gratuito" nem
+             "Bloqueado"), então o select dos matriculados não precisa. */
+          isFree: true,
           ownerId: true,
           reviewsEnabled: true,
           // O par do select de cima — ver o aviso lá. Mesma posição relativa de

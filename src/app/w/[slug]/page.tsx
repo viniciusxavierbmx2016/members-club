@@ -67,6 +67,9 @@ interface StoreCourse {
   ratingAverage?: number;
   ratingCount?: number;
   canManage?: boolean;
+  /** E4.4 2-B — curso gratuito ainda não resgatado: etiqueta "Gratuito" em vez
+      de "Bloqueado". Só a LOJA tem o campo; a lista de matriculados não usa. */
+  isFree?: boolean;
   // Alcança "Liberado": com canManage=true o `locked` fica false e o cartão cai
   // no último ramo. É a vista do PRÓPRIO produtor na vitrine dele — justamente
   // onde ele vai conferir se o toggle pegou.
@@ -576,6 +579,7 @@ export default function WorkspaceVitrinePage() {
                           ratingCount={course.ratingCount}
                           featured={course.featured}
                           locked={!course.canManage}
+                          isFree={course.isFree}
                           showAccessBadge={course.showAccessBadge}
                           manageHref={
                             course.canManage
