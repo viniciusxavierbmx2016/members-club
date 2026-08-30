@@ -35,6 +35,66 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-30 — CAMADA 4, ETAPA E4.4 (linha 3 da tabela + a etiqueta da linha 4) — Resgate de curso gratuito
+
+**Estado antes:** main em `80c3bb2`
+
+**O que foi feito:** três fatias numa entrega, todas sobre os campos que a etapa 1 já pusera em
+produção — **zero migração**. (1) **O resgate**: `POST /api/courses/[id]/claim`, arquivo novo de
+124 linhas, o **primeiro caminho de matrícula iniciado pelo ALUNO**; grava `origin: "FREE_CLAIM"`,
+o primeiro escritor a carimbar a origem. (2) **A etiqueta**: curso gratuito sem matrícula deixa de
+exibir "Bloqueado" e passa a "Gratuito" + "Resgatar acesso", no próprio `CourseCard`. (3) **O
+cache**: o `no-store` no init da vitrine, que é o que faz o curso migrar de "Outros cursos" para
+"Meus cursos" sem refresh forçado.
+⭐ **A regra nova**: o resgate **NÃO reativa** matrícula cancelada — **409**. Os 5 caminhos
+existentes reativam porque partem do produtor ou de uma compra; este parte do aluno, e um clique
+não pode desfazer uma revogação por baixo. Já `ACTIVE` → **200 `alreadyEnrolled`** (idempotente).
+E **não envia e-mail**: os moldes enviam porque entregam SENHA, e aqui a pessoa já está logada.
+⚠️ **A ordem executada trocou as linhas 2 e 3 do plano** — o **cadastro público segue ABERTO**, e
+por isso o resgate hoje **exige sessão**. Está escrito no plano e no ROADMAP para não virar
+item-fantasma.
+
+**Arquivos tocados:** `api/courses/[id]/claim/route.ts` (novo) · `components/course-preview.tsx` ·
+`(course)/course/[slug]/page.tsx` · `components/course-card.tsx` · `w/[slug]/page.tsx` ·
+`api/w/[slug]/init/route.ts` · `docs/PLANO-MESTRE.md` · `docs/ROADMAP-EXECUCAO.md`
+— **8 arquivos, +268/−6**.
+
+**Como foi provado:**
+- **Gates humanos: 6/6 (resgate) · 4/4 (etiqueta) · 2/2 (cache)**, colados nos comandos.
+- **Cache — causa MEDIDA, não deduzida** (3 hipóteses, 2 refutadas no palco): por `curl` (sem cache
+  HTTP) o servidor já respondia certo no instante seguinte ao resgate, e a página refaz a busca ao
+  voltar. Sobrou o header `private, max-age=30, stale-while-revalidate=60` — cache de **navegador**.
+  Header servido depois do fix: **`cache-control: no-store`**. ⚠️ E `curl` não guarda cache, então
+  essa prova mostra que o **servidor** está certo; **quem prova a cura é o header + o gate humano**.
+- **Conferência de consumidores antes de mexer** (o que o 9.118 ensinou): a vitrine é a **única**
+  consumidora da rota — os outros 2 hits do grep são strings de log do próprio arquivo.
+- **Regressão**: vitrine 200 com 0 chunks faltando · init 200 · shape de quem já tem o curso
+  inalterado (`isFree` entrou **só** no payload da loja).
+- **Portão**: `tsc` 0 erros · `npm run build` exit 0 · a rota nova compilada (`ƒ /api/courses/[id]/claim`).
+- **Produção pós-deploy**: vitrine e página de curso **200** na página FINAL (título do workspace,
+  não o 307), controle negativo **404**; `POST .../claim` sem sessão → **401** (existe, e barra).
+- **Staging limpo**: matrícula de prova removida, **0 `FREE_CLAIM`**.
+
+**SHA do merge:** `847a63a`  ·  **Rollback:** `git revert -m 1 847a63a`
+
+**Mudou em produção para quem:** **hoje, para ninguém — e isso é medido, não suposto**: há **0
+cursos `isFree=true`** em produção, então nenhum aluno vê etiqueta nova nem botão de resgate. A
+mudança só acorda quando o dono marcar um curso como "Gratuito". O que mudou **já** é invisível ao
+usuário: a vitrine parou de ser cacheada por 30s no navegador (fica mais fresca, uma requisição a
+mais por visita).
+
+**Ficou aberto:** nenhum item novo. Seguem: **fiar os 5 escritores de `Enrollment` para gravar
+`origin`** (a fatia seguinte, hoje todos gravam `UNKNOWN`) · **linha 2 do plano — cadastro
+público** · linha 4 encolhida (visitante deslogado + cadeado do pago) · linhas 5 a 8.
+⭐ **VIGIA REGISTRADA**: `FREE_CLAIM` em produção **sem** um curso `isFree=true` por trás =
+caminho de escrita carimbando a origem errada. Hoje: **0 e 0**.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ✅ (6/6, 4/4, 2/2) ·
+papelada ✅ · runbook: **sem migração pendente, conferido por `prisma migrate status` antes do
+push** ✅ · palco derrubado antes de qualquer build ✅
+
+---
+
 ## 2026-08-28 — CAMADA 4, ETAPA E4.4 (etapa 1 de 8) — Chave gratuito/pago e origem da matrícula
 
 **Estado antes:** main em `c526879`

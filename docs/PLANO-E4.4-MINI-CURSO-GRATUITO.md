@@ -99,12 +99,19 @@
 |---|---|---|
 | **1** ✅ | **FEITA (merge `35d440d`, 28/08, já em produção).** Fundação de schema: `Course.isFree` + `Enrollment.origin`/`EnrollmentOrigin`. Migração aditiva, zero runtime | Migração aplicada em staging com prova por `information_schema`; prova dupla em produção (não existe lá); `Post`/`Enrollment` sem colunas alteradas |
 | **2** | **Cadastro público** (rota + tela): recusa e-mail existente (D5), WhatsApp obrigatório (D7), sem verificação (D6). **NÃO reusar `/api/auth/register`** (DIV-4) | Provas por API: e-mail novo cria; e-mail existente **recusa** com a frase da casa; sem WhatsApp recusa; rate-limit ativo |
-| **3** | **"Resgatar acesso"** (D3) + a rota que cria a matrícula gratuita (D2), marcando a origem | Matrícula nasce ACTIVE com origem correta; **sem passar pelo ramo que rotaciona senha** (DIV-1); idempotente (resgatar duas vezes não duplica) |
-| **4** | **Vitrine + cadeado** (D8): curso pago mostra cadeado que leva à página do curso; gratuito mostra "Resgatar" | Visitante deslogado, aluno sem matrícula e aluno matriculado veem o correto; o critério do `locked` passa a considerar gratuidade |
+| **3** ✅ | **FEITA (merge `847a63a`, 30/08, já em produção).** **"Resgatar acesso"** (D3) + `POST /api/courses/[id]/claim` (D2), carimbando `FREE_CLAIM` | Matrícula nasce ACTIVE com origem correta; **não passa pelo ramo que rotaciona senha** (DIV-1) e **não envia e-mail** (a pessoa já está logada); idempotente (200 `alreadyEnrolled`); **cancelada NÃO reativa — 409**. Gate humano 6/6 |
+| **4** 🔽 | **Vitrine + cadeado** (D8) — **ENCOLHEU**: a **etiqueta já foi**, junto com a etapa 3 (`CourseCard` com `isFree`: "Gratuito" verde no lugar de "Bloqueado", rodapé "Resgatar acesso"; gate 4/4). **Sobra**: o **visitante DESLOGADO** e o cadeado do curso **pago** levando à página do curso | O que resta provar: deslogado vê o correto (hoje o resgate exige sessão — depende da etapa 2) e o cadeado do pago leva à página do curso |
 | **5** | **Gates**: confirmar que os 19 pontos de `ACTIVE` aceitam a matrícula gratuita sem alteração (D10) e que a comunidade funciona (D9) | Persona gratuita: entra na área de membros, assiste, comenta, anexa, baixa material, tira certificado — ou o relatório diz explicitamente o que NÃO deve |
 | **6** | **Proteger a senha de quem já é aluno** (DIV-1): garantir que nenhum caminho do funil rotacione credencial existente | Prova: aluno com credencial resgata curso gratuito → **senha inalterada** (verificar hash antes/depois) |
 | **7** | **Personalização** da tela de cadastro/resgate, no molde dos campos `login*` do `Workspace` (13 campos, `schema`) e dos `member*` do `Course` (8 campos) | Produtor personaliza e a tela reflete; campos são **texto puro**, não HTML (é o que os `login*` já são) |
 | **8** | **Relatórios**: separar aluno gratuito de pagante onde a contagem importa (R6) — analytics e exportação CSV | O produtor consegue ver os dois números separados; o CSV traz a origem |
+
+⚠️ **A ORDEM EXECUTADA TROCOU 2 E 3, e isto fica escrito para não virar item-fantasma.**
+Os comandos chamaram de **"etapa 2"** o que nesta tabela é a **linha 3** (o resgate). O **cadastro
+público — linha 2 — segue ABERTO e não foi tocado**. Consequência prática e presente: **o resgate
+exige estar logado**; o visitante deslogado ainda não tem por onde entrar, e é por isso que a
+linha 4 depende da 2 para fechar. Quem procurar uma "etapa 2 = cadastro" fechada não vai achar,
+porque ela não aconteceu.
 
 ---
 
@@ -173,3 +180,40 @@ alunos compraram — as matrículas anteriores não registram a origem"*.
 
 **Provado em produção depois da migração:** `isFree=true` em **0** cursos · origem ≠ `UNKNOWN` em
 **0** matrículas · **61 → 61** tabelas, `Course` 52→53 e `Enrollment` 9→10 colunas.
+
+---
+
+## 7. O resgate — o que ficou decidido na prática (30/08, merge `847a63a`)
+
+*(É a **linha 3** da tabela §3, executada sob o nome "etapa 2" — ver o aviso da ordem trocada.)*
+
+**(i) O resgate NÃO REATIVA matrícula cancelada — responde 409, e essa é a regra nova da casa.**
+Os 5 caminhos que já escreviam `Enrollment` **reativam**, e podem: todos partem do **produtor** ou
+de uma **compra**. Este é o **primeiro iniciado pelo ALUNO**. Deixá-lo reativar significaria que
+qualquer pessoa cujo acesso foi **revogado** o restaura sozinha com um clique, desfazendo por baixo
+uma decisão do dono do curso. Já `ACTIVE` devolve **200 `alreadyEnrolled`** — idempotente de
+propósito, porque botão se clica duas vezes.
+
+**(ii) Não envia e-mail de acesso, e isso é desenho.** Os moldes enviam porque **criam usuário e
+entregam SENHA**; aqui a pessoa **já está logada** e entra direto no curso. E-mail com senha num
+fluxo em que ninguém pediu senha é vazamento de contexto — o mesmo defeito que o **9.136** registra
+na porta do produtor. O que o resgate **mantém** do molde: notificação e automações
+`STUDENT_ENROLLED`, em fire-and-forget (o crítico é a matrícula).
+
+**(iii) O `select` explícito desmentiu o laudo, e custou uma fatia inteira.** A investigação da
+etapa supôs que a vitrine já recebia `isFree` *"porque usa include"*. **Falso** — aquele init monta
+um `select` campo a campo. Campo ausente **não dá erro, dá tela errada**: o curso gratuito apareceu
+para o gate humano com a tag **"Bloqueado"**. Ficou a regra: **conferir no arquivo, nunca supor
+pelo padrão do vizinho.**
+
+**(iv) A vitrine não atualizava por CACHE DE NAVEGADOR, medido — não deduzido.** Três hipóteses,
+duas refutadas no palco (o servidor responde certo no instante seguinte ao resgate; a página refaz
+a busca ao voltar). Sobrou o header `private, max-age=30, stale-while-revalidate=60` — que **o
+servidor não consegue invalidar**. Cura: **`no-store`**, o mesmo remédio do **9.118**. E a
+conferência que aquele item ensinou foi feita **antes**: a vitrine é a **única** consumidora da
+rota, então não havia trade-off.
+
+**A VIGIA, medida em produção no dia do merge:** **0** cursos `isFree=true` · **0** matrículas
+`FREE_CLAIM` · **28.918** `UNKNOWN`. Enquanto nenhum curso for marcado como gratuito, **o número
+correto dos dois é zero** — qualquer `FREE_CLAIM` sem curso gratuito por trás é escritor carimbando
+origem errada.
