@@ -486,3 +486,87 @@ Item **9.169 fechado**. Sobra o **9.170** (excluir o widget v1 do painel).
 ⚠️ **A alínea que NÃO fechou** e volta no desenho do cadastro: com **fail-open** e a CSP
 **sem `report-uri`**, *"captcha ausente por configuração errada"* e *"captcha ausente
 porque a Cloudflare caiu"* continuam **indistinguíveis**.
+
+---
+
+## 11. O VÍNCULO SEM MATRÍCULA — DECISÃO, OPÇÕES DESCARTADAS E PRÉ-REQUISITOS (31/08/26)
+
+> **De onde vem.** Investigação read-only da **etapa 5**, feita sobre `main @ 9b93a2f`, com
+> 6 leitores + 24 verificadores adversariais e **medição SELECT-only em produção**
+> (`SUPABASE_REF wyamxwmdgbvqrfcqfbyh`, alvo impresso antes de cada conexão). **Zero código.**
+
+### 11.1 ⭐ A DECISÃO DO DONO — o vínculo é uma MARCA PRÓPRIA
+
+O cadastro criará **conta + pertencimento ao workspace**, com **matrícula OPCIONAL**. A pessoa
+se cadastra num workspace específico, passa a ver **aquela** vitrine, e pode resgatar um
+gratuito, comprar um pago, ou não fazer nada. Uma conta por e-mail (global), **um cadastro por
+workspace**; cadastrado no produtor A **não** vê a vitrine do produtor B.
+
+**O pertencimento será uma marca própria.** As outras três opções estão **descartadas por
+medição**, não por gosto:
+
+| Opção | Por que caiu | Prova |
+|---|---|---|
+| **Usar a `WorkspaceCredential`** | Daria pertencimento **retroativo a 1.177 pessoas** em **15 workspaces** (679 delas não são aluno de ninguém) — e **exclui staff por construção**: `webhook-helpers.ts:144` só cria credencial `if (!isStaff && workspaceId)`, então produtor que compra de outro produtor, colaborador e admin teriam pertencimento **zero** mesmo com matrícula ativa. E há **dois criadores sem vínculo** | item **9.176** |
+| **Matrícula "vazia" (sem curso)** | **Impossível no schema**: `courseId` é `NOT NULL` sem default (`information_schema` em produção), com FK obrigatória e **`Enrollment_userId_courseId_key` UNIQUE**. Nenhuma das 7 migrações que tocam `Enrollment` afrouxa isso. Exigiria migração **e** um `Course`-sentinela real — e `Course.workspaceId` também é `NOT NULL` | medido 31/08 |
+| **`Collaborator` com permissão nula** | ⛔ **Não resolve o problema**: `workspace-access.ts:49-54` com `permissions: []` **não retorna `true`**, e as duas portas passam `requireMemberPermission: true` ⇒ a pessoa tomaria **exatamente o mesmo 403 de hoje**. E o efeito colateral é enorme: `auth.ts:183-188` **sintetiza a role `COLLABORATOR`** (135 chamadas de `requireStaff` em 86 arquivos), o painel abre (`producer/layout.tsx:38-43`), e a linha **vira a chave do dual-auth** em 4 pontos (`login:145-149` · `password:40-49` · `forgot-password:65-71` · `webhook-helpers:131-148`), **trocando o regime de senha das 679 pessoas** | medido 31/08 |
+
+ⓘ Em produção há **13** `Collaborator` `ACCEPTED` + **4** `PENDING`, e **0** com permissões
+vazias — o estado seria inédito.
+
+### 11.2 ⭐ A ASSIMETRIA QUE O DESENHO TERÁ DE RESPEITAR
+
+`hasWorkspaceAccess` tem **13 call-sites em 10 arquivos** (contados por `grep` literal em
+`main @ 9b93a2f`), e apenas **3** passam `requireMemberPermission: true`:
+**`w/[slug]/login:249`** · **`w/[slug]/init:63`** · **`courses/by-slug/[slug]/init:99`**.
+
+🔴 **A função responde a DUAS perguntas diferentes com o mesmo nome:**
+- **9 perguntam *"posso entrar?"*** — primeiro argumento é `user.id`;
+- **4 perguntam *"esta pessoa é gente daqui?"*** — sobre um **terceiro**:
+  `producer/students/[id]/tags:19`, `:49`, `:93` (passam `params.id`, o aluno-alvo) e
+  `producer/lives/[id]/moderators:60` (passa o `userId` do **candidato a moderador**, vindo do
+  corpo da requisição).
+
+O próprio JSDoc do helper registra isso (`workspace-access.ts:15-21`) e é a razão declarada de
+`requireMemberPermission` ser **opt-in por call-site**.
+
+⚠️ **Consequência para o desenho:** uma 4ª via colocada **dentro** do helper move as duas
+perguntas **de uma vez**. Nas 4 do terceiro, o efeito não é ler a mais — é **conceder poder ao
+recém-cadastrado**: ele passaria a ser elegível a **moderador de live**, e moderador tem
+`DELETE` de mensagem (`lives/[id]/messages/[messageId]:53-63`). É o caso literal da lição
+*"feature inofensiva pode CRIAR o vetor"*.
+
+### 11.3 ⛔ A ORDEM OBRIGATÓRIA — os furos fecham ANTES do cadastro público
+
+Os itens **9.172**, **9.173**, **9.174**, **9.175**, **9.176** e **9.177** (grupo **E3.42**)
+nasceram desta investigação. Três deles são **pré-requisito**, e a razão é uma só:
+
+> **Hoje esses furos exigem uma conta na plataforma. Depois do cadastro público exigiriam
+> apenas um cadastro grátis.** A mudança não cria os furos — ela **derruba o preço de entrada**
+> deles.
+
+1. **9.172 🔴** — `courses/by-slug/[slug]` sem gate de tenant: conteúdo cross-tenant para
+   qualquer autenticado, com `api/search` entregando o slug. **Fecha antes.**
+2. **9.173 🔴** — `lessons/[id]/quiz` sem gate de tenant, POST devolvendo o gabarito e
+   disparando automação do produtor. **Fecha antes.**
+3. **9.174 🟠** — `by-slug/[slug]/init` gateia por WORKSPACE e paga em CURSO. **É o furo que
+   esta etapa amplificaria** — todo cadastrado passaria a recebê-lo. **Fecha antes.**
+4. **9.175 · 9.176 · 9.177** — entram no mesmo grupo; **9.176** é o que sustenta a decisão do
+   §11.1 (por que credencial não pode ser pertencimento).
+
+### 11.4 O que a vitrine expõe hoje — e por que o risco NÃO está nela
+
+O `select` da loja (`api/w/[slug]/init/route.ts:179-208`) devolve **metadado de catálogo**:
+`id · title · slug · description · thumbnail · thumbnailPosition · checkoutUrl · price ·
+priceCurrency · isFree · reviewsEnabled · showAccessBadge ·` 6 campos `member*Color ·
+memberWelcomeText · memberLayoutStyle · featured · category`, mais as notas de avaliação
+(`ownerId` entra no select e é **removido** em `:235`). **Não há módulo, aula, material nem
+`videoUrl`.** Para não-staff o filtro é `isPublished: true, showInStore: true` (`:174-176`).
+
+⇒ **Deixar alguém ver a vitrine é barato.** O risco vive nas **outras** rotas que o mesmo
+helper guarda — daí a §11.3.
+
+ⓘ **O que ainda precisa de medição humana:** (a) se o `videoUrl` vazado converte em vídeo
+assistível (depende do provedor); (b) se há WAF/bot-protection na frente de
+`/api/w/*/forgot-password` fora do repo; (c) `/api/student/workspace/route.ts` não foi lido —
+não se sabe o que devolve para conta+credencial sem matrícula.

@@ -35,6 +35,91 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-31 — CAMADA 4, ETAPA E4.4 (etapa 5) — OS FUROS PRÉ-EXISTENTES DO VÍNCULO: REGISTRADOS, ZERO FIX
+
+**Estado antes:** main em `9b93a2f`
+
+**O que foi feito:** a investigação read-only do **vínculo sem matrícula** perguntou *"se a
+pessoa vir a vitrine sem matrícula, ela alcança conteúdo de curso pago?"*. **Alcança** — e o
+achado que reordena a fila é que **os dois piores furos NÃO são criados pela mudança: já valem
+hoje para qualquer conta autenticada da plataforma.** Esta rodada **só registra**: 6 itens
+novos (**9.172 · 9.173 · 9.174 · 9.175 · 9.176 · 9.177**), o grupo **E3.42** no ROADMAP e a
+**§11** do plano da E4.4 com a decisão do dono e as opções descartadas.
+⛔ **NENHUM FIX — decisão explícita do dono.** Zero código, zero banco, zero produção.
+
+**Arquivos tocados:** só documentação — `docs/PLANO-MESTRE.md` (os 6 itens) ·
+`docs/ROADMAP-EXECUCAO.md` (grupo E3.42) · `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md` (§11) ·
+`docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:**
+- 🔴 **O achado de maior gravidade, e ele é PRÉ-EXISTENTE (9.172):**
+  `courses/by-slug/[slug]/route.ts` — **156 linhas lidas inteiras** — tem `getCurrentUser()` →
+  401 em `:9-11` e **nenhuma outra checagem**. O `include` (`:16-34`) devolve módulos, aulas e
+  `videoUrl`; o `enrollment` de `:44` só alimenta `hasAccess` (`:54`), que é **campo da
+  resposta** (`:132`). ⭐ **É a rota IRMÃ daquela que o `ee032e5` fechou** — aquele commit
+  tocou só o `/init`. A lição *"conferir a rota IRMÃ"*, de novo, agora com um irmão que
+  **nunca teve** gate. E `api/search:31-42` entrega o `slug` sem escopo de workspace, então
+  nem adivinhar é preciso (calibrado: `LIMIT 5` e mínimo 2 chars ⇒ **oráculo de enumeração,
+  não dump**).
+- ⭐ **O item que quase nasceu contradizendo um laudo anterior (9.173):** `PLANO-MESTRE:161-162`
+  registrou em **04/07** que *"o GET de quiz vaza `isCorrect`" era FALSO*. Fui conferir antes
+  de escrever: **continua falso** — o `select` das opções em `:23` é `{ id, text, sortOrder }`,
+  sem `isCorrect`. O laudo antigo usou *"já é gated"* no sentido de **autenticado**; o item
+  novo é sobre a ausência de **tenant e matrícula**, e sobre o **POST**, que aquela
+  investigação não examinou — e o POST devolve **`correctOptionId`** (`:104`), grava tentativa
+  (`:113-121`) e dispara `QUIZ_PASSED` (`:127-134`). **Não é contradição, é outra pergunta** —
+  e o item diz isso por escrito, para o próximo leitor não achar que um dos dois está errado.
+- **Medição SELECT-only em produção** (`SUPABASE_REF wyamxwmdgbvqrfcqfbyh` **impresso antes de
+  cada conexão**, scripts fora do repo, `grep` de `INSERT|UPDATE|DELETE|DROP|ALTER` = **0**):
+  **2.526** aulas, **2.526** com `videoUrl` (100%) · **15** quizzes · **5** lives (3 `PUBLIC`,
+  2 `COURSE_ONLY`, **0** gravações) · cursos por workspace: mediana **1**, máx **8**, média
+  **1,9**, em **35** workspaces · **1.336** credenciais sem matrícula = **1.177** pessoas em
+  **15** workspaces, **679** sem matrícula em lugar nenhum, **5** com `resetToken`.
+  ⭐ **A dimensão CORRIGIU a gravidade para baixo em dois pontos:** as lives são 5 e sem
+  gravação, e a mediana de 1 curso por workspace significa que o 9.174 muitas vezes não tem
+  curso extra a vazar. **O furo é estrutural; a exposição de hoje é modesta** — e isso está
+  escrito nos itens, não só aqui.
+- **Numeração com controles** (a lição do E3.40, que quase virou item-fantasma por notação de
+  intervalo): cada número conferido por `grep -F` **literal e enumerado um a um** — 9.172, 9.173,
+  9.174, 9.175, 9.176 e 9.177, **todos com 0 ocorrências** antes de escrever; **controle
+  positivo** `9.144` → **8** e **controle negativo** `9.999` → **0**. Idem para o grupo:
+  `E3.42` → 0 antes, **controle negativo** `E3.99` → 0.
+- **Recap-pelo-repo antes de numerar:** `grep -F` de cada rota em `docs/` — `by-slug/[slug]/route.ts`
+  → **0** (inédito), `lessons/[id]/quiz` → **2** (o laudo de 04/07, tratado acima),
+  `module/[moduleId]` → **3** (tabelas de rota, não itens), com **controle positivo**
+  `workspace-access.ts` → 4 e **negativo** `rota-que-nao-existe.ts` → 0.
+
+**SHA do merge:** — **docs-only, commit direto na `main`**, como a casa faz.
+**Rollback:** `git revert <sha deste commit>`.
+
+**Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy.
+
+**Ficou aberto:** os **6** itens acima, todos `- [ ]`. ⛔ **A ordem é obrigatória e está no
+§11.3 do plano:** **9.172**, **9.173** e **9.174** fecham **ANTES** do cadastro público —
+*hoje esses furos exigem uma conta na plataforma; depois do cadastro público exigiriam apenas
+um cadastro grátis.* A mudança não cria os furos; **derruba o preço de entrada** deles.
+Segue sem medição humana: se `videoUrl` vazado vira vídeo assistível (depende do provedor) ·
+se há WAF na frente de `forgot-password` · o que `/api/student/workspace/route.ts` devolve.
+
+**⭐ A DECISÃO DE DESENHO QUE ESTA RODADA FIXOU:** o vínculo será uma **marca própria**. As
+outras três opções caíram **por medição**, e o §11.1 guarda a prova de cada uma: credencial
+daria pertencimento retroativo a **1.177 pessoas** e **exclui staff por construção**
+(`webhook-helpers.ts:144`) · matrícula vazia é **impossível** (`courseId NOT NULL` + unique
+composta, conferido no `information_schema` de produção) · `Collaborator` nulo **nem resolve o
+403** (`workspace-access.ts:49-54`) e trocaria o regime de auth de **679** pessoas.
+⚠️ **E a assimetria que o desenho terá de respeitar (§11.2):** dos **13** call-sites em **10**
+arquivos, **9** perguntam *"posso entrar?"* e **4** perguntam *"esta pessoa é gente daqui?"*
+sobre um terceiro. Uma 4ª via **dentro** do helper move as duas de uma vez — e nas 4 do
+terceiro **concede poder ao recém-cadastrado** (elegibilidade a moderador de live, que tem
+`DELETE` de mensagem). É *"feature inofensiva pode CRIAR o vetor"*, literal.
+
+**Regras conferidas:** §17 respondido ✅ · read-only na investigação, docs-only no registro ✅ ·
+prova de alvo impressa antes de **cada** conexão ao banco, SELECT-only ✅ · numeração enumerada
+com controle positivo e negativo ✅ · recap-pelo-repo antes de criar item ✅ · laudo anterior
+conferido antes de contradizê-lo ✅ · nenhum fix ✅ · papelada no mesmo fôlego ✅
+
+---
+
 ## 2026-08-30 — CAMADA 4, ETAPA E4.4 (grupo E3.41) — 9.169 FECHADO: WIDGET v2, A ROTAÇÃO PELA RAIZ
 
 **Estado antes:** main em `48be03e`
