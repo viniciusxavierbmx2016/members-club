@@ -130,6 +130,9 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
     if (!mountEl) return;
 
     let cancelled = false;
+    // VTurb: guardado aqui para o cleanup abaixo poder remover o listener.
+    // Sem isso, trocar de aula empilha um listener por montagem.
+    let vturbOnMessage: ((e: MessageEvent) => void) | null = null;
     setPlayerError(null);
 
     if (video.provider === "youtube") {
@@ -296,6 +299,56 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
       iframe.setAttribute("fetchpriority", "high");
       mountEl.innerHTML = "";
       mountEl.appendChild(iframe);
+    } else if (video.provider === "vturb") {
+      // VTurb (ConverteAI) — iframe puro, no MOLDE DO PANDA (o único ramo do
+      // arquivo sem SDK). `video.videoId` carrega a URL de embed INTEIRA, já
+      // validada no parser (https + host exato scripts.converteai.net).
+      const iframe = document.createElement("iframe");
+      iframe.src = video.videoId!;
+      iframe.style.border = "none";
+      iframe.style.backgroundColor = "#000";
+      iframe.style.position = "absolute";
+      iframe.style.top = "0";
+      iframe.style.left = "0";
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.allow =
+        "accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture";
+      iframe.allowFullscreen = true;
+      iframe.setAttribute("fetchpriority", "high");
+      mountEl.innerHTML = "";
+      mountEl.appendChild(iframe);
+
+      // ⭐ A CONCLUSÃO AUTOMÁTICA. Medido pela sonda descartável (gate humano,
+      // 31/08): o player emite ~195 postMessage por vídeo — a esmagadora
+      // maioria `videoTimeUpdate` — e UM `{"type":"videoEnded"}` no instante do
+      // fim. É o primeiro provedor de iframe puro do repo capaz disto; o Panda
+      // não emite nada, e por isso suas aulas dependem do botão manual.
+      //
+      // TRÊS TRAVAS, e cada uma existe por um motivo diferente:
+      let endedFired = false;
+      vturbOnMessage = (e: MessageEvent) => {
+        // (i) ORIGEM EXATA. Nunca `endsWith` nem `includes`: `evil-converteai.net`
+        //     e `scripts.converteai.net.attacker.com` passariam nos dois.
+        if (e.origin !== "https://scripts.converteai.net") return;
+        // (ii) SÓ o evento de fim. As outras ~194 mensagens por vídeo são
+        //      ignoradas — reagir a qualquer uma marcaria a aula no play.
+        let type: unknown;
+        try {
+          const d =
+            typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+          type = (d as { type?: unknown } | null)?.type;
+        } catch {
+          return; // string que não é JSON: não é evento nosso
+        }
+        if (type !== "videoEnded") return;
+        // (iii) UMA VEZ POR MONTAGEM. Sem isto, pausar e voltar ao fim
+        //      remarcaria a aula (e re-dispararia o autoplay) a cada vez.
+        if (endedFired) return;
+        endedFired = true;
+        onEndedRef.current?.();
+      };
+      window.addEventListener("message", vturbOnMessage);
     }
 
     return () => {
@@ -311,6 +364,12 @@ export function VideoPlayer({ video, hideYoutubeChrome, onEnded }: Props) {
       ytPlayerRef.current = null;
       vimeoPlayerRef.current = null;
       setYtPlayer(null);
+      // VTurb: remover a escuta junto com o iframe. Trocar de aula sem isto
+      // deixaria o listener antigo vivo, e ele marcaria a aula ERRADA.
+      if (vturbOnMessage) {
+        window.removeEventListener("message", vturbOnMessage);
+        vturbOnMessage = null;
+      }
       // Clear the mount node so a new player can be built
       if (mountEl) mountEl.innerHTML = "";
     };

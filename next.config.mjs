@@ -53,7 +53,16 @@ const nextConfig = {
               // The apex is mandatory: the wildcard doesn't match a bare domain, and the SDK deliberately strips the "player." prefix.
               "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://vimeo.com https://*.vimeo.com",
               "media-src 'self' https://*.youtube.com https://*.vimeo.com https://*.tv.pandavideo.com.br",
-              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br",
+              // VTurb (ConverteAI): `frame-src` BASTA — e isto foi MEDIDO, não
+              // deduzido. Sonda descartável (branch sonda/vturb-csp, `dab1a1a`),
+              // gate humano 31/08: com APENAS esta origem liberada aqui, e com
+              // connect-src / media-src / img-src / script-src NEGANDO, o vídeo
+              // tocou e o evento `securitypolicyviolation` do document acusou
+              // ZERO violações. ⇒ a cicatriz do BUG E (Vimeo, `5e78edd`, em que
+              // frame-src sozinho NÃO bastou) não se repetiu aqui.
+              // ⚠️ Host EXATO, sem apex e sem wildcard: o parser só aceita
+              // `scripts.converteai.net`, e a CSP acompanha esse recorte.
+              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br https://scripts.converteai.net",
               "worker-src 'self' blob:",
               "manifest-src 'self'",
             ].join("; "),
