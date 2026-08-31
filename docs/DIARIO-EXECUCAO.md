@@ -35,7 +35,114 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
-## 2026-08-31 — CAMADA 4, ETAPA E4.4 (etapa 5) — SONDA DO TURNSTILE: FEITA, MEDIDA E REMOVIDA
+## 2026-08-30 — CAMADA 4, ETAPA E4.4 (grupo E3.41) — 9.169 FECHADO: WIDGET v2, A ROTAÇÃO PELA RAIZ
+
+**Estado antes:** main em `48be03e`
+
+**⚠️ CORREÇÃO DE REGISTRO feita neste commit:** a entrada anterior (a sonda) estava datada
+**31/08/26** — data que ainda não existe. O commit `48be03e` é de **2026-08-30 21:49 -0300**
+(`git log`), logo a sonda foi encerrada em **30/08**. Datas ajustadas em 4 pontos: cabeçalho
+e corpo daquela entrada, `PLANO-MESTRE` (bloco da sonda), `PLANO-E4.4` (§10) e `ROADMAP`
+(linha da E4.4). Registrado aqui para a correção não parecer adulteração silenciosa.
+
+**O que foi feito:** o 9.169 pedia **rotacionar** a `TURNSTILE_SECRET_KEY`, que havia
+circulado fora do contrato de segredo. A rotação simples **não fechou o item, e medir
+mostrou por quê**: no widget v1 o painel da Cloudflare **devolvia sempre o mesmo valor** a
+cada rotação. Solução **pela raiz**: **widget v2** — *"Members Club - Cadastro v2"*, modo
+**managed**, mesmos 3 hostnames — com par de chaves novo. O `.env.staging` passou a
+carregar **sitekey v2 (24 chars)** e **secret v2 (35 chars)**, cada uma no seu slot,
+**as duas provadas pelo discriminador** antes de entrar. Zero código, zero banco, zero
+produção: a mudança inteira é **um arquivo gitignored** + esta papelada.
+
+**Arquivos tocados:** `.env.staging` (fora do repo — 2 linhas de chave + bloco de
+comentário reescrito). Na `main`, só documentação: `docs/PLANO-MESTRE.md` (9.169 fechado)
+· `docs/ROADMAP-EXECUCAO.md` (E3.41) · `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md` (§10.3 e
+§10.7) · `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:**
+- ⭐ **A MEDIÇÃO QUE VIROU O ITEM DE CABEÇA PARA BAIXO:** três rodadas seguidas em que o
+  dono rotacionou e o valor entregue pelo painel era **byte a byte o mesmo** (mesmo
+  `sha256`, comparado por prefixo registrado). E o discriminador mostrava a **secret v1
+  pré-rotação ainda ACEITA** pelo `siteverify` — se a Cloudflare guarda **um** *previous
+  secret*, uma rotação real teria expulsado aquela na hora. ⇒ **a rotação não estava
+  efetivando**, e a chave vazada era a que estava **EM VIGOR**. Nenhuma dessas três
+  rodadas gravou nada: o **7º gate (ineditismo)** barrou as três.
+- **O gate da FASE 1 no fecho — enumerado, porque placar não é prova** (todos passaram):
+  (1) clipboard não-vazio · (2) secret com **35** chars · (3) sem espaço nem quebra de
+  linha · (4) charset válido · (5) discriminador da secret = `invalid-input-response` ·
+  (6) **controle com o resultado OPOSTO** presente (`invalid-input-secret` na sitekey) ·
+  (7) **ineditismo** contra as **4** chaves já vistas na frente · (8) sitekey v2 com **24**
+  chars **medidos** — o agente havia reportado *25*, e só a régua pegou · (9) sitekey v2 ≠
+  sitekey v1.
+- **Escrita atômica** (`mkstemp` + `fsync` + `chmod` + `os.replace`) com **rollback armado
+  em memória** e verificação estrutural antes de considerar boa: cabeça e cauda do arquivo
+  **byte-idênticas**, só as 2 linhas de chave e o bloco de comentário mudaram.
+- **Prova relendo do DISCO** (não da variável): comprimentos **35 / 24** · discriminador
+  com **os dois resultados opostos** · **as duas secrets do v1** (a pré-rotação e a
+  queimada) **ausentes** do arquivo · **0** temporários
+  deixados para trás.
+- **Varredura por PADRÃO** `0x4AAAAAA[A-Za-z0-9_-]*` em `src/ .next/ docs/ scripts/
+  next.config.mjs .env public/ prisma/ .env.staging`, **classificada por comprimento** —
+  que é o que o gate manda fazer, porque o total cru não diz nada: **2 chaves no
+  `.env.staging`** (sitekey 24 + secret 35, cada uma no seu slot) **+ 2 sitekeys v1 de 24
+  chars em `docs/`** + as menções do **prefixo de 9 chars em prosa**. ⭐ **O zero que
+  importa: 0 valores de 35 chars fora do `.env.staging`.** Também **0** ocorrências da
+  secret queimada em qualquer alvo, e `git grep` **da secret** em `HEAD` → **0** (controle
+  positivo do `git grep`: 15 arquivos).
+  ⚠️ **DECLARAÇÃO, porque a próxima varredura vai achar isto e a linha-base não pode
+  mentir:** as 2 sitekeys v1 em `docs/` **foram escritas por esta papelada, de propósito**
+  (item 9.170 no PLANO-MESTRE e §10.3 do PLANO-E4.4), para identificar **qual widget
+  excluir**. **Sitekey é pública por desenho** — vai no bundle do navegador —, então **não
+  é vazamento**; mas é a primeira chave completa do Turnstile a entrar no histórico do git,
+  e por isso fica declarado em vez de descoberto depois.
+- **Clipboard limpo** ao final (`pbcopy < /dev/null`, `pbpaste` → **0** bytes). A secret
+  v2 existe agora **só** no `.env.staging`.
+
+**SHA do merge:** — **docs-only, commit direto na `main`**, como a casa faz (mesma decisão
+do encerramento da sonda). **Rollback:** `git revert <sha deste commit>`.
+
+**Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy. A
+`.env` de produção não tem linha `TURNSTILE` nenhuma (conferido: **0** ocorrências).
+
+**Ficou aberto:**
+- **9.170** 🟢 — **excluir o widget v1** no painel da Cloudflare quando nada mais o
+  referenciar. Ele continua existindo, e **a secret dele está queimada**.
+- **Verificação humana na Vercel** (não é lida daqui): `TURNSTILE_SECRET_KEY` deve estar
+  **vazia**, e **não pode** existir um `NEXT_PUBLIC_TURNSTILE_SITE_KEY` com **35** chars.
+- A sitekey de **produção** ainda é a do v1 no papel — quando o widget entrar, o par de
+  produção tem de ser o do **v2** (ou um terceiro widget), nunca o v1.
+- **9.171** 🟢 — a alínea que **não** fechou, agora com número próprio: com **fail-open** e
+  a CSP **sem `report-uri`**, *"captcha ausente por configuração errada"* e *"captcha
+  ausente porque a Cloudflare caiu"* são **indistinguíveis**. Antes vivia dentro do 9.169, e
+  nenhuma varredura de `- [ ]` a encontrava.
+
+**⚠️ O ARCO HONESTO — a chave circulou DUAS vezes, e a segunda foi minha:** (1) a secret do
+v1 foi colada em conversa durante a sonda, o que criou o 9.169; (2) na verificação do
+9.169 **eu imprimi** o valor de um slot `NEXT_PUBLIC_…` tratando o **nome do slot como
+prova** de que o conteúdo era público — e ali havia uma secret. ⭐ **A lição, agora regra:
+o nome do slot é uma alegação sobre para onde o valor VAI, não sobre o que ele É. O
+discriminador roda ANTES de qualquer impressão, inclusive de valor tido como público.**
+⭐ **Segunda lição, de método:** *medir o dado que chega, mesmo quando vem confirmado* —
+pela **quarta** vez nesta frente um valor chegou "confirmado no painel" e estava errado.
+
+**Gate humano:** a rotação é **100% manual no painel da Cloudflare** — o dono executou e
+reportou a cada rodada. ⚠️ **E é exatamente aqui que o gate humano falhou como PROVA:** nas
+três rodadas o retorno foi *"rotacionei, a chave nova está no clipboard"*, e a **medição
+desmentiu as três** (mesmo `sha256`). O que fechou o item **não foi o relato — foi a
+régua**. É o exemplo mais limpo desta frente de *"medir o dado que chega, mesmo quando vem
+confirmado"*.
+
+**Regras conferidas:** §17 respondido ✅ · escrita restrita a `.env.staging` (gitignored) ✅
+· escrita atômica com rollback armado ✅ · controles positivos em toda varredura ✅ ·
+clipboard limpo ✅ · papelada no mesmo fôlego ✅ ·
+❌ **"nenhum valor de secret impresso" — REGRA VIOLADA NESTA FRENTE.** Um ✅ aqui seria
+mentira: a secret do v1 **foi impressa** na verificação do 9.169 (ver o arco honesto acima),
+e foi essa violação que obrigou o widget v2. Da correção em diante a regra foi cumprida —
+mas o checklist registra o que **aconteceu**, não o que passou a valer depois.
+
+---
+
+## 2026-08-30 — CAMADA 4, ETAPA E4.4 (etapa 5) — SONDA DO TURNSTILE: FEITA, MEDIDA E REMOVIDA
 
 **Estado antes:** main em `d97e902` (a sonda nunca esteve na main — viveu só na branch)
 
@@ -45,7 +152,7 @@ diretivas da CSP o Turnstile exige"* **não é decidível por leitura** — é a
 **BUG E** (`5e78edd`), em que o SDK do Vimeo fazia XHR da página-mãe e o defeito era de
 `connect-src`, não de `frame-src` — foi construída uma **sonda descartável**, medida no
 navegador por gate humano, e **removida**. **O código saiu; o conhecimento ficou.**
-⭐ **GATE HUMANO VERDE (31/08):** site key vinda da env · script carregou · widget
+⭐ **GATE HUMANO VERDE (30/08):** site key vinda da env · script carregou · widget
 renderizou e **resolveu** · token de **773 chars** · servidor **HTTP 200** com
 `success:true`, `hostname:"localhost"`, `error-codes:[]`, **`metadata.interactive:false`**,
 **210ms** · **VIOLAÇÕES DE CSP = 0**.

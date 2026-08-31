@@ -352,7 +352,7 @@ VIGIA E4.4: 0 cursos isFree · 0 matrículas FREE_CLAIM · 28.929 UNKNOWN     �
 
 ---
 
-## 10. O QUE A SONDA DO TURNSTILE PROVOU (31/08/26) — anti-robô do cadastro
+## 10. O QUE A SONDA DO TURNSTILE PROVOU (30/08/26) — anti-robô do cadastro
 
 > **De onde vem.** Decisão do dono: a proteção anti-robô do cadastro público é
 > **limite por IP + Cloudflare Turnstile**, com o captcha **FAIL-OPEN** e o widget em
@@ -402,6 +402,8 @@ chave de produção — *"Cloudflare recommends that sitekeys used in production
 allow local domains"*, que é recomendação, não proibição). ⇒ **staging e dev usam a
 chave real**; as *dummy keys* documentadas (`1x00000000000000000000AA` etc.) **não são
 necessárias**. ⓘ Domínio **nunca** foi o problema desta sonda.
+
+⚠️ **ATUALIZAÇÃO 30/08/26 — o widget mudou.** O par em uso agora é o do **widget v2** (*"Members Club - Cadastro v2"*), criado porque a rotação da secret do v1 **não efetivava** (§10.7). ⚠️ **Os 3 hostnames e o modo managed foram CONFIGURADOS iguais — isso é PREMISSA DE PAINEL, não medição.** Tudo o que esta seção prova foi medido no **v1**; no v2 revalida no gate humano do widget, e a prova é o campo `hostname` da resposta do `siteverify`. Esta frente já teve **quatro** valores que chegaram "confirmados no painel" e estavam errados — herdar prova por semelhança de configuração é exatamente o que não se faz aqui. A sitekey v1 (`0x4AAAAAAEiYQMvuGFkxJM5v`) está **aposentada**; o widget v1 aguarda exclusão (**9.170**).
 
 ### 10.4 🔴 O DISCRIMINADOR SITEKEY × SECRET — o achado mais importante da sonda
 
@@ -459,10 +461,28 @@ insumo não diagnostica.
    isso significa que *"captcha ausente por erro de configuração"* e *"captcha ausente
    porque a Cloudflare caiu"* **são indistinguíveis** hoje. Ver o item **9.169**.
 
-### 10.7 🔴 PENDÊNCIA DECLARADA — rotacionar a Secret Key
+### 10.7 ✅ RESOLVIDA (30/08/26) — e a rotação simples NÃO bastou: foi preciso WIDGET NOVO
 
-A secret **circulou fora do contrato de segredo** (foi colada em conversa e passou por
-um bundle local antes do expurgo). **Nada saiu do git nem da máquina**, e a varredura
-final deu **0** ocorrências rastreadas. Mesmo assim, o procedimento conservador é
-**rotacionar no painel** e atualizar `TURNSTILE_SECRET_KEY`. **Custo zero enquanto o
-widget não está em uso em lugar nenhum.** Registrado como item **9.169**.
+A secret do v1 **circulou fora do contrato de segredo** — e **duas vezes**: na sonda
+(colada em conversa) e depois na verificação do próprio item, quando o valor de um slot
+`NEXT_PUBLIC_…` foi **impresso** porque o **nome do slot** foi tomado como prova de que o
+conteúdo era público. ⭐ **Regra que nasceu: o nome do slot é uma alegação sobre para onde
+o valor VAI, não sobre o que ele É — o discriminador (§10.4) roda ANTES de qualquer
+impressão, inclusive de valor tido como público.**
+
+⭐ **E a rotação não fechava o item — medido, não suposto.** Em **três** tentativas o
+painel do v1 devolveu **o mesmo valor byte a byte** (mesmo `sha256`), e o discriminador
+mostrava a chave **pré-rotação ainda ACEITA** pelo `siteverify`: se a Cloudflare guarda
+**um** *previous secret*, uma rotação real a teria expulsado na hora. ⇒ **a rotação não
+estava efetivando, e a chave vazada era a que estava EM VIGOR.** As três rodadas foram
+barradas pelo **gate de ineditismo** — nenhuma gravou nada.
+
+**A saída pela raiz:** widget **v2** (*"Members Club - Cadastro v2"*), managed, mesmos 3
+hostnames. Par novo no `.env.staging` por escrita atômica com rollback armado — sitekey
+**24** chars, secret **35**, **as duas provadas pelo discriminador antes de entrar**;
+varredura por padrão com **0** secrets fora do arquivo e `git grep` **0**; clipboard limpo.
+Item **9.169 fechado**. Sobra o **9.170** (excluir o widget v1 do painel).
+
+⚠️ **A alínea que NÃO fechou** e volta no desenho do cadastro: com **fail-open** e a CSP
+**sem `report-uri`**, *"captcha ausente por configuração errada"* e *"captcha ausente
+porque a Cloudflare caiu"* continuam **indistinguíveis**.
