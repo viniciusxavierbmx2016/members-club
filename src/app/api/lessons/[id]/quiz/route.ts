@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { checkLessonAccess } from "@/lib/lesson-access";
 import { processAutomations } from "@/lib/automation-engine";
 import { quizAttemptSchema, validateBody } from "@/lib/validations";
 
@@ -11,6 +12,23 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
   try {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+
+    // 9.173 — o quiz é CONTEÚDO da aula e não tinha gate nenhum: qualquer conta
+    // autenticada lia as perguntas de qualquer aula da plataforma.
+    // Reuso do predicado que as rotas de MATERIAL já usam (`lesson-access.ts:23-61`),
+    // na mesma forma de `materials/route.ts:16-22` — ramos, ordem e códigos idênticos.
+    // ⭐ É ele o molde certo porque tem o short-circuit de staff ANTES do vínculo
+    // (`:48-51`): o produtor DONO e o ADMIN veem o quiz sem matrícula, e isso é uso
+    // REAL — 15 tentativas de 3 donos em produção. Uma régua de "matrícula ATIVA"
+    // pura tiraria o quiz da aula do próprio produtor, e o sintoma seria MUDO
+    // (`lesson-quiz.tsx:62` faz `r.ok ? json : null` → `:119 return null`).
+    const access = await checkLessonAccess(user, params.id);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.status === 404 ? "Aula não encontrada" : "Sem acesso" },
+        { status: access.status }
+      );
+    }
 
     const quiz = await prisma.quiz.findUnique({
       where: { lessonId: params.id },
@@ -71,6 +89,18 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
+    // 9.173 — MESMA régua do GET, e do material: o POST escreve `QuizAttempt` e
+    // dispara `processAutomations`, então ele não pode ser mais frouxo que a leitura.
+    // ⓘ A consulta abaixo NÃO é redundante com `access.courseId`: ela precisa também
+    // de `workspaceId` para `processAutomations`, e das perguntas para corrigir.
+    const access = await checkLessonAccess(user, params.id);
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.status === 404 ? "Aula não encontrada" : "Sem acesso" },
+        { status: access.status }
+      );
+    }
+
     const quiz = await prisma.quiz.findUnique({
       where: { lessonId: params.id },
       include: {
@@ -101,7 +131,13 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       return {
         questionId: q.id,
         selectedOptionId: answer?.selectedOptionId ?? null,
-        correctOptionId: correctOption?.id ?? null,
+        // 9.173 — o gabarito só sai quando o produtor LIGOU a revisão de respostas.
+        // Antes ele saía sempre: um POST com respostas quaisquer devolvia
+        // `correctOptionId` de todas as questões (o `:93` exige responder tudo, não
+        // acertar nada). ⓘ Invisível para a tela: `lesson-quiz.tsx:128-133` já se
+        // ramifica em `showAnswers`, e o ramo `else` (:131-132) usa SÓ
+        // `selectedOptionId` e `isCorrect` — nunca `correctOptionId`.
+        correctOptionId: quiz.showAnswers ? correctOption?.id ?? null : null,
         isCorrect,
       };
     });
