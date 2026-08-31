@@ -14,7 +14,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // Site key PÚBLICA (por desenho vai no HTML). A secret NUNCA aparece aqui.
-const SITE_KEY = "0x4AAAAAAAEiYQMvuGFkxJM5v";
+//
+// ⚠️ VEM DE ENV, e SÓ de env. A chave é DIFERENTE em cada ambiente (a de
+// staging não vale em produção), então literal no código é errado por
+// construção — e o cadastro real vai exigir a env do mesmo jeito.
+//
+// ⭐ POR QUE ISTO NÃO É DETALHE: a parte 2 desta sonda custou uma ida-e-volta
+// inteira porque a chave tinha sido transcrita à mão e estava errada — um "A" a
+// mais no prefixo e a cauda inteira trocada, 25 chars em vez de 35. O sintoma
+// foi error-callback 400020 = "Invalid sitekey", que se PARECE com "Cloudflare
+// fora do ar" e tem consequência OPOSTA. Chave literal no código é o que torna
+// esse erro invisível até alguém abrir o painel.
+// ⓘ Nenhuma chave é reproduzida literalmente aqui: valor errado ao lado do certo
+// é exatamente como o errado volta a ser copiado.
+//
+// 🔴 SEM FALLBACK LITERAL, E O MOTIVO É UM ACHADO DE SEGURANÇA (parte 3):
+// numa das idas ao painel, o campo lido foi a SECRET em vez da site key — as
+// duas ficam lado a lado e as duas começam com `0x4AAAAAA`. Um literal aqui
+// teria publicado a secret no bundle do navegador.
+//
+// ⭐ O TESTE QUE DISTINGUE AS DUAS (rodar SEMPRE antes de colar uma chave):
+//   curl -s -X POST https://challenges.cloudflare.com/turnstile/v0/siteverify \
+//     -d "secret=<CANDIDATO>" -d "response=x"
+//   invalid-input-secret   → é SITEKEY  → pode ir ao cliente
+//   invalid-input-response → é SECRET   → NUNCA aqui, só TURNSTILE_SECRET_KEY
+// O teste discrimina de verdade: sitekeys reais e documentadas
+// (1x00000000000000000000AA, 2x00000000000000000000AB) são recusadas como
+// secret, e uma secret real passa. Foi assim que a troca foi detectada — e é
+// assim que a chave em uso hoje foi verificada antes de entrar.
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 const SCRIPT_SRC =
   "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit";
 const SCRIPT_TIMEOUT_MS = 15000;
@@ -212,6 +240,27 @@ export function SondaTurnstileClient({ slug }: { slug: string }) {
 
       <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: 18 }}>
         <tbody>
+          {/* ADIÇÃO DA PARTE 3: a rodada anterior queimou uma ida-e-volta inteira
+              sem que ninguém pudesse VER qual chave estava em uso. Uma sonda de
+              diagnóstico que esconde o próprio insumo não é diagnóstico. */}
+          <tr>
+            <td style={{ ...cell, width: 210, color: "#9aa0b4" }}>0. site key EFETIVA</td>
+            <td style={cell}>
+              {SITE_KEY ? (
+                <>
+                  <code>{SITE_KEY}</code> ({SITE_KEY.length} chars) · origem: env
+                  NEXT_PUBLIC_TURNSTILE_SITE_KEY ✅
+                </>
+              ) : (
+                <span style={{ color: "#f87171" }}>
+                  ❌ AUSENTE — a env NEXT_PUBLIC_TURNSTILE_SITE_KEY não chegou ao
+                  bundle. A sonda não vai renderizar o widget. Ver o relatório da
+                  parte 3: o valor recebido como &quot;site key&quot; foi medido e é
+                  uma SECRET KEY, então não pode entrar aqui.
+                </span>
+              )}
+            </td>
+          </tr>
           <tr>
             <td style={{ ...cell, width: 210, color: "#9aa0b4" }}>1. script de terceiro</td>
             <td style={cell}>{script}</td>
