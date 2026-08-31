@@ -98,8 +98,9 @@ comentário reescrito). Na `main`, só documentação: `docs/PLANO-MESTRE.md` (9
 - **Clipboard limpo** ao final (`pbcopy < /dev/null`, `pbpaste` → **0** bytes). A secret
   v2 existe agora **só** no `.env.staging`.
 
-**SHA do merge:** — **docs-only, commit direto na `main`**, como a casa faz (mesma decisão
-do encerramento da sonda). **Rollback:** `git revert <sha deste commit>`.
+**SHA do merge:** — **não houve merge: é docs-only, commit direto na `main`**, como a casa
+faz (mesma decisão do encerramento da sonda). A papelada é o commit **`8358575`**.
+**Rollback:** `git revert 8358575`.
 
 **Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy. A
 `.env` de produção não tem linha `TURNSTILE` nenhuma (conferido: **0** ocorrências).
