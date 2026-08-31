@@ -35,6 +35,82 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-31 — CAMADA 3, GRUPO E3.42 — 9.173 FECHADO: gate no quiz e gabarito só com showAnswers
+
+**Estado antes:** main em `18ffc3f`
+
+**O que foi feito:** a rota `lessons/[id]/quiz` não tinha gate nenhum — GET e POST chamavam
+**apenas** `getCurrentUser()`. Qualquer conta autenticada da plataforma lia as perguntas de
+qualquer aula, gravava `QuizAttempt` e disparava `processAutomations QUIZ_PASSED` **no
+workspace alheio**. O fix é **reuso**: `checkLessonAccess` nos dois handlers, mais o gabarito
+condicionado a `quiz.showAnswers`. **Zero migração, zero schema, zero outras rotas.**
+
+**Arquivos tocados:** `src/app/api/lessons/[id]/quiz/route.ts` (**+37/−1**, e a **única** linha
+removida é a do `correctOptionId`). Docs: `PLANO-MESTRE` · `ROADMAP` · `DIARIO`.
+
+**Como foi provado:**
+- **9 provas por API** em build de staging, com prova de alvo discriminante (`Login · Staging
+  Teste` do **banco** + 404 em slug real de produção) e **REF nos chunks produção 0 / staging 2**:
+  produtor dono ✅ · ADMIN ✅ · aluno ATIVO ✅ · aluno **VENCIDO barrado (403)** ✅ · outro
+  workspace **barrado** ✅ · sem sessão **401** ✅ · gabarito **presente** com `showAnswers=true`
+  e **nulo** com `false` ✅ · GET segue **sem vazar `isCorrect`** ✅.
+- ⭐ **A prova (a) é a que mais importa**, e o gate humano a repetiu: o quiz **APARECE** para o
+  produtor dono. É o caso que a quebra teria **silenciado**.
+- **Gate humano 4/4 (31/08).**
+- **Rito da matrícula vencida:** REF impresso · valor ANTES colado · 1 linha · **restaurada** ·
+  faxina provada (0) · e a prova do aluno ATIVO **re-rodada depois**.
+- **Faxina do staging:** 2 aulas + 2 quizzes + 15 tentativas de teste apagados; **0 restantes**.
+
+**SHA do merge:** **`c173a59`** (`--no-ff`) · papelada em commit separado.
+**Rollback:** `git revert -m 1 c173a59`.
+
+**Mudou em produção para quem:** **ninguém legítimo perde nada** — aluno matriculado, produtor
+dono e ADMIN passam como antes. Deixa de passar: conta de outro workspace, aluno com matrícula
+**vencida** e qualquer autenticado sem vínculo. E o **gabarito** deixa de sair quando o produtor
+desligou a revisão de respostas.
+
+**Ficou aberto:** **9.181** e **9.182** (grupo **E3.44**), abertos em `dd72ca4` — é o que este fix
+deliberadamente **não** cobre.
+
+**⭐ O QUE A MEDIÇÃO DECIDIU, e é o miolo desta rodada:** *"sem matrícula"* **não** significa
+*"ilegítimo"*. As **15** tentativas sem `Enrollment` em produção são de **3 PRODUTORES DONOS** —
+e o controle confirma a premissa: **só 5 dos 66** cursos têm o dono matriculado. Sem essa quebra
+por papel eu teria reportado **incidente** onde havia **exposição**, e — pior — poderia ter
+escolhido uma régua de *"matrícula ATIVA"* pura, que **tiraria o quiz da aula do próprio
+produtor**, com sintoma **mudo**. ⇒ **a medição não só dimensionou o dano: ela determinou a FORMA
+do fix.** É por isso que `checkLessonAccess`, que já tem o short-circuit de staff, era o molde
+certo — e reuso venceu código novo (pergunta 2 das 7 da skill).
+
+**⚠️ DUAS PREMISSAS DO ENUNCIADO QUE A INVESTIGAÇÃO DESMENTIU:** (1) **certificado NÃO está no
+raio de dano** — `GRANT_CERTIFICATE` não está em `VALID_ACTIONS`, é código morto para automações
+criadas hoje; (2) **existe consumidor legítimo sem matrícula** (o staff) — e foi essa correção que
+determinou a forma do fix.
+
+**⚠️ LACUNA DE PROCESSO, registrada como FATO:** este fix **não** passou por revisão adversarial
+multiagente — o script do workflow falhou (backtick dentro de template literal) e eu **não o
+relancei**, priorizando as provas. A validação foi **9 provas por máquina + gate humano 4/4 +
+leitura própria**. Sem consequência conhecida; fica escrito para o próximo leitor saber **qual**
+camada não rodou.
+
+**⚠️ E UMA LIÇÃO DE MÉTODO QUE CUSTOU TRÊS TENTATIVAS, no pós-deploy:** eu não consegui **provar**
+que o deploy subiu, e as duas primeiras sondas passaram por **vacuidade** — `x-vercel-id` é id de
+**requisição** (muda sempre, "mudou" seria vácuo) e o `BUILD_ID` extraído veio **vazio** nas duas
+medições, com meu próprio "controle" comparando vazio com vazio. A terceira (comparar os chunks
+servidos com os do build local) foi **inconclusiva**: o `turbopack-*.js` carrega metadado de build.
+⭐ **A razão de fundo é estrutural e vale guardar: este fix toca SÓ uma rota de servidor, e para um
+chamador não autenticado o comportamento é idêntico antes e depois (401 nos dois). Logo não existe
+impressão digital externa** — provar o deploy exigiria sessão, e sessão cria linha. **O que eu
+tenho é indireto e honesto:** uma tentativa de quiz de **aluno com matrícula**, `passed=true`, às
+**18:41:40 UTC — ~2 min depois do push** ⇒ aluno legítimo seguiu respondendo em produção.
+
+**Regras conferidas:** §17 respondido ✅ · zero migração (com controle positivo) ✅ · palco
+derrubado e provado morto antes de todo build ✅ · linha de base de produção tirada **antes** do
+push ✅ · `tsc --noEmit` e `npm run build` verdes antes do push ✅ · `merge --no-ff` ✅ · faxina
+provada ✅ · gate humano ✅ · sonda vacuosa **detectada e descartada** em vez de reportada ✅ ·
+papelada no mesmo fôlego ✅
+
+---
+
 ## 2026-08-31 — DEMANDA DE CLIENTE — VTURB: QUARTO PROVEDOR DE VÍDEO, EM PRODUÇÃO
 
 **Estado antes:** main em `7c81ceb`
