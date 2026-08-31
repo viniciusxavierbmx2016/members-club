@@ -35,6 +35,95 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-31 — CAMADA 3, GRUPO E3.42 — 9.172 FECHADO (rota irmã REMOVIDA) + a poda do 9.174
+
+**Estado antes:** main em `5660aae`
+
+**O que foi feito:** a rota `courses/by-slug/[slug]` tinha `getCurrentUser()` → 401 e **nada
+mais**: qualquer conta autenticada da plataforma lia módulos, aulas e `videoUrl` de **qualquer
+curso, cross-tenant**. Ela **não foi gateada — foi REMOVIDA**, porque a gêmea `/init` é
+**superconjunto estrito** do seu único consumidor. ⭐ **Fix por REMOÇÃO: 4 arquivos, +74/−160.**
+Junto veio a **poda** do 9.174: o `include` puro em `Lesson` virou `select` explícito **sem
+`videoUrl`**.
+
+**Arquivos tocados:** `src/app/api/courses/by-slug/[slug]/route.ts` (**apagado**, 156 linhas) ·
+`src/app/api/courses/by-slug/[slug]/init/route.ts` (poda + régua) ·
+`src/app/(course)/course/[slug]/module/[moduleId]/page.tsx` (repontada) ·
+`src/app/(course)/course/[slug]/page.tsx` (declaração morta de `videoUrl`). **Zero migração.**
+
+**Como foi provado:**
+- **9/9 provas por API**, rodadas **duas vezes** — no palco de dev e **de novo no build de
+  produção** (`next build` + `next start` com env de staging), porque é o artefato que sobe:
+  (a) aluno ATIVO abre e `hasAccess=true` · (b) aluno **VENCIDO** não abre (404) · (c) colaborador
+  **com** o curso no escopo abre · (d) o **mesmo** colaborador **sem** o outro curso no escopo
+  toma 404 · (e) dono e ADMIN abrem · (f) conta do workspace B toma 404 · (g) rota antiga 404 e
+  deslogado 401 · (h) `videoUrl` ausente dos dois payloads · (i) página de venda intacta.
+- ⭐ **Os pares que DISCRIMINAM**, e são o que dá valor às provas: em (c)/(d) muda **só o curso**,
+  mesma persona; em (b) muda **só o parâmetro**, mesma persona e mesmo instante — módulo **404**,
+  venda **200**.
+- **Prova de alvo discriminante** em todo palco: `Login · Staging Teste` (nome vindo do **banco**)
+  **e** 404 em dois slugs **reais de produção**. **REF nos chunks: produção 0 / staging 2.**
+- **Cobertura da poda** contra o `information_schema` de produção: `Lesson` tem **9 colunas
+  reais**, **9 decididas**, 8 mantidas, `videoUrl` fora. (A lição *"include → select remove em
+  silêncio"*: campo esquecido não dá erro, dá tela quebrada.)
+- **Gate humano: 4 blocos, verde (31/08)** — rodado em **build de produção**, depois que um
+  artefato visual apareceu no palco de **dev** (ver o achado abaixo).
+- **Sanidade pós-deploy em produção:** rota removida **404** · gêmea **401** *"Não autenticado"* ·
+  `/`, `/producer/login` e `/w/combo-presets` **200**. ⭐ **O sinal do deploy foi a própria
+  transição `401 → 404`** da rota removida — ela discrimina sozinha: a rota existia e exigia auth;
+  agora não existe.
+
+**SHA do merge:** **`b140e50`** (`--no-ff`) · papelada em commit separado.
+**Rollback:** `git revert -m 1 b140e50`.
+
+**Mudou em produção para quem:**
+- **Aluno com matrícula VENCIDA** — ⚠️ **mudança deliberada, aprovada pelo dono**: continua vendo a
+  vitrine e a **página de venda**, mas **não abre mais o curso**. Antes ele abria e — pior — via
+  tudo destravado (ver a armadilha).
+- **Colaborador** sem aquele curso no escopo deixa de abrir a tela de módulo (menor privilégio).
+- **Qualquer conta autenticada** deixa de ler estrutura de curso alheio. **Aluno, dono e ADMIN
+  legítimos: nada muda.**
+
+**Ficou aberto:** **9.174** na **metade do gate** (só a poda fechou) · **9.173** · **9.175** ·
+**9.176** · **9.177** · e **dois itens novos**: **9.178** e **9.179**.
+
+**⭐ O ARCO — e é a lição "conferir a rota IRMÃ", agora com SEGUNDO caso:** esta rota é a irmã
+daquela que o fix **`ee032e5`** (item 9.62) fechou — e aquele commit **tocou só o `/init`**. A
+primeira vez que a lição apareceu (9.109) era o par *conceder × revogar*; aqui é outra forma:
+**duas rotas que servem o MESMO payload, e só uma foi gateada** — e a irmã **nunca teve** gate, não
+é que tenha perdido. `grep -F "by-slug/[slug]/route.ts" docs/` dava **0**: nenhuma auditoria a
+tinha olhado. ⇒ **Regra que isso acrescenta: ao fechar um gate, `ls` o DIRETÓRIO do recurso e
+comparar os PAYLOADS, não os nomes; e o commit do fix tem de dizer QUAIS irmãos conferiu.**
+
+**⭐ COMO MÓDULO E PÁGINA DE VENDA FORAM SEPARADOS:** a gêmea serve **duas telas com regras
+opostas**. A página de venda **precisa** que o não-matriculado receba 200 (`init:83-89`: *"exigir
+matrícula aqui quebraria o checkout"*). A tela de módulo não tem contraparte de receita — seu único
+link nasce com `hasAccess === true` (`page.tsx:154`). A separação é por **parâmetro**: a tela de
+módulo pede `?scope=module`, e só nesse caminho a régua estrita roda. **Por que não é bypass:**
+omitir o parâmetro **não destrava nada** — devolve exatamente a resposta da página de venda, que
+quem passou no gate de tenant já podia pedir. **O parâmetro só FECHA.**
+
+**🔴 A ARMADILHA, para quem mexer nessa tela no futuro:** em
+`module/[moduleId]/page.tsx:179`, `const locked = hasAccess && !released`. Com `hasAccess` **falso o
+cadeado NUNCA roda** — todas as aulas viram links. ⇒ **zerar ou omitir `hasAccess` no payload faria
+o cadeado de drip SUMIR para o aluno matriculado.** O campo continua sendo devolvido com o mesmo
+valor de hoje; **quem barra é o status HTTP, nunca o campo.**
+
+**⚠️ LIÇÃO NOVA, de ferramenta:** `git add` com um pathspec de arquivo **já removido por `git rm`**
+**aborta o comando INTEIRO** — não é parcial. O commit saiu com **1 arquivo em vez de 4**, deixando
+a página apontando para rota inexistente, e **só o `git status` pós-commit denunciou**. É a família
+do *"N-1 é o sinal"*, terceira ocorrência, em forma nova. **Gate que passa a valer:**
+`git diff --cached HEAD~1 --name-only | wc -l` **antes** de commitar — contra `HEAD~1`, não contra o
+índice (a primeira régua que escrevi contou errado e me barrou sozinha).
+
+**Regras conferidas:** §17 respondido ✅ · **zero migração** (conferido com controle positivo) ✅ ·
+palco derrubado e **provado morto** antes de todo build ✅ · prova de alvo discriminante em toda
+rodada ✅ · `tsc --noEmit` e `npm run build` verdes **antes** do push ✅ · `merge --no-ff` ✅ ·
+faxina do staging provada (matrícula restaurada, elenco intacto) ✅ · gate humano ✅ · papelada no
+mesmo fôlego ✅
+
+---
+
 ## 2026-08-31 — CAMADA 4, ETAPA E4.4 (etapa 5) — OS FUROS PRÉ-EXISTENTES DO VÍNCULO: REGISTRADOS, ZERO FIX
 
 **Estado antes:** main em `9b93a2f`
