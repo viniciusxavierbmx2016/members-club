@@ -45,14 +45,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // SONDA-TURNSTILE — REMOVER (E4.4 etapa 5): + https://challenges.cloudflare.com
-              // Liberação MÍNIMA e deliberada: só script-src e frame-src, que a leitura
-              // dá como CERTOS. `connect-src` fica de FORA de propósito — é exatamente
-              // o que a sonda vai medir. Se o Turnstile fizer XHR da página-mãe, a
-              // violação vai aparecer na tabela da /w/{slug}/turnstile-teste, e aí a
-              // cicatriz do Vimeo (BUG E, 5e78edd) terá se repetido com outro fornecedor.
-              // ⚠️ static.cloudflareinsights.com NÃO cobre isto: são domínios diferentes.
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://player.vimeo.com https://player.pandavideo.com.br https://static.cloudflareinsights.com https://challenges.cloudflare.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://player.vimeo.com https://player.pandavideo.com.br https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
               "font-src 'self' data: https://fonts.gstatic.com",
@@ -60,8 +53,7 @@ const nextConfig = {
               // The apex is mandatory: the wildcard doesn't match a bare domain, and the SDK deliberately strips the "player." prefix.
               "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://vimeo.com https://*.vimeo.com",
               "media-src 'self' https://*.youtube.com https://*.vimeo.com https://*.tv.pandavideo.com.br",
-              // SONDA-TURNSTILE — REMOVER: + https://challenges.cloudflare.com (o widget é um iframe)
-              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br https://challenges.cloudflare.com",
+              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br",
               "worker-src 'self' blob:",
               "manifest-src 'self'",
             ].join("; "),
