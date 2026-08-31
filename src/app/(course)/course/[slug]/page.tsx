@@ -20,7 +20,6 @@ interface LessonItem {
   id: string;
   title: string;
   description: string | null;
-  videoUrl: string;
   duration: number | null;
   order: number;
   daysToRelease: number;

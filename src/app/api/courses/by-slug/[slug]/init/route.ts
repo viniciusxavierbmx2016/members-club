@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isEnrollmentActive } from "@/lib/auth";
 import { hasWorkspaceAccess } from "@/lib/workspace-access";
+import {
+  collaboratorCanActOnCourse,
+  MEMBER_AREA_PERMISSION,
+} from "@/lib/collaborator";
 import { getAutomationLocks } from "@/lib/automation-locks";
 import { logger } from "@/lib/logger";
 
@@ -39,8 +43,10 @@ async function ensureMenuDefaults(courseId: string) {
   }
 }
 
-export async function GET(_request: Request, props: { params: Promise<{ slug: string }> }) {
+export async function GET(request: Request, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
+  // 9.172 — quem pede a TELA DE MÓDULO se identifica. Ver a régua lá embaixo.
+  const scope = new URL(request.url).searchParams.get("scope");
   const t0 = Date.now();
   try {
     const user = await getCurrentUser();
@@ -61,7 +67,27 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
           include: {
             lessons: {
               orderBy: { order: "asc" },
-              include: {
+              // 9.174 — PODA. `include` puro devolvia TODOS os escalares de
+              // Lesson, `videoUrl` inclusive, para todo mundo que passasse no
+              // gate de TENANT — inclusive quem não comprou ESTE curso.
+              // Molde da casa: `lessons/[id]/view/route.ts:204` ("Masked
+              // payload — never expose raw videoUrl") e o recorte condicional
+              // de `courses/[id]/route.ts:239-246`.
+              // ⚠️ `select` e não delete-no-map DE PROPÓSITO: coluna nova em
+              // Lesson deixa de vazar sozinha. Cobertura provada contra o
+              // `information_schema` de produção — 9 colunas reais, 9
+              // decididas: as 8 abaixo entram, `videoUrl` sai. Nenhum cliente
+              // do payload de ESTRUTURA lê `videoUrl` (o editor do produtor lê,
+              // mas por `courses/[id]`, que tem recorte próprio).
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                hideYoutubeChrome: true,
+                duration: true,
+                order: true,
+                daysToRelease: true,
+                moduleId: true,
                 progress: { where: { userId: user.id } },
               },
             },
@@ -164,6 +190,42 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
       (course.ownerId === user.id || course.workspace.ownerId === user.id);
     const isStaffViewer = user.role === "ADMIN" || isCourseOwner;
     const hasAccess = isStaffViewer || isEnrollmentActive(enrollment);
+    // ───────────────────────────────────────────────────────────────────
+    // 9.172 — RÉGUA DA TELA DE MÓDULO. Abre: matrícula ATIVA · produtor dono ·
+    // ADMIN · colaborador COM ESTE curso no escopo. Matrícula VENCIDA vê a
+    // vitrine mas NÃO abre o curso — mudança de comportamento DELIBERADA.
+    //
+    // ⚠️ POR QUE UM PARÂMETRO, e por que ele NÃO é bypass: esta rota serve
+    // DUAS telas com regras diferentes. A PÁGINA DE VENDA (`course/[slug]/
+    // page.tsx:392` → `<CoursePreview>`) depende de o não-matriculado receber
+    // 200 — está escrito no gate de tenant acima, e quebrar isso quebra o
+    // checkout. A TELA DE MÓDULO não tem contraparte de receita: seu único
+    // link nasce com `hasAccess === true` (`page.tsx:154`). Omitir o parâmetro
+    // não destrava nada — devolve a MESMA resposta da página de venda, que
+    // quem passou no gate de tenant já podia pedir. O parâmetro só FECHA.
+    //
+    // ⚠️ `hasAccess` é reusado como as 3 primeiras vias porque é literalmente
+    // a mesma fórmula (`isStaffViewer || isEnrollmentActive`), com o
+    // short-circuit de ADMIN/dono ANTES do vínculo (lição 9.63). A 4ª via é o
+    // colaborador: `collaboratorCanActOnCourse` já embute a guarda
+    // cross-tenant e o escopo por curso (`collaborator.ts:20-26`).
+    // ⓘ `courseIds` vazio significa "todos os cursos do workspace" — semântica
+    // existente da casa, não decisão desta mudança.
+    if (scope === "module" && !hasAccess) {
+      const collabOnThisCourse = await collaboratorCanActOnCourse(
+        user.id,
+        course.id,
+        [MEMBER_AREA_PERMISSION]
+      );
+      if (!collabOnThisCourse) {
+        // 404 e não 403, pelo mesmo motivo do gate de tenant acima.
+        return NextResponse.json(
+          { error: "Curso não encontrado" },
+          { status: 404 }
+        );
+      }
+    }
+
     const isExpired =
       !!enrollment &&
       enrollment.status === "ACTIVE" &&

@@ -59,7 +59,16 @@ export default function ModuleDetailPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/courses/by-slug/${params.slug}`);
+        // 9.172 — esta tela usava `by-slug/[slug]`, que tinha 401 e NADA mais:
+        // qualquer conta autenticada lia a estrutura de qualquer curso da
+        // plataforma. A rota foi REMOVIDA e esta tela passou para a gêmea, que
+        // já tem gate de tenant. `?scope=module` liga a régua da tela de módulo
+        // (matrícula ATIVA · dono · ADMIN · colaborador com este curso) sem
+        // tocar no caminho da página de venda. A gêmea é superconjunto: devolve
+        // os 4 campos que esta tela lê (course, hasAccess, enrollment, overrides).
+        const res = await fetch(
+          `/api/courses/by-slug/${params.slug}/init?scope=module`
+        );
         if (res.ok) {
           const data = await res.json();
           setCourse(data.course);
