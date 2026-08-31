@@ -89,8 +89,8 @@ novos (**9.172 · 9.173 · 9.174 · 9.175 · 9.176 · 9.177**), o grupo **E3.42*
   `module/[moduleId]` → **3** (tabelas de rota, não itens), com **controle positivo**
   `workspace-access.ts` → 4 e **negativo** `rota-que-nao-existe.ts` → 0.
 
-**SHA do merge:** — **docs-only, commit direto na `main`**, como a casa faz.
-**Rollback:** `git revert <sha deste commit>`.
+**SHA do merge:** — **não houve merge: docs-only, commit direto na `main`**, como a casa faz.
+O registro é o commit **`aa7aafd`**. **Rollback:** `git revert aa7aafd`.
 
 **Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy.
 
