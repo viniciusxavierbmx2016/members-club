@@ -53,7 +53,13 @@ const nextConfig = {
               // The apex is mandatory: the wildcard doesn't match a bare domain, and the SDK deliberately strips the "player." prefix.
               "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://vimeo.com https://*.vimeo.com",
               "media-src 'self' https://*.youtube.com https://*.vimeo.com https://*.tv.pandavideo.com.br",
-              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br",
+              // SONDA-VTURB — REMOVER. Liberação MÍNIMA e deliberada: só
+              // `frame-src`, e só a origem exata do embed. NÃO liberar
+              // connect-src / media-src / img-src / script-src — descobrir de
+              // quais o VTurb realmente precisa É o objeto da sonda (cicatriz
+              // do BUG E: no Vimeo, frame-src sozinho não bastou — 5e78edd).
+              // ⚠️ O apex NÃO entra: `scripts.converteai.net` é o host exato.
+              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br https://scripts.converteai.net",
               "worker-src 'self' blob:",
               "manifest-src 'self'",
             ].join("; "),
