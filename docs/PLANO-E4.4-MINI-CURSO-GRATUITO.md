@@ -349,3 +349,120 @@ Telefone: 19.307 sem (70,6%) · 7.255 com não-dígito · lixo: 25 linhas
 Cursos 66 · publicados 53 · na loja 64 · sem checkoutUrl 20
 VIGIA E4.4: 0 cursos isFree · 0 matrículas FREE_CLAIM · 28.929 UNKNOWN     ✅ segue limpa
 ```
+
+---
+
+## 10. O QUE A SONDA DO TURNSTILE PROVOU (31/08/26) — anti-robô do cadastro
+
+> **De onde vem.** Decisão do dono: a proteção anti-robô do cadastro público é
+> **limite por IP + Cloudflare Turnstile**, com o captcha **FAIL-OPEN** e o widget em
+> modo **MANAGED**. Como "quais diretivas da CSP o Turnstile exige" **não é decidível
+> por leitura** — é a cicatriz do BUG E (`5e78edd`), em que o SDK do Vimeo fazia XHR
+> da página-mãe e o defeito era de `connect-src`, não de `frame-src` — foi construída
+> uma **sonda descartável** e medida no navegador.
+>
+> **A sonda foi REMOVIDA** (`5ea03e2`). O código dela fica arquivado na branch
+> `sonda/turnstile-csp` (**`da9697e`** = a sonda · **`56bac2f`** = a chave corrigida).
+> **Nada dela ficou no repositório.** O que sobrevive é esta seção.
+
+### 10.1 ✅ CSP — `script-src` + `frame-src` BASTAM. `connect-src` NÃO é necessário
+
+As duas linhas, verbatim, para voltarem **no mesmo commit que trouxer o widget**:
+```
+script-src  … https://challenges.cloudflare.com
+frame-src   … https://challenges.cloudflare.com
+```
+⚠️ **`static.cloudflareinsights.com`, que já está no `script-src`, NÃO cobre isto** —
+são domínios diferentes e não há wildcard.
+
+**Como foi medido, e por que a medição é confiável:** a CSP **não tem `report-uri`**
+(`next.config.mjs:44-60`), então uma violação é 100% silenciosa no servidor. A sonda
+contornou isso escutando o evento **`securitypolicyviolation` do `document`** e
+listando as violações **na tela**. Resultado do gate humano: **0 violações**, com o
+ciclo inteiro funcionando. ⭐ E há um segundo argumento independente: na rodada em que
+a chave estava errada, o widget **chegou a receber um 400 da Cloudflare** — uma
+requisição que **sai e é respondida** prova que a CSP não a bloqueou.
+⇒ **A cicatriz do Vimeo não se repetiu.**
+
+### 10.2 ✅ O ciclo inteiro funciona ponta a ponta
+
+```
+render → token (773 chars) → POST siteverify → HTTP 200
+  { success: true, hostname: "localhost", "error-codes": [], metadata: { interactive: false } }   210ms
+```
+⭐ **`interactive: false`** — o modo **managed** não pediu clique. **Zero atrito** para a
+pessoa real, que é exatamente o que se queria saber antes de pôr isso na porta de
+entrada do funil.
+
+### 10.3 ✅ `localhost` funciona com a chave de PRODUÇÃO — não precisamos de chave de teste
+
+Os hostnames do widget são **`app.mymembersclub.com.br` · `applyfy-mvp.vercel.app` ·
+`localhost`**. A Cloudflare **permite** domínio local (a doc só *recomenda* não usar em
+chave de produção — *"Cloudflare recommends that sitekeys used in production do not
+allow local domains"*, que é recomendação, não proibição). ⇒ **staging e dev usam a
+chave real**; as *dummy keys* documentadas (`1x00000000000000000000AA` etc.) **não são
+necessárias**. ⓘ Domínio **nunca** foi o problema desta sonda.
+
+### 10.4 🔴 O DISCRIMINADOR SITEKEY × SECRET — o achado mais importante da sonda
+
+As duas chaves **se parecem**: mesmo prefixo `0x4AAAAAA`, mesmo painel, campos
+vizinhos. Só o **formato** difere — **sitekey 24 chars · secret 35** — e não dá para
+confiar no olho. **Trocá-las publica a SECRET no bundle do navegador.**
+
+⚠️⚠️ **E o pior: a troca "quase funciona".** A secret **valida no servidor** — o
+`siteverify` aceita —, então o sintoma é parcial e o vazamento é silencioso.
+**Um gate de configuração que pergunte só "a env existe?" NÃO pega esse caso.**
+
+**O teste, e ele discrimina de verdade — rodar em TODO valor ANTES de colar:**
+```bash
+curl -s -X POST https://challenges.cloudflare.com/turnstile/v0/siteverify \
+  -d "secret=<CANDIDATO>" -d "response=x"
+```
+| Resposta | O candidato é | Onde pode ir |
+|---|---|---|
+| `{"error-codes":["invalid-input-secret"]}` | **SITEKEY** (ou string inválida) | ✅ `NEXT_PUBLIC_…`, HTML, bundle |
+| `{"error-codes":["invalid-input-response"]}` | **SECRET** | 🔴 **nunca no cliente** — só `TURNSTILE_SECRET_KEY` |
+
+**Prova de que o teste discrimina** (é o que o torna confiável, e não plausível):
+sitekeys **reais e documentadas** (`1x00000000000000000000AA`, `2x00000000000000000000AB`)
+são **recusadas** como secret com `invalid-input-secret`; uma secret real **passa**.
+
+### 10.5 ⚠️ O histórico honesto — a sonda custou 4 rodadas, e o erro é de INTERFACE
+
+Fica registrado porque **vai se repetir** com quem abrir aquele painel:
+
+| Rodada | O que aconteceu | Custo |
+|---|---|---|
+| 1 | Sonda construída e CSP liberada no mínimo | — |
+| 2 | Widget falhou: `error-callback` **400020**. A hipótese do comando leu isso como *"domínio não autorizado"*; a doc diz que **`400020` = "Invalid sitekey"** e que domínio é **`110200`**. A chave tinha **um "A" a mais** no prefixo (25 chars em vez de 24) | 1 rodada |
+| 3 | Ao voltar ao painel, foi lida a **SECRET** em vez da site key (campos vizinhos, formato parecido). Detectado pelo discriminador **antes do commit**; a secret chegou a ser assada num bundle **local** e foi expurgada (`.next` apagado, env removida, nada commitado) | 1 rodada |
+| 4 | Site key correta, **verificada pelo discriminador antes de entrar**. Gate verde | — |
+
+⭐ **A lição de método:** *medir o dado que chega, mesmo quando vem confirmado.* Nas
+rodadas 2 e 3 o valor veio como "confirmado no painel" e estava errado nas duas.
+⭐ **A lição de produto:** a sonda só ficou diagnosticável quando passou a **mostrar na
+tela qual chave estava em uso**. Ferramenta de diagnóstico que esconde o próprio
+insumo não diagnostica.
+
+### 10.6 📌 Requisitos que isto impõe ao cadastro
+
+1. **`NEXT_PUBLIC_TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` nos DOIS ambientes**,
+   com valores **diferentes** (a de staging não vale em produção).
+2. **Zero literal no código.** A site key vem de env, sem fallback.
+3. **O discriminador (§10.4) roda em cada valor antes de entrar** — é a única checagem
+   que separa os dois erros que já aconteceram.
+4. **As 2 linhas de CSP (§10.1) entram no MESMO commit do widget**, não antes: hoje
+   elas foram **removidas** do `next.config.mjs` por menor privilégio (§3 do DEV-BRABO),
+   já que nada as consome até o cadastro existir.
+5. ⚠️ **A env que falta é MUDA**: sem a site key o widget não renderiza, e **a CSP não
+   tem `report-uri`** — nada no servidor acusa. Combinado com a decisão de **fail-open**,
+   isso significa que *"captcha ausente por erro de configuração"* e *"captcha ausente
+   porque a Cloudflare caiu"* **são indistinguíveis** hoje. Ver o item **9.169**.
+
+### 10.7 🔴 PENDÊNCIA DECLARADA — rotacionar a Secret Key
+
+A secret **circulou fora do contrato de segredo** (foi colada em conversa e passou por
+um bundle local antes do expurgo). **Nada saiu do git nem da máquina**, e a varredura
+final deu **0** ocorrências rastreadas. Mesmo assim, o procedimento conservador é
+**rotacionar no painel** e atualizar `TURNSTILE_SECRET_KEY`. **Custo zero enquanto o
+widget não está em uso em lugar nenhum.** Registrado como item **9.169**.

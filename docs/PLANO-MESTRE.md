@@ -1284,6 +1284,28 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
 
 ---
 
+### 🧪 SONDA DO TURNSTILE — CONHECIMENTO PROVADO NO NAVEGADOR (31/08/26)
+
+> **Não são itens abertos: é o que ficou PROVADO.** A sonda descartável foi construída,
+> medida por gate humano e **REMOVIDA** (`5ea03e2`). O código dela fica arquivado na
+> branch `sonda/turnstile-csp` — **`da9697e`** (a sonda) e **`56bac2f`** (chave
+> corrigida). **Zero linha dela ficou no repositório**, e `git diff main..sonda` é
+> **vazio**. O laudo completo vive no **§10 do `PLANO-E4.4-MINI-CURSO-GRATUITO.md`**;
+> aqui fica o resumo e a única pendência acionável (**9.169**).
+
+**O que a sonda provou:**
+1. ✅ **CSP: `script-src` + `frame-src` com `https://challenges.cloudflare.com` BASTAM.** `connect-src` **NÃO** é necessário — medido por evento `securitypolicyviolation` (a CSP não tem `report-uri`, então a sonda escutou o evento e listou na tela): **0 violações** com o ciclo inteiro funcionando. **A cicatriz do BUG E (Vimeo, `5e78edd`) não se repetiu.** ⚠️ `static.cloudflareinsights.com`, já presente no `script-src`, **não cobre** — domínios diferentes, sem wildcard.
+2. ✅ **Ciclo ponta a ponta:** render → token (773 chars) → `siteverify` → `success:true`, `hostname:"localhost"`, `error-codes:[]`, **`metadata.interactive:false`**, **210ms**. O modo *managed* **não pediu clique** — zero atrito para a pessoa real.
+3. ✅ **`localhost` funciona com a chave de PRODUÇÃO** (está nos hostnames do widget, junto de `app.mymembersclub.com.br` e `applyfy-mvp.vercel.app`). ⇒ **não precisamos das chaves de teste** da Cloudflare em staging. Domínio nunca foi o problema.
+4. ⚠️ **As 2 linhas de CSP foram REMOVIDAS ao encerrar** (`next.config.mjs` voltou byte-idêntico), por **menor privilégio (DEV-BRABO §3)**: a CSP é global (`source: "/(.*)"`) e nada consome aquele host até o cadastro existir. As strings exatas estão no §10.1 do plano da E4.4 e **voltam no mesmo commit que trouxer o widget**.
+
+- [ ] **9.169 — Rotacionar a Secret Key do Turnstile (e o gate de config que a troca exige)** 🟠 — **pendência declarada no encerramento da sonda (31/08)**.
+  **(a) A ROTAÇÃO.** A `TURNSTILE_SECRET_KEY` **circulou fora do contrato de segredo**: foi colada em conversa e chegou a ser assada num bundle **local** antes do expurgo. ⓘ **Nada saiu do git nem da máquina** — varredura final: `git grep` da secret em `HEAD` → **0**, e `grep` em `src/ .next/ docs/ scripts/ .env` → **0**; ela vive só em `.env.staging` (gitignored), no slot correto. Mesmo assim, o conservador é **rotacionar no painel** e atualizar a env. **Custo ZERO enquanto o widget não estiver em uso em lugar nenhum** — depois deixa de ser zero. ⚠️ Ação **manual no painel da Cloudflare**, não código.
+  **(b) 🔴 O QUE TORNA ISTO MAIS QUE UMA ROTAÇÃO — o gate de configuração.** A sonda provou que **site key e secret se parecem** (mesmo prefixo `0x4AAAAAA`, campos vizinhos no painel) e só o formato difere — **sitekey 24 chars, secret 35**. **Trocá-las publica a SECRET no bundle do navegador** — e a troca **"quase funciona"**, porque a secret **valida no servidor**. ⇒ **um gate que pergunte só "a env existe?" NÃO pega esse caso.** O discriminador que pega está no §10.4 do plano da E4.4: `POST siteverify` com o candidato no campo `secret` — `invalid-input-secret` = é SITEKEY (pode ir ao cliente) · `invalid-input-response` = é SECRET (nunca). **Ele discrimina de verdade:** sitekeys reais e documentadas são recusadas como secret, e uma secret real passa.
+  **(c) ⚠️ E há um terceiro caso que o desenho terá de distinguir**, porque a decisão do dono é **fail-open**: sem a site key o widget **não renderiza**, e **a CSP não tem `report-uri`** ⇒ *"captcha ausente por erro de configuração"* e *"captcha ausente porque a Cloudflare caiu"* são **indistinguíveis hoje**, e têm consequências diferentes. → Camada 3 · grupo **E3.41**.
+
+---
+
 
 - [ ] **9.136 — Produtor adicionar aluno à mão RESETA a senha de quem já é aluno de outro curso** 🟠 — achado do laudo da E4.4 (DIV-1), e é o risco R1 **no lugar real**. `app/api/courses/[id]/students/route.ts:283-300` rotaciona a `WorkspaceCredential` quando o aluno **já tem uma**, gateado por `!wasActive && !isStaff` (`:276`). ⇒ Quem comprou o curso A e depois é **matriculado à mão** no curso B do MESMO workspace tem a senha trocada. ⚠️ **Não é bug puro**: o mesmo bloco envia o e-mail com a senha nova (`sendWorkspaceAccessEmail`, `:255-260`), então o aluno é avisado — o comentário `:263-274` mostra que a rotação foi pensada. **O que torna isto um item**: o aluno **não pediu** troca de senha, a senha antiga dele para de funcionar, e num fluxo de curso gratuito (E4.4) isso aconteceria **sem compra nenhuma**. ⭐ **Contraste que fecha o argumento**: o webhook de COMPRA faz o oposto e diz por quê — *"Existing credentials are never rotated — they stay under the student's control"* (`lib/webhook-helpers.ts:141-142`). **As duas portas divergem**, e a de compra é a que está certa. **Fix candidato**: não rotacionar quando já existe credencial; usar o link de recuperação, que a própria rota já sabe emitir. → Camada 3.
 

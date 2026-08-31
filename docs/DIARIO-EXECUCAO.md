@@ -35,6 +35,94 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-31 — CAMADA 4, ETAPA E4.4 (etapa 5) — SONDA DO TURNSTILE: FEITA, MEDIDA E REMOVIDA
+
+**Estado antes:** main em `d97e902` (a sonda nunca esteve na main — viveu só na branch)
+
+**O que foi feito:** o dono decidiu que a proteção anti-robô do cadastro público é **limite
+por IP + Cloudflare Turnstile** (captcha **fail-open**, widget **managed**). Como *"quais
+diretivas da CSP o Turnstile exige"* **não é decidível por leitura** — é a cicatriz do
+**BUG E** (`5e78edd`), em que o SDK do Vimeo fazia XHR da página-mãe e o defeito era de
+`connect-src`, não de `frame-src` — foi construída uma **sonda descartável**, medida no
+navegador por gate humano, e **removida**. **O código saiu; o conhecimento ficou.**
+⭐ **GATE HUMANO VERDE (31/08):** site key vinda da env · script carregou · widget
+renderizou e **resolveu** · token de **773 chars** · servidor **HTTP 200** com
+`success:true`, `hostname:"localhost"`, `error-codes:[]`, **`metadata.interactive:false`**,
+**210ms** · **VIOLAÇÕES DE CSP = 0**.
+
+**Arquivos tocados:** **nenhum de código na `main`.** Na branch `sonda/turnstile-csp`: os 3
+arquivos da sonda criados e depois **apagados**, e o `next.config.mjs` alterado e depois
+**revertido byte-idêntico**. Na `main`, só documentação:
+`docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md` (§10 novo) · `docs/PLANO-MESTRE.md` (bloco de
+conhecimento + item 9.169) · `docs/ROADMAP-EXECUCAO.md` (grupo E3.41 + linha da E4.4) ·
+`docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:**
+- ⭐ **A medição que a sonda existia para fazer:** a CSP **não tem `report-uri`**, então
+  violação é 100% muda no servidor. A sonda contornou escutando o evento
+  **`securitypolicyviolation` do `document`** e listando **na tela**. Resultado: **0
+  violações** com o ciclo inteiro funcionando ⇒ **`script-src` + `frame-src` bastam,
+  `connect-src` NÃO é necessário.** Segundo argumento independente: na rodada da chave
+  errada o widget **recebeu um 400 da Cloudflare** — requisição que sai e é respondida
+  **prova** que a CSP não a bloqueou.
+- **Prova de alvo do palco** em toda rodada: build de staging com **REF nos chunks
+  `produção 0 / staging 2`**, `curl -L` rendendo `Login · Staging Teste` (nome vindo do
+  BANCO) e **404** num slug real de produção.
+- **As 4 contagens no bundle servido** ao fechar a chave: site key nova **1** · antiga **0**
+  · secret **0** · **controle positivo do grep 2** (sem ele, três zeros não provariam nada).
+- **Prova determinística de que a env entrou no build**: o ramo morto do ternário
+  (`"AUSENTE…"`) **não existe no artefato** — o minificador só o colapsa se a env existia.
+- **Remoção provada:** `SONDA-TURNSTILE` → **0** no código · `turnstile` em `src/` → **0**
+  (com controle positivo: `useEffect` → 336) · rotas fora dos manifests · `tsc --noEmit`
+  **exit 0** · build de staging **verde** · **`git diff main..sonda` VAZIO**.
+- **Segredo:** `git grep` da secret em `HEAD` → **0**; `grep` em `src/ .next/ docs/ scripts/
+  .env` → **0**. Vive só em `.env.staging` (gitignored), no slot correto.
+
+**SHA do merge:** — **não houve merge, e é o ponto**: a sonda saiu inteira, `git diff
+main..sonda` é **vazio**, então não sobrou código para mesclar. Os docs entraram na `main`
+por **commit direto**, como a casa faz com docs-only. A branch `sonda/turnstile-csp` fica
+como **ARQUIVO** (`da9697e` = a sonda · `56bac2f` = chave corrigida · `5ea03e2` = remoção),
+referenciada por SHA nos docs. **Rollback:** `git revert <sha do commit de docs>`.
+
+**Mudou em produção para quem:** **ninguém.** Zero código na `main`, zero banco, zero
+deploy de runtime. A `.env` de produção nunca foi tocada (mtime de 17/jul).
+
+**⚠️ DUAS DECISÕES DECLARADAS NO ENCERRAMENTO:**
+**(1) As 2 liberações de CSP SAÍRAM.** Motivo: **menor privilégio (DEV-BRABO §3)**. A CSP é
+global (`source: "/(.*)"`), então manter `challenges.cloudflare.com` alargaria a plataforma
+inteira por um host que **nada carrega** até o cadastro existir — permissão sem consumidor é
+a família que a FASE 1 da auditoria gastou 14 itens removendo. As strings exatas e a prova
+ficam no **§10.1** do plano da E4.4 e **voltam no mesmo commit que trouxer o widget**.
+**(2) `NEXT_PUBLIC_TURNSTILE_SITE_KEY` FICOU** no `.env.staging` (gitignored, fora do repo).
+Motivo: é chave **pública**, custa zero, e reobtê-la do painel é **exatamente a operação que
+falhou duas vezes**. O comentário foi reescrito para não dizer mais "sonda" e para carregar
+o discriminador.
+
+**Ficou aberto:** **9.169** 🟠 (grupo **E3.41**) — rotacionar a Secret Key **e** o gate de
+configuração que a troca exige.
+🔴 **O ACHADO QUE MAIS IMPORTA, e não estava previsto:** site key e secret **se parecem**
+(mesmo prefixo `0x4AAAAAA`, campos vizinhos no painel) e só o formato difere — **24 × 35
+chars**. **Trocá-las publica a SECRET no bundle do navegador — e "quase funciona", porque a
+secret valida no servidor.** Um gate que pergunte só *"a env existe?"* **NÃO pega**. O
+discriminador que pega está no **§10.4**.
+
+**⚠️ O HISTÓRICO HONESTO — a sonda custou 4 rodadas, e o erro é de INTERFACE:** (1) sonda
+construída; (2) widget falhou com `400020` — a hipótese lia isso como "domínio", mas a doc
+diz **"Invalid sitekey"** (domínio é `110200`), e a chave tinha **um "A" a mais**; (3) ao
+voltar ao painel foi lida a **SECRET** por engano — **detectada pelo discriminador antes do
+commit**, com expurgo do bundle local e **nada commitado**; (4) chave certa, **verificada
+antes de entrar**, gate verde. ⭐ **Lição de método: medir o dado que chega, mesmo quando
+vem confirmado** — nas rodadas 2 e 3 ele veio "confirmado no painel" e estava errado.
+⭐ **Lição de produto: a sonda só ficou diagnosticável quando passou a mostrar NA TELA qual
+chave estava em uso.**
+
+**Regras conferidas:** §17 respondido ✅ · §22 (Regra de Parada) **acionada e respeitada na
+rodada 3** ✅ · palco derrubado antes de todo build ✅ · prova de alvo em toda rodada ✅ ·
+gate humano ✅ · `git add` explícito ✅ · numeração com controle positivo e negativo ✅ ·
+papelada no mesmo fôlego ✅
+
+---
+
 ## 2026-08-30 — CAMADA 4, ETAPA E4.4 (etapa 5, cadastro público) — INVESTIGAÇÃO READ-ONLY + REGISTRO DOS ACHADOS
 
 **Estado antes:** main em `7228afc`
