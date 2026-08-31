@@ -1,7 +1,13 @@
-export type VideoProvider = "youtube" | "vimeo" | "panda" | "unknown";
+export type VideoProvider = "youtube" | "vimeo" | "panda" | "vturb" | "unknown";
 
 export interface ParsedVideo {
   provider: VideoProvider;
+  // ⚠️ Para `vturb`, `videoId` carrega a URL de embed INTEIRA, não um id.
+  // Decisão do dono: guardar a URL toda em vez de extrair ids, porque o embed
+  // do VTurb tem DOIS segmentos variáveis (<uuid-da-conta>/players/<id-do-player>)
+  // e nada garante que o formato deles seja estável. O player usa este valor
+  // direto como `iframe.src`, e é por isso que o parser só o produz depois de
+  // provar protocolo https + host EXATO (ver o ramo do VTurb abaixo).
   videoId: string | null;
   // Panda Video uses tenant-specific subdomains (player-vz-XXXX.tv.pandavideo.com.br),
   // so we must preserve the host from the original URL to render the embed.
@@ -27,6 +33,10 @@ export interface ParsedVideo {
  *   - https://player-vz-XXXX.tv.pandavideo.com.br/embed/?v=VIDEO_ID
  *   - https://player-vz-XXXX.tv.pandavideo.com.br/VIDEO_ID
  *   - Full <iframe src="..."> snippet pasted by the producer
+ *
+ * Supported VTurb / ConverteAI formats:
+ *   - https://scripts.converteai.net/<conta>/players/<player>/v4/embed.html
+ *   - Full <iframe src="..."> snippet pasted by the producer
  */
 export function parseVideoUrl(url: string): ParsedVideo {
   if (!url) return { provider: "unknown", videoId: null };
@@ -36,6 +46,14 @@ export function parseVideoUrl(url: string): ParsedVideo {
   const iframeMatch = url.match(/src=["']([^"']+pandavideo[^"']+)["']/i);
   if (iframeMatch) {
     return parseVideoUrl(iframeMatch[1]);
+  }
+  // VTurb: mesmo aceite de cola de iframe do Panda, em regex PRÓPRIO — a linha
+  // acima fica byte-idêntica de propósito, para o diff provar que o caminho do
+  // Panda não foi tocado. A validação de host/protocolo é feita no ramo abaixo,
+  // depois da recursão: este match só extrai o `src`.
+  const vturbIframeMatch = url.match(/src=["']([^"']+converteai\.net[^"']*)["']/i);
+  if (vturbIframeMatch) {
+    return parseVideoUrl(vturbIframeMatch[1]);
   }
 
   try {
@@ -78,6 +96,15 @@ export function parseVideoUrl(url: string): ParsedVideo {
         return { provider: "panda", videoId: lastPart, embedHost: u.host };
       }
       return { provider: "panda", videoId: null, embedHost: u.host };
+    }
+
+    // VTurb (ConverteAI) — iframe puro, sem SDK, no molde do Panda.
+    // ⚠️ Host EXATO e protocolo https, deliberadamente estritos: o valor vira
+    // `iframe.src` sem mais nenhuma checagem, então "termina com converteai.net"
+    // aceitaria `evil-scripts.converteai.net` e um subdomínio arbitrário.
+    // `u.href` normaliza a URL (é o que vai para o banco e para o src).
+    if (u.protocol === "https:" && host === "scripts.converteai.net") {
+      return { provider: "vturb", videoId: u.href };
     }
 
     return { provider: "unknown", videoId: null };
