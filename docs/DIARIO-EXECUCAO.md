@@ -35,6 +35,82 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-31 — DEMANDA DE CLIENTE — VTURB: QUARTO PROVEDOR DE VÍDEO, EM PRODUÇÃO
+
+**Estado antes:** main em `7c81ceb`
+
+**O que foi feito:** a produtora do workspace `milena-business` (**279 alunos**, 103 aulas, até
+aqui **100% Vimeo**) pediu VTurb. Antes, colar a URL **não dava erro** — a aula era silenciosamente
+rebaixada a *"Aula de leitura e materiais"*. Entrou o **quarto provedor**: parser, quarto ramo do
+player, uma linha de CSP e — o que muda o jogo — **marcação automática da aula por `postMessage`**.
+**Zero migração, zero schema, zero outras telas.**
+
+**Arquivos tocados:** `src/lib/video.ts` · `src/components/video-player.tsx` · `next.config.mjs`
+(**+97/−2**). Docs: `PLANO-MESTRE` (bloco do VTurb, item 9.180, 9.128 atualizado) · `ROADMAP`
+(grupo E3.43) · `DIARIO`.
+
+**Como foi provado:**
+- ⭐ **O DESENHO SAIU DE MEDIÇÃO, NÃO DE LEITURA.** Sonda descartável (`sonda/vturb-csp`,
+  `dab1a1a`), **não mesclada**, com gate humano: **(1)** a CSP precisa **só** de `frame-src` — com
+  `connect-src`, `media-src`, `img-src` e `script-src` **negando**, o vídeo tocou e o evento
+  `securitypolicyviolation` acusou **ZERO** violações ⇒ a cicatriz do **BUG E** (`5e78edd`, em que
+  `frame-src` sozinho não bastou no Vimeo) **não se repetiu**; **(2)** toca em iframe puro, sem SDK;
+  **(3)** existe `postMessage {"type":"videoEnded"}` no instante do fim, entre **~195** mensagens.
+- **A não-regressão, em QUATRO camadas** (os 3 provedores somam **2.315** aulas em produção):
+  `video-player.tsx` **+59/−0** · ramos **YouTube (50), Vimeo (14) e Panda (21) byte-idênticos**
+  aos da `main`, com controle positivo do extrator · parser **transpilado e EXECUTADO** antes/depois
+  com **16 URLs** (só as 2 do VTurb mudaram; os 4 negativos seguem `unknown`) · e **playback com
+  vídeo REAL nos três**.
+- **Sanidade pós-deploy em produção:** contagens **idênticas** à linha de base tirada antes do push
+  — `total=2527 · youtube=1143 · vimeo=116 · panda=1056 · vturb=0`. Header com `converteai` em
+  **exatamente 1 diretiva**. ⭐ **O sinal do deploy foi a própria transição `0 → 1`** de `converteai`
+  no header servido: discrimina sozinha.
+- **Faxina do staging provada:** 5 aulas `[SONDA-VTURB]` apagadas, **restantes = 0**.
+
+**SHA do merge:** **`2421c01`** (`--no-ff`) · papelada em commit separado.
+**Rollback:** `git revert -m 1 2421c01`.
+
+**Mudou em produção para quem:** **ninguém perde nada.** Quem usa YouTube, Vimeo ou Panda não sente
+diferença (provado acima). O que nasce é uma **capacidade**: colar uma URL de VTurb passa a
+funcionar. **Nenhuma aula existente mudou de provedor** (contagens conferidas).
+
+**Ficou aberto:** **9.180** 🟢 (grupo **E3.43**) — a dica do editor não lista o quarto provedor.
+E o **9.128 CONTINUA ABERTO, por decisão registrada**: suportar um provedor a mais **não conserta a
+mecânica**. Wistia, Loom, JWPlayer, link de Drive — todos seguem caindo em `unknown` e sendo
+rebaixados em silêncio. **Fechá-lo por causa do VTurb seria fechar pelo EXEMPLO, não pela CAUSA.**
+
+**⭐ O DIFERENCIAL QUE VALE REGISTRAR:** o VTurb **marca a aula automaticamente e dispara o
+autoplay** — é o **primeiro provedor de iframe puro** do repo capaz disso. O **Panda não emite
+evento nenhum**, e é por isso que suas **1.056** aulas em produção dependem do botão manual
+*"Concluir aula"*. **Dois iframes puros, comportamentos opostos**; a diferença inteira é o provedor
+emitir ou não `postMessage`. As **três travas** da escuta (origem por igualdade estrita · só
+`videoEnded` · uma vez por montagem) e o `removeEventListener` no cleanup existem cada uma por um
+modo de falha distinto — sem a terceira, rever o fim remarcaria a aula; sem o cleanup, trocar de
+aula marcaria a **errada**.
+
+**⚠️ TRÊS LIÇÕES DE MÉTODO, e as três nasceram de erro meu nesta frente:**
+1. ⭐ **Fixture de parser NÃO é conteúdo reproduzível.** Criei "aulas de regressão" com
+   `vimeo.com/76979871` (demo **morta**, oEmbed 404) e um Panda que **eu inventei**
+   (`player-vz-abc12…/embed/?v=VIDEOID123`). O gate humano viu "não toca" e teve de perguntar se era
+   regressão. **Não era — mas o teste também não podia passar**: eu provei *shape de API* e chamei
+   de *regressão de playback*. É a família do *roteiro que passa por vacuidade*.
+2. ⭐ **Validar vídeo de terceiro exige descer até os SEGMENTOS.** No Panda, o vídeo real e o
+   inventado devolvem **HTTP 200 com 2849 bytes byte-idênticos** na página do embed, e ambos
+   entregam um `.m3u8` válido. Só a **variante** discrimina: **53 segmentos / 211,78 s** contra
+   **0 segmentos**. "O host responde" e "o manifesto existe" **não provam nada**.
+3. ⭐ **A recusa que virou regra:** não copiar `videoUrl` de cliente da produção para o staging —
+   seria pôr **conteúdo pago de terceiro** ao alcance de um aluno de teste. O desbloqueio veio de
+   **vídeo do próprio dono**, autorizado por ele. A recusa está registrada porque a **ausência de
+   uma prova precisa ter dono**.
+
+**Regras conferidas:** §17 respondido ✅ · **zero migração** (conferido com controle positivo) ✅ ·
+palco derrubado e provado morto antes de todo build ✅ · prova de alvo discriminante em toda rodada ✅
+· `tsc --noEmit` e `npm run build` verdes **antes** do push ✅ · `merge --no-ff` ✅ · faxina do
+staging provada (count=0) ✅ · gate humano completo ✅ · endereço de item **conferido** antes de
+registrar ✅ · papelada no mesmo fôlego ✅
+
+---
+
 ## 2026-08-31 — CAMADA 3, GRUPO E3.42 — 9.172 FECHADO (rota irmã REMOVIDA) + a poda do 9.174
 
 **Estado antes:** main em `5660aae`
