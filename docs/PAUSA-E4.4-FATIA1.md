@@ -4,18 +4,28 @@
 Nada foi corrigido, nada foi escolhido, nada foi mesclado, nada foi migrado em produção.
 
 Este documento existe para que a retomada não dependa de memória. Quem voltar
-lê daqui, confere os vigias do §1, e só então mexe em código.
+lê daqui, confere os **4 invariantes** do §1, e só então mexe em código.
 
 ---
 
 ## 1. Estado congelado
 
+A fatia foi recortada de `main @ d5349ca`. ⚠️ **Esse SHA é histórico, não âncora:**
+a `main` **vai andar muito** durante o rebranding, e isso é **esperado** — não é
+divergência, não é motivo de PARE. Conferir "a main ainda está em d5349ca" na volta só
+produziria falso alarme.
+
+**O que tem de ser verdade na retomada — os invariantes, que não envelhecem:**
+
+| # | Invariante | Como provar |
+|---|---|---|
+| **I1** | branch `feat/e4.4-fatia1-marca` em **`7d57c40`**, local **e** remota | `git log -1 --format=%h feat/e4.4-fatia1-marca` · `git ls-remote origin refs/heads/feat/e4.4-fatia1-marca` |
+| **I2** | tag `e4.4-fatia1-congelada` **desreferencia** para `7d57c40` | `git ls-remote --tags origin \| grep -F 'e4.4-fatia1-congelada^{}'` ⚠️ **`-F` obrigatório** — sem ele o `^{}` vira regex e a linha some, parecendo tag ausente |
+| **I3** | a fatia **NÃO** está mesclada | `git branch --merged main \| grep -i e4.4` → **vazio** |
+| **I4** | os 4 vigias de produção seguem no baseline | a tabela abaixo |
+
 | | |
 |---|---|
-| `main` | `d5349ca docs: registra as DECISÕES da marca de pertencimento (§12) e abre 9.183-9.188` |
-| branch da fatia | `feat/e4.4-fatia1-marca` @ `7d57c40` (local **e** remota) |
-| tag de selo | **`e4.4-fatia1-congelada`** → `7d57c40` (empurrada; `git ls-remote --tags origin` confirma) |
-| mesclada? | **NÃO.** `git branch --merged main \| grep -i e4.4` = vazio |
 | migração | aplicada **só no staging** (`db push`). **Produção nunca foi tocada.** |
 
 A tag é a proteção: mesmo que a branch seja apagada por engano, `e4.4-fatia1-congelada`
@@ -230,6 +240,96 @@ Estão registradas aqui só para não se perderem. Nenhuma é para esta janela.
 tem de renderizar `<title>Login · Staging Teste</title>` **e** um slug real de produção
 (`applyfy-cursos`, `applyfy-cursos-internos`, `orion-academy`) tem de dar **404**.
 
+### Como o palco nasce — o molde da casa PRIMEIRO
+
+**`scripts/seed-staging.mjs`** (329 linhas, idempotente, aborta se o REF não for staging):
+
+```
+npx dotenv -e .env.staging -- node scripts/seed-staging.mjs
+```
+
+⚠️ **Pré-requisito escrito no próprio cabeçalho (`:19`): a app de pé em
+`http://localhost:3000`** — o seed usa as **rotas reais** (`POST /api/auth/register-producer`,
+`/api/workspaces`, `/api/courses`, `/api/courses/[id]/students`, `/api/posts`,
+`/api/producer/collaborators`, `/api/producer/community/groups`, `/api/producer/moderation`).
+A senha de todo o elenco é `Staging@2026!` (`:33`).
+
+**O que ele JÁ cobre:** os workspaces `staging-teste` e `workspace-b-staging`; os cursos
+`curso-teste`, `curso-teste-2` (`:125`) e `curso-b` (`:162`); e **14 personas**, entre elas
+`producer-staging`, `aluno-staging`, `aluno-b`, `dono-b`, `admin-staging`, os seis
+`colab-*`, `sem-vinculo` e as duas de suporte.
+
+**O que ele NÃO cobre** — medido por `grep -c` no arquivo, **0 ocorrências de cada**:
+`createUser`, `email_confirm`, `admin.auth`, `WorkspaceCredential`, `generateSalt`,
+`hashPassword`, `workspaceMembership`, `isFree`. E não cria `curso-pago-palco`,
+`curso-corrida-923`, `marca-only-f1` nem `sem-marca-f1`. **Tudo isso é acréscimo manual.**
+
+⚠️ **`sem-vinculo@staging.test` NÃO serve como controle negativo da marca.** Ele nasce por
+`POST /api/auth/register-producer` (`seed-staging.mjs:224`), é **PRODUCER** e não tem
+`WorkspaceCredential` em `staging-teste`. O controle precisa ser idêntico ao sujeito
+**menos a marca** — por isso `sem-marca-f1` existe.
+
+#### Por que as duas personas da marca saem FORA do caminho real
+
+O molde da casa cria aluno pela rota real `POST /api/courses/[id]/students`
+(`seed-staging.mjs:169`) — mas essa rota **cria matrícula**, e matrícula destrói
+exatamente a propriedade que define o sujeito ("nenhuma das 3 vias"). A rota que criaria
+a marca pelo caminho real é **o cadastro público, que é a fatia 2 e ainda não existe**.
+Por isso — e só por isso — estas duas nascem por script direto.
+
+#### Receita das duas personas
+
+Script **temporário**, fora de `scripts/` (não é peça da casa; some quando a fatia 2
+chegar). Para cada persona, nesta ordem:
+
+1. **Supabase Auth** — `admin.auth.admin.createUser({ email, password: "Staging@2026!",
+   email_confirm: true })`, com a `SUPABASE_SERVICE_ROLE_KEY` de **staging**.
+   ⚠️ Sem este passo o login falha mesmo com credencial correta: `w/[slug]/login` monta a
+   sessão do aluno por **magic link** (`admin.auth.admin.generateLink` → `verifyOtp`), e o
+   `generateLink` exige que o usuário exista no Auth.
+2. **`User` do Prisma** — `id` **igual ao id do Auth** (a casa mantém os dois iguais),
+   `role: "STUDENT"`.
+3. **`WorkspaceCredential`** no workspace de slug `staging-teste` —
+   `salt = generateSalt()` e `passwordHash = hashPassword(SENHA, salt)`, **ambos importados
+   de `src/lib/workspace-auth.ts`** (`generateSalt` em `:14`, `hashPassword` em `:18`).
+   ⚠️ **Reusar as funções da casa, nunca reimplementar o scrypt** — hash divergente
+   produz um "login não funciona" que parece defeito de gate e não é.
+4. **⭐ Só para `marca-only-f1`** — a linha da marca:
+   ```
+   WorkspaceMembership { userId, workspaceId, origin: "PUBLIC_SIGNUP" }
+   ```
+   `id` (uuid) e `createdAt` têm default; **`origin` NÃO tem default, por decisão** — todo
+   escritor declara por onde a pessoa entrou. O par é único: `@@unique([userId, workspaceId])`,
+   e é essa unique que faz dois cadastros simultâneos colidirem em `P2002` em vez de criar
+   duas linhas. O enum tem **um valor só**: `PUBLIC_SIGNUP`.
+5. **Provar por `SELECT`**, não presumir: o sujeito com `marca=1`, `matrículas=0`,
+   `colaborações ACCEPTED=0`, `workspaces próprios=0`, `credencial=1`; o controle idêntico
+   com `marca=0`.
+
+⚠️ **`sem-marca-f1` é os passos 1-3 SEM o passo 4.** Essa é a única diferença entre as duas
+contas — e é ela que dá poder discriminante ao gate: sem isso, um 403 não prova nada.
+
+🔴 **A tabela da marca só existe se a branch estiver aplicada.** A migração
+`prisma/migrations/20260831190000_add_workspace_membership/migration.sql` vive **só em
+`feat/e4.4-fatia1-marca`** (0 ocorrências em `prisma/migrations/` na `main`). Num staging
+recriado do zero, o **passo 4 falha** até que a branch esteja em uso e a migração aplicada
+— e em staging isso é **`db push`**, nunca `migrate deploy` (staging tem lacuna de
+histórico de migração).
+
+#### Os dois cursos do palco que o seed não cria
+
+`curso-pago-palco` (`isFree:false`, `isPublished:true`) e `curso-corrida-923`
+(`isFree:true`, `isPublished:true`), ambos em `staging-teste`. Recriá-los pela **rota
+real** `POST /api/courses` com o jar do `producer-staging` — o mesmo caminho que o seed usa
+em `:125` e `:162`. ⓘ `isFree` **não aparece no seed**, mas a rota **aceita**: é
+desestruturado do corpo em `src/app/api/courses/route.ts:260` e gravado em `:332` como
+`isFree: isFree === true` — então basta mandá-lo no `POST`. (`showInStore` idem, `:259` →
+`:330`, com default `!== false`.)
+
+⚠️ **Sempre por SLUG, nunca por id** — `staging-teste`, `workspace-b-staging`,
+`curso-teste`, `curso-teste-2`, `curso-pago-palco`, `curso-corrida-923`. Ids mudam num
+Restore ou numa recriação; slugs não.
+
 ### Personas — senha de todas: `Staging@2026!`
 
 | Persona | Papel no roteiro |
@@ -273,9 +373,13 @@ não a árvore de trabalho.
 
 ## 10. CHECKLIST DE RETOMADA — nesta ordem
 
-- [ ] **(a) Reconferir os 4 vigias do §1** em produção (`SELECT`, com alvo impresso e
-      controle positivo). Esperado: `null` · 0 · 0 · 66/5. **Qualquer divergência muda as
-      premissas — investigar antes de seguir.**
+- [ ] **(a) Conferir os 4 invariantes do §1** — **I1** branch em `7d57c40` (local e
+      remota) · **I2** tag desreferenciando para `7d57c40` (com `grep -F`) · **I3**
+      `--merged main | grep -i e4.4` vazio · **I4** os 4 vigias de produção (`SELECT`,
+      com alvo impresso e controle positivo): `null` · 0 · 0 · 66/5.
+      ⚠️ **NÃO conferir o SHA da `main`** — ela terá andado, e isso é esperado.
+      **Divergência em I1, I2 ou I3 é PARE.** Divergência em I4 muda as premissas da
+      etapa 5 — investigar antes de seguir.
 - [ ] **(b) Trazer a `main` de volta para a branch** e resolver a colisão, consultando a
       lista do §2. `git checkout feat/e4.4-fatia1-marca && git merge main`. Atenção
       especial a `prisma/schema.prisma` e `src/lib/workspace-access.ts`.
