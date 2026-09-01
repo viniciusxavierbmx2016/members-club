@@ -151,6 +151,9 @@ conflito na retomada. Ver `docs/PAUSA-E4.4-FATIA1.md` §2.
 > evidência não medida (Q2) e achou saída fora do código (Q3). As opções A/B/C
 > ficam abaixo como **histórico**, e o que vale agora é o **processo**.
 
+📐 **A medição do passo 1 já foi feita — ver §12 (D6 — a arqueologia).** Números
+finais: **16 esmagador · 12 personalizou o login · 13 ambíguo**, corte 01/set/26.
+
 **O problema.** `Workspace.loginBgColor`, `loginPrimaryColor`, `loginBoxColor`,
 `loginSideColor` e `loginLinkColor` têm `@default` no schema ⇒ **a cor é gravada
 na ESCRITA**. Medido: `loginPrimaryColor` tem **0 NULL** e **25 de 39**
@@ -472,8 +475,8 @@ https://*.supabase.in` ([next.config.mjs:50](../next.config.mjs)) e
 `images.remotePatterns` só aceita supabase. **Asset de marca em CDN de terceiro
 é bloqueado em silêncio** — a CSP é enforcing e **não tem `report-uri`**.
 
-**🟠 ACHADO NOVO (01/set/26) — o toggle claro/escuro do painel do produtor não
-altera as variáveis `--producer-*`.** Observado no gate da F0: a classe do
+**✅ FECHADO (01/set/26) — o toggle claro/escuro do painel: é INTENCIONAL, não
+botão morto.** Observado no gate da F0: a classe do
 `<html>` muda de `dark` para `light` e **o painel continua igual**.
 
 🔴 **NÃO é efeito da F0**, e isto está provado, não suposto: o diff da F0 é
@@ -485,14 +488,42 @@ altera as variáveis `--producer-*`.** Observado no gate da F0: a classe do
 #191919`). Se o toggle não muda as `--producer-*`, **essa metade pode não ter
 destino no painel**.
 
-Duas hipóteses, **nenhuma medida**:
-1. **Intencional** — as cores do produtor são valores absolutos escolhidos por
-   ele, não um par claro/escuro; o toggle governaria só o que o Tailwind resolve
-   por `dark:`.
-2. **Botão morto** — o toggle deveria trocar e não troca.
+#### O veredito, medido
 
-⇒ **MEDIR no passo 1 da F3**, junto com os 5 campos de login da **D6**. **Não
-consertar agora** — sem saber qual das duas é, qualquer conserto é chute.
+| Sonda | Resultado |
+|---|---|
+| `--producer-*` **definida** no `globals.css` | **0** |
+| `--producer-*` **usada** (`var(`) no `globals.css` | **62** ⭐ controle: a sonda enxerga |
+| Blocos `dangerouslySetInnerHTML` no provider | **1** |
+| Esse bloco contém `.dark`? | **0** |
+| No HTML servido: `:root{--producer-` / `.dark{--producer-` | **1 / 0** |
+
+As 15 linhas com `.dark` + `--producer-` no `globals.css` são **uso, não
+definição** — `--producer-xxx:` fora de `var()` dá **0** ali. São regras como
+`.dark .producer-layout .dark\:text-blue-400 { color: var(--producer-primary, …) }`.
+
+⇒ **Existe UM ÚNICO conjunto de `--producer-*`.** Não há par claro/escuro. O
+toggle troca a classe do `<html>` (`next-themes`, `attribute="class"`,
+`theme-provider.tsx:9`) e as variáveis permanecem — **por construção**.
+E a chave `mode` do `themeConfig` **não muda cor nenhuma**: em
+`producer-theme-provider.tsx:65-66` e `producer/settings/page.tsx:63-64` ela só
+chama `setNextTheme(mode)` — persiste qual classe o `next-themes` põe, nada mais.
+
+**Não é botão morto:** ele funciona, e as centenas de utilitários `dark:` do app
+respondem. O que não responde são as `--producer-*`, e isso é o desenho.
+
+#### 🔴 A consequência — decisão PENDENTE da F3
+
+A metade clara da paleta (`bg/base #FFFFE6` · `surface #FEFFE6` · `elevated
+#FBFFC2` · `text/primary #191919`) **não tem destino automático no painel do
+produtor**. Com um conjunto único, ela só entra por um de dois caminhos:
+
+1. **virar o novo default do conjunto único** — e aí o painel fica **claro para
+   todos que não personalizaram**;
+2. **criar um segundo conjunto** `.dark`/`.light` para as `--producer-*` — o que
+   **hoje não existe** e é **mudança de arquitetura**, não troca de valor.
+
+**Nenhum dos dois foi escolhido.**
 
 **🟡 As duas leis não se referenciam.** A skill do repo —
 `.claude/skills/membersclub-engineering/SKILL.md`, **35.283 B** — **não cita
@@ -616,3 +647,127 @@ cat "${CSS[@]}" | grep -o -F -e "--producer-primary" | wc -l
 `.next/static/css/` **não existe** (o CSS vive em `.next/static/chunks/`), e
 `grep -o -F "--producer-primary"` **falha** — o `--` vira opção; é preciso
 `-e` ou `--`. Nos dois casos o erro devolve **0**, que se lê como "limpo".
+
+---
+
+## 12. D6 — a arqueologia
+
+**Medido em 01/set/26. Data de corte de toda contagem desta seção: 01/set/26.**
+Nenhuma decisão tomada aqui — esta seção existe para que a decisão do dono seja
+tomada sobre números, não sobre premissa.
+
+### 12.1 As cinco migrações
+
+Datas **reais de aplicação**, lidas de `_prisma_migrations` em produção:
+
+| Migração | Aplicada | O que fez |
+|---|---|---|
+| `20260413120000_add_workspace` | **13/04 03:44** | `loginBgColor TEXT` — **SEM default** |
+| `20260414030000_workspace_login_customization` | 14/04 23:14 | `loginBgColor` → `#0f172a` · `loginPrimaryColor` → `#3b82f6` |
+| `20260414040000_workspace_login_box_colors` | 14/04 23:43 | `loginBoxColor` → `#1e293b` · `loginSideColor` → `#0f172a` |
+| `20260414050000_workspace_login_link_color` | 15/04 00:07 | `loginLinkColor` → `#3b82f6` |
+| `20260415010000_workspace_login_default_theme` | **15/04 14:36** | trocou os 5 para os defaults **atuais** |
+
+### 12.2 A migração de 15/04 NÃO reescreveu linha nenhuma
+
+O arquivo tem 6 linhas, todas `ALTER TABLE … ALTER COLUMN … SET DEFAULT`.
+**`SET DEFAULT` não retroage** — linha existente fica como estava.
+
+⚠️ **Armadilha do grep, registrada:** `grep -ci update` no arquivo devolve **1**,
+e o 1 é o **comentário da linha 1** (*"Update workspace login theme defaults…"*).
+Controle: `UPDATE "` existe em **2 outras** migrações (`20260413120000_add_workspace`
+e `20260718000000_add_gateway_dimension`), então a sonda enxerga — o zero aqui é real.
+
+### 12.3 🔴 A CORREÇÃO DA PREMISSA
+
+A versão anterior desta decisão dizia: *"25 workspaces carregam `#6366f1` em
+`loginPrimaryColor` e são indistinguíveis"*. **A régua estava errada.**
+
+Ela comparava contra o default **atual**. A régua certa é **"fora de TODO default
+histórico"** — porque um valor que já foi default em algum momento **não é escolha**.
+
+Distribuição real de `loginBgColor` (41 workspaces):
+
+| Valor | Qtd | O que é |
+|---|---|---|
+| **`#0f172a`** | **17** | o default de 14/04 — **não é escolha** |
+| `(NULL)` | **15** | nasceu antes de o campo ter default |
+| 8 valores distintos | 9 | escolha real (`#3b2418`, `#49834d`, `#1c0f0d`, `#121212`, `#1b1b1f`, `#07090f`, `#ffffff`, `#000000`×2) |
+
+Nos outros quatro, mesmo padrão: `loginPrimaryColor` 27 atual + **5 antigo** + 9;
+`loginBoxColor` 28 + **4** + 9; `loginSideColor` 33 + **6** + 2; `loginLinkColor`
+27 + **6** + 8.
+
+⇒ **17 dos que pareciam escolha são resíduo de `#0f172a`.**
+
+### 12.4 ⭐ E há uma TERCEIRA fonte de verdade: a UI diverge do schema
+
+`src/app/producer/workspaces/[id]/edit/_lib/helpers.ts:44-49` tem defaults
+**próprios**, e são os **de 14/04** — ninguém os atualizou quando a migração de
+15/04 trocou os do banco:
+
+| Campo | SCHEMA | UI (`helpers.ts`) | coincide? |
+|---|---|---|---|
+| `loginBgColor` | `#0a0a1a` | `#0f172a` | 🔴 |
+| `loginPrimaryColor` | `#6366f1` | `#3b82f6` | 🔴 |
+| `loginBoxColor` | `#1a1a2e` | `#1e293b` | 🔴 |
+| `loginSideColor` | `#0a0a1a` | `#0f172a` | 🔴 |
+| `loginLinkColor` | `#818cf8` | `#3b82f6` | 🔴 |
+
+**Os 5 divergem.** Consequência: quando o produtor abre a aba de login e **salva
+sem mexer em nada**, o formulário grava `#0f172a`/`#3b82f6`/`#1e293b`. Aqueles
+valores **não são resíduo histórico — são default de UI ATIVO, gravado hoje**.
+
+E o `@default` de `loginBgColor` é **letra morta**: `api/workspaces/route.ts:73`
+faz `v.data.loginBgColor ?? null` e `:96` grava o campo, então um `INSERT` com
+`NULL` explícito **anula o default do schema**. Prova viva: dos 2 workspaces
+criados em **01/09**, um nasceu com `#0f172a` e o outro com **`null`** — nenhum
+com o `#0a0a1a` do schema.
+
+### 12.5 Os três grupos — e a pergunta certa
+
+⚠️ **Corrigi minha própria régua no meio da medição.** A primeira versão
+classificava por "quantas famílias tocou", e isso punha em *ambíguo* gente com
+`themeConfig` contendo `#ffca10` ou `#5900ff` — cores que **decidem sozinhas**.
+A pergunta da D6 não é *"quem personalizou algo"*, é **"para quem posso trocar o
+login sem risco"**.
+
+**Critério final:** o login está em algum default histórico? E há sinal de escolha
+nas outras 4 famílias (`themeConfig` fora do histórico · logo/favicon/banner ·
+5 cores de vitrine · 3 de e-mail)?
+
+| Grupo | Qtd | Definição |
+|---|---|---|
+| **A · ESMAGADOR** | **16** | login em default histórico **e** zero sinal nas outras 4 — **10 deles com `updatedAt = createdAt`** (nunca salvaram nada) |
+| **B · PERSONALIZOU O LOGIN** | **12** | valor fora de todo default histórico — inequívoco |
+| **C · AMBÍGUO** | **13** | login em default, **mas** personalizou noutra família |
+| | **41** | |
+
+Os 13 ambíguos: 8 só por `themeConfig`, 3 só por logo, 1 por tema+logo, 1 por
+tema+vitrine. Todos com o login intocado.
+
+⭐ **Controle contra vacuidade:** `Ebenézer 2.0` (0 sinais, `updatedAt = createdAt`)
+e `3N Trader` (os 5 campos de login fora de qualquer default, mais tema, logo,
+vitrine e e-mail). **A régua separa os dois extremos.**
+
+ⓘ **Sobre o `themeConfig`:** dos **15** preenchidos, **14 são inequivocamente
+diferentes** (`#ffca10`, `#E53935`, `#42db00`, `#5900ff`, `#d968b0`…) e **1 é
+idêntico a um default histórico** (`Funil Oculto`) — este último não conta como
+escolha. O `themeConfig` também teve defaults históricos: `primaryColor` era
+`#6366F1` até `6c55aa1` (25/04, *"indigo→blue sweep"*) e `cardColor` era
+`#0a0e19` até `19a85bc` (17/05).
+
+### 12.6 O alvo é móvel
+
+**41 workspaces, não 39** — o baseline de 31/08 já está desatualizado: `Desdobra` e
+`Digital Academy` nasceram em **01/09**.
+
+| Janela | Criados |
+|---|---|
+| últimos 7 dias | **2** |
+| últimos 30 dias | **8** |
+
+Um workspace criado hoje entra direto no grupo **A** ou **C** — nasce com os
+defaults e ninguém tocou em nada. **É argumento de PRAZO, não de pressa:** cada
+dia adiciona casos, e qualquer corte precisa de **data de referência explícita**.
+A desta seção é **01/set/26**.
