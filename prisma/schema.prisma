@@ -68,6 +68,7 @@ model User {
   studentSupportTickets CourseSupportTicket[]  @relation("StudentSupportTickets")
   courseSupportMessages CourseSupportMessage[] @relation("CourseSupportMessages")
   workspaceCredentials WorkspaceCredential[]
+  workspaceMemberships WorkspaceMembership[]
   pointsLedger         PointsLedger[]
 
   @@index([workspaceId])
@@ -141,6 +142,7 @@ model Workspace {
   tags                 Tag[]
   lives                Live[]
   workspaceCredentials WorkspaceCredential[]
+  workspaceMemberships WorkspaceMembership[]
   externalProducts     CourseExternalProduct[]
   notifications        Notification[]
   pushSubscriptions    PushSubscription[]
@@ -169,6 +171,55 @@ model WorkspaceCredential {
   @@unique([userId, workspaceId])
   @@index([workspaceId])
   @@index([resetToken])
+}
+
+/// E4.4 etapa 5 — POR QUE a pessoa pertence a este workspace. Enum e nao
+/// boolean, espelhando `EnrollmentOrigin`: estado com nome e o padrao da casa.
+/// ⚠️ UM valor so, de proposito. `EnrollmentOrigin` tem `UNKNOWN` porque nasceu
+/// sobre 22 mil linhas sem origem registrada; esta tabela nasce VAZIA, entao
+/// nao ha passado a rotular. Valor novo entra quando existir via nova de
+/// nascer — nao antes.
+enum WorkspaceMembershipOrigin {
+  /// Cadastro publico na vitrine do produtor (a fatia seguinte).
+  PUBLIC_SIGNUP
+}
+
+/// E4.4 etapa 5 — A MARCA DE PERTENCIMENTO. Decisoes canonicas no §12 do
+/// `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md`.
+///
+/// A pessoa pertence ao workspace SEM ter comprado nada: ve a vitrine, pode
+/// resgatar o gratuito e comprar. ⚠️ A marca NAO da conteudo — em curso, aula,
+/// material, live, chat, comunidade e certificado quem manda e a MATRICULA
+/// (§12.3). A leitura e OPT-IN por call-site (`allowMembership` em
+/// `lib/workspace-access.ts`), justamente para a Porta 3 nao abrir junto.
+///
+/// ⚠️ Cancelar matricula NAO apaga a marca (§12.2): o cancelamento tira o
+/// CURSO, nao o PERTENCIMENTO — a pessoa volta a ser "so cadastrada".
+///
+/// Molde: `WorkspaceCredential` — a silhueta da casa para "1 linha por par
+/// (pessoa, workspace)".
+model WorkspaceMembership {
+  id          String                    @id @default(uuid())
+  userId      String
+  workspaceId String
+  /// Sem @default: todo escritor declara por onde a pessoa entrou. Default
+  /// silencioso e como se perde a origem — a licao do `UNKNOWN`.
+  origin      WorkspaceMembershipOrigin
+  createdAt   DateTime                  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  /// A identidade da marca E a consulta quente ("esta pessoa pertence a este
+  /// workspace?"). ⚠️ E tambem a defesa contra corrida: dois cadastros
+  /// simultaneos colidem em P2002 em vez de criar duas linhas.
+  @@unique([userId, workspaceId])
+  /// FK com Cascade PRECISA de indice proprio: o Postgres nao indexa FK
+  /// sozinho, e sem ele o delete do workspace vira varredura. Serve tambem a
+  /// futura listagem "quem pertence a este workspace".
+  /// ⓘ Sem `@@index([userId])`: a unique ja o cobre como prefixo a esquerda —
+  /// mesma razao pela qual `WorkspaceCredential` tambem o omite.
+  @@index([workspaceId])
 }
 
 enum Role {

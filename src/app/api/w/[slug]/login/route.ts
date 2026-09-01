@@ -247,6 +247,9 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
     // exigir ACCESS_MEMBER_AREA; matrícula e posse seguem entrando como sempre.
     const allowed = await hasWorkspaceAccess(user.id, workspace.id, {
       requireMemberPermission: true,
+      // E4.4 §12.3 — PORTA 1. A marca resolve o gate de VÍNCULO; a autenticação
+      // acima (credencial do workspace / senha global) continua exigida.
+      allowMembership: true,
     });
     if (!allowed) {
       return NextResponse.json(
