@@ -239,7 +239,7 @@ com investigação própria.
 
 | Fatia | O que entrou | Arquivos | SHA | Prova de máquina | Gate humano | Data |
 |---|---|---|---|---|---|---|
-| **F0** | 4 cópias dos defaults do painel viraram 1 (`src/lib/theme-constants.ts`); consumidores ganharam 1 linha de alias cada. **Zero mudança de valor.** | **5** (1 novo + 4 modificados), −40/+8 | `caebebc` | diff de valor contra `git show HEAD:` → **8/8 idênticos** · literais antigos nos 4 alterados → **0** · `tsc --noEmit` **exit 0** · build de staging verde (`UgE92EXkbvYifZDfTatVj`) · alvo: ref staging **1**, ref produção **0** · `git status` = exatamente 5 linhas | ⏳ **PENDENTE** | 01/set/26 |
+| **F0** ✅ | 4 cópias dos defaults do painel viraram 1 (`src/lib/theme-constants.ts`); consumidores ganharam 1 linha de alias cada. **Zero mudança de valor.** | **5** (1 novo + 4 modificados), −40/+8 | `caebebc` → merge **`546c167`** | diff de valor contra `git show HEAD:` → **8/8 idênticos** · literais antigos nos 4 alterados → **0** · `tsc --noEmit` **exit 0** · build de staging verde (`UgE92EXkbvYifZDfTatVj`) · alvo: ref staging **1**, ref produção **0** · `git status` = exatamente 5 linhas | ✅ **PASSOU 7/7** — 01/set/26 | 01/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
@@ -257,6 +257,36 @@ todas com `themeConfig = '{}'` (medido). O caso "COM personalização" **precisa
 ser criado pela tela**, e isso é melhor que semear: o ato exercita
 `PUT /api/producer/theme`, que é um dos 4 arquivos alterados. O passo 5 exercita
 o `DELETE` (`route.ts:113`).
+
+#### ✅ Resultado do gate — 01/set/26, **7/7**, merge `546c167`
+
+**A evidência decisiva:** após salvar `#FF6600` e depois **resetar**, as **6
+variáveis `--producer-*` voltaram idênticas** ao estado inicial — medidas por
+**`getComputedStyle`**, não por descrição de aparência. É a prova de que o
+caminho `DELETE → { ...DEFAULTS }` (`api/producer/theme/route.ts:113`), agora
+alimentado pelo arquivo novo, devolve exatamente o que devolvia antes.
+
+**Como o gate foi executado, para quem for repetir:**
+- por **agente de navegador**, com a **sessão já autenticada** — o passo de
+  login não foi exercitado nesta rodada;
+- a medição foi por **`getComputedStyle`**, não por captura de tela nem por
+  julgamento visual. Isso importa: aparência descrita é opinião; valor computado
+  é medida.
+
+**Contaminação do palco, medida depois (`SELECT`, alvo staging impresso):**
+`producer-staging@staging.test` está de volta em `themeConfig = '{}'`, **0**
+contas com `#FF6600` remanescente, e **15 de 15** contas que abrem o painel
+estão em `'{}'`.
+
+ⓘ **Correção de contagem:** o baseline dizia "16 contas". São **15 pessoas** —
+4 staff + 11 híbridos distintos. O 16 vinha de contar **linhas de
+`Collaborator`**, e `colab-duplo@staging.test` tem **2**. Nenhuma conta sumiu.
+
+⚠️ **Armadilha do palco, registrada:** **2 dos 3 cursos** de `staging-teste`
+(`curso-pago-palco` e `curso-corrida-923`) têm **0 módulos**. Isso já contaminou
+uma medição anterior desta frente — um "0 módulos" foi lido como recorte de
+payload quando era só curso vazio. Quem medir conteúdo no palco tem de escolher
+`curso-teste` (2 módulos, 4 aulas).
 
 ---
 
@@ -318,6 +348,28 @@ workspace** — o produtor não consegue tirar a marca do PDF do aluno dele.
 https://*.supabase.in` ([next.config.mjs:50](../next.config.mjs)) e
 `images.remotePatterns` só aceita supabase. **Asset de marca em CDN de terceiro
 é bloqueado em silêncio** — a CSP é enforcing e **não tem `report-uri`**.
+
+**🟠 ACHADO NOVO (01/set/26) — o toggle claro/escuro do painel do produtor não
+altera as variáveis `--producer-*`.** Observado no gate da F0: a classe do
+`<html>` muda de `dark` para `light` e **o painel continua igual**.
+
+🔴 **NÃO é efeito da F0**, e isto está provado, não suposto: o diff da F0 é
+**−40/+8 só de literais**, com **igualdade de valor 8/8** contra
+`git show HEAD:`. O comportamento é anterior à fatia.
+
+**Por que entra nos riscos desta frente:** a paleta nova tem **metade clara**
+(`bg/base #FFFFE6`, `surface #FEFFE6`, `elevated #FBFFC2`, `text/primary
+#191919`). Se o toggle não muda as `--producer-*`, **essa metade pode não ter
+destino no painel**.
+
+Duas hipóteses, **nenhuma medida**:
+1. **Intencional** — as cores do produtor são valores absolutos escolhidos por
+   ele, não um par claro/escuro; o toggle governaria só o que o Tailwind resolve
+   por `dark:`.
+2. **Botão morto** — o toggle deveria trocar e não troca.
+
+⇒ **MEDIR no passo 1 da F3**, junto com os 5 campos de login da **D6**. **Não
+consertar agora** — sem saber qual das duas é, qualquer conserto é chute.
 
 **🟡 As duas leis não se referenciam.** A skill do repo —
 `.claude/skills/membersclub-engineering/SKILL.md`, **35.283 B** — **não cita
