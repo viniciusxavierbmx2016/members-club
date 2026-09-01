@@ -110,6 +110,8 @@ STAFF_ROLES = { PRODUCER, ADMIN, COLLABORATOR, ADMIN_COLLABORATOR }
 
 ## 5) ESTADO (puxado do PLANO-MESTRE)
 
+**🎨 REBRANDING 2026 em andamento — ver docs/REBRANDING-2026.md · branch de integração `feat/rebranding`**
+
 **E4.4 etapa 5, fatia 1 (marca de pertencimento) — ⏸️ PAUSADA em 31/ago/26 — ver docs/PAUSA-E4.4-FATIA1.md**
 
 **FEITO (merge SHA):**
