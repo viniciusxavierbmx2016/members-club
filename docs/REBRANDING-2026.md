@@ -144,21 +144,59 @@ a env de produção, **um preview roda `migrate deploy` contra a produção**.
 conflito na retomada. Ver `docs/PAUSA-E4.4-FATIA1.md` §2.
 
 ### D6 — 🔴 PENDENTE: os 5 campos de login com `@default` · **TRAVA A F3**
-`Workspace.loginBgColor`, `loginPrimaryColor`, `loginBoxColor`, `loginSideColor`
-e `loginLinkColor` têm `@default` no schema ⇒ **a cor é gravada na ESCRITA**.
-Medido: `loginPrimaryColor` tem **0 NULL** e **25 de 39** exatamente em
-`#6366f1` — **indistinguíveis** entre "nunca abriu a tela" e "escolheu esse
-índigo". É exatamente o caso que a regra central proíbe presumir.
-*(E há uma inconsistência dentro do próprio grupo: `loginBgColor` tem
-`@default("#0a0a1a")` mas **zero** linhas com esse valor e 14 NULL.)*
 
-| Opção | O que é | Custo |
+> ⚠️ **CORRIGIDA em 01/set/26 pela P0.** A versão anterior escolhia entre **três
+> opções que partiam de uma premissa não medida** — *"a cor salva é a única
+> evidência de que a pessoa personalizou"*. A P0 recusou a premissa (Q1), apontou
+> evidência não medida (Q2) e achou saída fora do código (Q3). As opções A/B/C
+> ficam abaixo como **histórico**, e o que vale agora é o **processo**.
+
+**O problema.** `Workspace.loginBgColor`, `loginPrimaryColor`, `loginBoxColor`,
+`loginSideColor` e `loginLinkColor` têm `@default` no schema ⇒ **a cor é gravada
+na ESCRITA**. Medido: `loginPrimaryColor` tem **0 NULL** e **25 de 39**
+exatamente em `#6366f1`. *(E há inconsistência dentro do próprio grupo:
+`loginBgColor` tem `@default("#0a0a1a")` mas **zero** linhas com esse valor e 14
+NULL.)*
+
+#### O PROCESSO (é isto que vale)
+
+**1. MEDIR — read-only, primeiro passo da F3.** Antes de qualquer escolha:
+   - **cruzar os 5 campos de login** com `themeConfig`, `logoUrl`, cor de vitrine
+     e cor de e-mail — quem personalizou de verdade tende a ter mexido em mais
+     de uma coisa;
+   - **`updatedAt`** de cada linha;
+   - **a data em que o `@default` entrou no schema** × a data de criação de cada
+     workspace — quem nasceu *antes* do default não pôde tê-lo recebido no
+     INSERT.
+   **Saída exigida:** quantos dos 25 têm **evidência esmagadora** e quantos são
+   **ambíguos de verdade**. Sem esse número, nada avança.
+
+**2. APLICAR só nos esmagadores**, por **shim de LEITURA** — zero escrita, zero
+   schema, **atrás de uma constante única que desliga tudo**.
+
+**3. NÃO ENCOSTAR no resíduo ambíguo.** Fica com a aparência de hoje.
+
+**4. AVISAR os 39 antes de publicar.** Quem salvar a cor no painel **trava a
+   aparência atual e resolve a própria ambiguidade** — é a Q3 da P0 em ação:
+   quando o dado não distingue, pergunta-se ao dono do dado.
+
+**5. MEDIR DEPOIS.** Quantos produtores mexeram na cor em **2 semanas**. É o
+   sinal de acerto *ou de erro* que a Q5 exige.
+
+**6. REGISTRAR o conserto de raiz** — parar de persistir o padrão no INSERT —
+   para **depois do descongelamento do E4.4**. É schema, hoje bloqueado pela
+   **D5**.
+
+#### Histórico — as três opções superadas
+
+| Opção | O que era | Por que foi superada |
 |---|---|---|
-| **A** | não encostar nos 5 — login fica azul | zero risco, identidade fica pela metade |
-| **B** | migrar no banco (`UPDATE` dos que estão no default) | escrita irreversível em 39 workspaces; erra e apaga escolha real |
-| **C** ⭐ | *shim* de leitura: tratar "== default antigo" como "não personalizado" no ponto de leitura | **zero escrita, zero schema, reversível por `git revert`** |
+| **A** | não encostar nos 5 | trata os 25 como bloco único; nem tenta separar quem é evidente |
+| **B** | migrar no banco (`UPDATE`) | escrita irreversível sobre 39 workspaces, decidida por adivinhação |
+| **C** | shim de leitura para todos os 25 | a forma certa aplicada ao conjunto errado — **sobrevive como o passo 2**, agora restrito aos esmagadores |
 
-**Recomendada: C.** Decisão do dono, ainda **não tomada**.
+**Decisão do dono, ainda não tomada.** O que mudou é que agora ela é tomada
+**depois** do passo 1, não antes.
 
 ### D7 — Os 12 fallbacks de `--member-primary` ficam para a F4 · 01/set/26
 Unificá-los **muda pixel para quem não personalizou** — é mudança visual real,
@@ -281,6 +319,14 @@ https://*.supabase.in` ([next.config.mjs:50](../next.config.mjs)) e
 `images.remotePatterns` só aceita supabase. **Asset de marca em CDN de terceiro
 é bloqueado em silêncio** — a CSP é enforcing e **não tem `report-uri`**.
 
+**🟡 As duas leis não se referenciam.** A skill do repo —
+`.claude/skills/membersclub-engineering/SKILL.md`, **35.283 B** — **não cita
+`docs/DEV-BRABO.md`** (0 ocorrências, medido). As duas leis convivem sem
+ponteiro entre si, então quem lê uma pode não saber que a outra existe — e a
+**P0 mora só no DEV-BRABO**. ⚠️ A skill do **repo** é a canônica; a cópia
+instalada no claude.ai **pode divergir** e não é verificável daqui. Registrado
+como arrumação; **não editei a skill**.
+
 **🟠 Colisão com a fatia congelada.** `src/app/api/w/[slug]/init/route.ts` tem
 **20 referências de cor/marca** — mas são **nomes de campo** (`logoUrl`,
 `loginBgColor`, `accentColor`, os 6 `member*Color` em dois selects), **não
@@ -318,3 +364,80 @@ centralizar, não um extra.
 3. lições no **§9**.
 
 Fatia sem registro aqui vira item-fantasma — a casa já pagou por isso.
+
+---
+
+## 11. BASELINE MEDIDO (pré-virada)
+
+**Data:** 01/set/26 · **`BUILD_ID`: `UgE92EXkbvYifZDfTatVj`** · palco local
+(`next start`, alvo staging provado: ref staging ≥ 1, ref produção 0).
+
+⚠️ **Por que este baseline vale como "antes da virada de cor", mesmo tendo sido
+medido sobre o build da F0:** a F0 provou **igualdade de valor 8/8** contra
+`git show HEAD:` — nenhum dos 8 defaults mudou. O que a F0 alterou foi de onde o
+valor vem, não qual ele é. Se algum tivesse mudado, este baseline estaria
+contaminado e não serviria.
+
+⇒ **A partir daqui, F3 e F4 comparam CONTRA ESTES NÚMEROS, não contra memória.**
+
+### (a) Páginas públicas — variáveis de tema emitidas no HTML
+
+| Página | `<style>` | `--producer-*` | `--member-*` |
+|---|---|---|---|
+| `/w/staging-teste` → **307** → `/w/staging-teste/login` | 1 | **0** | **0** |
+| `/producer/login` | **0** | **0** | — |
+
+**Discriminado, para o zero não ser lido como defeito:**
+- A vitrine emite **0** porque `staging-teste` tem **0 de 7** campos de
+  personalização preenchidos (`accentColor`, os 5 `vitrine*Color` e `logoUrl`,
+  todos `NULL` — medido por `SELECT` no staging). É **o esperado**: a emissão é
+  condicional (`w/[slug]/layout.tsx:40-48`). Confirma a afirmação da F0.
+- `/producer/login` tem **0 blocos `<style>`** porque
+  `app/producer/layout.tsx:19-21` retorna `<>{children}</>` quando não há
+  usuário — **o `ProducerThemeProvider` nem monta na tela de login**.
+
+### (b) Chunks CSS servidos — 4 arquivos, **156.468 B**
+
+⭐ Controle de vacuidade: **1.065** ocorrências de `color` nos mesmos arquivos —
+a sonda enxerga conteúdo, os zeros abaixo seriam zeros de verdade.
+
+| Cor | Ocorrências |
+|---|---|
+| **`#3b82f6`** (o azul da marca) | **126** |
+| `#ffffff` | 76 |
+| `#10b981` | 40 |
+| `#111827` | 25 |
+| `#0a0a1a` | 12 |
+| `#1a1e2e` | 7 |
+
+**Utilitários `*-blue-N` nos CSS servidos: 87 ocorrências**
+
+| Prefixo | bg | text | border | to | from | ring | shadow | accent |
+|---|---|---|---|---|---|---|---|---|
+| Ocorrências | 31 | 18 | 13 | 8 | 7 | 5 | 4 | 1 |
+
+**Variáveis de tema referenciadas nos CSS**
+
+| Variável | Ocorrências |
+|---|---|
+| `--producer-primary` | **77** |
+| `--member-primary` | **61** |
+| `--member-bg` | 7 |
+| `--producer-bg` | 5 |
+| `--producer-card` | 3 |
+| `--vitrine-*` | **0** ← confirma que o namespace não existe |
+
+### Como reproduzir
+
+```
+curl -sL http://localhost:3000/w/staging-teste          # e /producer/login
+CSS=(.next/static/chunks/*.css)                          # 4 arquivos
+cat "${CSS[@]}" | grep -o -F "#3b82f6" | wc -l
+cat "${CSS[@]}" | grep -oE "\.(bg|text|border|ring|from|via|to|shadow|fill|stroke|divide|accent)-blue-[0-9]+" | wc -l
+cat "${CSS[@]}" | grep -o -F -e "--producer-primary" | wc -l
+```
+
+⚠️ Duas armadilhas que me pegaram ao montar isto, registradas para quem repetir:
+`.next/static/css/` **não existe** (o CSS vive em `.next/static/chunks/`), e
+`grep -o -F "--producer-primary"` **falha** — o `--` vira opção; é preciso
+`-e` ou `--`. Nos dois casos o erro devolve **0**, que se lê como "limpo".
