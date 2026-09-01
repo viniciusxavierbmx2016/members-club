@@ -240,7 +240,7 @@ com investigação própria.
 | Fatia | O que entrou | Arquivos | SHA | Prova de máquina | Gate humano | Data |
 |---|---|---|---|---|---|---|
 | **F0** ✅ | 4 cópias dos defaults do painel viraram 1 (`src/lib/theme-constants.ts`); consumidores ganharam 1 linha de alias cada. **Zero mudança de valor.** | **5** (1 novo + 4 modificados), −40/+8 | `caebebc` → merge **`546c167`** | diff de valor contra `git show HEAD:` → **8/8 idênticos** · literais antigos nos 4 alterados → **0** · `tsc --noEmit` **exit 0** · build de staging verde (`UgE92EXkbvYifZDfTatVj`) · alvo: ref staging **1**, ref produção **0** · `git status` = exatamente 5 linhas | ✅ **PASSOU 7/7** — 01/set/26 | 01/set/26 |
-| **F1** ⏳ | **1 linha** — `ui/button.tsx:17`, variante `primary`: `text-white` → `text-[var(--producer-button-text,#ffffff)]`. Alcança **6 dos 11** `<Button>`. | **1** | `16fc628` | portão 4/4 (14/14 branco, 0 chave ausente · `/admin` 0 com controle positivo 10 · 0 importadores fora de `/producer` e `/admin` · 6 de 11) · regra CSS provada lado a lado · `tsc` exit 0 · `text-white` 1068→1067 · build `Ib4Zx6sQXgzhC_CPsvurT`, alvo 1/0 | ⚠️ **PARCIAL — 3 de 6** | 01/set/26 |
+| **F1** ✅ | **1 linha** — `ui/button.tsx:17`, variante `primary`: `text-white` → `text-[var(--producer-button-text,#ffffff)]`. Alcança **6 dos 11** `<Button>`. | **1** | `16fc628` → merge **`d8f57e2`** | portão 4/4 (14/14 branco, 0 chave ausente · `/admin` 0 com controle positivo 10 · 0 importadores fora de `/producer` e `/admin` · 6 de 11) · regra CSS provada lado a lado · `tsc` exit 0 · `text-white` 1068→1067 · build `Ib4Zx6sQXgzhC_CPsvurT`, alvo 1/0 | ⚠️ **PARCIAL — 3 de 6**, declarado suficiente pelo dono | 01/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
@@ -347,6 +347,17 @@ Confirmado no HTML servido do palco:
 ⚠️ **E 2 dos 3 que passaram estavam `disabled`** (`button.tsx:15` aplica
 `disabled:opacity-50`). Só o **#3** foi visto em cor plena.
 
+#### Por que o gate parcial foi declarado suficiente — 01/set/26
+
+Decisão do dono, com o argumento que a mede: **os 3 não vistos passam pela MESMA
+linha e caem nos MESMOS dois escopos já provados por olho.** A variável vive em
+`:root` e nenhum dos 7 arquivos com `<Button>` usa portal — logo não existe um
+terceiro comportamento possível a descobrir. #4, #5 e #6 são o caminho do
+fallback (`/admin`), que o #3 já provou em cor plena.
+
+⚠️ Fica escrito o que **não** foi visto, para não virar prova retroativa: nenhum
+dos 3 foi olhado, e 2 dos 3 que passaram estavam desabilitados.
+
 #### ⭐ Duas correções do que eu mesmo tinha escrito
 
 **(a) Contagem errada.** Eu havia registrado `admin/producers/[id]/page.tsx:317`
@@ -372,6 +383,33 @@ Mas aplicar uma **conta automática de contraste** mudaria **140 de 380 campos
 preenchidos em produção (36,8%)** — medido sobre 87 cores distintas. Por isso ela
 **não entrou na F1**: a F1 é pixel-neutra por construção, e mudar 36,8% dos campos
 é decisão de produto, não refactor. **Essa decisão vive na D6.**
+
+### O que sobrou do balde A — 216 de 217
+
+A F1 tocou **1** ocorrência: `src/components/ui/button.tsx:17`. Sobram **216**.
+Contagem medida (não estimada) para a próxima rodada **não recontar**:
+
+| Lote | Ocorrências | Arquivos | via (i) | via (ii) | via (iii) |
+|---|---|---|---|---|---|
+| **Painel do produtor** — escopo que emite a variável | **90** | 38 | 2 | 0 | **88** |
+| **Componentes compartilhados** | **65** | 35 | **48** | 5 | 10 |
+| **Curso e vitrine** | **17** | 8 | 15 | 0 | 2 |
+| **`/admin`** ⭐ | **26** | 12 | 0 | **26** | 0 |
+| Outros (raiz, auth, invite, landing, `globals.css`) | **18** | 12 | 0 | 16 | 2 |
+| **TOTAL** | **216** | | | | |
+
+Conferência: **216 + 1 = 217** = o balde A inteiro. ✅
+
+⭐ **O `/admin` SAI da F1 e vai para a F5.** O motivo não é tamanho, é natureza:
+**lá não existe produtor**. O fundo daquelas telas é a marca da **PLATAFORMA**, e
+o texto certo é o da **paleta nova** — não a preferência de cor de um cliente.
+Amarrar o `/admin` a `--producer-button-text` seria dar a um produtor qualquer o
+poder de pintar o painel interno da plataforma.
+
+E o dado sustenta a separação: as **26** ocorrências do `/admin` são **todas via
+(ii)** — azul literal fora dos três escopos remapeados. De **47** via (ii) em todo
+o balde A, **26 estão no `/admin`**; as outras 21 se espalham por componentes (5)
+e telas soltas (16).
 
 ---
 
