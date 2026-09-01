@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { useProducerTheme } from "@/components/producer-theme-provider";
 import { useConfirm } from "@/hooks/use-confirm";
 import { darkenHex } from "@/lib/color-utils";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 import { PushToggle } from "@/components/push-toggle";
 import { useActiveWorkspace } from "@/hooks/use-active-workspace";
 
@@ -19,16 +20,7 @@ interface ThemeConfig {
   buttonTextColor: string;
 }
 
-const DEFAULTS: ThemeConfig = {
-  mode: "dark",
-  primaryColor: "#3b82f6",
-  secondaryColor: "#1a1e2e",
-  bgColor: "#0a0a1a",
-  headerColor: "#0a0a1a",
-  sidebarColor: "#0a0a1a",
-  cardColor: "#111827",
-  buttonTextColor: "#ffffff",
-};
+const DEFAULTS: ThemeConfig = PRODUCER_THEME_DEFAULTS;
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
