@@ -1,3 +1,81 @@
+# P0 — RÉGUA DA EMPRESA GRANDE
+
+> **Acrescentada em 01/set/26.** Roda em **TUDO** — código, decisão, resposta ou
+> comando —, com **profundidade proporcional ao risco**. Vem antes de todo o
+> resto deste documento porque decide *se a tarefa é a tarefa certa*, e isso
+> precede fazer a tarefa bem.
+
+## As 5 perguntas
+
+**1. A PERGUNTA ESTÁ CERTA?**
+Recusar a premissa falsa em vez de escolher bem entre opções ruins. Escolher a
+melhor de três opções erradas continua sendo errado — e parece diligência.
+
+**2. QUE EVIDÊNCIA FALTA?**
+Medir **antes** de escolher. Evidência cruzada entre campos, `updatedAt`,
+histórico de migração, e **controle contra vacuidade** (a sonda consegue
+produzir o resultado oposto?). Ausência de medição não é neutralidade: é uma
+aposta não declarada.
+
+**3. TEM SOLUÇÃO FORA DO CÓDIGO?**
+Com **39 clientes**, avisar vence heurística. **Quando o dado não distingue,
+pergunte ao dono do dado.** Um e-mail para 39 pessoas resolve o que nenhuma
+inferência resolve — e sem risco de errar contra quem escolheu de verdade.
+
+**4. COMO EU VOLTO?**
+`reversível sem backup` > `reversível com backup` > `ótimo irreversível`.
+A ordem não é sugestão. Um bom resultado que não dá para desfazer vale menos que
+um resultado mediano que dá.
+
+**5. O QUE VOU MEDIR DEPOIS?**
+Sem sinal de acerto **ou de erro**, não está pronto. "Parece bom" não é sinal.
+
+## Como aplicar — e como NÃO aplicar
+
+⭐ **TRADUZIR a prática, NUNCA copiar a cerimônia.** São **39 clientes**, não 39
+milhões. **Proibido** RFC, comitê de arquitetura, camada de abstração ou
+processo desenhado para uma escala que não existe. O que se importa da empresa
+grande é o **rigor de evidência**, não o ritual.
+
+⚠️ **Se a régua contradisser o pedido do dono, DIZER** — com o motivo, na hora,
+antes de executar. A régua não é desculpa para desobedecer; é obrigação de
+avisar. Depois de avisado, a decisão é dele.
+
+## Calibração por risco
+
+| Risco | Profundidade |
+|---|---|
+| **Baixo** | mental — não ocupa o relatório |
+| **Médio** | **1 linha cada** no relatório |
+| **Alto** — cliente, dado, dinheiro, auth, schema, produção | **com evidência medida** e **registrada no documento da frente** |
+
+## O caso real que criou esta régua
+
+**Decisão D6 do rebranding — os 5 campos de login com `@default`** (01/set/26).
+
+Apresentei ao dono três opções — **A** não encostar, **B** migrar no banco,
+**C** shim de leitura — e recomendei a C. As três partiam da mesma premissa:
+*"a cor salva é a única evidência de que a pessoa personalizou"*.
+
+A régua desmontou isso:
+
+- **Q1 — a pergunta estava errada.** Escolher bem entre A, B e C ainda deixava
+  25 workspaces classificados por adivinhação. A pergunta certa não era *"qual
+  das três?"*, era *"por que aceitamos que a cor é a única evidência?"*.
+- **Q2 — havia evidência não medida.** O **cruzamento entre os 5 campos** (quem
+  mexeu em um mexeu nos outros?), o **`updatedAt`** da linha, e a **data em que
+  o `@default` entrou no schema** comparada à data de criação de cada workspace.
+  Nenhuma dessas eu tinha medido antes de apresentar as opções.
+- **Q3 — havia saída fora do código.** São **39 produtores**. Avisar: *"vamos
+  trocar a identidade; se você escolheu suas cores, salve-as uma vez"*. **Quem
+  salvar resolve a própria ambiguidade** — e ninguém tem escolha real
+  sobrescrita por heurística nenhuma.
+
+**A lição, em uma frase:** apresentar opções bem construídas sobre uma premissa
+não medida é o modo mais convincente de errar.
+
+---
+
 # APLICAÇÃO NESTE PROJETO
 
 > A lente pela qual as 24 seções abaixo passam a ser lidas. Acrescentada em

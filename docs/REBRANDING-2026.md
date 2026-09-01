@@ -310,6 +310,8 @@ centralizar, não um extra.
 
 ## 10. Regra da frente
 
+**P0 — Régua da Empresa Grande: ver [docs/DEV-BRABO.md](DEV-BRABO.md)** (o texto vive lá, e só lá).
+
 **Nenhuma fatia fecha sem atualizar ESTE documento:**
 1. linha nova na tabela do **§6** (com SHA e prova de máquina);
 2. decisões novas numeradas no **§4**, com data e motivo;
