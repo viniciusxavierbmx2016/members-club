@@ -281,6 +281,8 @@ um furo real. **Gate de verdade mora na rota e na página.**
 
 ## 9. REQUISITOS PROVADOS PARA O CADASTRO (investigação da etapa 5, 30/08/26)
 
+**⏸️ PAUSADA em 31/ago/26 — ver docs/PAUSA-E4.4-FATIA1.md**
+
 > **De onde vem esta seção.** Investigação read-only da etapa 5, com **16 agentes** (8 leitores +
 > 8 verificadores adversariais) e **4 rodadas de medição SELECT-only em produção** (alvo
 > `wyamxwmdgbvqrfcqfbyh` impresso em todas). **Zero código, zero banco, zero schema.**

@@ -110,6 +110,8 @@ STAFF_ROLES = { PRODUCER, ADMIN, COLLABORATOR, ADMIN_COLLABORATOR }
 
 ## 5) ESTADO (puxado do PLANO-MESTRE)
 
+**E4.4 etapa 5, fatia 1 (marca de pertencimento) — ⏸️ PAUSADA em 31/ago/26 — ver docs/PAUSA-E4.4-FATIA1.md**
+
 **FEITO (merge SHA):**
 - **Exposição da Data API fechada (FASE 6C)** ✅ `271d4aa` + `b0cfea8` — chave anon pública lia/escrevia `WorkspaceGatewaySecret` e lia `OriginLockLog`. Hoje: 60/60 com RLS, **0 grants para anon** em `public`, defaults revogados. ⚠️ App usa o papel **`postgres`** (não `service_role`). ⚠️ `REVOKE` sem `IN SCHEMA public` mata o upload. ⛔ `migrate deploy` proibido enquanto a Fatia A estiver pendente. Resta 6C.3 (`pg_default_acl` do `supabase_admin` — ticket Supabase).
 - FASE 1 segurança: 1.1–1.14 ✅ (todos com SHA no plano). Abertos: **1.5** (magic-link convite) e **1.6** (token single-use) — dependem da Fase 3 / migração.
