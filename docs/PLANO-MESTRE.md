@@ -1473,6 +1473,11 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
 - [ ] **9.192 — Duas ESCRITAS numa rota de leitura, depois do gate de tenant** 🟢 — **sem fix, registrado na pausa (31/08).** `src/app/api/courses/by-slug/[slug]/init/route.ts` é um `GET`, mas depois de passar o gate (`:127-132`) executa `ensureMenuDefaults(course.id)` em `:134` — que faz `prisma.menuItem.create` em `:39-41`, criando linhas no curso do **produtor** — e `prisma.user.update({ ... lastAccessAt })` em `:244` (fire-and-forget, com `.catch(() => {})`).
   ⚠️ **Por que é item e não observação:** afrouxar o gate desta rota — que é exatamente o que a etapa 5 avalia — **multiplica quem dispara escrita num caminho de leitura**. `ensureMenuDefaults` é idempotente por checagem (`:29-32` e `:35-37`), então o risco não é duplicar; é **custo e superfície**, e é o tipo de efeito que não aparece quando se lê só a linha do gate. → Camada 3.
 
+- [ ] **9.193 — `/admin` diz "Erro ao carregar dados." para qualquer falha, inclusive sessão expirada** 🟠 — **sem fix — achado durante a F1 (01/set/26).** `src/app/admin/page.tsx:104` faz `.then((r) => (r.ok ? r.json() : null))` e `:106` `.catch(console.error)`: **os dois descartam a informação do erro**. Com `data === null`, `:298-299` pinta *"Erro ao carregar dados."* — **a mesma frase para 401, para 5xx e para falha de rede**.
+  ⭐ **Discriminado por medição, e NÃO é dado incompleto de staging:** a rota `/api/admin/dashboard` devolve **401 sem sessão** e **200 com payload cheio** (`kpis`, `chart`, `topProducers`, `planDistribution`, `producers`) com sessão de ADMIN. O defeito é da **mensagem**, não do dado.
+  ⓘ Para chegar nessa tela é preciso ser ADMIN: `:96` `if (!user || !isAdminRole) return` impede o fetch, e `:110-116` renderiza skeleton. Então quem lê "Erro ao carregar dados." **é admin** e não descobre que a causa foi a sessão.
+  ⚠️ **Mesma família do 9.189** (o 404 mudo do curso): mensagem única para causas diferentes. A tela irmã repete — `src/app/admin/reports/page.tsx:211-213`. E o padrão `r.ok ? r.json() : null` está em **49 ocorrências / 41 arquivos**; o item é sobre a mensagem do `/admin`, mas a família é grande. → Camada 3.
+
 ---
 
 

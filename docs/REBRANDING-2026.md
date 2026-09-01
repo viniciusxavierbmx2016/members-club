@@ -240,6 +240,7 @@ com investigação própria.
 | Fatia | O que entrou | Arquivos | SHA | Prova de máquina | Gate humano | Data |
 |---|---|---|---|---|---|---|
 | **F0** ✅ | 4 cópias dos defaults do painel viraram 1 (`src/lib/theme-constants.ts`); consumidores ganharam 1 linha de alias cada. **Zero mudança de valor.** | **5** (1 novo + 4 modificados), −40/+8 | `caebebc` → merge **`546c167`** | diff de valor contra `git show HEAD:` → **8/8 idênticos** · literais antigos nos 4 alterados → **0** · `tsc --noEmit` **exit 0** · build de staging verde (`UgE92EXkbvYifZDfTatVj`) · alvo: ref staging **1**, ref produção **0** · `git status` = exatamente 5 linhas | ✅ **PASSOU 7/7** — 01/set/26 | 01/set/26 |
+| **F1** ⏳ | **1 linha** — `ui/button.tsx:17`, variante `primary`: `text-white` → `text-[var(--producer-button-text,#ffffff)]`. Alcança **6 dos 11** `<Button>`. | **1** | `16fc628` | portão 4/4 (14/14 branco, 0 chave ausente · `/admin` 0 com controle positivo 10 · 0 importadores fora de `/producer` e `/admin` · 6 de 11) · regra CSS provada lado a lado · `tsc` exit 0 · `text-white` 1068→1067 · build `Ib4Zx6sQXgzhC_CPsvurT`, alvo 1/0 | ⚠️ **PARCIAL — 3 de 6** | 01/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
@@ -287,6 +288,90 @@ estão em `'{}'`.
 uma medição anterior desta frente — um "0 módulos" foi lido como recorte de
 payload quando era só curso vazio. Quem medir conteúdo no palco tem de escolher
 `curso-teste` (2 módulos, 4 aulas).
+
+### F1 — o botão da casa lê a variável
+
+**O que mudou:** uma linha. `src/components/ui/button.tsx:17`, só a variante
+`primary`. A forma foi **copiada, não escolhida**: a casa já escreve
+`text-[var(--producer-button-text,#ffffff)]` literalmente em
+`components/notifications-bell.tsx:132`, e usa a mesma forma para o mesmo
+propósito em `components/workspace-auth-shell.tsx:461`.
+
+**Alcance: 6 dos 11 `<Button>`** — os outros 5 são 4 `secondary` e 1 `danger`.
+
+#### Prova de pixel por máquina
+
+```
+.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}
+.text-\[var\(--producer-button-text\,\#ffffff\)\]{color:var(--producer-button-text,#fff)}
+```
+
+Sem a variável, o navegador resolve `var(--producer-button-text,#fff)` → **`#fff`**,
+o mesmo pixel. ⚠️ **Armadilha registrada:** procurei o fallback como `#ffffff` na
+regra e obtive **0**, que se leria como falha — **o minificador encurtou para
+`#fff`**. E a única diferença entre as duas regras é o `--tw-text-opacity`, que
+aqui não muda nada: `text-opacity` tem **0** ocorrências em todo o `src/` e nenhum
+`<Button>` usa `text-white/N`.
+
+#### O modal enxerga a variável — três provas independentes
+
+1. o `<style>` do provider usa o seletor **`:root`** (`producer-theme-provider.tsx:84`);
+2. `applyTheme` escreve em **`document.documentElement`** (`:36`);
+3. **nenhum** dos 7 arquivos com `<Button>` usa portal. ⭐ Controle: `createPortal`
+   **existe** no projeto (`producer/automations/page.tsx:4,115`), num arquivo que
+   não tem `<Button>` — a sonda enxerga, o zero é real. E **0 bibliotecas de modal**
+   no `package.json`.
+
+Confirmado no HTML servido do palco:
+`:root{--producer-primary:#3b82f6;…;--producer-button-text:#ffffff;}`. `:root` é o
+`<html>`; custom property herda para todo descendente, **portal incluído**.
+
+#### Gate humano — **3 de 6**, sem arredondar
+
+| # | Uso | Tela | Rótulo | Visto? |
+|---|---|---|---|---|
+| 1 | `producer/students:584` | `/producer/students` | Liberar | ✅ **desabilitado** |
+| 2 | `producer/automations/tags:155` | `/producer/automations/tags` | Criar | ✅ **desabilitado** |
+| 3 | `admin/producers:129` | `/admin/producers` | Buscar | ✅ habilitado, cor plena |
+| 4 | `admin/producers/[id]:317` | `/admin/producers/<id>` | Ativar/Desativar | ❌ |
+| 5 | `subscription:341` | `.../subscription` | Criar assinatura | ❌ |
+| 6 | `subscription:574` | `.../subscription` | Confirmar | ❌ |
+
+**Por que os 3 restantes não foram vistos — todos exigem estado:**
+- **#4** só é `primary` quando **todos os workspaces do produtor estão inativos**
+  (`variant={allInactive ? "primary" : "danger"}`); com ws ativo ele renderiza vermelho;
+- **#5** só aparece com produtor **sem assinatura** (`subscription/page.tsx:285`
+  `{!sub ? …`), e nasce `disabled` até escolher um plano;
+- **#6** só aparece **dentro do modal**, depois de clicar numa ação do cartão.
+
+⚠️ **E 2 dos 3 que passaram estavam `disabled`** (`button.tsx:15` aplica
+`disabled:opacity-50`). Só o **#3** foi visto em cor plena.
+
+#### ⭐ Duas correções do que eu mesmo tinha escrito
+
+**(a) Contagem errada.** Eu havia registrado `admin/producers/[id]/page.tsx:317`
+como "1 default primary". **Está errado**: ele tem variante **condicional**
+(`allInactive ? "primary" : "danger"`). O total de 6 continua certo; a natureza
+de dois deles não estava.
+
+**(b) As telas 4 e 5 do roteiro original não provavam nada.** O que o olho mediu
+lá foram peças que a F1 **nunca tocou**: *"Login como produtor"*
+(`admin/producers/[id]/page.tsx:304-316`) é `<button>` **solto** com `bg-blue-600
+text-white` **cravado**; *"Trocar plano"* e *"Estender"*
+(`subscription/page.tsx:413-426`) são `<button>` soltos com
+`variantCls("blue")` = **outline** (`text-blue-600` sobre transparente). **A falha
+foi do meu roteiro, não do código.**
+
+#### O achado de contraste — e por que ele NÃO entrou na F1
+
+Branco sobre o azul de marca `#3b82f6` dá **3,68:1** — **abaixo do WCAG AA**
+(4,5:1 para texto normal). Preto daria 5,71:1. **Isso já é verdade hoje**, não é
+criado pelo lime.
+
+Mas aplicar uma **conta automática de contraste** mudaria **140 de 380 campos
+preenchidos em produção (36,8%)** — medido sobre 87 cores distintas. Por isso ela
+**não entrou na F1**: a F1 é pixel-neutra por construção, e mudar 36,8% dos campos
+é decisão de produto, não refactor. **Essa decisão vive na D6.**
 
 ---
 
