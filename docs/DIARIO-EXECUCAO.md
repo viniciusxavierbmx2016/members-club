@@ -35,6 +35,81 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-08-31 — CAMADA 4, ETAPA E4.4 (etapa 5) — AS DECISÕES DA MARCA DE PERTENCIMENTO, REGISTRADAS
+
+**Estado antes:** main em `ae908f6`
+
+**O que foi feito:** a investigação read-only anterior levantou **por medição** as opções de
+formato da marca de pertencimento; o dono **decidiu**, e esta rodada registra as decisões **com o
+raciocínio** — antes de qualquer implementação, para nada se perder. **Só docs: zero código, zero
+banco, zero schema.** Nasceu o **§12 do PLANO-E4.4** (canônico), mais **6 itens** e o grupo
+**E3.45**.
+
+**Arquivos tocados:** só documentação — `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md` (§12 novo) ·
+`docs/PLANO-MESTRE.md` (bloco de decisões + 9.183 a 9.188) · `docs/ROADMAP-EXECUCAO.md` (grupo
+E3.45 + linha da E4.4) · `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:**
+- **Numeração** por `grep -F` literal, **enumerada uma a uma**: 9.183 · 9.184 · 9.185 · 9.186 ·
+  9.187 · 9.188, **todas com 0 ocorrências** antes de escrever. **Controle positivo** `9.173` →
+  **14** · **controle negativo** `9.964` (inédito) → **0**. Idem para o grupo: `E3.45` inexistente.
+- **Tabelas do ROADMAP conferidas** por contagem de colunas contra as vizinhas (E3.45: 4=4=4).
+- As decisões **não foram inventadas aqui**: cada uma aponta para o `file:line` que a investigação
+  mediu, e o §12 carrega a prova junto da conclusão.
+
+**SHA do merge:** — **docs-only, commit direto na `main`**, como a casa faz.
+**Rollback:** `git revert <sha deste commit>`.
+
+**Mudou em produção para quem:** **ninguém.** Zero código, zero banco, zero deploy de runtime.
+
+**⭐ A DECISÃO MAIS BONITA, e ela é de PRODUTO, não de engenharia:** *"live é assunto de aluno —
+para assistir live é preciso ter curso; para ter curso é preciso comprar ou resgatar"*. A
+investigação tinha achado um ciclo que se fechava sozinho: a marca abriria o `POST` do chat → o
+nome apareceria na caixa *"Assistindo"* do console do produtor (montada com quem escreveu nos
+últimos 10 min) → **ao lado dela há um botão `+mod`** → e `LiveModerator` **apaga qualquer
+mensagem** da live. ⇒ cadastro gratuito + uma mensagem = **um clique** do poder de deletar
+conteúdo de aluno pagante. **A decisão do dono desarma isso no primeiro elo, sem trava especial
+nenhuma** — não é mitigação, é a regra de negócio tornando o vetor **inexistente**. É o inverso da
+lição *"feature inofensiva pode CRIAR o vetor"*: aqui o recorte de produto **impede o vetor de
+nascer**. ⓘ Efeito colateral bem-vindo: o chat de live seguir **sem rate-limit** deixa de ser
+problema **desta** etapa, porque quem não tem curso não chega lá.
+
+**⭐ A SEGUNDA DECISÃO, e ela resolve um achado que só a medição certa revelou:** *"cancelar
+matrícula NÃO apaga a marca — o cancelamento tira o CURSO, não o PERTENCIMENTO"*. Isso afeta os
+**505 pares** cuja única matrícula é `CANCELLED` — número que só apareceu quando a medição passou
+a usar as **3 vias exatas** do helper (`ACTIVE|EXPIRED`) em vez de *"tem alguma Enrollment"*
+(1.341 + 505 = **1.846**, exato). ⚠️ E **não** contradiz o 409 do resgate: a marca **não** devolve
+o curso revogado, só mantém a pessoa vendo a **loja**.
+
+**⚠️ UMA CORREÇÃO DE PRECEDENTE, registrada de propósito:** a tabela nova **nasce com RLS**
+(`ENABLE ROW LEVEL SECURITY` + `REVOKE` na própria migração). Foi medido que **só 2 migrações** do
+repo inteiro habilitam RLS e que o `PostAttachment` — o precedente recente de *"tabela nova
+bem-feita"* — **não está em nenhuma** (`grep "ROW LEVEL"` na migração dele = **0**). Ele é exemplar
+em **modelagem** e **omisso em postura de banco**. A marca guarda **quem pertence a qual
+produtor**, dado de tenancy puro. **Fica escrito para que o próximo que copiar aquele molde copie
+a modelagem e não o buraco.**
+
+**Ficou aberto:** **9.183** 🟠 (GET de tags sem escopo de workspace) · **9.184** 🟠 (recortes de
+live cegos a papel — é furo de **papel**, que a decisão 12.1 **não** conserta) · **9.185** 🟠
+(`/api/courses` com catálogo cru) · **9.186** 🟢 (`HAS_TAG` inerte, falha **silenciosa**) ·
+**9.187** 🟢 (a marca abre as portas mas é **invisível para a navegação** — a fatia do cadastro
+terá de tratar) · **9.188** 🔵 (**FUTURO**: bloqueio / lista negra do produtor). Grupo **E3.45**.
+⚠️ **9.183/9.184/9.185 são PRÉ-EXISTENTES** — a marca **amplia a população**, não cria o furo.
+
+**⚠️ ACHADO FORA DO ESCOPO, reportado e NÃO corrigido:** a linha da **E4.4** na tabela §8 do
+ROADMAP tem **5 colunas** onde a tabela tem **3**, e isso **já era assim no `HEAD`** (conferido
+contra `git show`, e o texto que acrescentei não tem pipe). A causa: dois `|` dentro de um code
+span — `` `login|forgot-password|reset-password` `` — e pipe em code span **ainda divide célula**
+em markdown de tabela. ⇒ aquela linha **não renderiza como linha**. Correção seria escapar para
+`\|`; **não fiz, por escopo**, e registro aqui para não virar achado órfão.
+
+**Regras conferidas:** §17 respondido ✅ · só docs, zero código/banco/schema ✅ · numeração
+enumerada com controle positivo e negativo ✅ · tabelas do ROADMAP validadas por contagem de
+colunas ✅ · decisão registrada **com o raciocínio**, não só a conclusão ✅ · achado fora do escopo
+reportado em vez de corrigido em silêncio ✅ · papelada no mesmo fôlego ✅
+
+---
+
 ## 2026-08-31 — CAMADA 3, GRUPO E3.42 — 9.173 FECHADO: gate no quiz e gabarito só com showAnswers
 
 **Estado antes:** main em `18ffc3f`

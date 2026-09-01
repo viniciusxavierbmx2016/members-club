@@ -1416,6 +1416,48 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
 
 ---
 
+### 🧭 MARCA DE PERTENCIMENTO — DECISÕES REGISTRADAS (31/08/26)
+
+> **Não são itens: são as decisões do dono**, com o raciocínio, que servem de base ao desenho da
+> fatia do cadastro público. Canônico no **§12 do `PLANO-E4.4-MINI-CURSO-GRATUITO.md`**; aqui fica
+> o resumo e os itens que a investigação deixou.
+> **1.** ⭐ **Live é assunto de ALUNO** — para assistir live é preciso ter curso; para ter curso é
+> preciso comprar ou resgatar. ⇒ o recém-cadastrado não alcança live, não escreve no chat, e
+> *"pode ser moderador?"* **não chega a existir**. Isso corta **na raiz** o ciclo achado na
+> investigação (chat → caixa *"Assistindo"* → botão `+mod` → DELETE de mensagem), **sem trava
+> especial**. Mesmo raciocínio para comentários e comunidade.
+> **2.** ⭐ **Cancelar matrícula NÃO apaga a marca** — o cancelamento tira o **curso**, não o
+> **pertencimento**; a pessoa volta a ser "só cadastrada" e pode comprar de novo. Afeta os **505**
+> pares medidos. ⓘ Não contradiz o 409 do resgate: a marca **não** devolve o curso revogado.
+> **3.** A marca vale em **4 lugares**: login · vitrine · resgate · as 3 rotas de tags. Em todo o
+> resto (curso, aula, material, live, chat, comunidade, certificado) **quem manda é a matrícula**.
+> **4.** **Tabela nova** no molde de `WorkspaceCredential` (`@@unique([userId, workspaceId])` +
+> Cascade×2 + `@@index`), com **origem em ENUM próprio**, não boolean.
+> **5.** ⚠️ **Nasce COM RLS** (`ENABLE ROW LEVEL SECURITY` + `REVOKE` na própria migração) —
+> **correção explícita de precedente**: só 2 migrações do repo habilitam RLS e o `PostAttachment`
+> **não está em nenhuma** (medido: `grep "ROW LEVEL"` na migração dele = **0**).
+> **6.** ⚠️ **`migrate deploy` ANTES do `git push`** — a cicatriz da linha 1124 deste arquivo.
+
+- [ ] **9.183 — `GET` de tags de aluno não tem escopo de workspace: o produtor A lê as tags que B, C e D aplicaram** 🟠 — `src/app/api/producer/students/[id]/tags/route.ts:22-26`: `prisma.userTag.findMany({ where: { userId: params.id }, include: { tag: { select: { id, name, color } } } })` — **sem filtro por `tag.workspaceId`**. O `POST` (`:62-65`) e o `DELETE` (`:104-107`) **validam** `tag.workspaceId !== workspace.id`; **só o GET não filtra**. ⇒ o produtor recebe os **nomes** das tags de segmentação de outros produtores sobre a mesma pessoa (*"lead frio"*, *"comprou X"*, *"inadimplente"*).
+  ⚠️ **A marca AMPLIA a população alvo, não cria o furo:** hoje o preço de entrada é *"a pessoa ser aluno/colaborador/dono no meu workspace"*; com a marca passa a ser *"a pessoa ter preenchido um formulário público"*. **É pré-existente e independe do cadastro** — mas fecha melhor **antes**. → Camada 3, grupo **E3.45**.
+
+- [ ] **9.184 — Os recortes de conteúdo das lives são CEGOS A PAPEL: `if (user.role === "STUDENT")`** 🟠 — quatro pontos abrem o recorte com a mesma condição: `w/[slug]/lives/route.ts:51` · `lives/[id]/route.ts:44-58` · `lives/[id]/messages/route.ts:45-61` e `:120-136`. Dentro dela vivem as duas travas de conteúdo: `visibility === "COURSE_ONLY"` exigindo matrícula ACTIVE, e `!roomOpen` → 403. O comentário assume o desenho: *"Staff (owner / collaborator / admin) são exempt"*.
+  🔴 **O problema é quem NÃO é staff e mesmo assim escapa:** quem carrega conta **`PRODUCER`** (produtor de outro workspace — caso comum na base) **não cai no ramo `STUDENT`**, então `COURSE_ONLY` e sala fechada **simplesmente não existem para ele** — inclusive a live que o produtor amarrou ao **curso pago**. ⓘ **A decisão 12.1 tira a marca dessa superfície**, mas **não** conserta este furo, que é de **papel**, não de vínculo. → Camada 3, grupo **E3.45**.
+
+- [ ] **9.185 — `/api/courses` devolve o catálogo CRU: todos os escalares de `Course`** 🟠 — `src/app/api/courses/route.ts:144-152` e `:178-186` fazem `prisma.course.findMany({ where: {...} , orderBy: { order: "asc" } })` **sem `select`**. ⇒ saem `externalProductId` (o id do produto no gateway, usado para casar webhook — `schema.prisma:227`), `checkoutUrl`, `price`, `termsContent`, `supportEmail`, `supportWhatsapp`, `ownerId`.
+  ⚠️ **O contraste é a prova de que existe padrão e esta rota ficou fora dele:** a vitrine (`w/[slug]/init/route.ts:179-208`) tem `select` **curado** e ainda **remove `ownerId`** no construtor (`:235`). O §11.4 custeou o risco da **vitrine** e concluiu *"deixar alguém ver a vitrine é barato"* — **essa conclusão não se transfere para cá**, porque o payload é outro. → Camada 3, grupo **E3.45**.
+
+- [ ] **9.186 — `HAS_TAG` é INERTE para quem não tem matrícula ATIVA: o produtor tagueia, filtra, monta automação e ela nunca alcança** 🟢 — as **duas** seleções de `HAS_TAG` exigem matrícula **ACTIVE** no mesmo `where`: `producer/automations/[id]/execute/route.ts:51-56` e `lib/automation-cron.ts:179-186` (`userTags: { some: { tagId } }` **E** `enrollments: { some: { course: { workspaceId }, status: "ACTIVE" } }`). Mas a lista de alunos do painel (`producer/students/route.ts:48-50`) **filtra por tag sem exigir matrícula**.
+  ⇒ **A tela mostra a pessoa, o filtro acha a pessoa, a automação não alcança a pessoa — e ninguém erra.** Falha **silenciosa**, sem log e sem aviso. ⓘ Hoje o alcance é pequeno; **com a marca, tagear o cadastrado passa a ser natural** e a incoerência fica visível. **Ou o dono aceita o silêncio, ou os dois seletores mudam no mesmo commit.** → Camada 3, grupo **E3.45**.
+
+- [ ] **9.187 — A marca abre as portas mas é INVISÍVEL para a navegação** 🟢 — `src/app/api/student/workspace/route.ts:12-27` resolve o workspace do aluno por `prisma.enrollment.findFirst({ where: { userId, status: "ACTIVE" } })` e devolve **404 `{"error":"Nenhum workspace encontrado"}`** quando não há. `lib/student-workspaces.ts:19-20` faz o mesmo para a **lista de áreas** da raiz inteligente.
+  ⇒ o cadastrado **sem matrícula** não aparece no seletor de áreas e não tem workspace resolvido: ele **entra pela porta certa e depois não é reconhecido pela casa**. ⓘ **Fecha a lacuna que o §11.4 registrou como não lida** (*"não se sabe o que `/api/student/workspace` devolve"*) — **devolve 404**. ⚠️ **A fatia do cadastro TERÁ de tratar isto**, senão a pessoa se cadastra e some. → Camada 3, grupo **E3.45**.
+
+- [ ] **9.188 — 🔵 FUTURO: bloqueio / lista negra do produtor** 🔵 — ideia do dono, registrada para o roadmap e **fora da etapa 5**. **Hoje o produtor tira o CURSO, mas não tem como tirar a PESSOA do workspace**: revogar matrícula (`Enrollment` → `CANCELLED`) encerra o acesso ao conteúdo e nada mais — a pessoa segue vendo a vitrine e podendo comprar de novo (e, pela decisão **12.2**, isso é o comportamento **desejado** por padrão).
+  ⭐ **O que muda com a marca:** se pertencer é **uma linha**, deixar de pertencer passa a ser **apagá-la ou marcá-la** — o bloqueio deixa de exigir conceito novo e vira o **complemento natural** da marca. ⚠️ Exige decisão de produto antes de código: bloqueio **apaga** a marca ou é **estado** dela? Bloqueado consegue **recomprar**? O que acontece com a matrícula **ativa** de quem é bloqueado? → Camada 3.
+
+---
+
 
 - [ ] **9.136 — Produtor adicionar aluno à mão RESETA a senha de quem já é aluno de outro curso** 🟠 — achado do laudo da E4.4 (DIV-1), e é o risco R1 **no lugar real**. `app/api/courses/[id]/students/route.ts:283-300` rotaciona a `WorkspaceCredential` quando o aluno **já tem uma**, gateado por `!wasActive && !isStaff` (`:276`). ⇒ Quem comprou o curso A e depois é **matriculado à mão** no curso B do MESMO workspace tem a senha trocada. ⚠️ **Não é bug puro**: o mesmo bloco envia o e-mail com a senha nova (`sendWorkspaceAccessEmail`, `:255-260`), então o aluno é avisado — o comentário `:263-274` mostra que a rotação foi pensada. **O que torna isto um item**: o aluno **não pediu** troca de senha, a senha antiga dele para de funcionar, e num fluxo de curso gratuito (E4.4) isso aconteceria **sem compra nenhuma**. ⭐ **Contraste que fecha o argumento**: o webhook de COMPRA faz o oposto e diz por quê — *"Existing credentials are never rotated — they stay under the student's control"* (`lib/webhook-helpers.ts:141-142`). **As duas portas divergem**, e a de compra é a que está certa. **Fix candidato**: não rotacionar quando já existe credencial; usar o link de recuperação, que a própria rota já sabe emitir. → Camada 3.
 

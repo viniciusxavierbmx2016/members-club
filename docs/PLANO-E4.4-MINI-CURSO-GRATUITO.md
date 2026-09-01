@@ -570,3 +570,115 @@ helper guarda — daí a §11.3.
 assistível (depende do provedor); (b) se há WAF/bot-protection na frente de
 `/api/w/*/forgot-password` fora do repo; (c) `/api/student/workspace/route.ts` não foi lido —
 não se sabe o que devolve para conta+credencial sem matrícula.
+
+---
+
+## 12. A MARCA DE PERTENCIMENTO — DECISÕES DO DONO (31/08/26)
+
+> **É a base do desenho da fatia seguinte.** Registrado **antes** de implementar, para que o
+> raciocínio não se perca — o §11 levantou as opções por medição; aqui ficam as **escolhas** e,
+> mais importante, **o porquê de cada uma**. Zero código nesta rodada.
+
+### 12.1 ⭐ LIVE É ASSUNTO DE ALUNO — e é isto que corta o pior risco NA RAIZ
+
+**A regra:** para assistir live é preciso ter **curso**; para ter curso é preciso **comprar** ou
+**resgatar** o gratuito. ⇒ o recém-cadastrado **não alcança live, não escreve no chat**, e a
+pergunta *"pode ser moderador?"* **não chega a existir**. Mesmo raciocínio para **moderação de
+comentários** e **comunidade**: exigem matrícula.
+
+⭐ **Por que isto é elegante, e não só restritivo:** a investigação achou um ciclo que se fechava
+sozinho — a marca abriria o `POST` do chat (`lives/[id]/messages/route.ts:112`) → escrever põe o
+nome na caixa *"Assistindo"* do console do produtor, montada com quem escreveu nos últimos 10
+minutos (`producer/lives/[id]/page.tsx:343-353`) → **ao lado dela há um botão `+mod`** (`:602`) →
+o `POST` de `producer/lives/[id]/moderators/route.ts:60` aceitaria porque o helper diria sim → e
+`LiveModerator` **apaga qualquer mensagem** da live (`lives/[id]/messages/[messageId]/route.ts:53-65`).
+⇒ **cadastro gratuito + uma mensagem = um clique do poder de deletar conteúdo de aluno pagante.**
+
+**A decisão do dono desarma esse ciclo no primeiro elo, sem trava especial nenhuma.** Não é
+mitigação: é a regra de negócio tornando o vetor **inexistente**. É o contrário da lição *"feature
+inofensiva pode CRIAR o vetor"* — aqui o recorte de produto **impede que o vetor nasça**.
+ⓘ **Consequência prática:** o chat de live seguir **sem rate-limit** (`messages/route.ts` não
+importa `rateLimit`, e o proxy pula `/api/` em `proxy.ts:58-61`) deixa de ser problema **desta**
+etapa, porque quem não tem curso não chega lá.
+
+### 12.2 ⭐ CANCELAR MATRÍCULA **NÃO** APAGA A MARCA
+
+**O raciocínio do dono:** o cancelamento tira o **CURSO**, não o **pertencimento**. A pessoa volta
+a ser *"só cadastrada"*: **vê a vitrine, pode comprar de novo ou resgatar o gratuito**.
+
+📏 **Afeta os 505 pares medidos** cuja **única** matrícula é `CANCELLED` — o achado que só apareceu
+quando a medição passou a usar as **3 vias exatas** do helper (`ACTIVE|EXPIRED`) em vez de *"tem
+alguma Enrollment"*. A conta fecha: **1.341 + 505 = 1.846** pares.
+
+⚠️ **Isto NÃO contradiz a regra do resgate** (§7): lá, *"o resgate não reativa matrícula cancelada
+(409)"* — continua valendo. São coisas diferentes: **a marca não devolve o curso revogado**; ela
+só mantém a pessoa vendo a **loja**. Revogação de acesso segue intacta.
+
+### 12.3 A MARCA VALE EM EXATAMENTE 4 LUGARES
+
+| Vale | Não vale |
+|---|---|
+| **Porta 1** — login do workspace (`w/[slug]/login/route.ts:248`) | **Porta 3** — curso (`courses/by-slug/[slug]/init/route.ts:124`) |
+| **Porta 2** — vitrine (`w/[slug]/init/route.ts:62`) | aula · material · certificado |
+| **Resgate** de curso gratuito (`courses/[id]/claim/route.ts:68`) | live · chat · comunidade · comentários |
+| **As 3 rotas de tags** (`producer/students/[id]/tags/route.ts:19, :49, :93`) — a pergunta *"esta pessoa é gente minha?"* | **em todo o resto quem manda é a MATRÍCULA** |
+
+⚠️ **Por que a Porta 3 fica de fora, provado no código:** `courses/by-slug/[slug]/init` **não
+filtra por `isPublished`** e devolve seções, módulos, **títulos e descrições de aula**, duração e
+`daysToRelease` de **qualquer curso do workspace** (`:58-97`). Se a marca valesse ali, o cadastrado
+gratuito leria a árvore inteira de todo curso pago — inclusive os **não publicados**.
+
+⭐ **E é isto que prova que a 4ª via NÃO pode entrar "dentro do helper" sem distinção:** as três
+portas chamam `hasWorkspaceAccess` com o **mesmo** `requireMemberPermission`. Somado à assimetria
+do §11.2 (**9** call-sites perguntam *"posso entrar?"* e **4** perguntam sobre um **terceiro**), a
+forma da leitura é decisão de desenho da fatia seguinte — e **não** um detalhe de implementação.
+
+### 12.4 A FORMA: tabela nova, no molde de `WorkspaceCredential`
+
+`@@unique([userId, workspaceId])` + `onDelete: Cascade` nas **duas** FKs + `@@index([workspaceId])`
+— a silhueta que a casa opera há meses (`prisma/schema.prisma:155-172`).
+**A origem vira ENUM próprio, não boolean**, espelhando `EnrollmentOrigin` e o `AttachmentStatus`
+do `PostAttachment` (`:602-606`): estado com nome é o padrão desta casa.
+
+⚠️ **A `@@unique` não é só integridade — é a defesa contra corrida**: o molde é `create` +
+`catch P2002` + re-busca **pela unique que conflitou** (a lição de que `upsert` do Prisma pode ser
+emulado). E o contra-molde está no próprio schema: `PointsLedger` e `Notification` têm o par
+`(userId, workspaceId)` **sem** unique — é assim que a casa diz *"isto é LOG, muitas linhas"*.
+A marca é o oposto: **uma linha por par**.
+
+### 12.5 ⚠️ A TABELA NASCE **COM RLS** — correção explícita de precedente
+
+`ENABLE ROW LEVEL SECURITY` **+ `REVOKE`** na **própria migração**.
+
+🔴 **O precedente recente NÃO tem, e isso foi medido:** só **duas** migrações do repo inteiro
+habilitam RLS (`20260603150000_enable_rls_remaining_tables` e
+`20260805004547_enable_rls_origin_lock_and_gateway_secret`), e **`PostAttachment` não aparece em
+nenhuma** — `grep "ROW LEVEL"` na migração dele devolve **0**. O modelo é exemplar em **modelagem**
+e **omisso em postura de banco**.
+⇒ **A marca não repete a omissão**, porque ela guarda **quem pertence a qual produtor** — dado de
+tenancy puro, a mesma família do P0 da Data API já fechado. **Registrado aqui como correção de
+precedente, para que o próximo que copiar o `PostAttachment` copie a modelagem e não o buraco.**
+
+### 12.6 ⚠️ A ORDEM: `migrate deploy` em produção **ANTES** do `git push`
+
+É a cicatriz do dia dos anexos (`PLANO-MESTRE:1124`): *"o merge foi empurrado ANTES da migração, e
+a Vercel faz deploy no push: o código foi para produção com o GET do feed consultando `attachments`
+numa tabela que não existia."* **Não há esperteza que compense** — a Vercel deploya no push.
+O runbook completo está na skill; a ordem é **GATE**, não sugestão.
+
+### 12.7 🔵 FUTURO, fora desta etapa — BLOQUEIO / lista negra do produtor
+
+Ideia do dono, registrada para o roadmap: **hoje o produtor tira o CURSO, mas não tem como tirar a
+PESSOA do workspace.** Com a marca existindo, **bloquear passa a ser possível** — e é o complemento
+natural dela: se pertencer é uma linha, deixar de pertencer é apagá-la ou marcá-la.
+⇒ Item **9.188**. **Não é desta etapa.**
+
+### 12.8 O que a fatia seguinte terá de resolver, e já está registrado
+
+| # | O que | Onde |
+|---|---|---|
+| **9.187** 🟢 | a marca abre as portas mas é **invisível para a navegação** — `/api/student/workspace` resolve por `Enrollment` ACTIVE e devolve **404** sem ela | PLANO-MESTRE |
+| **9.186** 🟢 | `HAS_TAG` é **inerte** para quem não tem matrícula ATIVA — o produtor tagueia, filtra, monta automação e ela **nunca alcança**, em silêncio | PLANO-MESTRE |
+| **9.183** 🟠 | `GET` de tags **sem escopo de workspace** — o produtor A lê as tags de B/C/D | PLANO-MESTRE, grupo **E3.45** |
+| **9.184** 🟠 | recortes de live **cegos a papel** (`if user.role === "STUDENT"`) — furo de PAPEL, que a decisão 12.1 **não** conserta | PLANO-MESTRE, grupo **E3.45** |
+| **9.185** 🟠 | `/api/courses` devolve o **catálogo cru** (sem `select`) | PLANO-MESTRE, grupo **E3.45** |
