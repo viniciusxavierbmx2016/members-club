@@ -203,7 +203,7 @@ function EmailLinkModal({ editor, onClose }: { editor: Editor; onClose: () => vo
           <button type="button" onClick={onClose} className="px-3 py-2 text-gray-400 hover:text-white text-sm font-medium rounded-lg transition-colors">
             Cancelar
           </button>
-          <button type="button" onClick={handleSave} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors">
+          <button type="button" onClick={handleSave} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors">
             {existing ? "Salvar" : "Inserir"}
           </button>
         </div>

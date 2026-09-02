@@ -172,7 +172,7 @@ export function SupportChatWidget() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Abrir suporte"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg flex items-center justify-center transition-colors"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] shadow-lg flex items-center justify-center transition-colors"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -273,7 +273,7 @@ function TicketListView({
       <div className="px-4 py-3 border-b border-gray-100 dark:border-white/[0.04]">
         <button
           onClick={onNew}
-          className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg"
+          className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
         >
           + Novo ticket
         </button>
@@ -486,7 +486,7 @@ function NewTicketForm({
         <button
           type="submit"
           disabled={submitting || !subject.trim() || !body.trim()}
-          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-medium rounded"
+          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-[var(--producer-button-text,#ffffff)] text-xs font-medium rounded"
         >
           {submitting ? "Enviando…" : "Enviar"}
         </button>
@@ -602,7 +602,7 @@ function TicketChatView({
               <div
                 className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
                   own
-                    ? "bg-blue-600 text-white rounded-br-sm"
+                    ? "bg-blue-600 text-[var(--producer-button-text,#ffffff)] rounded-br-sm"
                     : "bg-gray-100 dark:bg-white/[0.06] text-gray-900 dark:text-white rounded-bl-sm"
                 }`}
               >
@@ -754,7 +754,7 @@ function AttachmentLink({ path, own }: { path: string; own: boolean }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`flex items-center gap-1.5 text-[11px] underline ${own ? "text-white" : "text-blue-600 dark:text-blue-400"}`}
+      className={`flex items-center gap-1.5 text-[11px] underline ${own ? "text-[var(--producer-button-text,#ffffff)]" : "text-blue-600 dark:text-blue-400"}`}
     >
       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

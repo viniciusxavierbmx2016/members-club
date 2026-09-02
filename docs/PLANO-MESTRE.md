@@ -1492,6 +1492,17 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
   ⚠️ **Consequência para a D6:** o `#0f172a` de 17 workspaces **não é escolha** — é default de UI ativo. Isso já está registrado no **§12.4** de `docs/REBRANDING-2026.md`.
   ⓘ **Família maior:** os *fallbacks inline* de `var(--producer-*)` também divergem entre si — `--producer-bg` aparece com `#0a0a1a` e `#030712`; `--producer-header` e `--producer-sidebar` com `#0a0a1a` e `#111827`; `--producer-card` com `#0a0e19` e `#0f1320`, **nenhum deles igual ao `#111827` do `theme-constants`**. No painel são inertes (o provider sempre define as vars); na **vitrine** de quem não personalizou, não. → Camada 3.
 
+- [ ] **9.195 — O contador de não-lidas do workspace FHO está INVISÍVEL na vitrine, hoje, em produção** 🟠 — **sem fix — achado durante a F2b (01/set/26).** O workspace **FHO** (`formacao-home-office-fho`) tem **`vitrineTextColor` = `accentColor` = `#ffc845`** — a mesma cor. `src/app/w/[slug]/layout.tsx:41` mapeia `accentColor` → `--producer-primary` e `:47` mapeia `vitrineTextColor` → `--producer-button-text`.
+  ⭐ **`src/components/notifications-bell.tsx:132` é o único ponto do app que consome as DUAS variáveis juntas** — `bg-[var(--producer-primary,…)]` com `text-[var(--producer-button-text,…)]` — e ele **alcança a vitrine**: `notifications-bell` ← `workspace-shell.tsx` ← `app/w/[slug]/layout.tsx` (provado por grafo de imports).
+  📏 **Contraste medido: `#ffc845` sobre `#ffc845` = 1,00:1** — invisível. *(Controles: `#000`/`#fff` = 21,00 · `#777`/`#888` = 1,26.)*
+  📏 **Vitrine alcançável:** workspace **ativo**, **1 curso publicado e na loja** ⇒ **usuário real chega lá**.
+  ⓘ **3N Trader** tem o mesmo padrão em menor grau — `#F5F7FA` sobre `#E53935` = **3,94:1**, abaixo de AA — mas a vitrine **não é alcançável** (0 cursos na loja).
+  ⚠️ **É ESCOLHA DO PRODUTOR, não defeito de código:** ele escolheu a mesma cor para o texto e para o destaque, e o app obedeceu. **A decisão entre avisar o produtor ou tratar no código é do dono** — e conecta com a regra registrada em `docs/REBRANDING-2026.md`: *onde o produtor escolheu, respeita; onde ninguém escolheu, cor legível calculada*. → Camada 3.
+
+- [ ] **9.196 — `text-<cor>/<opacidade>` não sobrevive à troca por `var()` arbitrário** 🟢 — **sem fix — achado durante a F2b (01/set/26).** `text-white/70` gera `.text-white\/70{color:#ffffffb3}` — branco a **70%**. Mas `text-[var(--producer-button-text,#ffffff)]/70` **não gera regra nenhuma**: medido no CSS servido, **0** ocorrências de `button-text` combinado com `70`. O Tailwind **não decompõe uma `var()` em canais RGB**, então o modificador de opacidade é descartado — e o texto perde a **cor inteira**, não só a transparência.
+  📏 **Alcance:** 2 ocorrências, ambas em `src/components/support-chat-widget.tsx` (`:622` e `:733`), o horário das mensagens no balão próprio. **Foram excluídas do lote 2 por isso** — o lote fechou em 21, não 23.
+  ⚠️ **Vale para toda a frente:** qualquer varredura futura que troque `text-white` por `var()` precisa **excluir as ocorrências com sufixo `/N`**, ou tratá-las por outro mecanismo. → Camada 3.
+
 ---
 
 

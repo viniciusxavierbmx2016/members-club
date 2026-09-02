@@ -212,7 +212,7 @@ export function ImportStudentsModal({
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                   step >= s
-                    ? "bg-blue-600 text-white"
+                    ? "bg-blue-600 text-[var(--producer-button-text,#ffffff)]"
                     : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                 }`}
               >
@@ -328,7 +328,7 @@ export function ImportStudentsModal({
                     scopedCourseId ? handleImport() : setStep(2)
                   }
                   disabled={!file}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {scopedCourseId ? "Importar" : "Próximo"}
                 </button>
@@ -378,7 +378,7 @@ export function ImportStudentsModal({
                 <button
                   onClick={handleImport}
                   disabled={selectedCourses.size === 0}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Importar
                 </button>
@@ -551,7 +551,7 @@ export function ImportStudentsModal({
                     {downloadCsv && (
                       <button
                         onClick={handleDownload}
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
+                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
                       >
                         <svg
                           className="w-4 h-4"

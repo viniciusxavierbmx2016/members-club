@@ -281,6 +281,63 @@ Nenhuma descrição de aparência — só valor computado.
 - **Leitura sem escrita:** o agente **não salvou curso, não persistiu automação e não
   finalizou cadastro**. Nenhum caminho de escrita foi exercitado.
 
+#### F2b · Lote 2 — componentes compartilhados (01/set/26)
+
+🔴 **O lote 2 é 21, não 65.** Dois cortes, ambos medidos:
+
+**1 · A reclassificação do zero deu 61 no balde A, não 66.** 327 ocorrências em
+`src/components/`, 3 agentes independentes, **concordância de 97,9%** com a lista
+antiga. As **7 diferenças**, uma a uma: 4 em `course-support-widget.tsx`
+(`:247` `:340` `:455` `:527`) saíram para **B** — é o **mesmo padrão** já aprovado
+em `customize/page.tsx:653`: `buttonStyle` = `buttonColor || var(--member-primary,…)`,
+cor **arbitrária do produtor** com fallback de outro namespace; `notifications-bell.tsx:132`
+e `ui/button.tsx:17` saíram do grep (o primeiro já usava a classe, o segundo foi a F1);
+e `confirm-modal.tsx:103` **entrou**, porque o agente novo leu o `variant = "info"`
+default em `:25` e viu que o fundo padrão é `bg-blue-600`.
+
+**2 · Dos 61, só 23 renderizam SÓ no painel** — e desses, 2 foram excluídas pelo
+sufixo de opacidade (item **9.196**). **Lote final: 21 em 11 arquivos.**
+
+| Classe | Arquivos | Ocorr. | Destino |
+|---|---|---|---|
+| **P · só painel — ENTRAM** | **11** | **23 → 21** | `app/producer` |
+| M · misto | 11 | 17 | saem |
+| C · área de curso | 9 | 14 | saem |
+| V · vitrine | 3 | 6 | saem |
+| R · raiz/auth/invite | 1 | 1 | saem |
+
+**Os 38 que saem:** `avatar-uploader` · `change-password-form` · `confirm-modal` ·
+`context-lock-notice` · `course-card` · `date-range-selector` · `mini-calendar` ·
+`rich-text-editor` · `sidebar` · `ui/avatar` · `workspace-switcher` (M) ·
+`autoplay-countdown` · `course-preview` · `course-sidebar` · `course-support-widget` ·
+`lesson-comments` · `lesson-quiz` · `post-card` · `reviews-section` · `terms-modal` (C) ·
+`install-prompt` · `push-opt-in` · `workspace-auth-shell` (V) · `auth-provider` (R).
+
+⭐ **O motivo da fronteira:** `--producer-button-text` é a variável **do produtor**, e
+ela só é emitida em **dois** lugares — no **painel** (`producer-theme-provider.tsx:84`,
+sempre) e na **vitrine** (`w/[slug]/layout.tsx:47`, **só se** `vitrineTextColor`). Em
+`(course)`, `/admin` e na raiz ela **nunca** é emitida (0 ocorrências de `--producer-`
+em cada). Trocar lá cairia sempre no fallback — inócuo, mas sem sentido — e na
+**vitrine** carregaria a cor de outro dono. Ver o item **9.195**.
+
+⭐ **O ACHADO DO GRAFO — e a lição.** Montei o grafo de imports por script para provar
+o destino de cada componente. A primeira versão dava **3 falsos órfãos**
+(`rich-text-editor`, `support-chat-widget`, `email-editor`): eles são carregados por
+**`dynamic(() => import(…))`**, que um regex de `from "…"` não captura. A v2 incluiu
+`import()` e ganhou **+27 arestas (1340 → 1367)**. **Lição: grafo de imports que ignora
+import dinâmico classifica componente errado** — e aqui teria posto 3 arquivos no balde
+errado, um deles com 7 ocorrências.
+
+#### O que vira a fatia da COR LEGÍVEL
+
+Os **38 que saem** não são descarte: são a fatia seguinte. A regra do dono, registrada:
+
+> **Onde o produtor escolheu, respeita. Onde ninguém escolheu, cor legível calculada.**
+
+⚠️ **Hoje ela NÃO é executável.** `src/lib/color-utils.ts` tem **16 linhas e só
+`darkenHex`** — **não existe conta de contraste no código**. E aplicá-la mudaria
+**140 de 380 campos preenchidos em produção (36,8%)**, o que é decisão de produto.
+
 ##### 🔴 A conta do balde A — e uma divergência de 1 que NÃO ajustei
 
 | | |

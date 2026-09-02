@@ -124,7 +124,7 @@ export function QuizManager({ lessonId }: Props) {
           type="button"
           onClick={createQuiz}
           disabled={saving}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
         >
           Adicionar quiz
         </button>
@@ -406,7 +406,7 @@ function QuestionModal({
               type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-xl disabled:opacity-50"
             >
               {saving ? "Salvando..." : "Salvar"}
             </button>

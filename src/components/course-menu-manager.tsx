@@ -93,7 +93,7 @@ export function CourseMenuManager({ courseId }: { courseId: string }) {
           <div className="flex gap-2">
             <button
               onClick={handleCreate}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
             >
               Adicionar
             </button>
