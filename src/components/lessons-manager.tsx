@@ -395,7 +395,7 @@ function LessonForm({
       <div className="flex gap-2">
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
         >
           Salvar
         </button>

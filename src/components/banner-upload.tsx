@@ -230,7 +230,7 @@ export function BannerUpload({
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-1.5 rounded-lg font-medium transition"
+                  className="bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-xs px-4 py-1.5 rounded-lg font-medium transition"
                 >
                   Salvar
                 </button>
