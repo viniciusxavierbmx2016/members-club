@@ -251,6 +251,19 @@ landing, e-mail e certificado são **F5**, decisão separada.
 | **F5** | superfícies fora do app: e-mail, certificado, landing | **SIM** |
 | **F6** | varredura do azul literal fora dos 3 escopos remapeados (~42 linhas) | **SIM** |
 
+🔴 **CORREÇÃO DA ORDEM (01/set/26) — medida, não opinada.** A ordem original punha
+a **F3 antes** da varredura das 216 ocorrências do balde A. **A medição do §13
+refuta:** `#ffffff` sobre `#EFFF20` dá **1,11:1**. Com **216 lugares ainda cravando
+`text-white`** (a F1 tocou 1 das 217), virar `primaryColor` para lime **apagaria o
+texto do botão primário nesses 216 lugares**.
+
+⇒ **A varredura do balde A passa a ser PRÉ-REQUISITO da F3**, não fatia paralela.
+Ela é o novo **F2b**, entre a F2 e a F3:
+
+| Fatia | O que é | Muda pixel? |
+|---|---|---|
+| **F2b** ⭐ | varredura do balde A — as 216 restantes passam a ler `--producer-button-text` | **NÃO** (pixel-neutro, como a F1) |
+
 ⚠️ A ordem acima é a sequência lógica, **não** um compromisso. Cada fatia abre
 com investigação própria.
 
@@ -833,6 +846,52 @@ outras **216 ainda cravam `text-white`** e **não leem** `--producer-button-text
 
 ⇒ **A F3 não pode ser feita antes da varredura do balde A**, ou o botão primário
 de 216 lugares fica ilegível. Isso é constatação medida, não escolha de ordem.
+
+### 13.2b Onde cada variável é realmente consumida
+
+Medido por `var(--nome`, separando `globals.css` do resto:
+
+| Variável | `globals.css` | resto de `src/` | total |
+|---|---|---|---|
+| `--producer-primary` | 47 | 8 | **55** ⭐ controle: a sonda acha uso |
+| `--producer-text` | 11 | 0 | **11** ⚠️ ver abaixo |
+| `--producer-bg` | 1 | 4 | 5 |
+| `--producer-primary-hover` | 4 | 0 | 4 |
+| `--producer-header` | 0 | 2 | 2 |
+| `--producer-sidebar` | 0 | 2 | 2 |
+| `--producer-card` | 2 | 0 | 2 |
+| `--producer-button-text` | 0 | 2 | 2 |
+| **`--producer-secondary`** | **1** | **0** | **1** |
+
+⭐ **`--producer-secondary` NÃO é campo morto**, embora tenha um só ponto de uso.
+`globals.css:321` remapeia a classe `dark:bg-[#1a1e2e]`, e essa classe tem **3
+usos reais**, todos em `producer/courses/[id]/settings/page.tsx`: um chip em
+`:228`, o **estado desabilitado** em `:267` e o **trilho do switch desligado** em
+`:326`. ⇒ ela pinta **superfícies secundárias e inativas**. A pendência continua
+sendo "qual valor", não "existe?".
+
+⚠️ **`--producer-text` tem 11 usos e o painel NUNCA a define** — o provider emite
+8 variáveis e ela não está entre elas; quem a define é só a **vitrine**
+(`w/[slug]/layout.tsx:48`). No painel, os 11 usos caem sempre no fallback.
+
+### 13.2c A hierarquia — a proposta preserva a ordem, mas sobe o patamar
+
+| Superfície | HOJE | L | PROPOSTA | L |
+|---|---|---|---|---|
+| fundo / header / sidebar | `#0a0a1a` (os **três iguais**) | 0,00356 | `#191919` (`bg/base`) | 0,00972 |
+| card | `#111827` | 0,00919 | `#202020` ou `#262626` | 0,01444 / 0,01938 |
+| secondary | `#1a1e2e` | 0,01345 | sem par | — |
+
+✅ **A ordem é preservada:** mais escuro no fundo, mais claro conforme eleva.
+⚠️ **Mas o patamar sobe 2,7×** — o fundo vai de `L=0,00356` para `L=0,00972`. O
+painel novo é **mais claro que o de hoje**, ainda que continue escuro.
+ⓘ O contraste do texto cai de **19,60:1** (`#ffffff` sobre `#0a0a1a`) para
+**16,23:1** (`#F6F6F2` sobre `#191919`) — segue muito acima de AA.
+
+⭐ **E isso reformula uma das pendências:** hoje `bg = header = sidebar` são o
+**mesmo valor** — o painel é uma chapa única. O guia oferece **três níveis**. A
+decisão do dono não é só "qual hex", é **se quer manter a chapa única (tudo
+`#191919`) ou usar os três níveis**.
 
 ### 13.3 ⭐ As fontes de verdade — são QUATRO, não três
 

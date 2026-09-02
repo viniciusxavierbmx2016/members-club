@@ -1478,6 +1478,20 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
   ⓘ Para chegar nessa tela é preciso ser ADMIN: `:96` `if (!user || !isAdminRole) return` impede o fetch, e `:110-116` renderiza skeleton. Então quem lê "Erro ao carregar dados." **é admin** e não descobre que a causa foi a sessão.
   ⚠️ **Mesma família do 9.189** (o 404 mudo do curso): mensagem única para causas diferentes. A tela irmã repete — `src/app/admin/reports/page.tsx:211-213`. E o padrão `r.ok ? r.json() : null` está em **49 ocorrências / 41 arquivos**; o item é sobre a mensagem do `/admin`, mas a família é grande. → Camada 3.
 
+- [ ] **9.194 — QUATRO fontes decidem a cor padrão do login do workspace, e elas divergem** 🟠 — **sem fix — achado durante a F3 (01/set/26).** O produtor abre a aba de login, o seletor mostra **`#0f172a`**, e a tela dele pinta **`#0a0a1a`**. Formulário e render discordam.
+
+  | Fonte | file:line | BG | PRIMARY | BOX | SIDE | OPACITY |
+  |---|---|---|---|---|---|---|
+  | **1** schema (`@default`, aplicado no INSERT) | `prisma/schema.prisma:83-91` | `#0a0a1a` | **`#6366f1`** | `#1a1a2e` | `#0a0a1a` | 0.85 |
+  | **2** formulário de edição | `producer/workspaces/[id]/edit/_lib/helpers.ts:44-49` | **`#0f172a`** | `#3b82f6` | **`#1e293b`** | **`#0f172a`** | **0.8** |
+  | **3** a tela renderizada | `components/workspace-auth-shell.tsx:26-30` | `#0a0a1a` | `#3b82f6` | `#1a1a2e` | `#0a0a1a` | 0.85 |
+  | **4** o painel (não é login, mas é a 4ª origem de cor) | `src/lib/theme-constants.ts` | `#0a0a1a` | `#3b82f6` | — | — | — |
+
+  ⭐ **Nenhuma das três primeiras concorda com as outras duas em tudo.** A 2 diverge da 3 em **BG, BOX, SIDE e OPACITY**; a 1 diverge das outras em **PRIMARY**.
+  📏 **Medido em produção (01/09):** **15 de 41** workspaces têm `loginBgColor` **NULL** — são exatamente os que veem `#0f172a` no seletor e `#0a0a1a` na tela. Outros **17** têm `#0f172a` **gravado**, que é o formulário escrevendo o próprio default ao salvar. ⭐ Controle: **0** têm o `#0a0a1a` do schema, o que confirma que o `@default` desse campo é **letra morta** — a rota (`api/workspaces/route.ts:73`) faz `?? null` e grava NULL explícito, anulando-o.
+  ⚠️ **Consequência para a D6:** o `#0f172a` de 17 workspaces **não é escolha** — é default de UI ativo. Isso já está registrado no **§12.4** de `docs/REBRANDING-2026.md`.
+  ⓘ **Família maior:** os *fallbacks inline* de `var(--producer-*)` também divergem entre si — `--producer-bg` aparece com `#0a0a1a` e `#030712`; `--producer-header` e `--producer-sidebar` com `#0a0a1a` e `#111827`; `--producer-card` com `#0a0e19` e `#0f1320`, **nenhum deles igual ao `#111827` do `theme-constants`**. No painel são inertes (o provider sempre define as vars); na **vitrine** de quem não personalizou, não. → Camada 3.
+
 ---
 
 
