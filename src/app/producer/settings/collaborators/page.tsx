@@ -179,7 +179,7 @@ export default function AdminCollaboratorsPage() {
             setEditing(null);
             setShowModal(true);
           }}
-          className="px-5 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-colors"
+          className="px-5 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-colors"
         >
           Convidar colaborador
         </button>
@@ -377,7 +377,7 @@ export default function AdminCollaboratorsPage() {
                 navigator.clipboard.writeText(inviteLink);
                 showToast("Link copiado");
               }}
-              className="px-3 py-2 bg-primary hover:bg-primary text-white text-xs font-medium rounded-md"
+              className="px-3 py-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-xs font-medium rounded-md"
             >
               Copiar
             </button>
@@ -744,7 +744,7 @@ function CollaboratorModal({
             disabled={saving || !email || permissions.length === 0}
             title={motivoBloqueio ?? undefined}
             aria-describedby={motivoBloqueio ? "motivo-bloqueio" : undefined}
-            className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg"
+            className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
           >
             {saving
               ? "Salvando…"

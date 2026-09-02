@@ -190,7 +190,7 @@ function DashboardContent() {
             </p>
             <button
               onClick={() => setShowWelcome(false)}
-              className="w-full py-3 bg-primary hover:bg-primary-hover text-white font-medium rounded-xl transition"
+              className="w-full py-3 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl transition"
             >
               Começar agora
             </button>

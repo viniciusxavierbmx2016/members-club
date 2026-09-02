@@ -127,7 +127,7 @@ export default function CourseStudentsPage(
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <button
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-white font-medium rounded-lg text-sm transition"
+          className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-lg text-sm transition"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -193,7 +193,7 @@ export default function CourseStudentsPage(
           {!debouncedQ && (
             <button
               onClick={() => setModalOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-white font-medium rounded-lg text-sm transition"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-lg text-sm transition"
             >
               Enviar primeiro acesso
             </button>

@@ -454,7 +454,7 @@ export default function CourseSupportInboxPage() {
                         <div
                           className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
                             isProducer
-                              ? "bg-blue-600 text-white rounded-br-sm"
+                              ? "bg-blue-600 text-[var(--producer-button-text,#ffffff)] rounded-br-sm"
                               : "bg-white dark:bg-white/10 text-gray-900 dark:text-white border border-gray-200 dark:border-white/5 rounded-bl-sm"
                           }`}
                         >
@@ -497,7 +497,7 @@ export default function CourseSupportInboxPage() {
                   <button
                     type="submit"
                     disabled={!reply.trim() || submitting}
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? "…" : "Enviar"}
                   </button>

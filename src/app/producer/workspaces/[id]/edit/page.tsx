@@ -686,7 +686,7 @@ export default function EditWorkspacePage() {
             type="button"
             onClick={() => save()}
             disabled={saving || !name.trim()}
-            className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
           >
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>

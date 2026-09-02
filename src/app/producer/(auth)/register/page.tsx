@@ -164,7 +164,7 @@ export default function ProducerRegisterPage() {
               <div className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                   i <= step
-                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                    ? "bg-primary text-[var(--producer-button-text,#ffffff)] shadow-lg shadow-primary/20"
                     : "bg-white/[0.04] text-gray-500 border border-white/[0.08]"
                 }`}>
                   {i < step ? (
@@ -216,7 +216,7 @@ export default function ProducerRegisterPage() {
                 />
                 Concordo com os Termos de Uso e Política de Privacidade
               </label>
-              <button onClick={next} className="w-full py-3 bg-primary hover:bg-primary text-white font-medium rounded-xl shadow-lg shadow-primary/20 transition">
+              <button onClick={next} className="w-full py-3 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition">
                 Próximo
               </button>
             </div>
@@ -271,7 +271,7 @@ export default function ProducerRegisterPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white font-medium rounded-lg transition"
+                  className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] font-medium rounded-lg transition"
                 >
                   {loading ? "Criando conta..." : "Criar conta"}
                 </button>
@@ -338,7 +338,7 @@ function StepButtons({ onBack, onNext }: { onBack: () => void; onNext: () => voi
       <button onClick={onBack} className="flex-1 py-3 border border-white/[0.08] text-gray-300 hover:bg-white/[0.04] font-medium rounded-xl transition">
         Voltar
       </button>
-      <button onClick={onNext} className="flex-1 py-3 bg-primary hover:bg-primary text-white font-medium rounded-xl shadow-lg shadow-primary/20 transition">
+      <button onClick={onNext} className="flex-1 py-3 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition">
         Próximo
       </button>
     </div>

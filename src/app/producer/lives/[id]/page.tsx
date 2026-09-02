@@ -424,7 +424,7 @@ export default function ProducerLiveRoomPage() {
             href={live.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 bg-primary hover:bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
+            className="flex items-center gap-1 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-3 py-1.5 rounded-lg text-xs font-medium transition"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -555,7 +555,7 @@ export default function ProducerLiveRoomPage() {
                   <button
                     onClick={handleSend}
                     disabled={!chatInput.trim() || sending}
-                    className="bg-primary hover:bg-primary disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition flex-shrink-0"
+                    className="bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] px-3 py-1.5 rounded-lg transition flex-shrink-0"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

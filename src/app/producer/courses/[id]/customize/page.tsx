@@ -408,7 +408,7 @@ export default function CourseCustomizePage() {
                     }`}
                   >
                     {isSaved && (
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-semibold bg-primary text-white rounded">
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-semibold bg-primary text-[var(--producer-button-text,#ffffff)] rounded">
                         Atual
                       </span>
                     )}
@@ -628,7 +628,7 @@ export default function CourseCustomizePage() {
                   type="button"
                   onClick={saveFade}
                   disabled={savingFade || !fadeDirty}
-                  className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
                 >
                   {savingFade ? "Salvando…" : "Salvar fade"}
                 </button>
@@ -767,7 +767,7 @@ export default function CourseCustomizePage() {
                     type="button"
                     onClick={saveSupportButton}
                     disabled={savingSupportBtn || !supportBtnDirty}
-                    className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
                   >
                     {savingSupportBtn ? "Salvando…" : "Salvar botão"}
                   </button>
@@ -801,7 +801,7 @@ export default function CourseCustomizePage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
               >
                 {saving ? "Salvando..." : "Salvar personalização"}
               </button>

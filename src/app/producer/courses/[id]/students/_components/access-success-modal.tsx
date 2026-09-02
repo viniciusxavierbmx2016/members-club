@@ -100,7 +100,7 @@ export function AccessSuccessModal({
           <button
             type="button"
             onClick={() => copy(fullText, "all")}
-            className="flex-1 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg"
+            className="flex-1 px-4 py-2.5 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
           >
             {copied === "all" ? "Copiado!" : "Copiar tudo"}
           </button>

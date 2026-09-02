@@ -138,7 +138,7 @@ export default function StudentDetailPage(
                 className="w-14 h-14 rounded-full object-cover"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center text-lg font-semibold">
+              <div className="w-14 h-14 rounded-full bg-primary text-[var(--producer-button-text,#ffffff)] flex items-center justify-center text-lg font-semibold">
                 {user.name.charAt(0).toUpperCase()}
               </div>
             )}

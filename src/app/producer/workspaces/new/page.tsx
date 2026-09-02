@@ -130,7 +130,7 @@ export default function NewWorkspacePage() {
           <button
             type="submit"
             disabled={submitting || !name.trim() || !slug.trim()}
-            className="px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+            className="px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
           >
             {submitting ? "Criando..." : "Criar workspace"}
           </button>

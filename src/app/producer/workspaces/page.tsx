@@ -84,7 +84,7 @@ export default function AdminWorkspacesPage() {
         <div className="flex items-center gap-0">
           <Link
             href="/producer/workspaces/new"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -126,7 +126,7 @@ export default function AdminWorkspacesPage() {
           </p>
           <Link
             href="/producer/workspaces/new"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
           >
             Criar workspace
           </Link>
@@ -195,7 +195,7 @@ export default function AdminWorkspacesPage() {
                   <button
                     type="button"
                     onClick={() => copyLink(ws.slug)}
-                    className="px-2.5 py-1.5 text-[11px] font-medium bg-primary hover:bg-primary text-white rounded-md flex-shrink-0"
+                    className="px-2.5 py-1.5 text-[11px] font-medium bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] rounded-md flex-shrink-0"
                   >
                     Copiar
                   </button>
@@ -243,7 +243,7 @@ export default function AdminWorkspacesPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-white rounded-lg shadow-xl text-sm font-medium">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-[var(--producer-button-text,#ffffff)] rounded-lg shadow-xl text-sm font-medium">
           {toast}
         </div>
       )}

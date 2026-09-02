@@ -424,7 +424,7 @@ export default function CourseCommentsPage(
                         type="button"
                         onClick={() => handleReply(c.id, c.lesson.id)}
                         disabled={sending || !replyText.trim()}
-                        className="px-3 py-2 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors"
+                        className="px-3 py-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50 transition-colors"
                       >
                         {sending ? "..." : "Enviar"}
                       </button>
