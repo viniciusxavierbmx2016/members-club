@@ -307,7 +307,7 @@ function BillingContent() {
               <button
                 onClick={handleCheckout}
                 disabled={checkingOut}
-                className="block w-full text-center px-6 py-3 bg-primary hover:bg-primary text-white font-medium rounded-xl transition text-sm disabled:opacity-50"
+                className="block w-full text-center px-6 py-3 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl transition text-sm disabled:opacity-50"
               >
                 {checkoutLabel}
               </button>
@@ -375,7 +375,7 @@ function BillingContent() {
                 <button
                   onClick={handleCheckout}
                   disabled={checkingOut}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary rounded-lg transition disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-[var(--producer-button-text,#ffffff)] bg-primary hover:bg-primary rounded-lg transition disabled:opacity-50"
                 >
                   {checkingOut ? "Gerando checkout..." : "Reativar assinatura"}
                 </button>

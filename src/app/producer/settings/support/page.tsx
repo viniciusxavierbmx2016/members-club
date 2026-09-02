@@ -170,7 +170,7 @@ export default function ProducerSupportPage() {
             <button
               onClick={() => handleSave(w.id)}
               disabled={saving[w.id]}
-              className="px-4 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {saving[w.id] ? "Salvando..." : "Salvar"}
             </button>

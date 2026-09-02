@@ -345,7 +345,7 @@ export function CreateEditLiveModal({
             <button
               onClick={handleSave}
               disabled={saving || !form.title.trim() || !form.externalUrl.trim() || !form.scheduledAt || (form.visibility === "COURSE_ONLY" && !form.courseId)}
-              className="bg-primary hover:bg-primary disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              className="bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] px-4 py-2 rounded-lg text-sm font-medium transition"
             >
               {saving ? "Salvando..." : editingLive ? "Salvar" : "Criar Live"}
             </button>

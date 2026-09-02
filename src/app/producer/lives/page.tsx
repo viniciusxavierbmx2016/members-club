@@ -167,7 +167,7 @@ export default function ProducerLivesPage() {
         <div className="flex items-center gap-0">
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg transition text-sm font-medium"
+            className="flex items-center gap-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-4 py-2 rounded-lg transition text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -186,7 +186,7 @@ export default function ProducerLivesPage() {
             onClick={() => setFilter(s)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
               filter === s
-                ? "bg-primary text-white"
+                ? "bg-primary text-[var(--producer-button-text,#ffffff)]"
                 : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10"
             }`}
           >
@@ -219,7 +219,7 @@ export default function ProducerLivesPage() {
           {filter === "ALL" && (
             <button
               onClick={openCreate}
-              className="bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg transition text-sm mt-4"
+              className="bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-4 py-2 rounded-lg transition text-sm mt-4"
             >
               Criar Live
             </button>
@@ -301,7 +301,7 @@ export default function ProducerLivesPage() {
                     <>
                       <button
                         onClick={() => router.push(`/producer/lives/${live.id}`)}
-                        className="flex items-center gap-1 bg-primary hover:bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
+                        className="flex items-center gap-1 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-3 py-1.5 rounded-lg text-xs font-medium transition"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />

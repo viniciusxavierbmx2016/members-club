@@ -489,7 +489,7 @@ function RequestModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-5 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg"
+              className="w-full sm:w-auto px-5 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
             >
               Fechar
             </button>
@@ -591,7 +591,7 @@ function RequestModal({ onClose }: { onClose: () => void }) {
                 <button
                   type="submit"
                   disabled={submitting || !gateway.trim() || !email.trim()}
-                  className="px-4 py-2.5 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+                  className="px-4 py-2.5 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
                 >
                   {submitting ? "Enviando..." : "Enviar solicitação"}
                 </button>

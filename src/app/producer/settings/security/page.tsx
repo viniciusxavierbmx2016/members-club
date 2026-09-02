@@ -197,7 +197,7 @@ export default function ProducerSecurityPage() {
           <button
             onClick={handleEnroll}
             disabled={enrolling}
-            className="mt-4 px-4 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="mt-4 px-4 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {enrolling
               ? "Configurando..."
@@ -261,7 +261,7 @@ export default function ProducerSecurityPage() {
                   <button
                     onClick={handleVerify}
                     disabled={code.length !== 6 || verifying}
-                    className="flex-1 py-2 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg"
+                    className="flex-1 py-2 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
                   >
                     {verifying ? "Verificando..." : "Confirmar"}
                   </button>

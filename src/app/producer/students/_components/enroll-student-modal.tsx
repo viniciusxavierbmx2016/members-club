@@ -171,7 +171,7 @@ export function EnrollStudentModal({
               <button
                 type="button"
                 onClick={() => copy(fullText, "all")}
-                className="flex-1 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg"
+                className="flex-1 px-4 py-2.5 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
               >
                 {copied === "all" ? "Copiado!" : "Copiar tudo"}
               </button>
@@ -276,7 +276,7 @@ export function EnrollStudentModal({
                   onClick={() => setDurationIdx(i)}
                   className={`px-3 py-2 rounded-lg text-xs font-medium border transition ${
                     durationIdx === i
-                      ? "bg-primary text-white border-primary"
+                      ? "bg-primary text-[var(--producer-button-text,#ffffff)] border-primary"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
@@ -315,7 +315,7 @@ export function EnrollStudentModal({
               type="submit"
               disabled={loading || !!motivoBloqueio}
               title={motivoBloqueio ?? undefined}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
             >
               {loading ? "Cadastrando..." : "Cadastrar aluno"}
             </button>

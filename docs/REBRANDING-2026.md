@@ -264,6 +264,29 @@ Ela é o novo **F2b**, entre a F2 e a F3:
 |---|---|---|
 | **F2b** ⭐ | varredura do balde A — as 216 restantes passam a ler `--producer-button-text` | **NÃO** (pixel-neutro, como a F1) |
 
+#### F2b · Lote 1 — painel do produtor (01/set/26)
+
+**89 ocorrências em 38 arquivos**, todas em `src/app/producer/`. Via **(iii)** em 87
+(`bg-primary`) e via **(i)** em 2 (`bg-blue-*` remapeado por `.producer-layout`).
+
+🔴 **O lote é 89, não 90 — e a lista original estava errada.** Ela classificava
+`producer/courses/[id]/customize/page.tsx:653` como balde A, e **não é**: `previewColor`
+(`:358-361`) é `supportBtn.color` — **cor arbitrária escolhida pelo produtor** para o
+botão de suporte — e, no fallback, é **`var(--member-primary)`**, namespace da área de
+membros, que este lote não governa. **Dois motivos independentes para ficar fora.**
+
+⭐ **A LIÇÃO — reclassificar do zero, não reciclar lista antiga.** A lista tinha dias de
+idade e **um erro real**; reciclá-la teria propagado o erro para dentro do código. A
+reclassificação independente (**3 agentes, 443/443, concordância de 99,3%**) encontrou
+exatamente a única divergência, e ela era substantiva. **O custo de refazer foi uma
+rodada; o de reciclar seria um bug em produção.**
+
+**Como a troca foi aplicada:** por **número de linha**, não por âncora de texto — **7
+padrões de linha se repetiam** (um deles 9×), então âncora por conteúdo não seria única
+em nenhum. Cada ponto foi verificado antes (exatamente 1 `text-white` na linha) e depois
+(desfazer a troca reproduz a linha original, byte a byte).
+
+
 ⚠️ A ordem acima é a sequência lógica, **não** um compromisso. Cada fatia abre
 com investigação própria.
 
@@ -816,13 +839,30 @@ A desta seção é **01/set/26**.
 | `mode` | `"dark"` | `"dark"` | **D10** — não é cor, não muda |
 | `primaryColor` | `#3b82f6` | **`#EFFF20`** | guia · `brand/primary` |
 | `bgColor` | `#0a0a1a` | **`#191919`** | guia · `bg/base` |
-| `headerColor` | `#0a0a1a` | ⚠️ `#191919` ou `#202020`? | **PENDÊNCIA** — o guia tem `bg/surface`, mas não diz se header é base ou surface |
-| `sidebarColor` | `#0a0a1a` | ⚠️ `#191919` ou `#202020`? | **PENDÊNCIA** — mesma dúvida |
-| `cardColor` | `#111827` | ⚠️ `#202020` ou `#262626`? | **PENDÊNCIA** — card é `surface` ou `elevated`? |
-| `secondaryColor` | `#1a1e2e` | 🔴 **sem par no guia** | **PENDÊNCIA** — o guia não tem token equivalente |
+| `headerColor` | `#0a0a1a` | **`#191919`** | ✅ **RESOLVIDA** — chapa única |
+| `sidebarColor` | `#0a0a1a` | **`#191919`** | ✅ **RESOLVIDA** — chapa única |
+| `cardColor` | `#111827` | **`#202020`** | ✅ **RESOLVIDA** — `bg/surface` |
+| `secondaryColor` | `#1a1e2e` | **`#262626`** | ✅ **RESOLVIDA** — `bg/elevated` |
 | `buttonTextColor` | `#ffffff` | **`#191919`** | guia · `text/primary` do modo claro — **obrigatório**, ver 13.2 |
 
-**4 pendências**, todas de decisão do dono. **Não escolhi nenhuma.**
+### ✅ As 4 pendências, RESOLVIDAS pelo dono em 01/set/26
+
+- **`bgColor` · `headerColor` · `sidebarColor` → `#191919`** — **CHAPA ÚNICA**: os três
+  continuam **iguais entre si**, como hoje. Usar os três níveis do guia mudaria a
+  **estrutura** da tela, não só a cor. Fica como possibilidade futura, e é
+  **reversível por 2 valores**.
+- **`cardColor` → `#202020`** (`bg/surface`) — o card segue **um degrau acima** do fundo.
+- **`secondaryColor` → `#262626`** (`bg/elevated`) — ela pinta **chip, estado
+  desabilitado e trilho de switch** (§13.2b): superfície inativa.
+- **`buttonTextColor` → `#191919`** — **obrigatório**: branco sobre lime dá **1,11:1**.
+- **`primaryColor` → `#EFFF20`**.
+
+**Efeito medido:** o painel **sobe de patamar 2,7×** (fundo de `L=0,00356` para
+`L=0,00972`) e o contraste do texto **cai de 19,60:1 para 16,23:1** — ainda **muito
+acima de AA**. A ordem de elevação é **preservada**: fundo < card < secundária.
+
+⚠️ **Estes valores NÃO estão aplicados no código.** É registro; quem os aplica é a
+**F3**, que depende da **F2b**.
 
 ### 13.2 🔴 O contraste — e o risco concreto da F3
 

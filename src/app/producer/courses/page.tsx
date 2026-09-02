@@ -155,7 +155,7 @@ export default function AdminCoursesPage() {
                 <button
                   onClick={saveOrder}
                   disabled={savingOrder}
-                  className="px-4 py-2.5 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition"
+                  className="px-4 py-2.5 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
                 >
                   {savingOrder ? "Salvando..." : "Salvar ordem"}
                 </button>
@@ -177,7 +177,7 @@ export default function AdminCoursesPage() {
                   <Link
                     href="/producer/courses/new"
                     data-tour="create-course-btn"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg transition"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -215,7 +215,7 @@ export default function AdminCoursesPage() {
           <p className="text-gray-500 mb-4">Nenhum curso cadastrado ainda</p>
           <Link
             href="/producer/courses/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             Criar primeiro curso

@@ -60,7 +60,7 @@ export default async function ProducerDashboardPage() {
         </p>
         <Link
           href="/producer/courses"
-          className="inline-block mt-5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+          className="inline-block mt-5 px-4 py-2 bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
         >
           Ir para Cursos
         </Link>

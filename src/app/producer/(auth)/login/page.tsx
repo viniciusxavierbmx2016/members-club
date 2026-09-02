@@ -261,7 +261,7 @@ function ProducerLoginForm() {
               <button
                 type="submit"
                 disabled={mfaCode.length !== 6 || loading}
-                className="w-full py-2.5 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                className="w-full py-2.5 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-[var(--producer-button-text,#ffffff)] rounded-xl font-medium transition-colors"
               >
                 {loading ? "Verificando..." : "Verificar"}
               </button>
@@ -312,7 +312,7 @@ function ProducerLoginForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-primary hover:bg-primary disabled:opacity-50 text-white font-medium rounded-xl shadow-lg shadow-primary/20 transition"
+                  className="w-full py-3 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition"
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </button>
@@ -378,7 +378,7 @@ function ProducerLoginForm() {
                         type="button"
                         onClick={handleStudentLookup}
                         disabled={lookupLoading || !lookupEmail.trim()}
-                        className="mt-3 w-full py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                        className="mt-3 w-full py-2.5 rounded-lg bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
                       >
                         {lookupLoading ? "Enviando..." : "Enviar links de acesso"}
                       </button>
