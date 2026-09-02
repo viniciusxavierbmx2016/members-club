@@ -219,6 +219,24 @@ Logo do gateway. **Não rebrandear.** Consumida em
 | `noreply@mymembersclub.com.br` | [email.ts:6](../src/lib/email.ts) | Endereço fixo, com DKIM da Brevo no domínio |
 | `friendlyName: "Members Club Auth"` | `api/auth/mfa/enroll/route.ts:40` | Nome do emissor TOTP no app autenticador |
 
+### D10 — O painel do produtor continua **ESCURO** · 01/set/26
+Decidido pelo dono a partir de **maquete comparativa** das duas opções.
+
+**Motivo registrado:** o painel tem **um conjunto único** de `--producer-*` (ver o
+veredito do toggle no §8), então a escolha não é "claro *ou* escuro por
+preferência do usuário" — é **qual conjunto único existe**. Escuro preserva a
+estrutura atual, e o lime como destaque sobre neutro escuro é **o uso que o guia
+prescreve** (`brand/primary` só em CTA, seleção e destaque). Na versão clara,
+`#EFFF20` e `#FFFFE6` são vizinhos na mesma família — **o destaque se dissolve no
+fundo**, e painel é tela de trabalho densa.
+
+⭐ **ESCOPO:** a decisão vale para o **PAINEL DO PRODUTOR**. A metade clara da
+paleta (`#FFFFE6` · `#FEFFE6` · `#FBFFC2`) **segue sem destino definido** —
+landing, e-mail e certificado são **F5**, decisão separada.
+
+⚠️ **A maquete NÃO é o produto.** Ela foi montada a partir dos valores medidos;
+**quem prova a tela real é o gate da F3**.
+
 ---
 
 ## 5. Plano de fatias
@@ -771,3 +789,80 @@ Um workspace criado hoje entra direto no grupo **A** ou **C** — nasce com os
 defaults e ninguém tocou em nada. **É argumento de PRAZO, não de pressa:** cada
 dia adiciona casos, e qualquer corte precisa de **data de referência explícita**.
 A desta seção é **01/set/26**.
+
+---
+
+## 13. F3 — o mapa de-para (medido, não aplicado)
+
+**01/set/26. Nada foi trocado.** Esta seção é o que a F3 vai executar.
+
+### 13.1 As 8 chaves, valor a valor
+
+| Chave | HOJE | NOVO proposto | Fonte do valor novo |
+|---|---|---|---|
+| `mode` | `"dark"` | `"dark"` | **D10** — não é cor, não muda |
+| `primaryColor` | `#3b82f6` | **`#EFFF20`** | guia · `brand/primary` |
+| `bgColor` | `#0a0a1a` | **`#191919`** | guia · `bg/base` |
+| `headerColor` | `#0a0a1a` | ⚠️ `#191919` ou `#202020`? | **PENDÊNCIA** — o guia tem `bg/surface`, mas não diz se header é base ou surface |
+| `sidebarColor` | `#0a0a1a` | ⚠️ `#191919` ou `#202020`? | **PENDÊNCIA** — mesma dúvida |
+| `cardColor` | `#111827` | ⚠️ `#202020` ou `#262626`? | **PENDÊNCIA** — card é `surface` ou `elevated`? |
+| `secondaryColor` | `#1a1e2e` | 🔴 **sem par no guia** | **PENDÊNCIA** — o guia não tem token equivalente |
+| `buttonTextColor` | `#ffffff` | **`#191919`** | guia · `text/primary` do modo claro — **obrigatório**, ver 13.2 |
+
+**4 pendências**, todas de decisão do dono. **Não escolhi nenhuma.**
+
+### 13.2 🔴 O contraste — e o risco concreto da F3
+
+Controles: `#000000`/`#ffffff` = **21,00:1** (bom) · `#777777`/`#888888` = **1,26:1** (ruim). A fórmula discrimina.
+
+| Par | Contraste | AA (4,5:1) |
+|---|---|---|
+| **HOJE** `#ffffff` sobre `#3b82f6` | **3,68:1** | 🔴 **já falha hoje** |
+| **PROPOSTO** `#191919` sobre `#EFFF20` | **15,90:1** | ✅ **a troca CONSERTA** |
+| 🔴 `#ffffff` sobre `#EFFF20` | **1,11:1** | 🔴 **praticamente invisível** |
+| `#F6F6F2` sobre `#191919` | 16,23:1 | ✅ |
+| `#F6F6F2` sobre `#202020` | 15,04:1 | ✅ |
+| `#F6F6F2` sobre `#262626` | 13,97:1 | ✅ |
+| `#EFFF20` sobre `#191919` (lime como destaque) | 15,90:1 | ✅ |
+| `#EFFF20` sobre `#262626` | 13,69:1 | ✅ |
+
+⭐ **A linha do meio é o risco da F3, e ele é grande:** trocar `primaryColor` para
+lime **sem** trocar `buttonTextColor` produz **1,11:1** — texto branco sobre fundo
+lima, ilegível. E lembrar que a **F1 tocou 1 das 217** ocorrências do balde A: as
+outras **216 ainda cravam `text-white`** e **não leem** `--producer-button-text`.
+
+⇒ **A F3 não pode ser feita antes da varredura do balde A**, ou o botão primário
+de 216 lugares fica ilegível. Isso é constatação medida, não escolha de ordem.
+
+### 13.3 ⭐ As fontes de verdade — são QUATRO, não três
+
+| # | Fonte | Governa | Quem lê |
+|---|---|---|---|
+| **1** | `src/lib/theme-constants.ts` | **o PAINEL** (`--producer-*`) | `producer/layout.tsx` · `producer/settings/page.tsx` · `api/producer/theme/route.ts` · `producer-theme-provider.tsx` — **4, todas do painel** |
+| **2** | `prisma/schema.prisma:83-91` (`@default` dos 5) | o valor gravado no INSERT de workspace novo | **o Postgres** — nenhuma leitura em código |
+| **3** | `producer/workspaces/[id]/edit/_lib/helpers.ts:44-49` | o **formulário** de edição do login | `edit/page.tsx` · `edit/_components/login-tab.tsx` |
+| **4** | `components/workspace-auth-shell.tsx:26-30` | a **tela de login do aluno**, renderizada | `/w/[slug]/login` · `forgot-password` · `reset-password` |
+
+**A fonte 4 não estava no mapa e diverge da 3:**
+
+| | 3 · formulário | 4 · tela real | 2 · schema |
+|---|---|---|---|
+| BG | `#0f172a` | **`#0a0a1a`** | `#0a0a1a` |
+| PRIMARY | `#3b82f6` | `#3b82f6` | **`#6366f1`** |
+| BOX | `#1e293b` | **`#1a1a2e`** | `#1a1a2e` |
+| SIDE | `#0f172a` | **`#0a0a1a`** | `#0a0a1a` |
+| OPACITY | 0.8 | **0.85** | 0.85 |
+
+⚠️ O produtor abre a aba de login e o seletor mostra `#0f172a`; a tela dele, se o
+campo for NULL, pinta `#0a0a1a`. **Formulário e render discordam.**
+
+### 13.4 ⭐ Resposta do X4: para o PAINEL, UMA fonte basta
+
+**Sim — trocar só `src/lib/theme-constants.ts` tem efeito completo no painel.**
+Provado por quem lê o quê, não por suposição: as **4 leitoras são todas do
+painel**, e `--producer-*` é **definida 0 vezes** no `globals.css` (§8) — não há
+segunda origem.
+
+**As fontes 2, 3 e 4 NÃO governam o painel** — governam a **tela de login do
+workspace**, que é superfície do **aluno**. Elas pertencem à **D6** (2 e 3) e a uma
+fatia própria da tela de login (4). **Não entram na F3.**
