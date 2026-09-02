@@ -283,6 +283,41 @@ Nenhuma descrição de aparência — só valor computado.
 
 #### F2b · Lote 2 — componentes compartilhados (01/set/26)
 
+##### ⚠️ Gate — 14 leituras válidas, e o que ficou SEM prova
+
+**14 × `rgb(255,255,255)` sobre `rgb(59,130,246)`**, por `getComputedStyle`.
+
+🔴 **O que NÃO foi provado**, escrito para não virar prova retroativa:
+
+- **A 4ª ocorrência do `import-students-modal` (`:554`, "Baixar CSV com acessos")
+  não foi vista.** Ela vive atrás de `{downloadCsv && (` (`:551`), e `downloadCsv`
+  vem da resposta da API (`:141`). A rota devolve o CSV **sempre no caminho de
+  sucesso** (`api/producer/students/import/route.ts:459-462`, sem guarda) ⇒
+  **é alcançável, mas exige concluir uma importação de verdade** — subir um `.csv`
+  válido e chegar ao passo 3. As 3 vistas foram `:215` (indicador de passo),
+  `:331` ("Próximo"/"Importar") e `:381` ("Importar" do passo 2).
+- **Os 2 pontos com `text-white/70` seguem SEM a variável, de propósito** — item
+  **9.196**. Se o agente ler o horário do balão, vai encontrar
+  `rgba(255,255,255,0.7)`, e isso está **correto**.
+- **`banner-upload`, `course-menu-manager` e `date-picker-single` não foram vistos**
+  (1 ocorrência cada).
+
+##### O falso reprovado — e por que foi do roteiro, não do código
+
+Os botões **H2 / H3 / B / I / U** do editor de e-mail vieram `rgb(156,163,175)`
+sobre transparente, e isso foi lido como reprovação. **Não é.**
+`rgb(156,163,175)` = `#9ca3af` = **`text-gray-400`** — a cor nativa deles
+(`email-editor.tsx:148-150`, componente `TBtn`, dentro de uma barra
+`bg-gray-900/80`). **A única troca naquele arquivo é `:206`**, o botão
+`Salvar`/`Inserir`. Os botões de formatação **nunca estiveram no lote**.
+
+⭐ **A LIÇÃO — roteiro de gate tem de sair do CÓDIGO, não de uma lista de rótulos.**
+O roteiro citava "os botões do editor" de forma ampla, e o agente leu elementos que
+a fatia nunca tocou. Rótulo colhido de lista pode nomear coisa que não está no lote
+— e o critério *"PASSA se `color = rgb(255,255,255)`"* então gera **falso reprovado**.
+O rótulo tem de vir do código, **com a condição de renderização junto**.
+
+
 🔴 **O lote 2 é 21, não 65.** Dois cortes, ambos medidos:
 
 **1 · A reclassificação do zero deu 61 no balde A, não 66.** 327 ocorrências em
@@ -337,6 +372,53 @@ Os **38 que saem** não são descarte: são a fatia seguinte. A regra do dono, r
 ⚠️ **Hoje ela NÃO é executável.** `src/lib/color-utils.ts` tem **16 linhas e só
 `darkenHex`** — **não existe conta de contraste no código**. E aplicá-la mudaria
 **140 de 380 campos preenchidos em produção (36,8%)**, o que é decisão de produto.
+
+##### 🔴 A conta do balde A depois do lote 2 — 101, e a aritmética que fecha
+
+| | |
+|---|---|
+| **Denominador medido hoje** | **211** = 61 (outros, nunca remedidos) + 89 (`producer/`, medido antes do lote 1) + 61 (`components/`, medido antes do lote 2) |
+| Feitas **dentro do denominador** | **110** = 89 (lote 1) + 21 (lote 2) |
+| **Restantes** | **101** |
+
+**Conferência: 110 + 101 = 211** ✅
+
+⚠️ **O plano esperava 105, e o medido é 101. Não ajustei.** A diferença de 4 tem
+duas causas, ambas aritméticas:
+
+1. **O denominador caiu de 216 para 211** — `components/` foi de 66 para **61** na
+   reclassificação do zero (−5).
+2. **A F1 saiu do denominador** (+1): `components/` foi remedido **depois** dela, e
+   `ui/button.tsx:17` já tinha a classe nova, então não entrou no grep de `text-white`.
+
+`216 − 5 = 211` · `111 − 1 = 110` · `211 − 110 = **101**`.
+
+⇒ **A F1 continua feita; ela só não está mais no denominador.** Total histórico de
+trocas: **111** (1 + 89 + 21).
+
+| Lote restante | Ocorr. | Arq. | Por quê ainda não |
+|---|---|---|---|
+| **Componentes** (classes M/V/C/R) | **40** | 25 | 38 saem por destino fora do painel + **2 pelo `/70`** (9.196) |
+| **`/admin`** | **26** | 12 | vai para a **F5** — lá não existe produtor |
+| **Outros** (raiz, auth, invite, landing, `globals.css`) | **18** | 12 | fora do escopo da variável do produtor |
+| **Curso e vitrine** | **17** | 8 | `--producer-*` nunca é emitida em `(course)`; na vitrine carregaria cor de outro dono |
+| **TOTAL** | **101** | | |
+
+ⓘ Os **2 pontos do `/70`** seguem contados entre os restantes, e não são "pendência
+de trabalho": são exclusão **permanente** enquanto o mecanismo for esse.
+
+##### Sujeira do palco, medida (02/set/26)
+
+O gate deixou rastro, e ele fica **registrado, não apagado** — controle negativo
+contaminado já mordeu esta casa uma vez:
+
+| O quê | Onde |
+|---|---|
+| **1 ticket** `"Teste QA - relatorio"` (status `OPEN`, **1 mensagem**), 02/09 02:02 | `SupportTicket` |
+| tag **`sonda-f1`** | única tag do palco |
+| post **`sonda-controle-positivo-f1`** | 1 de 39 posts |
+
+⭐ Controle: 39 posts, 1 tag, 1 ticket — a sonda distingue.
 
 ##### 🔴 A conta do balde A — e uma divergência de 1 que NÃO ajustei
 
@@ -400,6 +482,7 @@ com investigação própria.
 | **F0** ✅ | 4 cópias dos defaults do painel viraram 1 (`src/lib/theme-constants.ts`); consumidores ganharam 1 linha de alias cada. **Zero mudança de valor.** | **5** (1 novo + 4 modificados), −40/+8 | `caebebc` → merge **`546c167`** | diff de valor contra `git show HEAD:` → **8/8 idênticos** · literais antigos nos 4 alterados → **0** · `tsc --noEmit` **exit 0** · build de staging verde (`UgE92EXkbvYifZDfTatVj`) · alvo: ref staging **1**, ref produção **0** · `git status` = exatamente 5 linhas | ✅ **PASSOU 7/7** — 01/set/26 | 01/set/26 |
 | **F1** ✅ | **1 linha** — `ui/button.tsx:17`, variante `primary`: `text-white` → `text-[var(--producer-button-text,#ffffff)]`. Alcança **6 dos 11** `<Button>`. | **1** | `16fc628` → merge **`d8f57e2`** | portão 4/4 (14/14 branco, 0 chave ausente · `/admin` 0 com controle positivo 10 · 0 importadores fora de `/producer` e `/admin` · 6 de 11) · regra CSS provada lado a lado · `tsc` exit 0 · `text-white` 1068→1067 · build `Ib4Zx6sQXgzhC_CPsvurT`, alvo 1/0 | ⚠️ **PARCIAL — 3 de 6**, declarado suficiente pelo dono | 01/set/26 |
 | **F2b·1** ✅ | **89 pontos** em `src/app/producer/` passam a ler `--producer-button-text`, fallback `#ffffff`. Pixel-neutro. | **38** (+89/−89) | `f50c8cd` → merge **`d4e0d66`** | `text-white` 1067→**978** (−89 exato) · classe nova 2→**91** (+89) · 0 arquivos fora de `src/app/producer/` · **word-diff: único token trocado** · `tsc` exit 0 · build `-5xCnXaNwdyLRSG4vvGYg`, alvo 1/0 · regra CSS resolve para `#fff` sem a variável | ✅ **19/19 por `getComputedStyle`** | 01/set/26 |
+| **F2b·2** ✅ | **21 pontos** em `src/components/` (11 arquivos que só renderizam no painel) passam a ler `--producer-button-text`. Pixel-neutro. | **11** (+21/−21) | `337951f` → merge **`b1fb9cb`** | `text-white` 978→**957** (−21) · classe nova 91→**112** (+21) · 0 fora de `src/components/` · **word-diff: token único** (aspa normalizada nos 2 lados) · `tsc` exit 0 · build `ZdqOo7tcLUTBmyVlzvB9i`, alvo 1/0 | ⚠️ **14/14 válidas por `getComputedStyle`** — cobertura parcial | 01/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
