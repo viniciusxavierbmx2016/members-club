@@ -237,6 +237,35 @@ landing, e-mail e certificado são **F5**, decisão separada.
 ⚠️ **A maquete NÃO é o produto.** Ela foi montada a partir dos valores medidos;
 **quem prova a tela real é o gate da F3**.
 
+### D11 — Manter o toggle claro/escuro e CONSERTAR o modo claro ANTES da F3 · 01/set/26
+
+Quando a medição da F3 perguntou "o modo claro de hoje funciona?", a resposta
+foi **parcialmente quebrado**: as telas-núcleo passam (alunos, cursos, dashboard
+= 17,74:1), mas **4 features + 1 família transversal** têm texto entre **1,00 e
+2,59:1** no claro — Lives inteira, chat de suporte, editores rich-text/e-mail,
+cards de recursos do curso, e ~18 pontos de `gray-400` cru. Inventário completo,
+ponto a ponto com contraste medido, nos itens **9.197-9.201** do PLANO-MESTRE.
+
+**A decisão do dono (01/set/26):** manter o toggle e **consertar o claro antes
+da virada de cor**. A alternativa — desligar o toggle e declarar o painel
+escuro-somente — foi apresentada e **recusada**.
+
+**Consequência medida, sem suavizar:** a frente CRESCE. O conserto é de **bug
+pré-existente** (nenhum dos pontos nasceu do rebranding — 125/125 staff no
+escuro em produção é o motivo de ninguém ter visto), e entra na frente porque a
+F3 o tornaria pior: lime sobre branco = 1,11:1 nos mesmos lugares onde o azul
+ainda dá 3,3-3,7. Estimativa: **~3 rodadas de conserto** (1 para a causa C2 — as
+4 regras de `globals.css:318-321` explicam ~20 pontos sozinhas; 1 para Lives; 1
+para a família difusa + e-mail) **+ 1 gate humano do claro**, antes do que já
+estava planejado.
+
+**A ORDEM NOVA da frente:**
+1. conserto do modo claro (9.197-9.201) + horário do chat (9.196);
+2. decisão de padrão dos **189** `*-primary` em superfície clara (§13);
+3. aplicação do padrão (2-3 lotes, molde F2b);
+4. gate humano (claro E escuro);
+5. **F3** — a virada de cor.
+
 ---
 
 ## 5. Plano de fatias
@@ -246,7 +275,7 @@ landing, e-mail e certificado são **F5**, decisão separada.
 | **F0** | fonte única dos defaults do painel (`theme-constants.ts`) | **NÃO** |
 | **F1** | assets: logo, ícones PWA com nome novo, favicon, OG | **SIM** |
 | **F2** | tokens: os hexes do guia entram como constantes, ainda sem trocar nada | **NÃO** |
-| **F3** | a troca: defaults do painel passam a apontar para a paleta nova | **SIM** — bloqueada por **D6** |
+| **F3** | a troca: defaults do painel passam a apontar para a paleta nova | **SIM** — bloqueada por **D6** e pela ordem do **D11** (conserto do claro primeiro) |
 | **F4** | fallbacks do CSS (`globals.css`) e os 12 de `--member-primary` | **SIM** |
 | **F5** | superfícies fora do app: e-mail, certificado, landing | **SIM** |
 | **F6** | varredura do azul literal fora dos 3 escopos remapeados (~42 linhas) | **SIM** |
