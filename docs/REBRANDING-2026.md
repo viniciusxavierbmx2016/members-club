@@ -266,6 +266,50 @@ Ela é o novo **F2b**, entre a F2 e a F3:
 
 #### F2b · Lote 1 — painel do produtor (01/set/26)
 
+##### ✅ Gate — 19/19, merge `d4e0d66`
+
+**19 leituras por `getComputedStyle`, 19 × `rgb(255,255,255)` sobre `rgb(59,130,246)`.**
+Nenhuma descrição de aparência — só valor computado.
+
+⚠️ **O que NÃO foi visto**, escrito para não virar prova retroativa:
+
+- **Os TOASTS não foram vistos como caixa.** O *"Copiado!"* que apareceu é o **próprio
+  botão trocando de texto**, não o toast. **O toast de sucesso segue sem prova visual** —
+  está coberto apenas pela prova de pixel no CSS servido.
+- **Vários botões foram lidos em estado `disabled`** (opacidade 0,4–0,5). A cor computada
+  é a mesma, mas **o olho os viu esmaecidos**.
+- **Leitura sem escrita:** o agente **não salvou curso, não persistiu automação e não
+  finalizou cadastro**. Nenhum caminho de escrita foi exercitado.
+
+##### 🔴 A conta do balde A — e uma divergência de 1 que NÃO ajustei
+
+| | |
+|---|---|
+| Total original da classificação | **217** |
+| ⭐ **Total corrigido** | **216** — `customize/page.tsx:653` saiu do A (ver acima) |
+| Feitas | **90** = 1 (F1) + 89 (lote 1) |
+| **Restantes** | **126** |
+
+**Conferência: 90 + 126 = 216** ✅ — a aritmética fecha.
+
+⚠️ **O plano desta rodada esperava 127 restantes, e o medido é 126.** Não ajustei nada:
+a diferença é **exatamente a mesma correção** aprovada nesta rodada — a conta de 127
+partia do total antigo (217 − 90), e a de 126 parte do total corrigido (216 − 90).
+**Não é achado novo; é a correção se propagando.**
+
+| Lote restante | Ocorrências | Arquivos |
+|---|---|---|
+| **Componentes compartilhados** | **65** | 35 |
+| **`/admin`** ⭐ | **26** | 12 |
+| **Outros** (raiz, auth, invite, landing, `globals.css`) | **18** | 12 |
+| **Curso e vitrine** | **17** | 8 |
+| **TOTAL** | **126** | |
+
+⭐ **O `/admin` (26) segue FORA da F2b — vai para a F5.** O motivo é natureza, não
+tamanho: lá não existe produtor, o fundo é a marca da **plataforma**, e amarrá-lo a
+`--producer-button-text` daria a um produtor o poder de pintar o painel interno.
+
+
 **89 ocorrências em 38 arquivos**, todas em `src/app/producer/`. Via **(iii)** em 87
 (`bg-primary`) e via **(i)** em 2 (`bg-blue-*` remapeado por `.producer-layout`).
 
@@ -298,6 +342,7 @@ com investigação própria.
 |---|---|---|---|---|---|---|
 | **F0** ✅ | 4 cópias dos defaults do painel viraram 1 (`src/lib/theme-constants.ts`); consumidores ganharam 1 linha de alias cada. **Zero mudança de valor.** | **5** (1 novo + 4 modificados), −40/+8 | `caebebc` → merge **`546c167`** | diff de valor contra `git show HEAD:` → **8/8 idênticos** · literais antigos nos 4 alterados → **0** · `tsc --noEmit` **exit 0** · build de staging verde (`UgE92EXkbvYifZDfTatVj`) · alvo: ref staging **1**, ref produção **0** · `git status` = exatamente 5 linhas | ✅ **PASSOU 7/7** — 01/set/26 | 01/set/26 |
 | **F1** ✅ | **1 linha** — `ui/button.tsx:17`, variante `primary`: `text-white` → `text-[var(--producer-button-text,#ffffff)]`. Alcança **6 dos 11** `<Button>`. | **1** | `16fc628` → merge **`d8f57e2`** | portão 4/4 (14/14 branco, 0 chave ausente · `/admin` 0 com controle positivo 10 · 0 importadores fora de `/producer` e `/admin` · 6 de 11) · regra CSS provada lado a lado · `tsc` exit 0 · `text-white` 1068→1067 · build `Ib4Zx6sQXgzhC_CPsvurT`, alvo 1/0 | ⚠️ **PARCIAL — 3 de 6**, declarado suficiente pelo dono | 01/set/26 |
+| **F2b·1** ✅ | **89 pontos** em `src/app/producer/` passam a ler `--producer-button-text`, fallback `#ffffff`. Pixel-neutro. | **38** (+89/−89) | `f50c8cd` → merge **`d4e0d66`** | `text-white` 1067→**978** (−89 exato) · classe nova 2→**91** (+89) · 0 arquivos fora de `src/app/producer/` · **word-diff: único token trocado** · `tsc` exit 0 · build `-5xCnXaNwdyLRSG4vvGYg`, alvo 1/0 · regra CSS resolve para `#fff` sem a variável | ✅ **19/19 por `getComputedStyle`** | 01/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
