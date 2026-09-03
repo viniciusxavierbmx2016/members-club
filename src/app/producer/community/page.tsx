@@ -313,7 +313,7 @@ export default function AdminCommunityPage() {
         <button
           className={`px-4 py-2 text-sm border-b-2 transition ${
             subTab === "posts"
-              ? "border-primary text-primary"
+              ? "border-primary text-[#191919] dark:text-primary"
               : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           }`}
           onClick={() => setSubTab("posts")}
@@ -324,7 +324,7 @@ export default function AdminCommunityPage() {
         <button
           className={`px-4 py-2 text-sm border-b-2 transition ${
             subTab === "groups"
-              ? "border-primary text-primary"
+              ? "border-primary text-[#191919] dark:text-primary"
               : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           }`}
           onClick={() => setSubTab("groups")}
@@ -335,7 +335,7 @@ export default function AdminCommunityPage() {
         <button
           className={`px-4 py-2 text-sm border-b-2 transition flex items-center gap-1.5 ${
             subTab === "pending"
-              ? "border-primary text-primary"
+              ? "border-primary text-[#191919] dark:text-primary"
               : "border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           }`}
           onClick={() => setSubTab("pending")}

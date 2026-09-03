@@ -288,7 +288,7 @@ export default function CourseStudentsPage(
                           <span className={exp.color}>{exp.text}</span>
                           <button
                             onClick={() => setEditTarget(s)}
-                            className="p-1 text-gray-400 hover:text-primary dark:hover:text-primary rounded"
+                            className="p-1 text-gray-400 hover:text-[#191919] dark:hover:text-primary rounded"
                             aria-label="Editar tempo de acesso"
                             title="Editar tempo de acesso"
                           >
@@ -401,7 +401,7 @@ export default function CourseStudentsPage(
                         <p className={exp.color}>{exp.text}</p>
                         <button
                           onClick={() => setEditTarget(s)}
-                          className="p-1 text-gray-400 hover:text-primary dark:hover:text-primary rounded"
+                          className="p-1 text-gray-400 hover:text-[#191919] dark:hover:text-primary rounded"
                           aria-label="Editar tempo de acesso"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

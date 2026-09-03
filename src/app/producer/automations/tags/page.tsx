@@ -225,7 +225,7 @@ export default function TagsPage() {
                     <button
                       type="button"
                       onClick={() => toggleExpand(t.id)}
-                      className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-primary transition"
+                      className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-[#191919] dark:hover:text-primary transition"
                     >
                       <svg className={`w-3 h-3 transition-transform ${expandedTag === t.id ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                       {t.studentCount}
@@ -240,7 +240,7 @@ export default function TagsPage() {
                         <>
                           <button
                             onClick={() => handleUpdate(t.id)}
-                            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition"
+                            className="px-2.5 py-1 text-xs font-medium rounded-lg bg-primary/10 hover:bg-primary/20 text-[#191919] dark:text-primary border border-primary/20 transition"
                           >
                             Salvar
                           </button>

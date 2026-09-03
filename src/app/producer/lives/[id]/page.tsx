@@ -330,7 +330,7 @@ export default function ProducerLiveRoomPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <p className="text-gray-500 dark:text-gray-400 mb-4">Live não encontrada</p>
-        <button onClick={() => router.push("/producer/lives")} className="text-primary hover:underline text-sm">
+        <button onClick={() => router.push("/producer/lives")} className="text-[#191919] dark:text-primary hover:underline text-sm">
           Voltar
         </button>
       </div>
@@ -512,7 +512,7 @@ export default function ProducerLiveRoomPage() {
                     {msg.user.avatarUrl ? (
                       <Image src={msg.user.avatarUrl} alt="" width={24} height={24} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-[10px] font-medium text-primary">
+                      <span className="text-[10px] font-medium text-[#191919] dark:text-primary">
                         {msg.user.name?.charAt(0)?.toUpperCase() || "?"}
                       </span>
                     )}
@@ -600,7 +600,7 @@ export default function ProducerLiveRoomPage() {
                     ) : (
                       <button
                         onClick={() => addModerator(u.id)}
-                        className="text-[10px] text-primary hover:text-primary transition"
+                        className="text-[10px] text-[#191919] dark:text-primary hover:text-[#191919] dark:hover:text-primary transition"
                       >
                         +mod
                       </button>

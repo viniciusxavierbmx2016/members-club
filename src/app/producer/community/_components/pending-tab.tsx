@@ -100,7 +100,7 @@ export function PendingTab({
                   </span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
                     item.type === "community_post"
-                      ? "bg-primary/20 text-primary"
+                      ? "bg-primary/20 text-[#191919] dark:text-primary"
                       : "bg-purple-500/20 text-purple-400"
                   }`}>
                     {item.type === "community_post" ? "Post" : "Comentário"}

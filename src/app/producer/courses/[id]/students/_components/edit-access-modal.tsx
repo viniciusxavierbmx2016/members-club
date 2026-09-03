@@ -424,7 +424,7 @@ export function EditAccessModal({
                           <span
                             className={`text-xs ${
                               modOn
-                                ? "text-primary font-medium"
+                                ? "text-[#191919] dark:text-primary font-medium"
                                 : "text-gray-500"
                             }`}
                           >
@@ -475,7 +475,7 @@ export function EditAccessModal({
                                   <span
                                     className={`text-xs ${
                                       lOn
-                                        ? "text-primary"
+                                        ? "text-[#191919] dark:text-primary"
                                         : "text-gray-500"
                                     }`}
                                   >
