@@ -285,6 +285,52 @@ o 9.204 vem antes de qualquer refinamento adicional do claro.
 4. gate humano (claro E escuro);
 5. **F3** — a virada de cor.
 
+### D12 — PRIMEIRO PLANO TEM PAR CLARO/ESCURO · 03/set/26
+
+No modo claro, texto e ícone que hoje usam a marca viram **neutro escuro
+(`#191919`)**; no escuro, seguem **lime (`#EFFF20`)**.
+
+**Motivo medido:** valor único é **matematicamente impossível** — exigiria
+luminância ≤0,183 contra branco E ≥0,223 contra `#0a0a1a`; a janela é vazia.
+E é o que o guia prescreve: `brand/primary` só em CTA, seleção e destaque.
+**Cobertura (medição PP):** 134 de 160 pontos sem exceção nenhuma; +23 perdem
+ênfase, não informação (pista redundante no próprio elemento).
+
+**Forma:** o par da casa é `text-emerald-600 dark:text-emerald-400` (**15
+usos**). ⚠️ **NÃO copiar o par azul**: dentro do `.producer-layout` ele é
+**sequestrado pelos remaps** de `globals.css:269` e `:287`, que viram AS DUAS
+metades para `var(--producer-primary)`.
+
+### D13 — OS 3 PONTOS ONDE A COR É A ÚNICA PISTA GANHAM PISTA PRÓPRIA · 03/set/26
+
+`side-panel.tsx:69` e `mobile-flow-editor.tsx:71` (card de trigger
+selecionado — borda+tinta são a única distinção; o ícone é primary nas DUAS
+pernas) e `settings/page.tsx:266` (chip de funcionalidade habilitada — cor
+única no elemento; o toggle vizinho é pista externa).
+**Solução:** sinal não-cromático na perna selecionada (ícone de check e/ou
+`font-medium`).
+⭐ **Motivo que vale além do rebranding:** hoje a informação depende SÓ de
+cor — **já é ruim para daltônicos, nos dois modos**. A pista própria melhora
+o estado atual, não só o futuro.
+
+### D14 — BORDA E ANEL USAM PAR, NÃO TOM ÚNICO · 03/set/26
+
+Existe janela (L 0,13–0,30) para um tom único servir nos dois modos, porque o
+limiar de componente é 3:1. **Recusado assim mesmo:** o tom único criaria uma
+TERCEIRA cor — nem marca, nem neutro — espalhada em **112 lugares**. Par custa
+mais e é previsível.
+
+### D15 — O KNOB DO TOGGLE ESCURECE QUANDO O TRILHO É A MARCA · 03/set/26
+
+Bolinha branca sobre trilho lime dá **1,11:1** e o estado "ligado" desaparece.
+Mesma lógica do `buttonTextColor`: **o que está sobre a marca acompanha a
+marca**.
+
+⚠️ **REGISTRO SEM SUAVIZAR:** as decisões D12–D15 são de **DESIGN SYSTEM, não
+de rebranding** — regem a interface além do lime. Foram tomadas com base em
+contraste medido e no guia da marca, que é critério correto **mas não o
+único**; **não passaram por revisão de design**.
+
 ---
 
 ## 5. Plano de fatias
@@ -311,6 +357,18 @@ Ela é o novo **F2b**, entre a F2 e a F3:
 | Fatia | O que é | Muda pixel? |
 |---|---|---|
 | **F2b** ⭐ | varredura do balde A — as 216 restantes passam a ler `--producer-button-text` | **NÃO** (pixel-neutro, como a F1) |
+| **F3.0** ✅ | as 4 decisões do dono (D12–D15) e este plano | **NÃO** (só docs) |
+| **F3.1** | par de primeiro plano: texto/ícone da marca ganham par claro/escuro (~83 pontos) | **SIM — só no CLARO** (escuro fica idêntico: metade dark preserva o azul de hoje até a F3.5) |
+| **F3.2** | pista própria nos 3 pontos da D13 (check/`font-medium`) | **SIM — nos DOIS modos** (acrescenta glifo/peso; melhora acessibilidade já no azul) |
+| **F3.3** | borda e anel: par claro/escuro (112 pontos) | **SIM — só no CLARO** |
+| **F3.4** | knob do toggle acompanha a marca (5 toggles, D15) | **NÃO no azul** (knob branco sobre azul segue; a diferença só aparece com o lime na F3.5) |
+| **F3.5** ⭐ | **A VIRADA** — os 5 valores novos em `theme-constants.ts` | **SIM — nos DOIS modos** (é o rebranding em si) |
+
+⭐ **Por que a virada é a ÚLTIMA fatia:** com o azul ainda no lugar, cada fatia
+F3.1–F3.4 é verificável **sozinha** (o gate compara "azul antes ↔ azul depois"
+no modo intocado e mede só o claro). Virando a cor primeiro, **todo gate teria
+duas variáveis mudando ao mesmo tempo** — nunca se saberia se uma quebra veio
+do par novo ou do valor novo.
 
 #### F2b · Lote 1 — painel do produtor (01/set/26)
 
@@ -1204,3 +1262,25 @@ segunda origem.
 **As fontes 2, 3 e 4 NÃO governam o painel** — governam a **tela de login do
 workspace**, que é superfície do **aluno**. Elas pertencem à **D6** (2 e 3) e a uma
 fatia própria da tela de login (4). **Não entram na F3.**
+
+### Os números da medição final (rodadas OO e PP, 03/set/26)
+
+- **Os "189" viraram 160 linhas alcançáveis** (178 tokens): **13 NUNCA-CLARO**
+  (login/register `#060612` fixo, flow-editor, mini-canvas — provado que a
+  guarda da etapa A não os vira: 0 usos das 4 classes) e **4 CONDICIONAIS**
+  (borda que coincide com o próprio `bg-primary`).
+- 🔴 **REFUTAÇÃO REGISTRADA, não apagada:** a hipótese anterior do dono —
+  *"a marca como TEXTO sobre fundo claro é o problema inteiro"* — foi testada
+  e **refutada a 43%** (76 de 178 pontos; borda/anel sozinho é MAIOR: 102). A
+  hipótese seguinte ("no claro a marca não é primeiro plano") passou a 98%,
+  com as 3 exceções da D13 nomeadas. **A refutação foi o resultado mais útil
+  da rodada** — encolheu a decisão errada antes de ela virar código.
+- **A superfície clara do guia NÃO ajuda:** lime sobre `#FFFFE6`/`#FEFFE6`/
+  `#FBFFC2` dá **1,09 / 1,09 / 1,06** — pior que sobre branco (1,11). Trocar o
+  chão claro não compra contraste nenhum. *(Controles: 21,00 · 1,26.)*
+- **Tintas e toggles (46):** dos 17 que sinalizam estado, **13 têm pista
+  redundante** no elemento (texto do badge, borda-presença, posição do knob),
+  **2 são os trigger cards da D13**, 1 é nunca-claro (wizard do register) e 1
+  sobrevive por presença (a barrinha da aba do analytics).
+- **Valor único de primeiro plano: impossível** (janela de luminância vazia —
+  ver D12); para contorno a janela L 0,13–0,30 existia e foi **recusada na D14**.
