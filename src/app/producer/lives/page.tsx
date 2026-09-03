@@ -265,9 +265,9 @@ export default function ProducerLivesPage() {
                     )}
                   </div>
 
-                  <h3 className="text-white font-medium truncate">{live.title}</h3>
+                  <h3 className="text-gray-900 dark:text-white font-medium truncate">{live.title}</h3>
 
-                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
+                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span>
                       {live.status === "LIVE" && live.startedAt
                         ? `Iniciou ${formatDate(live.startedAt)}`
@@ -332,7 +332,7 @@ export default function ProducerLivesPage() {
                   )}
                   <button
                     onClick={() => copyLink(live.externalUrl)}
-                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-white transition"
+                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                     title="Copiar link"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -341,7 +341,7 @@ export default function ProducerLivesPage() {
                   </button>
                   <button
                     onClick={() => openEdit(live)}
-                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-white transition"
+                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                     title="Editar"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,7 +350,7 @@ export default function ProducerLivesPage() {
                   </button>
                   <button
                     onClick={() => setConfirmAction({ type: "delete", live })}
-                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-red-400 transition"
+                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-red-400 transition"
                     title="Excluir"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
