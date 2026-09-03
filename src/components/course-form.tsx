@@ -574,7 +574,7 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
 
         {/* Upload PDF */}
         <div className="mb-4">
-          <label className="text-xs text-gray-400 mb-1.5 block">Arquivo PDF (opcional)</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 block">Arquivo PDF (opcional)</label>
           {termsFileUrl ? (
             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg">
               <svg className="w-8 h-8 text-red-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -633,7 +633,7 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
         </div>
 
         {/* Textarea de texto */}
-        <label className="text-xs text-gray-400 mb-1.5 block">Texto dos termos (opcional)</label>
+        <label className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 block">Texto dos termos (opcional)</label>
         <textarea
           value={termsContent}
           onChange={(e) => setTermsContent(e.target.value)}

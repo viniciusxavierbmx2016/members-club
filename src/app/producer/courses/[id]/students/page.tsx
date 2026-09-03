@@ -315,7 +315,7 @@ export default function CourseStudentsPage(
                           ) : (
                             <button
                               type="button"
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-500/10 text-gray-400 cursor-not-allowed"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-500/10 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                               title="WhatsApp não cadastrado"
                               onClick={() => showToast("Este aluno não possui WhatsApp cadastrado")}
                             >
@@ -438,7 +438,7 @@ export default function CourseStudentsPage(
                     ) : (
                       <button
                         type="button"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-400 cursor-not-allowed flex-shrink-0"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-500 dark:text-gray-400 cursor-not-allowed flex-shrink-0"
                         title="WhatsApp não cadastrado"
                         onClick={() => showToast("Este aluno não possui WhatsApp cadastrado")}
                       >

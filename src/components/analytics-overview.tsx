@@ -270,8 +270,8 @@ export function AnalyticsOverview({
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="currentColor" className="text-gray-200 dark:text-gray-800" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="day" stroke="currentColor" className="text-gray-400" fontSize={11} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={28} />
-              <YAxis stroke="currentColor" className="text-gray-400" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+              <XAxis dataKey="day" stroke="currentColor" className="text-gray-500 dark:text-gray-400" fontSize={11} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={28} />
+              <YAxis stroke="currentColor" className="text-gray-500 dark:text-gray-400" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
               <Tooltip content={<CustomTooltip color="#3b82f6" />} />
               <Area type="monotone" dataKey="count" name="Matrículas" stroke="#3b82f6" strokeWidth={2.5} fill="url(#enrollGrad)" />
             </AreaChart>
@@ -282,8 +282,8 @@ export function AnalyticsOverview({
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={data.lessonsCompletedPerDay} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
               <CartesianGrid stroke="currentColor" className="text-gray-200 dark:text-gray-800" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="day" stroke="currentColor" className="text-gray-400" fontSize={11} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={28} />
-              <YAxis stroke="currentColor" className="text-gray-400" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+              <XAxis dataKey="day" stroke="currentColor" className="text-gray-500 dark:text-gray-400" fontSize={11} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={28} />
+              <YAxis stroke="currentColor" className="text-gray-500 dark:text-gray-400" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
               <Tooltip cursor={{ fill: "rgba(16, 185, 129, 0.06)" }} content={<CustomTooltip color="#10b981" />} />
               <Bar dataKey="count" name="Concluídas" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={28} />
             </BarChart>
@@ -298,8 +298,8 @@ export function AnalyticsOverview({
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={data.progressDistribution} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
                 <CartesianGrid stroke="currentColor" className="text-gray-200 dark:text-gray-800" strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" stroke="currentColor" className="text-gray-400" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-                <YAxis type="category" dataKey="bucket" stroke="currentColor" className="text-gray-400" fontSize={12} tickLine={false} axisLine={false} width={70} />
+                <XAxis type="number" stroke="currentColor" className="text-gray-500 dark:text-gray-400" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+                <YAxis type="category" dataKey="bucket" stroke="currentColor" className="text-gray-500 dark:text-gray-400" fontSize={12} tickLine={false} axisLine={false} width={70} />
                 <Tooltip cursor={{ fill: "rgba(59, 130, 246, 0.05)" }} content={<CustomTooltip color="#3b82f6" />} />
                 <Bar dataKey="count" name="Alunos" radius={[0, 6, 6, 0]} maxBarSize={32}>
                   {data.progressDistribution.map((_, i) => (
@@ -522,7 +522,7 @@ function KpiCard({
           <span className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${trendUp ? "text-emerald-600 dark:text-emerald-400" : trendDown ? "text-rose-600 dark:text-rose-400" : "text-gray-400"}`}>
             {trendUp ? <TrendUp className="w-3 h-3" /> : trendDown ? <TrendDown className="w-3 h-3" /> : null}
             {Math.abs(delta).toFixed(0)}%
-            {deltaLabel ? <span className="font-normal text-gray-400 ml-0.5">{deltaLabel}</span> : null}
+            {deltaLabel ? <span className="font-normal text-gray-500 dark:text-gray-400 ml-0.5">{deltaLabel}</span> : null}
           </span>
         )}
       </div>

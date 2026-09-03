@@ -33,9 +33,9 @@ export function SidePanel({
 }) {
   const isTrigger = type === "trigger";
   const selectCls = "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors";
-  const labelCls = "block text-xs font-medium text-gray-400 mb-1.5";
+  const labelCls = "block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5";
   const inputCls = selectCls;
-  const stepCls = "text-[11px] uppercase tracking-wider font-semibold text-gray-400 mb-3";
+  const stepCls = "text-[11px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 mb-3";
 
   const allLessons = selectedCourse?.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, moduleTitle: m.title }))) || [];
 
@@ -269,7 +269,7 @@ export function SidePanel({
                           <div className="bg-white dark:bg-card rounded-lg p-3 space-y-0.5 border border-gray-100 dark:border-white/5">
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs">🔔</span>
-                              <span className="text-[10px] text-gray-400 font-medium">Members Club</span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Members Club</span>
                             </div>
                             <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{actionConfig.pushTitle || "Título"}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{actionConfig.pushBody || "Mensagem..."}</p>

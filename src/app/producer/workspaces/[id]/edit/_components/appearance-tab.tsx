@@ -209,7 +209,7 @@ export function AppearanceTab({
               <p className="text-[11px] text-gray-500">
                 Deixe em branco para usar a saudação automática por horário
               </p>
-              <p className="text-xs text-gray-400 shrink-0 ml-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 shrink-0 ml-2">
                 {(vitrineWelcomeTitle || "").length}/100
               </p>
             </div>
@@ -235,7 +235,7 @@ export function AppearanceTab({
               <p className="text-[11px] text-gray-500">
                 Deixe em branco para usar o texto padrão
               </p>
-              <p className="text-xs text-gray-400 shrink-0 ml-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 shrink-0 ml-2">
                 {(vitrineWelcomeText || "").length}/200
               </p>
             </div>
@@ -381,7 +381,7 @@ export function AppearanceTab({
             {faviconUrl ? (
               <Image src={faviconUrl} alt="favicon" width={32} height={32} className="w-8 h-8 object-contain" />
             ) : (
-              <span className="text-xs text-gray-400">32×32</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">32×32</span>
             )}
           </div>
           <div className="flex-1 flex items-center gap-2">
