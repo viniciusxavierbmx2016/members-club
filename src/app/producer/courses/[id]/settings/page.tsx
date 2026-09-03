@@ -264,7 +264,7 @@ export default function CourseSettingsPage(
                   className={`shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center ${
                     enabled
                       ? "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary"
-                      : "bg-gray-100 text-gray-400 dark:bg-[#1a1e2e] dark:text-gray-500"
+                      : "bg-gray-100 text-gray-500 dark:bg-[#1a1e2e] dark:text-gray-500"
                   }`}
                 >
                   {item.icon}
