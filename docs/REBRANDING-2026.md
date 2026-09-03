@@ -259,10 +259,24 @@ ainda dá 3,3-3,7. Estimativa: **~3 rodadas de conserto** (1 para a causa C2 —
 para a família difusa + e-mail) **+ 1 gate humano do claro**, antes do que já
 estava planejado.
 
-**Status (02/set/26):** etapa A (a alavanca C2) **ENTREGUE** — merge `5051949`,
-linha **Claro·A** no §6. Faltam: **etapa B** (Lives, ~26 pontos C1, molde
-`text-gray-900 dark:text-white`) e **etapa C** (família 9.201 + editor de
-e-mail C3) — e o 9.202 (interruptor dessincronizado) descoberto no gate.
+**✅ STATUS FINAL (03/set/26): o conserto do modo claro está CONCLUÍDO, em 3 etapas.**
+**A** (alavanca C2: guarda `.dark` nas 4 regras + 8 pares, 19+8 pontos) — merge `5051949` ·
+**B** (Lives, 34 pontos) — merge `48629c8` ·
+**C** (família gray-400 + faixas C3, 73 pontos em 46 trocas) — merge `8ac4d28`.
+**Total: ~134 pontos** de contraste consertados no claro, com o escuro provado
+byte-idêntico nas três etapas (comparação de CSS servido na A; tabelas
+antes/depois por família na B e C) e gates humanos 12/12 · 22/22 · 34/34.
+
+**O QUE FICOU DE FORA — registrado para não virar prova retroativa:**
+- **editor de e-mail** (item **9.205**): exige `dark:prose-invert`, 0 usos na casa — decisão de padrão pendente;
+- **hover vermelho** de `lives/page.tsx:353` (item **9.203**): sem molde `dark:hover:text-red-*`, dono decidiu ficar;
+- **família inversa do escuro** (item **9.204**): placeholders e a família `text-gray-500` crua (3,69–4,05 no escuro);
+- **badge amarelo** `courses/page.tsx:291` (no 9.201): quebra nos DOIS modos — outra família.
+
+⭐ **A régua de prioridade que fica:** a família inversa (9.204) é a ÚNICA
+pendência que atinge os **125 de 125 HOJE** — todo o resto desta frente
+consertou (ou adiou) um modo que ninguém usa ainda. Quando o dono priorizar,
+o 9.204 vem antes de qualquer refinamento adicional do claro.
 
 **A ORDEM NOVA da frente:**
 1. conserto do modo claro (9.197-9.201) + horário do chat (9.196);
@@ -452,8 +466,10 @@ contaminado já mordeu esta casa uma vez:
 | tag **`sonda-f1`** | única tag do palco |
 | post **`sonda-controle-positivo-f1`** | 1 de 39 posts |
 | live **`Live gate B @staging.test`** (status `LIVE`, **0 mensagens de chat**), 03/09 01:43 — do gate da etapa B | `Live` (1 de **2** no palco; a outra é `Live de Teste E3.12`, 18/08, pré-existente) |
+| automação **`Reengajar alunos inativos`** (`active=true`), 03/09 03:51 — do gate da etapa C | `Automation` (única do palco) |
+| secret de gateway **hubla · label "Principal"**, 03/09 03:54 — do gate da etapa C. ⭐ **Inerte, com prova**: `lastUsedAt=NULL`; o POST de `hubla-secrets/route.ts:62` não faz chamada externa nem e-mail (grep: zero `fetch`/brevo); o secret só valida webhook DE ENTRADA (adapter), que exigiria a Hubla chamar o staging — não registrado — e falharia fail-closed com token falso | `WorkspaceGatewaySecret` (único do palco) |
 
-⭐ Controle: 39 posts, 1 tag, 1 ticket, 2 lives — a sonda distingue.
+⭐ Controle: 39 posts, 1 tag, 1 ticket, 2 lives, 1 automação, 1 secret — a sonda distingue.
 
 ##### 🔴 A conta do balde A — e uma divergência de 1 que NÃO ajustei
 
@@ -520,6 +536,7 @@ com investigação própria.
 | **F2b·2** ✅ | **21 pontos** em `src/components/` (11 arquivos que só renderizam no painel) passam a ler `--producer-button-text`. Pixel-neutro. | **11** (+21/−21) | `337951f` → merge **`b1fb9cb`** | `text-white` 978→**957** (−21) · classe nova 91→**112** (+21) · 0 fora de `src/components/` · **word-diff: token único** (aspa normalizada nos 2 lados) · `tsc` exit 0 · build `ZdqOo7tcLUTBmyVlzvB9i`, alvo 1/0 | ⚠️ **14/14 válidas por `getComputedStyle`** — cobertura parcial | 01/set/26 |
 | **Claro·A** ✅ | Guarda `.dark` nas 4 regras de superfície (`globals.css:318-321`, forma copiada dos irmãos de membros `:335-336`) + os **8 pares rebaixados** no mesmo commit (`settings:267` · `chat:287/:311` · blockquote `globals:561` no molde `.tiptap :154/:158` · `rte:187` · placeholders `rte:306/:318/:609`). 19 pontos C2 saem de 1,00-2,59:1 para 4,83-17,74:1 no claro. ⭐ **Decisão de método:** onde a metade escura já era `gray-500`, ela foi **mantida** em vez do par clássico `dark:text-gray-400` — o molde diria gray-400, mas isso mudaria o escuro, e a promessa (byte-idêntico) vencia o molde. | **4** (+17/−13) | `abbc6df` → merge **`5051949`** | **CSS servido congelado ANTES e comparado DEPOIS**: 42→42 regras `.producer-layout`, diff = só os 4 prefixos; arquivo inteiro 5 saem/6 entram, todas computando no escuro o valor de hoje · `tsc` exit 0 · build `a024bUe1LGutqLgKkp6p8`, alvo prod 0/staging 2 | ✅ **12/12 nos dois modos**; no escuro os valores lidos foram `#0a0a1a` e `#111827` — os de hoje | 02/set/26 |
 | **Claro·B** ✅ | Lives legível no claro: **34 pontos** (37 trocas) nos 6 arquivos de `lives/` — títulos `text-white`→par (1,00→17,74), secundários (2,54→4,83), gray-300 (1,47→10,31), badges de status no molde do import-modal com a **duplicata inline do `:401`** (1,48-2,53→4,76-6,87), input do chat da sala (1,00→17,74). ⚠️ **34, não 26**: o inventário GG não contava os badges (helpers `:15-17` + `:401`), o 3º botão de ícone, o "Enviando…" e linhas finas dos modais. **Saíram com motivo:** 12 linhas nos modais `bg-gray-950` da sala (escuros nos 2 modos DE PROPÓSITO) · 10 de cor semântica sólida (red/green/gray-600) · 3 overlays `bg-black/60` · 2 de mídia. ⭐ **A regra que venceu o molde de novo:** metade escura mantida LITERAL em todos os 34 (dark:text-gray-400/300, dark:bg-\*-500/20, dark:hover:text-white). | **6** (+34/−34) | `037ec2f` → merge **`48629c8`** | escuro **8/8 famílias idênticas** antes→depois (19,60·7,72·13,30·20,13·5,81·8,94·6,42·17,86) · `tsc` exit 0 · sufixo `/N`: 0 candidatos · build `Umq0DzAOfgQri083Fl6nh`, alvo prod 0/staging 2 | ✅ **22/22 nos dois modos**, com `document.documentElement.className` conferido antes de cada leitura (regra do 9.202) | 03/set/26 |
+| **Claro·C** ✅ | Família gray-400 + faixas fixas: **73 pontos em 46 trocas** — e não os ~18 do 9.201, porque **as constantes multiplicam** (`labelCls` ×24 + `stepCls` ×6 = 30 pontos em 2 trocas) e a sonda anterior (limitada a 10 casos) não enumerou os eixos dos gráficos do analytics (×6), lesson-materials (×4), lessons-manager (×3) e course-form (×2). ⭐ **Achado C3 novo:** `modules-manager.tsx:656`, faixa `bg-gray-950/40` sem `dark:` atrás dos campos do módulo expandido. **Saíram com motivo:** modais escuros-propositais de Lives (6) · `preview-modal`/`flow-editor`/mini-canvas (fixos escuros) · `whatsapp-link:28` (disabled, isento) · badge amarelo (C4, quebra nos 2 modos) · família inversa 9.204 (é do escuro) · **o EDITOR DE E-MAIL inteiro** (→ item 9.205: `dark:prose-invert` tem 0 usos na casa). ⭐ **Registro de honestidade do executor:** a 1ª varredura dos 25 componentes prefixou o caminho EM DOBRO e não varreu nada — o `2>/dev/null` engoliu o erro, detectado pelo VAZIO IMPLAUSÍVEL, não pelo retorno. **Lição: retorno de sucesso não é prova de execução.** | **24** (+45/−45) | `40e2e43` → merge **`8ac4d28`** | escuro **5/5 famílias idênticas** (7,04 · 9,29 · 12,12 · 20,13 · faixa por token literal) · `tsc` exit 0 · `/N`: 0 · zero arquivo fora do lote · build `aVOCvLOjbg0ftu64AjsKM`, alvo prod 0/staging 2 | ✅ **34/34 nos dois modos**, `className` conferido antes de cada leitura (9.202); os 2 pontos "sem par" vistos no gate (`appearance-tab:209/:235` e o chip de categoria `workspaces/page.tsx:171`) foram conferidos: **pré-existentes e intocados pelo diff** (hunks: só 212/238/384), membros da família inversa 9.204 | 03/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
