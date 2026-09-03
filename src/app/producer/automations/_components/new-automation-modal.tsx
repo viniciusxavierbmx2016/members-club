@@ -21,7 +21,7 @@ export function NewAutomationModal({ onClose, onScratch, onTemplate }: { onClose
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button type="button" onClick={onScratch} className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 hover:bg-primary/5 transition text-center group">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition">
-                <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <svg className="w-6 h-6 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               </div>
               <div><p className="text-sm font-semibold text-gray-900 dark:text-white">Criar do zero</p><p className="text-xs text-gray-500 mt-1">Monte seu fluxo personalizado</p></div>
             </button>

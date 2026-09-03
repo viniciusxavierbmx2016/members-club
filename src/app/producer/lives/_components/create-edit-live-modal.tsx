@@ -281,7 +281,7 @@ export function CreateEditLiveModal({
                 >
                   Remover
                 </button>
-                <label className="text-xs text-primary hover:text-primary transition cursor-pointer">
+                <label className="text-xs text-[#191919] dark:text-primary hover:text-[#191919] dark:hover:text-primary transition cursor-pointer">
                   Trocar
                   <input
                     type="file"

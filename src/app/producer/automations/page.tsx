@@ -150,7 +150,7 @@ export default function AutomationsPage() {
       ) : automations.length === 0 ? (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-12 text-center">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
-            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <svg className="w-8 h-8 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <p className="text-gray-900 dark:text-white font-semibold text-lg mb-2">Automatize tarefas repetitivas</p>
           <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">Crie fluxos visuais que executam ações automaticamente</p>
@@ -181,7 +181,7 @@ export default function AutomationsPage() {
                     </div>
                   </div>
                 </div>
-                {courseName && <p className="text-[10px] text-primary mb-2 truncate">{courseName}</p>}
+                {courseName && <p className="text-[10px] text-[#191919] dark:text-primary mb-2 truncate">{courseName}</p>}
                 <div className="bg-[#0a0a0b] rounded-xl p-3 mb-3 overflow-hidden" style={{ backgroundImage: "radial-gradient(circle, #1d1d23 1px, transparent 1px)", backgroundSize: "16px 16px" }}>
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 text-[var(--producer-button-text,#ffffff)]" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></div>

@@ -67,7 +67,7 @@ export function SidePanel({
                 {Object.entries(TRIGGER_META).map(([key, m]) => (
                   <button key={key} type="button" onClick={() => setTriggerType(key)}
                     className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-colors cursor-pointer ${triggerType === key ? "border-primary bg-primary/5 dark:bg-primary/10" : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-primary/30"}`}>
-                    <svg className="w-5 h-5 text-primary mx-auto mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={m.icon} /></svg>
+                    <svg className="w-5 h-5 text-[#191919] dark:text-primary mx-auto mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={m.icon} /></svg>
                     <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300 leading-tight">{m.short}</span>
                     {m.behavioral && <span className="text-[8px] px-1.5 py-px rounded bg-amber-500/15 text-amber-500 dark:text-amber-400 font-medium">Cron</span>}
                   </button>

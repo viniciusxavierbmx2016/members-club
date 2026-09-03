@@ -206,7 +206,7 @@ export default function ProducerLivesPage() {
       ) : filtered.length === 0 ? (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-xl p-10 text-center">
           <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-7 h-7 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
           </div>
@@ -276,7 +276,7 @@ export default function ProducerLivesPage() {
                           : `Agendada para ${formatDate(live.scheduledAt)}`}
                     </span>
                     {live.course && (
-                      <span className="text-primary">{live.course.title}</span>
+                      <span className="text-[#191919] dark:text-primary">{live.course.title}</span>
                     )}
                     {live._count.messages > 0 && (
                       <span>{live._count.messages} mensagens</span>

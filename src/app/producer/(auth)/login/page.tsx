@@ -181,7 +181,7 @@ function ProducerLoginForm() {
                             className="w-9 h-9 rounded-lg object-cover shrink-0"
                           />
                         ) : (
-                          <span className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center font-bold shrink-0">
+                          <span className="w-9 h-9 rounded-lg bg-primary/15 text-[#191919] dark:text-primary flex items-center justify-center font-bold shrink-0">
                             {w.name.charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -220,7 +220,7 @@ function ProducerLoginForm() {
               <div className="text-center mb-6">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <svg
-                    className="w-7 h-7 text-primary"
+                    className="w-7 h-7 text-[#191919] dark:text-primary"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -321,13 +321,13 @@ function ProducerLoginForm() {
               <div className="mt-6 flex items-center justify-between text-sm">
                 <Link
                   href="/forgot-password?from=producer"
-                  className="text-primary hover:underline"
+                  className="text-[#191919] dark:text-primary hover:underline"
                 >
                   Esqueci minha senha
                 </Link>
                 <Link
                   href="/producer/register"
-                  className="text-primary hover:underline"
+                  className="text-[#191919] dark:text-primary hover:underline"
                 >
                   Criar conta
                 </Link>
@@ -337,7 +337,7 @@ function ProducerLoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowStudentLookup(!showStudentLookup)}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-[#191919] dark:text-primary hover:underline"
                 >
                   É aluno? Encontre seu curso
                 </button>
@@ -356,7 +356,7 @@ function ProducerLoginForm() {
                           setLookupSent(false);
                           setLookupEmail("");
                         }}
-                        className="mt-2 text-xs text-primary hover:underline"
+                        className="mt-2 text-xs text-[#191919] dark:text-primary hover:underline"
                       >
                         Enviar para outro email
                       </button>

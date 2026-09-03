@@ -156,7 +156,7 @@ export default function StudentDetailPage(
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-[#191919] dark:text-primary border border-primary/20">
                   Nv {user.level} · {user.points} pts
                 </span>
                 <span className="text-xs text-gray-500">
@@ -214,7 +214,7 @@ export default function StudentDetailPage(
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="Cursos ativos" value={stats.activeCourses} accent="text-primary" />
+        <StatCard label="Cursos ativos" value={stats.activeCourses} accent="text-[#191919] dark:text-primary" />
         <StatCard label="Aulas concluídas" value={stats.totalLessonsCompleted} accent="text-emerald-500 dark:text-emerald-400" />
         <StatCard label="Posts / Comentários" value={`${stats.totalPosts} / ${stats.totalComments}`} accent="text-amber-500 dark:text-amber-400" />
         <StatCard label="Certificados" value={stats.totalCertificates} accent="text-purple-500 dark:text-purple-400" />
@@ -229,7 +229,7 @@ export default function StudentDetailPage(
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
-                  ? "border-primary text-primary"
+                  ? "border-primary text-[#191919] dark:text-primary"
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
