@@ -184,7 +184,7 @@ export default function RichTextEditor({
         onClick={handleEditorClick}
       >
         {editor.isEmpty && (
-          <p className="absolute top-3 left-4 text-gray-400 dark:text-gray-500 pointer-events-none select-none">
+          <p className="absolute top-3 left-4 text-gray-500 dark:text-gray-500 pointer-events-none select-none">
             {placeholder}
           </p>
         )}
@@ -303,7 +303,7 @@ function LinkModal({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="exemplo.com.br (https:// automático)"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0f1320] border border-gray-300 dark:border-[#1a1e2e] rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0f1320] border border-gray-300 dark:border-[#1a1e2e] rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}
             />
           </div>
@@ -315,7 +315,7 @@ function LinkModal({
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Clique aqui (opcional)"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0f1320] border border-gray-300 dark:border-[#1a1e2e] rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0f1320] border border-gray-300 dark:border-[#1a1e2e] rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSave(); } }}
             />
           </div>
@@ -606,7 +606,7 @@ function ImageModal({
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setPreviewError(false); }}
                 placeholder="https://exemplo.com/imagem.jpg"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0f1320] border border-gray-300 dark:border-[#1a1e2e] rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-[#0f1320] border border-gray-300 dark:border-[#1a1e2e] rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleInsert(); } }}
               />
             </div>

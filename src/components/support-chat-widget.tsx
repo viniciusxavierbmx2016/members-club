@@ -284,7 +284,7 @@ function TicketListView({
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Nenhum ticket ainda.
             </p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Clique em &ldquo;Novo ticket&rdquo; para falar com o suporte.
             </p>
           </div>
@@ -308,7 +308,7 @@ function TicketListView({
                         >
                           {t.subject}
                         </p>
-                        <span className="text-[10px] text-gray-400 flex-shrink-0">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 flex-shrink-0">
                           {formatDay(t.lastMessageAt)}
                         </span>
                       </div>
