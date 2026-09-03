@@ -261,13 +261,14 @@ export default function CourseSettingsPage(
                 }`}
               >
                 <span
-                  className={`shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center ${
+                  className={`relative shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center ${
                     enabled
                       ? "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary"
                       : "bg-gray-100 text-gray-500 dark:bg-[#1a1e2e] dark:text-gray-500"
                   }`}
                 >
                   {item.icon}
+                  {enabled && <svg className="absolute -top-1 -right-1 w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                 </span>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">

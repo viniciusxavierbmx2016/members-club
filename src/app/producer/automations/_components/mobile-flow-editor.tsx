@@ -72,6 +72,7 @@ export function MobileFlowEditor({
                   <svg className="w-5 h-5 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={m.icon} /></svg>
                   <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">{m.short}</span>
                   {m.behavioral && <span className="text-[8px] px-1.5 py-px rounded bg-amber-500/15 text-amber-500 dark:text-amber-400 font-medium">Cron</span>}
+                  {triggerType === key && <svg className="w-3 h-3 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                 </button>
               ))}
             </div>
