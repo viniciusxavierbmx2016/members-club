@@ -57,7 +57,7 @@ export const CustomSelect = React.memo(function CustomSelect({ value, onChange, 
       >
         {icon && <span className="text-gray-500 flex-shrink-0">{icon}</span>}
         <span className="flex-1 text-left truncate">{label}</span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (

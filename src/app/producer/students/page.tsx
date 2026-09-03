@@ -479,7 +479,7 @@ export default function AdminUsersPage() {
                     ) : (
                       <button
                         type="button"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-400 cursor-not-allowed"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                         title="WhatsApp não cadastrado"
                         onClick={(e) => { e.stopPropagation(); showToast("Este aluno não possui WhatsApp cadastrado"); }}
                       >

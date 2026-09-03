@@ -216,12 +216,12 @@ function SortableLesson({
         >
           <div className="border-t border-gray-200 dark:border-[#1a1e2e] my-6" />
           <div>
-            <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Materiais complementares</h5>
+            <h5 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Materiais complementares</h5>
             <LessonMaterials lessonId={lesson.id} />
           </div>
           <div className="border-t border-gray-200 dark:border-[#1a1e2e] my-6" />
           <div>
-            <h5 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quiz</h5>
+            <h5 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Quiz</h5>
             <QuizManager lessonId={lesson.id} />
           </div>
         </LessonForm>
@@ -352,7 +352,7 @@ function LessonForm({
             onChange={(e) => setHideYoutubeChrome(e.target.checked)}
             className="mt-0.5 rounded border-gray-600 bg-white/5 text-blue-600 focus:ring-blue-500/30"
           />
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             Esconder marcas do YouTube — remove controles e logo do YouTube. O player terá controles próprios.
             <br />
             <span className="text-gray-500">⚠️ Confirme se está em conformidade com os termos da plataforma de vídeo.</span>

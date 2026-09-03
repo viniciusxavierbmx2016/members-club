@@ -274,7 +274,7 @@ function SortableRow({
       {canDelete ? (
         <button
           onClick={() => onDelete(item.id)}
-          className="p-2 text-gray-400 hover:text-red-500 transition flex-shrink-0"
+          className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 transition flex-shrink-0"
           aria-label="Excluir"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

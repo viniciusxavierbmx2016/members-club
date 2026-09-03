@@ -77,9 +77,9 @@ export function ImageDropzone({
           className="w-full h-[120px] rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1.5 disabled:opacity-50"
         >
           {initial && !imageUrl ? (
-            <span className="text-2xl font-bold text-gray-400">{initial}</span>
+            <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">{initial}</span>
           ) : (
-            <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           )}

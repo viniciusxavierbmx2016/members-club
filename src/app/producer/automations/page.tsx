@@ -169,12 +169,12 @@ export default function AutomationsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate pr-2">{auto.name}</h3>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button type="button" onClick={(e) => toggleActive(e, auto)} className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full font-medium transition ${auto.active ? "bg-emerald-500/15 text-emerald-400" : "bg-gray-500/15 text-gray-400"}`}>
+                    <button type="button" onClick={(e) => toggleActive(e, auto)} className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full font-medium transition ${auto.active ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-gray-500/15 text-gray-500 dark:text-gray-400"}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${auto.active ? "bg-emerald-400" : "bg-gray-500"}`} />
                       {auto.active ? "Ativo" : "Inativo"}
                     </button>
                     <div className="relative">
-                      <button type="button" onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === auto.id ? null : auto.id); }} className="p-1 text-gray-500 hover:text-gray-300 hover:bg-white/5 rounded-lg transition">
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === auto.id ? null : auto.id); }} className="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/5 rounded-lg transition">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
                       </button>
                       {menuOpen === auto.id && <CardMenu onEdit={() => { setMenuOpen(null); setEditorAuto(auto); }} onDuplicate={() => duplicateAutomation(auto)} onDelete={() => deleteAutomation(auto.id)} onClose={() => setMenuOpen(null)} />}

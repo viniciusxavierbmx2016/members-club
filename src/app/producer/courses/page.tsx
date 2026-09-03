@@ -236,7 +236,7 @@ export default function AdminCoursesPage() {
                   : "border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03]"
               }`}
             >
-              <svg className="w-5 h-5 text-gray-400 cursor-grab flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 cursor-grab flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
               </svg>
               <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-white/[0.04] flex-shrink-0">
@@ -257,7 +257,7 @@ export default function AdminCoursesPage() {
                   )}
                 </div>
               </div>
-              <span className="text-xs text-gray-400 flex-shrink-0">#{i + 1}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">#{i + 1}</span>
             </div>
           ))}
         </div>

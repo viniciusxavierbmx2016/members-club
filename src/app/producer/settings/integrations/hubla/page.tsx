@@ -294,7 +294,7 @@ export default function HublaIntegrationPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-gray-800 dark:text-gray-200 font-medium truncate">{t.label}</span>
-                        <span className="font-mono text-xs text-gray-400">{t.maskedValue}</span>
+                        <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{t.maskedValue}</span>
                       </div>
                       <p className="text-[10px] text-gray-500 mt-0.5">{formatLastUsed(t.lastUsedAt)}</p>
                     </div>

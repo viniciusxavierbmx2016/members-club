@@ -144,7 +144,7 @@ export function DatePickerSingle({
                   setOpen(false);
                 }
               }}
-              className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
+              className="text-gray-500 dark:text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
               title="Limpar data"
               aria-label="Limpar data"
             >
