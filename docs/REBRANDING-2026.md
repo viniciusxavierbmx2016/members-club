@@ -259,6 +259,11 @@ ainda dá 3,3-3,7. Estimativa: **~3 rodadas de conserto** (1 para a causa C2 —
 para a família difusa + e-mail) **+ 1 gate humano do claro**, antes do que já
 estava planejado.
 
+**Status (02/set/26):** etapa A (a alavanca C2) **ENTREGUE** — merge `5051949`,
+linha **Claro·A** no §6. Faltam: **etapa B** (Lives, ~26 pontos C1, molde
+`text-gray-900 dark:text-white`) e **etapa C** (família 9.201 + editor de
+e-mail C3) — e o 9.202 (interruptor dessincronizado) descoberto no gate.
+
 **A ORDEM NOVA da frente:**
 1. conserto do modo claro (9.197-9.201) + horário do chat (9.196);
 2. decisão de padrão dos **189** `*-primary` em superfície clara (§13);
@@ -512,6 +517,7 @@ com investigação própria.
 | **F1** ✅ | **1 linha** — `ui/button.tsx:17`, variante `primary`: `text-white` → `text-[var(--producer-button-text,#ffffff)]`. Alcança **6 dos 11** `<Button>`. | **1** | `16fc628` → merge **`d8f57e2`** | portão 4/4 (14/14 branco, 0 chave ausente · `/admin` 0 com controle positivo 10 · 0 importadores fora de `/producer` e `/admin` · 6 de 11) · regra CSS provada lado a lado · `tsc` exit 0 · `text-white` 1068→1067 · build `Ib4Zx6sQXgzhC_CPsvurT`, alvo 1/0 | ⚠️ **PARCIAL — 3 de 6**, declarado suficiente pelo dono | 01/set/26 |
 | **F2b·1** ✅ | **89 pontos** em `src/app/producer/` passam a ler `--producer-button-text`, fallback `#ffffff`. Pixel-neutro. | **38** (+89/−89) | `f50c8cd` → merge **`d4e0d66`** | `text-white` 1067→**978** (−89 exato) · classe nova 2→**91** (+89) · 0 arquivos fora de `src/app/producer/` · **word-diff: único token trocado** · `tsc` exit 0 · build `-5xCnXaNwdyLRSG4vvGYg`, alvo 1/0 · regra CSS resolve para `#fff` sem a variável | ✅ **19/19 por `getComputedStyle`** | 01/set/26 |
 | **F2b·2** ✅ | **21 pontos** em `src/components/` (11 arquivos que só renderizam no painel) passam a ler `--producer-button-text`. Pixel-neutro. | **11** (+21/−21) | `337951f` → merge **`b1fb9cb`** | `text-white` 978→**957** (−21) · classe nova 91→**112** (+21) · 0 fora de `src/components/` · **word-diff: token único** (aspa normalizada nos 2 lados) · `tsc` exit 0 · build `ZdqOo7tcLUTBmyVlzvB9i`, alvo 1/0 | ⚠️ **14/14 válidas por `getComputedStyle`** — cobertura parcial | 01/set/26 |
+| **Claro·A** ✅ | Guarda `.dark` nas 4 regras de superfície (`globals.css:318-321`, forma copiada dos irmãos de membros `:335-336`) + os **8 pares rebaixados** no mesmo commit (`settings:267` · `chat:287/:311` · blockquote `globals:561` no molde `.tiptap :154/:158` · `rte:187` · placeholders `rte:306/:318/:609`). 19 pontos C2 saem de 1,00-2,59:1 para 4,83-17,74:1 no claro. ⭐ **Decisão de método:** onde a metade escura já era `gray-500`, ela foi **mantida** em vez do par clássico `dark:text-gray-400` — o molde diria gray-400, mas isso mudaria o escuro, e a promessa (byte-idêntico) vencia o molde. | **4** (+17/−13) | `abbc6df` → merge **`5051949`** | **CSS servido congelado ANTES e comparado DEPOIS**: 42→42 regras `.producer-layout`, diff = só os 4 prefixos; arquivo inteiro 5 saem/6 entram, todas computando no escuro o valor de hoje · `tsc` exit 0 · build `a024bUe1LGutqLgKkp6p8`, alvo prod 0/staging 2 | ✅ **12/12 nos dois modos**; no escuro os valores lidos foram `#0a0a1a` e `#111827` — os de hoje | 02/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
