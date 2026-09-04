@@ -789,6 +789,43 @@ E o dado sustenta a separação: as **26** ocorrências do `/admin` são **todas
 o balde A, **26 estão no `/admin`**; as outras 21 se espalham por componentes (5)
 e telas soltas (16).
 
+### 6-C. ⭐ O PORTÃO DA F5 — medido na sessão de 04/set/26 (madrugada)
+
+**A conclusão que organiza tudo:** cada superfície restante precisa da **mesma
+sequência que o painel teve** — preparar os pares e as pistas **com o azul no
+lugar**, e só então virar. Aplicar 183 pontos do `/admin` de uma vez, sem gate,
+repetiria exatamente o erro que a ordem da F3 provou ser errado. Por isso a
+sessão **aplicou só o que era inequívoco** e **parou** no resto, com a medição
+registrada.
+
+| sub-fatia | tamanho medido | natureza | estado |
+|---|---|---|---|
+| **F5.1 landing** | 6 tokens de accent + og-image ×2 · **74 usos**, **0 classes Tailwind de cor** (100% token — a superfície mais isolada do sistema) | token + arquivo | ✅ **APLICADA**, branch `feat/rebranding-f5-1-landing` (`fb69e9a`) — **aguardando gate** |
+| **F5.4 certificado** | 5 chamadas `setTextColor/setDrawColor(37,99,235)` | token (RGB, não hex) | ✅ **APLICADA**, branch `feat/rebranding-f5-4-certificado` (`76c4c7b`) — **aguardando gate** |
+| **F5.3 e-mail** | 73 hex em `email-templates.ts` + **2ª cópia** em `email-tab.tsx` (34 hex) | token + texto | 🔴 **PULADA** — pergunta aberta, item **9.212** |
+| **F5.2 /admin** | **183** azuis literais em **15 arquivos** | token | ⏸️ **NÃO aplicada** — precisa de sequência própria (ver abaixo) |
+| **F5.5 outros** | 25 `text-white` sobre `bg-blue` em raiz/auth/invite · 77 hex azuis em `globals.css` (a maioria é *fallback* de `var()`, que é o desenho) | token | ⏸️ **NÃO aplicada** — mesma razão |
+
+⭐ **Por que o `/admin` não foi feito nesta noite — com o número:** ele tem
+**704 classes `dark:`**, ou seja **usa os dois modos**, e **nunca passou pelas
+fatias preparatórias** (F3.1–F3.4) que o painel teve. Seus `text-white` sobre
+`bg-blue-600` ainda estão crus: **23 pontos** que virariam 1,11:1 no instante em
+que o azul de lá virasse lime. É uma frente do tamanho de F3.1+F3.3 juntas, com
+gate próprio — não uma sub-fatia de madrugada.
+
+⭐ **E o certificado ensinou uma coisa que vale para a F5 inteira:** ele tem
+**fundo CLARO** (`#FAF9F5`). O lime ali daria **1,05:1** e o texto sumiria do PDF
+impresso; por isso recebeu **`#191919`** (16,69), que é a **D12 aplicada
+literalmente**. **A regra da F5 não é "trocar azul por lime"** — é *"sobre
+escuro, lime; sobre claro, neutro"*. O e-mail é escuro (lime funciona, 15,43–17,73);
+o certificado é claro (lime não funciona).
+
+⚠️ **Fora do escopo desta medição, registrado:** `text-white` sobre cor
+**semântica** (`bg-red`/`emerald`/`green`/`amber`) tem **46 ocorrências** e
+**não deve entrar em lote nenhum** — ali o branco está certo.
+
+---
+
 ### 6-B. ⭐ O PLACAR HONESTO DA FRENTE (04/set/26)
 
 **FEITO** — tudo em `feat/rebranding`, **nada em produção**:
