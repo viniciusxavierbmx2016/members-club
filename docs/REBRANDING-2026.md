@@ -801,6 +801,38 @@ E o dado sustenta a separação: as **26** ocorrências do `/admin` são **todas
 o balde A, **26 estão no `/admin`**; as outras 21 se espalham por componentes (5)
 e telas soltas (16).
 
+### 6-E. Sessão de 04/set/26 (noite) — o portão do `/admin` e a varredura dos 3 padrões
+
+**⭐ O `/admin` é uma frente DIFERENTE, e o número que prova: 0.** Zero
+`--producer-*`, zero `.producer-layout`, zero token `primary` — ele é **100%
+Tailwind literal**. No painel a virada foi **1 arquivo**; ali serão **184
+substituições**, e com par claro/escuro, porque o `/admin` usa **os dois modos**
+(704 classes `dark:` + o `<ThemeToggle/>` do Header). Inventário e sequência no
+item **9.219**; o foco que **já falha hoje** (1,85 claro / 2,13 escuro) virou o
+item **9.218**. ⚠️ **23 CTAs acoplados**, não 18 — a estimativa anterior era baixa.
+
+⭐ **E uma diferença fina que só a medição mostra:** no painel o foco era **classe
+morta** (9.208 — não gerava regra); no `/admin` as classes são `blue-500`, cor real
+do Tailwind, então **geram**: lá o foco **não existia**, aqui ele **existe e é
+fraco**. Defeitos diferentes, consertos diferentes.
+
+**A varredura dos TRÊS padrões — a dívida de método do 9.213, paga.** A varredura
+por CLASSE é cega a **gradiente** e a **`style` inline**; refiz com os três padrões
+em todo o `src/`: **87 linhas**, das quais **13 alcançam o painel**. Delas, **6
+saem pela vitrine** (item 9.195), **4 já estavam corretas** (`settings:229/248` já
+usam `theme.buttonTextColor`; `:213` é preview da cor; `:137` é o trilho, que deve
+ser a marca mesmo), **1 é falso positivo** (`students:325` usa `from-blue-600`, que
+**não** está nos remaps) — e **2 eram defeito real**, corrigidos na branch
+`feat/rebranding-camaleoes-2` (`ddf6eff`): `sidebar.tsx:419` (**gradiente**
+`from-blue-500 to-blue-600`) e `workspace-switcher.tsx:106` (**`style` inline**).
+
+ⓘ **O balde A restante NÃO foi tocado, e é decisão consciente:** os **14** pontos
+de `raiz/auth/invite` **não quebram hoje** — estão fora do painel, o fundo segue
+azul e o branco está certo. Trocá-los antes da virada daquelas superfícies seria
+**mudar pixel sem ganho**. Eles entram junto com a F5 de cada área.
+
+---
+
 ### 6-D. Sessão de 04/set/26 (tarde) — 3 branches prontas e o número do 9.216
 
 **O certificado ganhou prova visual sem tocar no banco.** A rota exige 100% de
