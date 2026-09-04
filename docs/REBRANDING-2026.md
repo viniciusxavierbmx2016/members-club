@@ -976,6 +976,30 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 
 ### 6-B. ⭐ O PLACAR HONESTO DA FRENTE (04/set/26)
 
+> ⭐ **ESTADO REAL EM 04/set/26, DEPOIS DA LEVA DE MERGES (§6-H) — este bloco
+> vale mais que os avisos abaixo, que são anteriores:**
+>
+> **A integração está com TUDO dentro.** As 6 fatias que esperavam gate foram
+> mescladas (`504f5c5` · `f409dad` · `b8b300a` · `f42fcf9` · `d69c4f8` ·
+> `67459c5`), as 6 branches foram apagadas com `-d` (a forma que recusa se não
+> mesclada) e **não resta nenhuma branch de rebranding pendente**.
+> `feat/rebranding` @ **`67459c5`**, **82 commits à frente da `main`**, com
+> **97 arquivos de `src/`** e 24 de `public/` alterados. `tsc` exit 0.
+>
+> **FECHADOS nesta leva:** **9.210** · **9.211** · **9.214** · **9.215** ·
+> **9.217** · **9.224** — cada um provado no código E no bundle servido.
+>
+> **ABERTOS que a frente deixa** (todos registrados, nenhum é surpresa):
+> 🔴 **9.220** — a área de membros ficou **inteira** fora do rebranding: 50 dos
+> 69 cursos renderizam a identidade azul, e **é a tela do ALUNO**. Decisão do
+> dono: **frente própria, depois da subida para produção**. ·
+> **9.216** (o "Salvar tema" congela o padrão) · **9.219** (a virada do `/admin`,
+> 184 pontos) · **9.218** (o foco do `/admin`, já falha hoje) · **9.209**
+> (o favicon borra a 16px, é design) · **9.221**, **9.222**, **9.223**, **9.212**.
+>
+> ⛔ **A MAIN SEGUE INTOCADA em `d388389`.** Todo o trabalho vive na integração;
+> o merge para `main` e o deploy são decisão do dono.
+
 > ⚠️ **Atualizado em 04/set/26 pela rodada do §6-F.** O primeiro gate do
 > **estado mesclado** achou dois defeitos que a medição por fatia não pegou. A
 > rodada mediu ambos e **quase não aplicou** — as recusas são o conteúdo, e cada
@@ -1826,3 +1850,57 @@ avatar aparece em todas as telas abaixo, com as iniciais **"DW"**.
    **quase-branco sobre vermelho** (3,94) — legível, e é essa a mudança que a
    D16 aceitou. *(Dado de teste de staging; produção não foi tocada — o slug
    `workspace-b-staging` não existe lá.)*
+
+---
+
+### 6-H. A LEVA DE MERGES — as 6 fatias entram na integração (04/set/26)
+
+Todas as fatias que esperavam gate foram mescladas em `feat/rebranding`, uma a
+uma, com `--no-ff`, `tsc` exit 0 entre cada e push a cada passo. **Nada foi para
+a `main`.**
+
+| # | fatia | SHA da fatia | merge | o que entrou |
+|---|---|---|---|---|
+| 1 | `f5-4-certificado` | `7fa5d8d` | **`504f5c5`** | `certificate-pdf.ts`: 5 chamadas `(37,99,235)` → `(25,25,25)`. O fundo do PDF é `#FAF9F5`, claro — o lime daria 1,05. |
+| 2 | `config-marca` | `e7e5fb8` | **`f409dad`** | `theme-color` `#0a0a1a` → `#191919` e o `DynamicFavicon` deixa de cair em `/logo.png`. Fecha **9.214** e **9.215**. |
+| 3 | `f5-1b-gemeos` | `83d57a5` | **`b8b300a`** | os 2 pontos da landing com texto branco sobre a marca. Fecha **9.217**. |
+| 4 | `defaults-personalizacao` | `3a18713` | **`f42fcf9`** | o fade do banner parte de `#191919`, não do `#0a0a1a` aposentado. |
+| 5 | `camaleoes-2` | `ddf6eff` | **`d69c4f8`** | 🔴 **o conserto órfão** — `sidebar.tsx:419` e `workspace-switcher.tsx:106`. Fecha **9.224**. |
+| 6 | `defeito-a` | `b6194c2` | **`67459c5`** | os 5 pontos da **D16** + o registro da decisão. |
+
+#### A medição que tornou a ordem irrelevante — e vale registrar
+
+A ordem prescrita ia da menor superfície para a maior, para que um conflito
+aparecesse cedo e barato. **A medição mostrou que conflito era impossível:**
+cruzando os arquivos dos commits próprios das 6 branches, **cada arquivo aparece
+exatamente uma vez** — as 6 são disjuntas em `src/`, e só a `defeito-a` toca
+`docs/`. Os 6 ensaios `--no-commit --no-ff` confirmaram: **6 de 6 limpos**.
+A ordem foi seguida assim mesmo, por ser inócua.
+
+⚠️ **O que a bancada pegou antes de mesclar:** `feat/rebranding-defaults-personalizacao`
+**não estava no remoto** — só no disco. Foi empurrada antes do merge. É o mesmo
+risco que quase engoliu o `ddf6eff`, e a checagem de "está no remoto?" no
+inventário é o que o evita.
+
+#### O portão do conjunto
+
+- `tsc --noEmit` **exit 0** depois de cada merge e ao final — **7 execuções**.
+- **97 arquivos de `src/`** diferem da `main` (125 no total, com 24 em `public/` e 4 em `docs/`).
+- **`text-white`: 954 → 946, delta exatamente −8** — 5 do defeito A, 2 dos camaleões, 1 da landing. Bate com o previsto, sem sobra.
+- **Paleta antiga nos 12 arquivos tocados: 11 ocorrências, todas legítimas** — 7 são os swatches que **dizem a verdade** (**9.220**), 1 é o texto `#3B82F6` **dentro de um SVG** (é conteúdo, não cor), 2 são fallbacks mortos de `var()` sob `.producer-layout` e 1 é comentário no `theme-constants.ts`. **Zero resíduo real.**
+- **Alvo do palco discriminado:** staging **23** personas `@staging.test`, produção **0**.
+- **As 6 fatias provadas no bundle servido**, com marcador positivo E controle
+  negativo por fatia. O servido foi provado idêntico ao disco por `shasum`.
+
+⚠️ **A sonda da fatia 4 deu "zero e zero" e eu NÃO li como ausência** — pela
+lição do zero-duplo. O marcador `fade.color:"#191919"` não sobrevive à
+minificação: a variável vira `W`. A forma real no chunk é
+`backgroundColor:b.test(W.color||"")?W.color:"#191919"`, nas duas linhas, com
+`#0a0a1a` em **zero**. A fatia estava lá; a sonda é que estava errada.
+
+#### Limpeza
+
+As 6 branches foram apagadas com `git branch -d` — **a forma que RECUSA se não
+mesclada** — e removidas do remoto. **6 de 6 aceitaram**, e os 6 SHA seguem
+ancestrais da integração. Restam no repo apenas `main`, `feat/rebranding` e as
+3 frentes alheias (`course-banner-carousel`, `e4.4-fatia1-marca`, as 2 sondas).
