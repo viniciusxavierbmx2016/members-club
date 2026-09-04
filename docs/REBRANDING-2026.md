@@ -820,6 +820,34 @@ literalmente**. **A regra da F5 não é "trocar azul por lime"** — é *"sobre
 escuro, lime; sobre claro, neutro"*. O e-mail é escuro (lime funciona, 15,43–17,73);
 o certificado é claro (lime não funciona).
 
+⭐ **O FAN-OUT DAS 6 ÁREAS voltou depois do fecho da sessão** (6/6, **149 pontos
+catalogados**) e trouxe o que a medição manual não tinha alcançado:
+
+- 🔴 **14 pontos JÁ QUEBRAM na branch de integração** — item **9.213**. Não é
+  previsão: `theme-constants` já vale `#EFFF20` e o remap de `globals.css:263`
+  já está ativo, então `bg-blue-600 + text-white` na mesma string **hoje** pinta
+  branco sobre lime (1,11:1). Escaparam da F2b porque são **camaleões** (rodam
+  no painel *e* no `/admin`/dashboard), e os dois lotes dela eram "só painel".
+  **É o item mais urgente da frente.**
+- **`/admin` medido de verdade: 189 pontos** (184 classes + 5 strings), com os
+  papéis contados — fill de CTA **43** · foco **45** · texto **50** · tinta **29**
+  · borda **17**. ⚠️ **18 CTAs têm `text-white` na MESMA string do `bg`** (trocar
+  só o fundo dá 1,11) e **o foco de lá JÁ falha hoje** (1,85 claro / 2,13 escuro)
+  — com lime pioraria para 1,11. Confirma que o `/admin` é frente própria.
+- **CSP: hipótese de quebra REFUTADA** — `'self'` cobre `/brand/*.svg` e
+  `/icons/*-v2.png`, e o `logoUrl` do Supabase **já passa** por `*.supabase.co`
+  na `img-src` (`next.config.mjs:50`). **Nada a mudar ali.** Os achados reais de
+  config foram outros dois: **9.214** (`meta theme-color` desatualizado) e
+  **9.215** (o `DynamicFavicon` sobrescrevendo com o logo antigo).
+- **Certificado, detalhe que muda o custo do logo:** o jsPDF **tem** `addImage`,
+  mas **`doc.svg` é `undefined`** — os 7 SVGs de `public/brand/` **são inúteis
+  para o PDF**; o caminho é `public/logo-v2.png`, e só com `compression:'FAST'`
+  (+11,8 KB; sem ela **+786 KB** por certificado).
+- **Landing:** trocar as 6 linhas reacende **79 usos** na página **+ 33 nos
+  mockups** — e ⚠️ **dois gêmeos pintam texto BRANCO sobre a marca**
+  (`page.tsx:462` e `landing-mockups.tsx:257`), que **já reprovam hoje** (3,68) e
+  com lime viram 1,11. **A F5.1 aplicada NÃO os cobriu** — ficam para o gate.
+
 ⚠️ **Fora do escopo desta medição, registrado:** `text-white` sobre cor
 **semântica** (`bg-red`/`emerald`/`green`/`amber`) tem **46 ocorrências** e
 **não deve entrar em lote nenhum** — ali o branco está certo.
