@@ -26,7 +26,7 @@ export function buildCertificatePdf(data: CertificateData): Buffer {
   doc.rect(0, 0, W, H, "F");
 
   // Outer decorative double border
-  doc.setDrawColor(37, 99, 235); // blue-600
+  doc.setDrawColor(25, 25, 25); // #191919 — a marca sobre fundo claro (D12)
   doc.setLineWidth(3);
   doc.rect(24, 24, W - 48, H - 48);
   doc.setLineWidth(0.8);
@@ -39,7 +39,7 @@ export function buildCertificatePdf(data: CertificateData): Buffer {
     [36, H - 36],
     [W - 36, H - 36],
   ];
-  doc.setDrawColor(37, 99, 235);
+  doc.setDrawColor(25, 25, 25);
   doc.setLineWidth(1.2);
   for (const [cx, cy] of corners) {
     doc.circle(cx, cy, 6);
@@ -47,11 +47,11 @@ export function buildCertificatePdf(data: CertificateData): Buffer {
 
   // Logo / brand
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(37, 99, 235);
+  doc.setTextColor(25, 25, 25);
   doc.setFontSize(24);
   doc.text("Members Club", W / 2, 90, { align: "center" });
 
-  doc.setDrawColor(37, 99, 235);
+  doc.setDrawColor(25, 25, 25);
   doc.setLineWidth(1);
   doc.line(W / 2 - 40, 100, W / 2 + 40, 100);
 
@@ -91,7 +91,7 @@ export function buildCertificatePdf(data: CertificateData): Buffer {
 
   // Course title
   doc.setFont("times", "bold");
-  doc.setTextColor(37, 99, 235);
+  doc.setTextColor(25, 25, 25);
   doc.setFontSize(26);
   const courseLines = doc.splitTextToSize(data.courseTitle, W - 160);
   doc.text(courseLines, W / 2, 380, { align: "center" });
