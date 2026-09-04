@@ -1,10 +1,10 @@
-const SW_VERSION = '2.3.0';
+const SW_VERSION = '2.4.0';
 const CACHE_NAME = `mc-cache-v${SW_VERSION}`;
 
 const PRECACHE_URLS = [
   '/offline.html',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  '/icons/icon-192x192-v2.png',
+  '/icons/icon-512x512-v2.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -38,8 +38,8 @@ self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   const options = {
     body: data.body || 'Nova notificação',
-    icon: data.icon || '/icons/icon-192x192.png',
-    badge: data.badge || '/icons/icon-72x72.png',
+    icon: data.icon || '/icons/icon-192x192-v2.png',
+    badge: data.badge || '/icons/icon-72x72-v2.png',
     image: data.image || undefined,
     data: { url: data.url || '/' },
     vibrate: [200, 100, 200],

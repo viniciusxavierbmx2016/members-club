@@ -9,7 +9,7 @@ import {
 } from '@/components/landing-mockups';
 
 const IMAGES = {
-  logo: '/logo-landing.png',
+  logo: '/brand/simbolo-lime.svg',
 };
 
 // ───────────────── LINKS ─────────────────
