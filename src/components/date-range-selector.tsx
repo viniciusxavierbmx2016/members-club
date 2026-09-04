@@ -355,7 +355,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
               <button type="button" onClick={handleCancel} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                 Cancelar
               </button>
-              <button type="button" onClick={handleMobileApply} className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
+              <button type="button" onClick={handleMobileApply} className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] rounded-lg transition-colors">
                 Aplicar
               </button>
             </div>
@@ -416,7 +416,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
               <button type="button" onClick={handleCancel} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                 Cancelar
               </button>
-              <button type="button" onClick={handleApply} className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
+              <button type="button" onClick={handleApply} className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] rounded-lg transition-colors">
                 Aplicar
               </button>
             </div>
