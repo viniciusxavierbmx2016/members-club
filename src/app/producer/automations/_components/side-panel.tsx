@@ -32,10 +32,10 @@ export function SidePanel({
   onClose: () => void;
 }) {
   const isTrigger = type === "trigger";
-  const selectCls = "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors";
-  const labelCls = "block text-xs font-medium text-gray-400 mb-1.5";
+  const selectCls = "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors";
+  const labelCls = "block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5";
   const inputCls = selectCls;
-  const stepCls = "text-[11px] uppercase tracking-wider font-semibold text-gray-400 mb-3";
+  const stepCls = "text-[11px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 mb-3";
 
   const allLessons = selectedCourse?.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, moduleTitle: m.title }))) || [];
 
@@ -67,9 +67,10 @@ export function SidePanel({
                 {Object.entries(TRIGGER_META).map(([key, m]) => (
                   <button key={key} type="button" onClick={() => setTriggerType(key)}
                     className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-colors cursor-pointer ${triggerType === key ? "border-primary bg-primary/5 dark:bg-primary/10" : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-primary/30"}`}>
-                    <svg className="w-5 h-5 text-primary mx-auto mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={m.icon} /></svg>
+                    <svg className="w-5 h-5 text-[#191919] dark:text-primary mx-auto mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d={m.icon} /></svg>
                     <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300 leading-tight">{m.short}</span>
                     {m.behavioral && <span className="text-[8px] px-1.5 py-px rounded bg-amber-500/15 text-amber-500 dark:text-amber-400 font-medium">Cron</span>}
+                    {triggerType === key && <svg className="w-3 h-3 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                   </button>
                 ))}
               </div>
@@ -269,7 +270,7 @@ export function SidePanel({
                           <div className="bg-white dark:bg-card rounded-lg p-3 space-y-0.5 border border-gray-100 dark:border-white/5">
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs">🔔</span>
-                              <span className="text-[10px] text-gray-400 font-medium">Members Club</span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Members Club</span>
                             </div>
                             <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{actionConfig.pushTitle || "Título"}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{actionConfig.pushBody || "Mensagem..."}</p>

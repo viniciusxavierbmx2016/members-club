@@ -95,7 +95,7 @@ export function SendAccessModal({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-primary"
               placeholder="aluno@email.com"
             />
           </div>
@@ -107,7 +107,7 @@ export function SendAccessModal({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-primary"
               placeholder="Nome do aluno"
             />
           </div>
@@ -119,7 +119,7 @@ export function SendAccessModal({
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-primary"
               placeholder="(31) 98426-6117"
             />
             <p className="text-[10px] text-gray-500 mt-1">Número com DDD para contato via WhatsApp</p>
@@ -136,7 +136,7 @@ export function SendAccessModal({
                   onClick={() => setDurationIdx(i)}
                   className={`px-3 py-2 rounded-lg text-xs font-medium border transition ${
                     durationIdx === i
-                      ? "bg-primary text-white border-primary"
+                      ? "bg-primary text-[var(--producer-button-text,#ffffff)] border-primary"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
@@ -154,7 +154,7 @@ export function SendAccessModal({
                   value={customDays}
                   onChange={(e) => setCustomDays(sanitizeDaysText(e.target.value))}
                   onBlur={(e) => setCustomDays(normalizeDaysOnBlur(e.target.value))}
-                  className="w-28 px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-28 px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#191919] dark:focus:ring-primary"
                 />
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   dias
@@ -175,7 +175,7 @@ export function SendAccessModal({
               type="submit"
               disabled={loading || !!motivoBloqueio}
               title={motivoBloqueio ?? undefined}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg"
             >
               {loading ? "Enviando..." : "Enviar acesso"}
             </button>

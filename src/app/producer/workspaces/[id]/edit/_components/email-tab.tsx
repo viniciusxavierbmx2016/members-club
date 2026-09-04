@@ -158,7 +158,7 @@ export function EmailTab({
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              className={`inline-block h-4 w-4 rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                 config.emailUseCustomHtml ? "translate-x-[18px]" : "translate-x-0.5"
               }`}
             />
@@ -177,7 +177,7 @@ export function EmailTab({
                 onChange={(e) => setField("emailTitle", e.target.value)}
                 maxLength={200}
                 placeholder="Seu acesso ao curso {curso}"
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
               />
             </div>
             <div>
@@ -191,7 +191,7 @@ export function EmailTab({
                 rows={20}
                 spellCheck={false}
                 placeholder="<html>...</html>"
-                className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 resize-y"
+                className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 resize-y"
               />
             </div>
           </>
@@ -273,7 +273,7 @@ export function EmailTab({
                 onChange={(e) => setField("emailTitle", e.target.value)}
                 maxLength={200}
                 placeholder="Bem-vindo(a) ao {curso}!"
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
               />
             </div>
 
@@ -288,7 +288,7 @@ export function EmailTab({
                 maxLength={10000}
                 rows={6}
                 placeholder={"Olá {nome}, seu acesso ao curso {curso} foi liberado!\nSenha: {senha}"}
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 resize-y"
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 resize-y"
               />
             </div>
 
@@ -303,7 +303,7 @@ export function EmailTab({
                 onChange={(e) => setField("emailFooter", e.target.value)}
                 maxLength={500}
                 placeholder={wsName}
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
               />
             </div>
           </>

@@ -27,7 +27,7 @@ const HeadsetIcon = ({ className = "" }: { className?: string }) => (
 );
 
 const inputCls =
-  "w-full bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20";
+  "w-full bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-white/20";
 const labelCls = "text-xs text-gray-500 dark:text-gray-400 mb-1 block";
 
 export default function ProducerSupportPage() {
@@ -170,7 +170,7 @@ export default function ProducerSupportPage() {
             <button
               onClick={() => handleSave(w.id)}
               disabled={saving[w.id]}
-              className="px-4 py-2.5 bg-primary hover:bg-primary text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {saving[w.id] ? "Salvando..." : "Salvar"}
             </button>

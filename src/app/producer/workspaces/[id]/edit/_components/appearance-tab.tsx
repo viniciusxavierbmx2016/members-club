@@ -181,7 +181,7 @@ export function AppearanceTab({
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              className={`inline-block h-4 w-4 rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                 vitrineWelcomeEnabled ? "translate-x-[18px]" : "translate-x-0.5"
               }`}
             />
@@ -203,13 +203,13 @@ export function AppearanceTab({
               disabled={!vitrineWelcomeEnabled}
               placeholder="Bom dia, {nome do aluno} — automático"
               maxLength={100}
-              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors disabled:cursor-not-allowed"
+              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors disabled:cursor-not-allowed"
             />
             <div className="flex items-center justify-between mt-1">
               <p className="text-[11px] text-gray-500">
                 Deixe em branco para usar a saudação automática por horário
               </p>
-              <p className="text-xs text-gray-400 shrink-0 ml-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 shrink-0 ml-2">
                 {(vitrineWelcomeTitle || "").length}/100
               </p>
             </div>
@@ -229,13 +229,13 @@ export function AppearanceTab({
               placeholder="Bem-vindo à área de membros de {nome do workspace} — automático"
               rows={3}
               maxLength={200}
-              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[80px] disabled:cursor-not-allowed"
+              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors resize-y min-h-[80px] disabled:cursor-not-allowed"
             />
             <div className="flex items-center justify-between mt-1">
               <p className="text-[11px] text-gray-500">
                 Deixe em branco para usar o texto padrão
               </p>
-              <p className="text-xs text-gray-400 shrink-0 ml-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400 shrink-0 ml-2">
                 {(vitrineWelcomeText || "").length}/200
               </p>
             </div>
@@ -295,7 +295,7 @@ export function AppearanceTab({
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              className={`inline-block h-4 w-4 rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                 vitrineBannerFadeEnabled ? "translate-x-[18px]" : "translate-x-0.5"
               }`}
             />
@@ -381,7 +381,7 @@ export function AppearanceTab({
             {faviconUrl ? (
               <Image src={faviconUrl} alt="favicon" width={32} height={32} className="w-8 h-8 object-contain" />
             ) : (
-              <span className="text-xs text-gray-400">32×32</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">32×32</span>
             )}
           </div>
           <div className="flex-1 flex items-center gap-2">

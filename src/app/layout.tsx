@@ -36,7 +36,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://app.mymembersclub.com.br"
   ),
-  icons: { icon: "/logo.png" },
+  icons: {
+    icon: [
+      { url: "/favicon-v2.svg", type: "image/svg+xml" },
+      { url: "/favicon-v2.ico", sizes: "48x48" },
+      { url: "/logo-v2.png", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon-v2.png",
+  },
   manifest: "/manifest.json",
   openGraph: {
     type: "website",
@@ -67,15 +74,15 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <DynamicFavicon />
-        <meta name="theme-color" content="#0a0a1a" />
+        <meta name="theme-color" content="#191919" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Members Club" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
-        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png" />
-        <link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128x128.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v2.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152-v2.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144-v2.png" />
+        <link rel="apple-touch-icon" sizes="128x128" href="/icons/icon-128x128-v2.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900 dark:bg-gray-950 dark:text-white`}

@@ -4,17 +4,9 @@ import { getCurrentUser, hasAcceptedCollaborator } from "@/lib/auth";
 import { ProducerThemeProvider } from "@/components/producer-theme-provider";
 import { ProducerShell } from "@/components/producer-shell";
 import { ContextLockNotice } from "@/components/context-lock-notice";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 
-const THEME_DEFAULTS = {
-  mode: "dark",
-  primaryColor: "#3b82f6",
-  secondaryColor: "#1a1e2e",
-  bgColor: "#0a0a1a",
-  headerColor: "#0a0a1a",
-  sidebarColor: "#0a0a1a",
-  cardColor: "#111827",
-  buttonTextColor: "#ffffff",
-};
+const THEME_DEFAULTS = PRODUCER_THEME_DEFAULTS;
 
 export default async function ProducerLayout({
   children,

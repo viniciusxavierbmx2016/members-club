@@ -127,7 +127,7 @@ export default function CourseStudentsPage(
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <button
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-white font-medium rounded-lg text-sm transition"
+          className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-lg text-sm transition"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -176,12 +176,12 @@ export default function CourseStudentsPage(
             setQ(e.target.value);
             setPage(1);
           }}
-          className="w-full sm:max-w-sm px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors"
+          className="w-full sm:max-w-sm px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors"
         />
       </div>
       {loading && !data ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#191919] dark:border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : !data || data.students.length === 0 ? (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-xl p-12 text-center">
@@ -193,7 +193,7 @@ export default function CourseStudentsPage(
           {!debouncedQ && (
             <button
               onClick={() => setModalOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-white font-medium rounded-lg text-sm transition"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-lg text-sm transition"
             >
               Enviar primeiro acesso
             </button>
@@ -288,7 +288,7 @@ export default function CourseStudentsPage(
                           <span className={exp.color}>{exp.text}</span>
                           <button
                             onClick={() => setEditTarget(s)}
-                            className="p-1 text-gray-400 hover:text-primary dark:hover:text-primary rounded"
+                            className="p-1 text-gray-400 hover:text-[#191919] dark:hover:text-primary rounded"
                             aria-label="Editar tempo de acesso"
                             title="Editar tempo de acesso"
                           >
@@ -315,7 +315,7 @@ export default function CourseStudentsPage(
                           ) : (
                             <button
                               type="button"
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-500/10 text-gray-400 cursor-not-allowed"
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-500/10 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                               title="WhatsApp não cadastrado"
                               onClick={() => showToast("Este aluno não possui WhatsApp cadastrado")}
                             >
@@ -401,7 +401,7 @@ export default function CourseStudentsPage(
                         <p className={exp.color}>{exp.text}</p>
                         <button
                           onClick={() => setEditTarget(s)}
-                          className="p-1 text-gray-400 hover:text-primary dark:hover:text-primary rounded"
+                          className="p-1 text-gray-400 hover:text-[#191919] dark:hover:text-primary rounded"
                           aria-label="Editar tempo de acesso"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -438,7 +438,7 @@ export default function CourseStudentsPage(
                     ) : (
                       <button
                         type="button"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-400 cursor-not-allowed flex-shrink-0"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-500 dark:text-gray-400 cursor-not-allowed flex-shrink-0"
                         title="WhatsApp não cadastrado"
                         onClick={() => showToast("Este aluno não possui WhatsApp cadastrado")}
                       >

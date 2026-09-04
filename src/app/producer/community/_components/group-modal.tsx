@@ -84,7 +84,7 @@ export function GroupModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={60}
-                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#191919] dark:focus:ring-primary focus:border-transparent outline-none"
                 placeholder="Ex: Networking"
                 autoFocus
               />
@@ -99,7 +99,7 @@ export function GroupModal({
                 onChange={(e) => setDescription(e.target.value)}
                 maxLength={200}
                 rows={2}
-                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none"
+                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#191919] dark:focus:ring-primary focus:border-transparent outline-none resize-none"
                 placeholder="Breve descrição do grupo"
               />
             </div>
@@ -161,7 +161,7 @@ export function GroupModal({
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-xl transition disabled:opacity-60"
+              className="px-4 py-2 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-xl transition disabled:opacity-60"
             >
               {saving ? "Salvando..." : "Salvar"}
             </button>

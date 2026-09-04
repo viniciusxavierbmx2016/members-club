@@ -12,15 +12,15 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  SCHEDULED: "bg-yellow-500/20 text-yellow-400",
-  LIVE: "bg-red-500/20 text-red-400 animate-pulse",
-  ENDED: "bg-gray-500/20 text-gray-400",
+  SCHEDULED: "bg-yellow-50 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400",
+  LIVE: "bg-red-50 text-red-700 dark:bg-red-500/20 dark:text-red-400 animate-pulse",
+  ENDED: "bg-gray-100 text-gray-600 dark:bg-gray-500/20 dark:text-gray-400",
 };
 
 export const inputCls =
-  "w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors text-sm";
+  "w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors text-sm";
 
-export const labelCls = "block text-xs text-gray-400 mb-1.5";
+export const labelCls = "block text-xs text-gray-500 dark:text-gray-400 mb-1.5";
 
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", {

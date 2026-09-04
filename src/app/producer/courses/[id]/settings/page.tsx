@@ -261,13 +261,14 @@ export default function CourseSettingsPage(
                 }`}
               >
                 <span
-                  className={`shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center ${
+                  className={`relative shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center ${
                     enabled
                       ? "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary"
-                      : "bg-gray-100 text-gray-400 dark:bg-[#1a1e2e] dark:text-gray-500"
+                      : "bg-gray-100 text-gray-500 dark:bg-[#1a1e2e] dark:text-gray-500"
                   }`}
                 >
                   {item.icon}
+                  {enabled && <svg className="absolute -top-1 -right-1 w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                 </span>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -322,12 +323,12 @@ function Toggle({
       aria-label={label}
       disabled={disabled}
       onClick={onChange}
-      className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-white dark:focus:ring-offset-gray-900 ${
+      className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#191919] dark:focus:ring-primary focus:ring-offset-white dark:focus:ring-offset-gray-900 ${
         checked ? "bg-primary" : "bg-gray-300 dark:bg-[#1a1e2e]"
       } ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+        className={`inline-block h-5 w-5 transform rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
           checked ? "translate-x-5" : "translate-x-0.5"
         }`}
       />

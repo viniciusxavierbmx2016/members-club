@@ -74,7 +74,7 @@ function CourseLayoutInner({ children }: { children: React.ReactNode }) {
         <p className="text-gray-600 dark:text-gray-400">Curso não encontrado</p>
         <Link
           href="/producer/courses"
-          className="inline-block mt-4 text-primary hover:text-primary"
+          className="inline-block mt-4 text-[#191919] dark:text-primary hover:text-[#191919] dark:hover:text-primary"
         >
           Voltar para cursos
         </Link>

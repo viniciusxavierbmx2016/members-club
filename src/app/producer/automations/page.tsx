@@ -129,7 +129,7 @@ export default function AutomationsPage() {
           <p className="text-sm text-gray-500 mt-1">Crie fluxos visuais que executam ações automaticamente</p>
         </div>
         <div className="flex items-center gap-0">
-          <button type="button" onClick={() => setShowNewModal(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-xl transition">
+          <button type="button" onClick={() => setShowNewModal(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-xl transition">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             Nova automação
           </button>
@@ -150,11 +150,11 @@ export default function AutomationsPage() {
       ) : automations.length === 0 ? (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-12 text-center">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
-            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <svg className="w-8 h-8 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <p className="text-gray-900 dark:text-white font-semibold text-lg mb-2">Automatize tarefas repetitivas</p>
           <p className="text-gray-500 text-sm mb-6 max-w-md mx-auto">Crie fluxos visuais que executam ações automaticamente</p>
-          <button type="button" onClick={() => setShowNewModal(true)} className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-xl transition">+ Criar primeira automação</button>
+          <button type="button" onClick={() => setShowNewModal(true)} className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-xl transition">+ Criar primeira automação</button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -165,26 +165,26 @@ export default function AutomationsPage() {
             const ad = getActionDetail(auto, courses);
             const courseName = courses.find((c) => c.id === auto.courseId)?.title;
             return (
-              <div key={auto.id} onClick={() => setEditorAuto(auto)} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-5 cursor-pointer transition hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+              <div key={auto.id} onClick={() => setEditorAuto(auto)} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-5 cursor-pointer transition hover:border-[#191919]/30 dark:hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate pr-2">{auto.name}</h3>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button type="button" onClick={(e) => toggleActive(e, auto)} className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full font-medium transition ${auto.active ? "bg-emerald-500/15 text-emerald-400" : "bg-gray-500/15 text-gray-400"}`}>
+                    <button type="button" onClick={(e) => toggleActive(e, auto)} className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full font-medium transition ${auto.active ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-gray-500/15 text-gray-500 dark:text-gray-400"}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${auto.active ? "bg-emerald-400" : "bg-gray-500"}`} />
                       {auto.active ? "Ativo" : "Inativo"}
                     </button>
                     <div className="relative">
-                      <button type="button" onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === auto.id ? null : auto.id); }} className="p-1 text-gray-500 hover:text-gray-300 hover:bg-white/5 rounded-lg transition">
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === auto.id ? null : auto.id); }} className="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/5 rounded-lg transition">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
                       </button>
                       {menuOpen === auto.id && <CardMenu onEdit={() => { setMenuOpen(null); setEditorAuto(auto); }} onDuplicate={() => duplicateAutomation(auto)} onDelete={() => deleteAutomation(auto.id)} onClose={() => setMenuOpen(null)} />}
                     </div>
                   </div>
                 </div>
-                {courseName && <p className="text-[10px] text-primary mb-2 truncate">{courseName}</p>}
+                {courseName && <p className="text-[10px] text-[#191919] dark:text-primary mb-2 truncate">{courseName}</p>}
                 <div className="bg-[#0a0a0b] rounded-xl p-3 mb-3 overflow-hidden" style={{ backgroundImage: "radial-gradient(circle, #1d1d23 1px, transparent 1px)", backgroundSize: "16px 16px" }}>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></div>
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 text-[var(--producer-button-text,#ffffff)]" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></div>
                     <div className="w-4 h-px bg-[#3b3b44]" />
                     <div className="flex-1 min-w-0 bg-[#141416] border border-[#28282e] rounded-lg px-2 py-1.5">
                       <div className="flex items-center gap-1">
@@ -240,7 +240,7 @@ export default function AutomationsPage() {
       {showNewModal && <NewAutomationModal onClose={() => setShowNewModal(false)} onScratch={() => { setShowNewModal(false); setEditorNew(true); }} onTemplate={(t) => { setShowNewModal(false); setEditorTemplate(t); }} />}
       <ConfirmDialog />
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-white rounded-lg shadow-xl text-sm font-medium">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-[var(--producer-button-text,#ffffff)] rounded-lg shadow-xl text-sm font-medium">
           {toast}
         </div>
       )}

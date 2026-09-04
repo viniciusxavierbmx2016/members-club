@@ -282,7 +282,7 @@ function BillingContent() {
                     </span>
                   </p>
                 </div>
-                <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-[#191919] dark:text-primary">
                   Recomendado
                 </span>
               </div>
@@ -307,7 +307,7 @@ function BillingContent() {
               <button
                 onClick={handleCheckout}
                 disabled={checkingOut}
-                className="block w-full text-center px-6 py-3 bg-primary hover:bg-primary text-white font-medium rounded-xl transition text-sm disabled:opacity-50"
+                className="block w-full text-center px-6 py-3 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl transition text-sm disabled:opacity-50"
               >
                 {checkoutLabel}
               </button>
@@ -375,7 +375,7 @@ function BillingContent() {
                 <button
                   onClick={handleCheckout}
                   disabled={checkingOut}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary rounded-lg transition disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-[var(--producer-button-text,#ffffff)] bg-primary hover:bg-primary rounded-lg transition disabled:opacity-50"
                 >
                   {checkingOut ? "Gerando checkout..." : "Reativar assinatura"}
                 </button>
@@ -448,7 +448,7 @@ function BillingContent() {
 
 function Banner({ color, children }: { color: string; children: React.ReactNode }) {
   const colors: Record<string, string> = {
-    blue: "bg-primary/10 dark:bg-primary/5 border-primary/30 dark:border-primary/20 text-primary",
+    blue: "bg-primary/10 dark:bg-primary/5 border-[#191919]/30 dark:border-primary/30 dark:border-primary/20 text-[#191919] dark:text-primary",
     amber: "bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400",
     red: "bg-red-50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400",
   };

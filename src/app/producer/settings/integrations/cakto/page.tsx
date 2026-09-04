@@ -278,7 +278,7 @@ export default function CaktoIntegrationPage() {
               <button
                 type="button"
                 onClick={copyUrl}
-                className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-lg whitespace-nowrap"
+                className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg whitespace-nowrap"
               >
                 {copied ? "Copiado!" : "Copiar"}
               </button>
@@ -307,7 +307,7 @@ export default function CaktoIntegrationPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-gray-800 dark:text-gray-200 font-medium truncate">{t.label}</span>
-                        <span className="font-mono text-xs text-gray-400">{t.maskedValue}</span>
+                        <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{t.maskedValue}</span>
                       </div>
                       <p className="text-[10px] text-gray-500 mt-0.5">{formatLastUsed(t.lastUsedAt)}</p>
                     </div>
@@ -339,7 +339,7 @@ export default function CaktoIntegrationPage() {
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="Rótulo (opcional)"
                   maxLength={100}
-                  className="sm:w-48 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="sm:w-48 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                 />
                 <input
                   type="text"
@@ -361,7 +361,7 @@ export default function CaktoIntegrationPage() {
                       addToken();
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                  className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                 />
                 <button
                   type="button"
@@ -377,7 +377,7 @@ export default function CaktoIntegrationPage() {
                   type="button"
                   onClick={addToken}
                   disabled={!newToken.trim() || savingToken}
-                  className="px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg whitespace-nowrap"
+                  className="px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg whitespace-nowrap"
                 >
                   {savingToken ? "Salvando..." : "+ Adicionar"}
                 </button>
@@ -458,13 +458,13 @@ export default function CaktoIntegrationPage() {
                               }
                             }}
                             placeholder="ID do produto na Cakto"
-                            className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50"
+                            className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                           />
                           <button
                             type="button"
                             onClick={() => addExternalId(c.id)}
                             disabled={!draft.trim() || savingCourseId === c.id}
-                            className="px-3 py-2 bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg whitespace-nowrap"
+                            className="px-3 py-2 bg-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-[var(--producer-button-text,#ffffff)] text-xs font-medium rounded-lg whitespace-nowrap"
                           >
                             {savingCourseId === c.id ? "Salvando..." : "+ Adicionar"}
                           </button>
@@ -502,7 +502,7 @@ export default function CaktoIntegrationPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-white rounded-lg shadow-xl text-sm font-medium">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-[var(--producer-button-text,#ffffff)] rounded-lg shadow-xl text-sm font-medium">
           {toast}
         </div>
       )}

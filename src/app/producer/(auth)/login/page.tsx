@@ -170,7 +170,7 @@ function ProducerLoginForm() {
                         href={`/w/${w.slug}/login`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] hover:border-primary/50 transition"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] hover:border-[#191919]/50 dark:hover:border-primary/50 transition"
                       >
                         {w.logoUrl ? (
                           <Image
@@ -181,7 +181,7 @@ function ProducerLoginForm() {
                             className="w-9 h-9 rounded-lg object-cover shrink-0"
                           />
                         ) : (
-                          <span className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center font-bold shrink-0">
+                          <span className="w-9 h-9 rounded-lg bg-primary/15 text-[#191919] dark:text-primary flex items-center justify-center font-bold shrink-0">
                             {w.name.charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -220,7 +220,7 @@ function ProducerLoginForm() {
               <div className="text-center mb-6">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <svg
-                    className="w-7 h-7 text-primary"
+                    className="w-7 h-7 text-[#191919] dark:text-primary"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -250,7 +250,7 @@ function ProducerLoginForm() {
                   setMfaCode(e.target.value.replace(/\D/g, ""))
                 }
                 placeholder="000000"
-                className="w-full text-center text-2xl tracking-[0.5em] font-mono bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                className="w-full text-center text-2xl tracking-[0.5em] font-mono bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-white/20"
                 autoFocus
               />
 
@@ -261,7 +261,7 @@ function ProducerLoginForm() {
               <button
                 type="submit"
                 disabled={mfaCode.length !== 6 || loading}
-                className="w-full py-2.5 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors"
+                className="w-full py-2.5 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-[var(--producer-button-text,#ffffff)] rounded-xl font-medium transition-colors"
               >
                 {loading ? "Verificando..." : "Verificar"}
               </button>
@@ -291,7 +291,7 @@ function ProducerLoginForm() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     autoComplete="email"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-white/20 transition"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -305,14 +305,14 @@ function ProducerLoginForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-white/20 transition"
                     placeholder="••••••••"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-primary hover:bg-primary disabled:opacity-50 text-white font-medium rounded-xl shadow-lg shadow-primary/20 transition"
+                  className="w-full py-3 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition"
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </button>
@@ -321,13 +321,13 @@ function ProducerLoginForm() {
               <div className="mt-6 flex items-center justify-between text-sm">
                 <Link
                   href="/forgot-password?from=producer"
-                  className="text-primary hover:underline"
+                  className="text-[#191919] dark:text-primary hover:underline"
                 >
                   Esqueci minha senha
                 </Link>
                 <Link
                   href="/producer/register"
-                  className="text-primary hover:underline"
+                  className="text-[#191919] dark:text-primary hover:underline"
                 >
                   Criar conta
                 </Link>
@@ -337,7 +337,7 @@ function ProducerLoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowStudentLookup(!showStudentLookup)}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-[#191919] dark:text-primary hover:underline"
                 >
                   É aluno? Encontre seu curso
                 </button>
@@ -356,7 +356,7 @@ function ProducerLoginForm() {
                           setLookupSent(false);
                           setLookupEmail("");
                         }}
-                        className="mt-2 text-xs text-primary hover:underline"
+                        className="mt-2 text-xs text-[#191919] dark:text-primary hover:underline"
                       >
                         Enviar para outro email
                       </button>
@@ -371,14 +371,14 @@ function ProducerLoginForm() {
                         placeholder="seu@email.com"
                         value={lookupEmail}
                         onChange={(e) => setLookupEmail(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#191919]/50 dark:focus:ring-white/50"
                         onKeyDown={(e) => e.key === "Enter" && handleStudentLookup()}
                       />
                       <button
                         type="button"
                         onClick={handleStudentLookup}
                         disabled={lookupLoading || !lookupEmail.trim()}
-                        className="mt-3 w-full py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                        className="mt-3 w-full py-2.5 rounded-lg bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
                       >
                         {lookupLoading ? "Enviando..." : "Enviar links de acesso"}
                       </button>

@@ -144,7 +144,7 @@ export function DatePickerSingle({
                   setOpen(false);
                 }
               }}
-              className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
+              className="text-gray-500 dark:text-gray-400 hover:text-red-500 p-0.5 cursor-pointer"
               title="Limpar data"
               aria-label="Limpar data"
             >
@@ -213,7 +213,7 @@ export function DatePickerSingle({
               const base =
                 "w-8 h-8 flex items-center justify-center text-xs rounded-full transition-colors";
               const cls = isSelected
-                ? "bg-blue-600 text-white font-semibold"
+                ? "bg-blue-600 text-[var(--producer-button-text,#ffffff)] font-semibold"
                 : isPast
                   ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
                   : isToday

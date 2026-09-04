@@ -19,14 +19,14 @@ export function ConfirmModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
       <div className="relative bg-white dark:bg-gray-950 border border-gray-200 dark:border-white/10 rounded-xl w-full max-w-sm p-6">
-        <h3 className="text-lg font-bold text-white mb-2">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           {action.type === "start"
             ? "Iniciar Live?"
             : action.type === "end"
               ? "Encerrar Live?"
               : "Excluir Live?"}
         </h3>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
           {action.type === "start"
             ? `"${action.live.title}" será marcada como ao vivo. O chat será liberado para os alunos.`
             : action.type === "end"
@@ -36,7 +36,7 @@ export function ConfirmModal({
         <div className="flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm text-gray-400 hover:text-white transition"
+            className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
           >
             Cancelar
           </button>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, createContext, useContext, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
 import { darkenHex } from "@/lib/color-utils";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 
 interface ThemeConfig {
   mode: string;
@@ -15,16 +16,7 @@ interface ThemeConfig {
   buttonTextColor: string;
 }
 
-const DEFAULTS: ThemeConfig = {
-  mode: "dark",
-  primaryColor: "#3b82f6",
-  secondaryColor: "#1a1e2e",
-  bgColor: "#0a0a1a",
-  headerColor: "#0a0a1a",
-  sidebarColor: "#0a0a1a",
-  cardColor: "#111827",
-  buttonTextColor: "#ffffff",
-};
+const DEFAULTS: ThemeConfig = PRODUCER_THEME_DEFAULTS;
 
 interface ThemeContextValue {
   theme: ThemeConfig;

@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { useProducerTheme } from "@/components/producer-theme-provider";
 import { useConfirm } from "@/hooks/use-confirm";
 import { darkenHex } from "@/lib/color-utils";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 import { PushToggle } from "@/components/push-toggle";
 import { useActiveWorkspace } from "@/hooks/use-active-workspace";
 
@@ -19,16 +20,7 @@ interface ThemeConfig {
   buttonTextColor: string;
 }
 
-const DEFAULTS: ThemeConfig = {
-  mode: "dark",
-  primaryColor: "#3b82f6",
-  secondaryColor: "#1a1e2e",
-  bgColor: "#0a0a1a",
-  headerColor: "#0a0a1a",
-  sidebarColor: "#0a0a1a",
-  cardColor: "#111827",
-  buttonTextColor: "#ffffff",
-};
+const DEFAULTS: ThemeConfig = PRODUCER_THEME_DEFAULTS;
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
@@ -145,7 +137,7 @@ export default function SettingsPage() {
                 style={{ backgroundColor: theme.mode === "dark" ? theme.primaryColor : "#d1d5db" }}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                  className={`inline-block h-5 w-5 transform rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                     theme.mode === "dark" ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
@@ -368,7 +360,7 @@ function ColorPicker({
               handleHexInput(e.target.value);
             }
           }}
-          className="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white font-mono focus:outline-none focus:border-primary/50 transition-colors"
+          className="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white font-mono focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors"
           placeholder="#000000"
           maxLength={7}
         />

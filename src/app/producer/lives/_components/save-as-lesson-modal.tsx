@@ -88,8 +88,8 @@ export function SaveAsLessonModal({
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-white dark:bg-gray-950 border border-gray-200 dark:border-white/10 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="p-6 space-y-4">
-          <h2 className="text-lg font-bold text-white">Salvar como aula</h2>
-          <p className="text-gray-400 text-sm">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Salvar como aula</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             Crie uma aula a partir da live &quot;{live.title}&quot;
           </p>
 
@@ -162,7 +162,7 @@ export function SaveAsLessonModal({
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-400 hover:text-white transition"
+              className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
             >
               Cancelar
             </button>

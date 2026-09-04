@@ -403,12 +403,12 @@ export default function CourseCustomizePage() {
                     onClick={() => updateField("memberLayoutStyle", layout.value)}
                     className={`relative flex-1 text-left p-4 rounded-xl transition-colors ${
                       selected
-                        ? "border-2 border-primary bg-primary/5"
+                        ? "border-2 border-[#191919] dark:border-primary bg-primary/5"
                         : "border border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20"
                     }`}
                   >
                     {isSaved && (
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-semibold bg-primary text-white rounded">
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-semibold bg-primary text-[var(--producer-button-text,#ffffff)] rounded">
                         Atual
                       </span>
                     )}
@@ -499,9 +499,9 @@ export default function CourseCustomizePage() {
               placeholder="Bem-vindo à nossa comunidade!"
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[80px]"
+              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors resize-y min-h-[80px]"
             />
-            <p className="text-xs text-gray-400 mt-1 text-right">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
               {(custom.memberWelcomeText || "").length}/500
             </p>
           </div>
@@ -542,7 +542,7 @@ export default function CourseCustomizePage() {
                         } ${isSaving ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                          className={`inline-block h-4 w-4 rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                             enabled ? "translate-x-[18px]" : "translate-x-0.5"
                           }`}
                         />
@@ -588,11 +588,11 @@ export default function CourseCustomizePage() {
                 <div className="flex items-center gap-2">
                   <span
                     className="w-9 h-9 rounded-md border border-gray-200 dark:border-white/10 relative overflow-hidden flex-shrink-0"
-                    style={{ backgroundColor: HEX_RE.test(fade.color || "") ? fade.color! : "#0a0a1a" }}
+                    style={{ backgroundColor: HEX_RE.test(fade.color || "") ? fade.color! : "#191919" }}
                   >
                     <input
                       type="color"
-                      value={HEX_RE.test(fade.color || "") ? fade.color! : "#0a0a1a"}
+                      value={HEX_RE.test(fade.color || "") ? fade.color! : "#191919"}
                       onChange={(e) => setFade((f) => ({ ...f, color: e.target.value }))}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
@@ -603,7 +603,7 @@ export default function CourseCustomizePage() {
                     onChange={(e) => setFade((f) => ({ ...f, color: e.target.value || null }))}
                     placeholder="vazio = padrão do tema"
                     maxLength={7}
-                    className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                    className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                   />
                 </div>
               </div>
@@ -628,7 +628,7 @@ export default function CourseCustomizePage() {
                   type="button"
                   onClick={saveFade}
                   disabled={savingFade || !fadeDirty}
-                  className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
                 >
                   {savingFade ? "Salvando…" : "Salvar fade"}
                 </button>
@@ -717,7 +717,7 @@ export default function CourseCustomizePage() {
                       }
                       placeholder="#3b82f6 (padrão do tema)"
                       maxLength={7}
-                      className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                      className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                     />
                   </div>
                 </div>
@@ -767,7 +767,7 @@ export default function CourseCustomizePage() {
                     type="button"
                     onClick={saveSupportButton}
                     disabled={savingSupportBtn || !supportBtnDirty}
-                    className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-4 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
                   >
                     {savingSupportBtn ? "Salvando…" : "Salvar botão"}
                   </button>
@@ -801,7 +801,7 @@ export default function CourseCustomizePage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
               >
                 {saving ? "Salvando..." : "Salvar personalização"}
               </button>

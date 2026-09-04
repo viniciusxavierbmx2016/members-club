@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/auth";
 import { producerThemeSchema, validateBody } from "@/lib/validations";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 
 interface ThemeConfig {
   mode: string;
@@ -14,16 +15,7 @@ interface ThemeConfig {
   buttonTextColor: string;
 }
 
-const DEFAULTS: ThemeConfig = {
-  mode: "dark",
-  primaryColor: "#3b82f6",
-  secondaryColor: "#1a1e2e",
-  bgColor: "#0a0a1a",
-  headerColor: "#0a0a1a",
-  sidebarColor: "#0a0a1a",
-  cardColor: "#111827",
-  buttonTextColor: "#ffffff",
-};
+const DEFAULTS: ThemeConfig = PRODUCER_THEME_DEFAULTS;
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 const COLOR_KEYS: (keyof ThemeConfig)[] = [

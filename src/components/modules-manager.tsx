@@ -278,7 +278,7 @@ export function ModulesManager({
             <div className="flex items-center gap-0">
               <button
                 onClick={() => setCreatingModule(true)}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -310,7 +310,7 @@ export function ModulesManager({
           />
           <button
             onClick={handleCreateSection}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
           >
             Criar
           </button>
@@ -345,7 +345,7 @@ export function ModulesManager({
           />
           <button
             onClick={handleCreateModule}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
           >
             Criar
           </button>
@@ -653,7 +653,7 @@ function SortableModule({
       </div>
 
       {expanded && (
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-950/40 p-4 space-y-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 p-4 space-y-4">
           <ThumbnailUpload
             value={module.thumbnailUrl}
             onChange={(url) => onUpdate(module.id, { thumbnailUrl: url })}

@@ -93,7 +93,7 @@ export function CourseMenuManager({ courseId }: { courseId: string }) {
           <div className="flex gap-2">
             <button
               onClick={handleCreate}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition"
             >
               Adicionar
             </button>
@@ -274,7 +274,7 @@ function SortableRow({
       {canDelete ? (
         <button
           onClick={() => onDelete(item.id)}
-          className="p-2 text-gray-400 hover:text-red-500 transition flex-shrink-0"
+          className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 transition flex-shrink-0"
           aria-label="Excluir"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

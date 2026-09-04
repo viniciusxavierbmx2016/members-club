@@ -258,7 +258,7 @@ export default function AdminUsersPage() {
           <button
             type="button"
             onClick={() => setImportOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-white transition"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] transition"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 8l-4-4-4 4M12 4v12" />
@@ -270,7 +270,7 @@ export default function AdminUsersPage() {
             onClick={() => setEnrollOpen(true)}
             disabled={courses.length === 0}
             title={courses.length === 0 ? "Crie um curso primeiro" : undefined}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -344,7 +344,7 @@ export default function AdminUsersPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por nome ou e-mail..."
-            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg pl-9 pr-9 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary/50 transition-colors"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg pl-9 pr-9 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors"
           />
           {query && (
             <button
@@ -393,7 +393,7 @@ export default function AdminUsersPage() {
       ) : users.length === 0 ? (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-xl p-10 text-center">
           <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-7 h-7 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
@@ -440,7 +440,7 @@ export default function AdminUsersPage() {
                         u.role === "ADMIN"
                           ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30"
                           : u.role === "PRODUCER"
-                          ? "bg-primary/10 text-primary border-primary/30"
+                          ? "bg-primary/10 text-[#191919] dark:text-primary border-[#191919]/30 dark:border-primary/30"
                           : "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-400/30"
                       )}
                     >
@@ -479,7 +479,7 @@ export default function AdminUsersPage() {
                     ) : (
                       <button
                         type="button"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-400 cursor-not-allowed"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-500/10 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                         title="WhatsApp não cadastrado"
                         onClick={(e) => { e.stopPropagation(); showToast("Este aluno não possui WhatsApp cadastrado"); }}
                       >
@@ -681,7 +681,7 @@ export default function AdminUsersPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-white rounded-lg shadow-xl text-sm font-medium">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-primary text-[var(--producer-button-text,#ffffff)] rounded-lg shadow-xl text-sm font-medium">
           {toast}
         </div>
       )}

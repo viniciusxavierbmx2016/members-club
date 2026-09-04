@@ -167,7 +167,7 @@ export default function ProducerLivesPage() {
         <div className="flex items-center gap-0">
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg transition text-sm font-medium"
+            className="flex items-center gap-2 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-4 py-2 rounded-lg transition text-sm font-medium"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -186,7 +186,7 @@ export default function ProducerLivesPage() {
             onClick={() => setFilter(s)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
               filter === s
-                ? "bg-primary text-white"
+                ? "bg-primary text-[var(--producer-button-text,#ffffff)]"
                 : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10"
             }`}
           >
@@ -206,7 +206,7 @@ export default function ProducerLivesPage() {
       ) : filtered.length === 0 ? (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-xl p-10 text-center">
           <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-7 h-7 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
           </div>
@@ -219,7 +219,7 @@ export default function ProducerLivesPage() {
           {filter === "ALL" && (
             <button
               onClick={openCreate}
-              className="bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg transition text-sm mt-4"
+              className="bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-4 py-2 rounded-lg transition text-sm mt-4"
             >
               Criar Live
             </button>
@@ -265,9 +265,9 @@ export default function ProducerLivesPage() {
                     )}
                   </div>
 
-                  <h3 className="text-white font-medium truncate">{live.title}</h3>
+                  <h3 className="text-gray-900 dark:text-white font-medium truncate">{live.title}</h3>
 
-                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
+                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span>
                       {live.status === "LIVE" && live.startedAt
                         ? `Iniciou ${formatDate(live.startedAt)}`
@@ -276,7 +276,7 @@ export default function ProducerLivesPage() {
                           : `Agendada para ${formatDate(live.scheduledAt)}`}
                     </span>
                     {live.course && (
-                      <span className="text-primary">{live.course.title}</span>
+                      <span className="text-[#191919] dark:text-primary">{live.course.title}</span>
                     )}
                     {live._count.messages > 0 && (
                       <span>{live._count.messages} mensagens</span>
@@ -301,7 +301,7 @@ export default function ProducerLivesPage() {
                     <>
                       <button
                         onClick={() => router.push(`/producer/lives/${live.id}`)}
-                        className="flex items-center gap-1 bg-primary hover:bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
+                        className="flex items-center gap-1 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] px-3 py-1.5 rounded-lg text-xs font-medium transition"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -332,7 +332,7 @@ export default function ProducerLivesPage() {
                   )}
                   <button
                     onClick={() => copyLink(live.externalUrl)}
-                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-white transition"
+                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                     title="Copiar link"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -341,7 +341,7 @@ export default function ProducerLivesPage() {
                   </button>
                   <button
                     onClick={() => openEdit(live)}
-                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-white transition"
+                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                     title="Editar"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,7 +350,7 @@ export default function ProducerLivesPage() {
                   </button>
                   <button
                     onClick={() => setConfirmAction({ type: "delete", live })}
-                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-red-400 transition"
+                    className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-red-400 transition"
                     title="Excluir"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

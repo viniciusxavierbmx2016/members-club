@@ -188,7 +188,7 @@ export function ReportsFeedbackTab({ courseId, startDate, endDate }: Props) {
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{c.userName}</p>
                     <p className="text-xs text-gray-500 truncate">{c.userEmail}</p>
                   </div>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">{formatDate(c.createdAt)}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{formatDate(c.createdAt)}</span>
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300">&ldquo;{c.comment}&rdquo;</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">

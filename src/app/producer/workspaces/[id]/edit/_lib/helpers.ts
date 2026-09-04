@@ -50,7 +50,7 @@ export const DEFAULT_LINK = "#3b82f6";
 export const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 export const inputClass =
-  "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors text-sm";
+  "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors text-sm";
 
 export const labelClass = "block text-xs text-gray-500 dark:text-gray-400 mb-1.5";
 

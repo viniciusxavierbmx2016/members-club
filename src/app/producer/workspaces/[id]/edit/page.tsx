@@ -488,7 +488,7 @@ export default function EditWorkspacePage() {
         <p className="text-gray-500">Workspace não encontrado.</p>
         <Link
           href="/producer/workspaces"
-          className="inline-block mt-4 text-primary"
+          className="inline-block mt-4 text-[#191919] dark:text-primary"
         >
           Voltar
         </Link>
@@ -532,7 +532,7 @@ export default function EditWorkspacePage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap",
                 tab === t.key
-                  ? "border-primary text-primary"
+                  ? "border-[#191919] dark:border-primary text-[#191919] dark:text-primary"
                   : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
               )}
             >
@@ -686,7 +686,7 @@ export default function EditWorkspacePage() {
             type="button"
             onClick={() => save()}
             disabled={saving || !name.trim()}
-            className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+            className="px-6 py-2 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors"
           >
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>

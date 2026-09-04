@@ -83,7 +83,7 @@ export function GroupsTab({
       <div className="flex justify-end">
         <button
           onClick={onCreate}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-medium rounded-xl transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-[var(--producer-button-text,#ffffff)] text-sm font-medium rounded-xl transition"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -121,7 +121,7 @@ export function GroupsTab({
                     {g.name}
                   </h3>
                   {g.isDefault && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-medium">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-[#191919] dark:text-primary font-medium">
                       Padrão
                     </span>
                   )}
@@ -149,7 +149,7 @@ export function GroupsTab({
                 <button
                   onClick={() => onEdit(g)}
                   title="Editar"
-                  className="p-1.5 text-gray-500 hover:text-primary hover:bg-gray-100 dark:hover:bg-white/5 rounded transition"
+                  className="p-1.5 text-gray-500 hover:text-[#191919] dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-white/5 rounded transition"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

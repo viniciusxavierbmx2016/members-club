@@ -184,7 +184,7 @@ function AdminAnalyticsPageInner() {
                 onClick={() => changeTab(t.id)}
                 className={`relative px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
                   active
-                    ? "text-primary"
+                    ? "text-[#191919] dark:text-primary"
                     : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >

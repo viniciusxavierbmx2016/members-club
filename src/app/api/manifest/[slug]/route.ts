@@ -19,10 +19,10 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
         { src: logoUrl, sizes: "512x512", type: "image/png", purpose: "maskable" },
       ]
     : [
-        { src: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-        { src: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-        { src: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-        { src: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+        { src: "/icons/icon-192x192-v2.png", sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: "/icons/icon-512x512-v2.png", sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: "/icons/maskable-192x192-v2.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+        { src: "/icons/maskable-512x512-v2.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
       ];
 
   const manifest = {
@@ -31,8 +31,8 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
     description: `Área de membros - ${name}`,
     start_url: `/w/${params.slug}`,
     display: "standalone",
-    background_color: "#0a0a1a",
-    theme_color: "#0a0a1a",
+    background_color: "#191919",
+    theme_color: "#191919",
     orientation: "portrait-primary",
     icons,
   };

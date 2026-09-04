@@ -112,14 +112,14 @@ export function ContextLockNotice({
               type="button"
               onClick={goStudentHome}
               disabled={resolving}
-              className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-60"
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-semibold rounded-lg transition-colors disabled:opacity-60"
             >
               {resolving ? "Localizando..." : homeLabel}
             </button>
           ) : (
             <Link
               href={homeHref!}
-              className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-[var(--producer-button-text,#ffffff)] text-sm font-semibold rounded-lg transition-colors"
             >
               {homeLabel}
             </Link>

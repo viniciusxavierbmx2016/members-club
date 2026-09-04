@@ -76,7 +76,7 @@ export function PostsTab({
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-xl p-10 text-center">
           <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <svg
-              className="w-7 h-7 text-primary"
+              className="w-7 h-7 text-[#191919] dark:text-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -120,7 +120,7 @@ export function PostsTab({
                         {post.user.name}
                       </span>
                       {post.user.role === "ADMIN" && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/30 text-primary">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/30 text-[#191919] dark:text-primary">
                           ADMIN
                         </span>
                       )}
@@ -216,7 +216,7 @@ export function PostsTab({
                   </span>
                   <Link
                     href={`/course/${post.course.slug}/community`}
-                    className="text-primary hover:text-primary ml-auto"
+                    className="text-[#191919] dark:text-primary hover:text-[#191919] dark:hover:text-primary ml-auto"
                   >
                     Responder
                   </Link>

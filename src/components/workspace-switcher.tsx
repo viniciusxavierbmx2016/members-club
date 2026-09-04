@@ -103,7 +103,7 @@ export function WorkspaceSwitcher({
         </p>
         <Link
           href={`${routePrefix}/workspaces/new`}
-          className="inline-block text-[11px] font-medium px-2.5 py-1 rounded text-white hover:opacity-90"
+          className="inline-block text-[11px] font-medium px-2.5 py-1 rounded text-[var(--producer-button-text,#ffffff)] hover:opacity-90"
           style={{ backgroundColor: "var(--producer-primary, #3b82f6)" }}
         >
           Criar workspace

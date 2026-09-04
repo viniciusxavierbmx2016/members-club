@@ -137,7 +137,7 @@ export function CreateEditLiveModal({
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-white dark:bg-gray-950 border border-gray-200 dark:border-white/10 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="p-6 space-y-4">
-          <h2 className="text-lg font-bold text-white">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {editingLive ? "Editar Live" : "Nova Live"}
           </h2>
 
@@ -232,7 +232,7 @@ export function CreateEditLiveModal({
                   className="mt-0.5 accent-primary"
                 />
                 <div>
-                  <span className="text-sm text-white">Pública</span>
+                  <span className="text-sm text-gray-900 dark:text-white">Pública</span>
                   <p className="text-xs text-gray-500">Todos os alunos do workspace</p>
                 </div>
               </label>
@@ -246,7 +246,7 @@ export function CreateEditLiveModal({
                   className="mt-0.5 accent-primary"
                 />
                 <div>
-                  <span className="text-sm text-white">Restrita ao curso</span>
+                  <span className="text-sm text-gray-900 dark:text-white">Restrita ao curso</span>
                   <p className="text-xs text-gray-500">Apenas alunos matriculados no curso</p>
                 </div>
               </label>
@@ -281,7 +281,7 @@ export function CreateEditLiveModal({
                 >
                   Remover
                 </button>
-                <label className="text-xs text-primary hover:text-primary transition cursor-pointer">
+                <label className="text-xs text-[#191919] dark:text-primary hover:text-[#191919] dark:hover:text-primary transition cursor-pointer">
                   Trocar
                   <input
                     type="file"
@@ -298,7 +298,7 @@ export function CreateEditLiveModal({
             ) : (
               <label className={`${inputCls} flex items-center justify-center gap-2 cursor-pointer border-dashed`}>
                 {uploadingThumb ? (
-                  <span className="text-gray-400 text-sm">Enviando...</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm">Enviando...</span>
                 ) : (
                   <>
                     <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -338,14 +338,14 @@ export function CreateEditLiveModal({
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-400 hover:text-white transition"
+              className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !form.title.trim() || !form.externalUrl.trim() || !form.scheduledAt || (form.visibility === "COURSE_ONLY" && !form.courseId)}
-              className="bg-primary hover:bg-primary disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              className="bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] px-4 py-2 rounded-lg text-sm font-medium transition"
             >
               {saving ? "Salvando..." : editingLive ? "Salvar" : "Criar Live"}
             </button>
