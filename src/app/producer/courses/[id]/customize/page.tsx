@@ -588,11 +588,11 @@ export default function CourseCustomizePage() {
                 <div className="flex items-center gap-2">
                   <span
                     className="w-9 h-9 rounded-md border border-gray-200 dark:border-white/10 relative overflow-hidden flex-shrink-0"
-                    style={{ backgroundColor: HEX_RE.test(fade.color || "") ? fade.color! : "#0a0a1a" }}
+                    style={{ backgroundColor: HEX_RE.test(fade.color || "") ? fade.color! : "#191919" }}
                   >
                     <input
                       type="color"
-                      value={HEX_RE.test(fade.color || "") ? fade.color! : "#0a0a1a"}
+                      value={HEX_RE.test(fade.color || "") ? fade.color! : "#191919"}
                       onChange={(e) => setFade((f) => ({ ...f, color: e.target.value }))}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
