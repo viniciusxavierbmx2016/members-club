@@ -590,12 +590,12 @@ function McStyles() {
         --mc-ink1: #f0f0f5;
         --mc-ink2: #8b8b9e;
         --mc-ink3: #5a5a6e;
-        --mc-accent: #3b82f6;
-        --mc-accent-2: #60a5fa;
-        --mc-accent-3: #93c5fd;
-        --mc-accent-soft: rgba(59,130,246,.10);
-        --mc-accent-glow: rgba(59,130,246,.35);
-        --mc-accent-ring: rgba(59,130,246,.22);
+        --mc-accent: #EFFF20;
+        --mc-accent-2: #F5FF58;
+        --mc-accent-3: #D6E600;
+        --mc-accent-soft: rgba(239,255,32,.10);
+        --mc-accent-glow: rgba(239,255,32,.35);
+        --mc-accent-ring: rgba(239,255,32,.22);
         /* Aliases consumed by landing-mockups.tsx (no mc- prefix). */
         --accent: var(--mc-accent);
         --accent-soft: var(--mc-accent-soft);
