@@ -358,7 +358,7 @@ Ela é o novo **F2b**, entre a F2 e a F3:
 |---|---|---|
 | **F2b** ⭐ | varredura do balde A — as 216 restantes passam a ler `--producer-button-text` | **NÃO** (pixel-neutro, como a F1) |
 | **F3.0** ✅ | as 4 decisões do dono (D12–D15) e este plano | **NÃO** (só docs) |
-| — | **PLACAR (03/set/26): F3.0 ✅ · F3.1 ✅ · F3.2 ✅ · F3.3 ✅ · F3.4 ✅ · [medição do 9.208] · F3.5 pendente. Total já coberto: 75 + 3 + 100 + 7 = 185 pontos.** | — |
+| — | ⭐ **F3 FECHADA (04/set/26): F3.0 ✅ · F3.1 ✅ · F3.2 ✅ · F3.3 ✅ · F3.3b ✅ · F3.4 ✅ · [9.208 medido] · F3.5 ✅ A VIRADA.** Total preparado antes da virada: **237 pontos** (75 texto/ícone + 3 pistas da D13 + 100 borda/anel + 7 knobs + 52 foco no escuro). ⭐ **A ordem foi o que tornou isso possível:** a virada por ÚLTIMO, uma variável por gate — cada fatia foi verificável sozinha com o azul ainda no lugar. | — |
 | **[9.208]** ⭐ | **medição da família `/N` morta do token `primary`** — inserida ANTES da virada **por decisão do dono (01/set/26)** | **NÃO** (medição) |
 | **F3.1** | par de primeiro plano: texto/ícone da marca ganham par claro/escuro (~83 pontos) | **SIM — só no CLARO** (escuro fica idêntico: metade dark preserva o azul de hoje até a F3.5) |
 | **F3.2** | pista própria nos 3 pontos da D13 (check/`font-medium`) | **SIM — nos DOIS modos** (acrescenta glifo/peso; melhora acessibilidade já no azul) |
@@ -609,6 +609,7 @@ com investigação própria.
 | **F3.3** ✅ | **Par claro/escuro em borda e anel (D14): 100 tokens em 95 linhas / 43 arquivos** — `(border\|ring)-primary(/N)` → `(border\|ring)-[#191919](/N) dark:(border\|ring)-primary(/N)`; 5 metades escuras pré-existentes mantidas literais. **Lote 100, não 112**: 6 nunca-claro, 4 condicionais e **2 da D13** saíram do bruto. **Papéis: FOCO 71 · DECORAÇÃO 17 · SELEÇÃO 12.** ⭐ **O ganho real medido: 51 pontos de foco que NÃO tinham indicação NENHUMA passaram a ter no claro** — não era "foco fraco", era **ausente** (ver item **9.208**: a família `/N` do token `primary` nunca gerou regra). Relocalização de linhas feita contra o código ATUAL (a F3.2 inserira linhas). | **43** (+95/−95) | `2ff14b0` → merge **`e02bacd`** (que levou junto `771ffd5`, o doc da lição 9-B) | **Portão do escuro por comparação de declarações no CSS servido**: **6/6 plenos casados** (`border-color`/`--tw-ring-color: var(--producer-primary,#3b82f6)`, forma `:is(.dark *)`); as gêmeas `dark:*/N` são **mortas dos dois lados (0 = 0)** — byte-idêntico literal, e ficam prontas se o token um dia virar canais · `tsc` exit 0 · build `C_I0gjfJCu4KhKO0fvX-T`, alvo prod 0/staging 2 · ⚠️ duas sondas minhas deram falso-vazio por escape de regex; o grep cru desmentiu (vazio implausível → re-sondar) | ✅ **COMPLETO**: ⭐ **primeira vez na frente que se testou navegação por TECLADO** — anel de foco por Tab conferido nos dois modos — mais o **mobile 390×844**. Roteiro reescrito antes do gate (rodada WW) porque 2 rótulos meus não existiam; a aba real é **"Email de Acesso"** e seus 5 campos **nunca aparecem juntos** (ternário do toggle *HTML personalizado*) | 03/set/26 |
 | **F3.4** ✅ | **Knob do toggle lê `--producer-button-text` (D15): 7 pontos**, e **não 5** — ⭐ os dois extras **não seriam achados por busca da classe `bg-primary`**: `course-form.tsx:61` tem trilho `bg-blue-600`, que dentro de `.producer-layout` é **remapeado** para `var(--producer-primary)` por `globals.css:263` (viraria lime sozinho), e `settings/page.tsx:137` (o toggle de **modo claro/escuro**) pinta o trilho por **`style` inline com `theme.primaryColor`**. ⚠️ Achados só porque a sonda foi refeita: `grep translate-x` deu 36 falsos positivos e o primeiro filtro deu **2** — vazio implausível → re-sonda pelo **ternário do trilho**. **Reuso:** `--producer-button-text` serviu pela semântica exata da D15 (*o que está sobre a marca acompanha a marca*) — **nada criado**. **A conta:** hoje 3,68 · virada SEM a fatia **1,11** (o "ligado" some) · virada COM a fatia **16,05**. ⓘ Nenhum dos 7 trilhos usa `bg-primary/N` — a família morta do **9.208** não afeta esta fatia. | **6** (+7/−7) | `b47cee7` → merge **`a6de241`** | ⭐ **Pixel-neutro provado em DOIS eixos:** (1) a regra servida é `background-color:var(--producer-button-text,#fff)`; (2) **SELECT em produção** (ref impresso) → `buttonTextColor = #ffffff` em **14/14** dos que salvaram config ⇒ **125/125 contas resolvem para branco hoje** · `tsc` exit 0 · build `7c_YJEuI49mI4DAXEVyQh`, alvo prod 0/staging 2 | ✅ **7/7 nos dois modos, com clique testado em cada e estado restaurado**. ⚠️ **Foi gate de NÃO-REGRESSÃO, com todas as letras: o GANHO desta fatia só é verificável na F3.5** — hoje o trilho é azul e a bolinha branca já contrasta | 03/set/26 |
 | **F3.3b** ✅ | **Foco visível no modo ESCURO: 52 ocorrências em 47 linhas / 23 arquivos** — `dark:focus:(border\|ring)-primary/N` → `…-white/N`, espelhando a F3.3 (que resolveu o lado claro com hex literal). ⚠️ **52 e não 45**: aquele número contava só `border/50`; o lote soma **border/50 ×45 + ring/20 ×6 + ring/50 ×1**. **Molde:** `border-white/N`, porque a casa já usa (**188** de `/10`, 158 de `/5`, 82 de `[0.08]`) — **cinza novo foi recusado**. ⭐ **O `ring/20` ficou fraco (1,78) DE PROPÓSITO**, por simetria com o claro (1,53): **espelhar, não melhorar por conta própria** — o ganho do elemento vem da borda `/50` (5,27), no mesmo input. **Exclusões, ambas provadas automáticas** (nenhuma tem prefixo `dark:focus:`): `register:313` (ali o `focus:ring-1` **já pinta** pelo `--tw-ring-color` default do Tailwind — acordar o `/20` **pioraria**) e os 5 de cor-sobre-a-própria-matiz. | **23** (+47/−47) | `893022c` → merge **`ad95414`** | ⭐ **A prova que salvou a fatia, feita ANTES de aplicar:** `border-white/10` já existia no bundle como `#ffffff1a` — `white` é cor **real** do Tailwind e o alpha funciona, ao contrário do token `primary` (`var()` crua). **Sem essa checagem, a fatia poderia trocar uma classe morta por outra e o gate passaria como "sem mudança".** Depois: **3 regras nasceram (antes 0)** — `border-color:#ffffff80`, `--tw-ring-color:#fff3`, `#ffffff80` · **Portão do claro:** regras `[#191919]` da F3.3 **idênticas** (2/2 e 3/3) · `tsc` exit 0 · build `pvMbRp9bkQIEIFwZYXQVf`, alvo prod 0/staging 2 | ⚠️ **GATE PARCIAL — escrito como parcial, não como provado:** **11 pontos vistos** por teclado em 3 telas (workspaces→Email de Acesso, integrations/hubla, modal Solicitar integração). **Os 7 do `/producer/login` NÃO foram vistos** — o agente de navegador não faz logout; provados **apenas por CSS/HTML** (classe presente no HTML servido, regra presente no bundle). ⭐ **Caso NOVO medido ali, reportado e não consertado:** o login tem fundo `#060612` **FIXO**, então no modo **claro** vale a metade clara (`[#191919]/50`) sobre superfície escura = **1,06 🔴**; no escuro, **5,27 ✅**. **Não é regressão** — antes da F3.3 aquele ponto não tinha foco em modo nenhum: é ganho no escuro e permanência do nada no claro | 04/set/26 |
+| **F3.5** ⭐✅ | **A VIRADA — a paleta nova entra no painel.** 7 valores em `theme-constants.ts`: `primaryColor` **`#3b82f6` → `#EFFF20`** · `bgColor`/`headerColor`/`sidebarColor` **`#0a0a1a` → `#191919`** (chapa única) · `cardColor` **`#111827` → `#202020`** · `secondaryColor` **`#1a1e2e` → `#262626`** · `buttonTextColor` **`#ffffff` → `#191919`** (D15). `mode` segue `dark` (D10). Nenhum outro arquivo tocado. | **1** (+22/−14) | `6d0028e` → merge **`3c65e69`** | ⭐ **Prova no ARTEFATO COMPILADO** (determinística): o objeto literal aparece virado no `.next/server`, e **`primaryColor:"#3b82f6"` = 0 no servidor** — o azul sobrevive só como *fallback* de `var()`, que é o desenho · hexes antigos **0/6 no bloco do objeto** (as 5 ocorrências restantes são o comentário que documenta a origem, provado por linha) · `tsc` exit 0 · build `_U3ZjsaYtQjJZwYvOgnEE`, alvo prod 0/staging 2 | ✅ **Aprovado pelo dono no palco.** ⭐ **A conferência que só a virada tornou possível — todos os pares preparados PASSARAM:** botão primário **15,90** (era **3,68**, sub-AA no azul) · knob sobre trilho lime **15,90** · marca como texto **15,90** (bg) e **14,74** (card) · borda e anel **15,90** · foco branco/50 **5,23** · texto do guia `#F6F6F2` **13,97–16,23**. Nada abaixo do limiar | 04/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
@@ -778,6 +779,39 @@ E o dado sustenta a separação: as **26** ocorrências do `/admin` são **todas
 (ii)** — azul literal fora dos três escopos remapeados. De **47** via (ii) em todo
 o balde A, **26 estão no `/admin`**; as outras 21 se espalham por componentes (5)
 e telas soltas (16).
+
+### 6-B. ⭐ O PLACAR HONESTO DA FRENTE (04/set/26)
+
+**FEITO** — tudo em `feat/rebranding`, **nada em produção**:
+`F0` (fonte única dos defaults) · `F1` (o molde da casa lê a variável) ·
+`F2b` lotes 1 e 2 (110 pontos passam a ler `--producer-button-text`) ·
+**conserto do modo claro** (etapas **A**, **B**, **C**) ·
+**F3 completa** (`F3.0` decisões · `F3.1` · `F3.2` · `F3.3` · `F3.3b` · `F3.4` ·
+medição do `9.208` · **`F3.5` a virada**).
+
+**FALTA:**
+- **F2** — logo, favicon, ícones PWA e OG. **Os arquivos já estão gerados e
+  aguardando** (ver D2); é a única fatia de *assets* da frente.
+- **F5** — as outras superfícies: **`/admin`** (26 azuis literais, fora dos
+  escopos remapeados), **e-mail**, **certificado**, **landing**, os
+  **manifests**, `theme_color` e a **CSP**.
+- **A MAIN** — **nada foi para produção.** Todo o trabalho vive na branch de
+  integração; o merge para `main` e o deploy são decisão do dono.
+
+⚠️ **O QUE ESTA FRENTE CONSERTOU SEM SER REBRANDING** — é a maior parte do
+custo e precisa estar visível:
+- **~134 pontos** de contraste do **modo claro**, que estava quebrado em 4
+  features inteiras (Lives, chat de suporte, editores, cards de recursos) e numa
+  família transversal. Pré-existente; ninguém tinha visto porque **125 de 125**
+  contas de staff rodam no escuro.
+- **52 pontos de foco** que **não existiam** no modo escuro (a família `/N` do
+  token `primary` nunca gerou regra — item **9.208**).
+- **O contraste do botão primário**, que estava **sub-AA no azul** (3,68) e foi
+  a **15,90** com a virada.
+- **A pista não-cromática** dos 3 pontos onde a cor era a única informação
+  (**D13** / F3.2) — melhora para daltônicos **já no azul**, não só no futuro.
+- **20 itens abertos** no PLANO-MESTRE (**9.189 a 9.208**), todos com causa
+  provada e file:line — de defeitos de tema a achados de arquitetura.
 
 ---
 
