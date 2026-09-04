@@ -32,7 +32,7 @@ export function SidePanel({
   onClose: () => void;
 }) {
   const isTrigger = type === "trigger";
-  const selectCls = "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 transition-colors";
+  const selectCls = "w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors";
   const labelCls = "block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5";
   const inputCls = selectCls;
   const stepCls = "text-[11px] uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 mb-3";

@@ -344,7 +344,7 @@ export default function AdminUsersPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por nome ou e-mail..."
-            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg pl-9 pr-9 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary/50 transition-colors"
+            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg pl-9 pr-9 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors"
           />
           {query && (
             <button
@@ -440,7 +440,7 @@ export default function AdminUsersPage() {
                         u.role === "ADMIN"
                           ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30"
                           : u.role === "PRODUCER"
-                          ? "bg-primary/10 text-[#191919] dark:text-primary border-primary/30"
+                          ? "bg-primary/10 text-[#191919] dark:text-primary border-[#191919]/30 dark:border-primary/30"
                           : "bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-400/30"
                       )}
                     >

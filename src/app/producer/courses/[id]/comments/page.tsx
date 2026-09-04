@@ -225,7 +225,7 @@ export default function CourseCommentsPage(
   const tabClass = (tab: string) =>
     `px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
       (tab === "all" && statusFilter === "all") || (tab === "PENDING" && statusFilter === "PENDING")
-        ? "border-primary text-[#191919] dark:text-primary"
+        ? "border-[#191919] dark:border-primary text-[#191919] dark:text-primary"
         : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
     }`;
 
@@ -312,7 +312,7 @@ export default function CourseCommentsPage(
                 type="checkbox"
                 checked={allPendingSelected}
                 onChange={toggleSelectAll}
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#191919] dark:text-primary focus:ring-primary"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#191919] dark:text-primary focus:ring-[#191919] dark:focus:ring-primary"
               />
               <span className="text-xs text-gray-500">Selecionar todos</span>
             </div>
@@ -339,7 +339,7 @@ export default function CourseCommentsPage(
                         return n;
                       });
                     }}
-                    className="w-4 h-4 mt-2.5 rounded border-gray-300 dark:border-gray-600 text-[#191919] dark:text-primary focus:ring-primary shrink-0"
+                    className="w-4 h-4 mt-2.5 rounded border-gray-300 dark:border-gray-600 text-[#191919] dark:text-primary focus:ring-[#191919] dark:focus:ring-primary shrink-0"
                   />
                 )}
                 <Avatar src={c.user.avatarUrl} name={c.user.name} size="sm" />
@@ -417,7 +417,7 @@ export default function CourseCommentsPage(
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleReply(c.id, c.lesson.id)}
                         placeholder="Escreva sua resposta..."
-                        className="flex-1 min-w-0 px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors"
+                        className="flex-1 min-w-0 px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors"
                         autoFocus
                       />
                       <button

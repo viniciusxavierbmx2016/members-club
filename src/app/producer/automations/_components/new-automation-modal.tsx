@@ -19,13 +19,13 @@ export function NewAutomationModal({ onClose, onScratch, onTemplate }: { onClose
         </div>
         {!showTemplates ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button type="button" onClick={onScratch} className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 hover:bg-primary/5 transition text-center group">
+            <button type="button" onClick={onScratch} className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 dark:border-white/10 hover:border-[#191919]/50 dark:hover:border-primary/50 hover:bg-primary/5 transition text-center group">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition">
                 <svg className="w-6 h-6 text-[#191919] dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               </div>
               <div><p className="text-sm font-semibold text-gray-900 dark:text-white">Criar do zero</p><p className="text-xs text-gray-500 mt-1">Monte seu fluxo personalizado</p></div>
             </button>
-            <button type="button" onClick={() => setShowTemplates(true)} className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 dark:border-white/10 hover:border-primary/50 hover:bg-primary/5 transition text-center group">
+            <button type="button" onClick={() => setShowTemplates(true)} className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-gray-200 dark:border-white/10 hover:border-[#191919]/50 dark:hover:border-primary/50 hover:bg-primary/5 transition text-center group">
               <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition">
                 <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
@@ -42,7 +42,7 @@ export function NewAutomationModal({ onClose, onScratch, onTemplate }: { onClose
               {TEMPLATES.map((t, i) => {
                 const trigger = TRIGGER_META[t.triggerType];
                 return (
-                  <button key={i} type="button" onClick={() => onTemplate(t)} className="flex flex-col items-start gap-2 p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-primary/50 hover:bg-primary/5 transition text-left">
+                  <button key={i} type="button" onClick={() => onTemplate(t)} className="flex flex-col items-start gap-2 p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-[#191919]/50 dark:hover:border-primary/50 hover:bg-primary/5 transition text-left">
                     <span className="text-2xl">{t.emoji}</span>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">{t.name}</p>
                     <p className="text-xs text-gray-500 leading-relaxed">{t.description}</p>

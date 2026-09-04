@@ -74,7 +74,7 @@ export function ImageDropzone({
           type="button"
           onClick={onPick}
           disabled={uploading}
-          className="w-full h-[120px] rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 hover:border-primary dark:hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1.5 disabled:opacity-50"
+          className="w-full h-[120px] rounded-lg border-2 border-dashed border-gray-300 dark:border-white/10 hover:border-[#191919] dark:hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1.5 disabled:opacity-50"
         >
           {initial && !imageUrl ? (
             <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">{initial}</span>

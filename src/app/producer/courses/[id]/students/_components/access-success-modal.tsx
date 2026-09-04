@@ -141,7 +141,7 @@ function CredentialRow({
           readOnly
           value={value}
           onFocus={(e) => e.currentTarget.select()}
-          className={`flex-1 min-w-0 px-3 py-2 text-xs ${mono ? "font-mono" : ""} bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary`}
+          className={`flex-1 min-w-0 px-3 py-2 text-xs ${mono ? "font-mono" : ""} bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-[#191919] dark:focus:ring-primary`}
         />
         <button
           type="button"

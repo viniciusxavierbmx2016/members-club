@@ -911,6 +911,34 @@ de chaves, não indentação), e **registrar os pontos de consumo que guardam a
 referência** — eles são onde o bug vai nascer. Isso é parte do trabalho de
 centralizar, não um extra.
 
+### 9-B. Rótulo de tela NÃO sobrevive a passar por texto — TRÊS ocorrências
+
+Toda vez que um rótulo foi escrito **de memória** em vez de extraído do código,
+ele chegou errado ao dono. Três casos nesta frente:
+
+1. **"Baixar CSV" (F2b)** — botão citado no roteiro que **não existia** naquela tela.
+2. **"Modal de e-mail" nos gateways e "abas do profile" (F3.3)** — nenhum dos dois
+   existe: `hubla/page.tsx` tem **0** modais e **0** menções a e-mail; `profile/page.tsx`
+   tem **41 linhas** e nenhuma aba. O rótulo certo é o modal **"Solicitar integração"**
+   (`integrations/page.tsx:416`), que contém um campo de e-mail — foi essa contração
+   ("modal que tem campo de e-mail" → "modal de e-mail") que nasceu **no relatório do
+   executor** e o dono só replicou.
+3. **"Assunto do email" vs "Título" (F3.3)** — ⚠️ **e aqui a correção é mais fina do que
+   parecia**: os DOIS existem. `email-tab.tsx` tem um **ternário** em `config.emailUseCustomHtml`
+   — a perna LIGADA mostra *Assunto do email* + *HTML personalizado* (`:180`/`:194`), a
+   perna DESLIGADA (padrão) mostra *Título* + *Corpo da mensagem* + *Rodapé*
+   (`:276`/`:291`/`:306`). Não era rótulo errado: era **metade da tela**. O nome real da
+   aba é **"Email de Acesso"** (`_lib/tabs.tsx:35`), não "aba E-mail".
+   ⭐ **Consequência prática para o gate:** os 5 pontos daquela aba **nunca aparecem
+   juntos** — quem testar precisa **alternar o toggle "HTML personalizado"**, ou 2 dos 5
+   campos jamais são vistos.
+
+**REGRA:** todo roteiro de gate **extrai o rótulo do código** (parser que junte linhas —
+`<label>` multi-linha derrota `grep` de uma linha, como derrotou duas vezes aqui) **E
+prova a string no bundle servido** antes de ir para o dono — com **controle negativo**
+(uma string inventada tem de dar 0). Verificado assim, o lote da F3.3 rendeu 10/10
+strings presentes e 0 para a inventada.
+
 ---
 
 ## 10. Regra da frente

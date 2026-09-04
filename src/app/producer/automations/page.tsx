@@ -165,7 +165,7 @@ export default function AutomationsPage() {
             const ad = getActionDetail(auto, courses);
             const courseName = courses.find((c) => c.id === auto.courseId)?.title;
             return (
-              <div key={auto.id} onClick={() => setEditorAuto(auto)} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-5 cursor-pointer transition hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+              <div key={auto.id} onClick={() => setEditorAuto(auto)} className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl p-5 cursor-pointer transition hover:border-[#191919]/30 dark:hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate pr-2">{auto.name}</h3>
                   <div className="flex items-center gap-2 flex-shrink-0">

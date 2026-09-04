@@ -232,7 +232,7 @@ export default function AdminCoursesPage() {
               onDragEnd={() => setDragIdx(null)}
               className={`flex items-center gap-4 p-3 rounded-xl border transition ${
                 dragIdx === i
-                  ? "opacity-50 border-dashed border-primary dark:border-primary"
+                  ? "opacity-50 border-dashed border-[#191919] dark:border-primary"
                   : "border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03]"
               }`}
             >

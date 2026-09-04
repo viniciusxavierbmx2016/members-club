@@ -190,7 +190,7 @@ export default function AdminWorkspacesPage() {
                     readOnly
                     value={workspaceUrl(ws.slug)}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="flex-1 min-w-0 px-2.5 py-1.5 text-[11px] font-mono bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-md text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-primary/20"
+                    className="flex-1 min-w-0 px-2.5 py-1.5 text-[11px] font-mono bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-md text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-primary/20"
                   />
                   <button
                     type="button"

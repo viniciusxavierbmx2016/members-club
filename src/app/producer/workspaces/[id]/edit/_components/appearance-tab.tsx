@@ -203,7 +203,7 @@ export function AppearanceTab({
               disabled={!vitrineWelcomeEnabled}
               placeholder="Bom dia, {nome do aluno} — automático"
               maxLength={100}
-              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors disabled:cursor-not-allowed"
+              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors disabled:cursor-not-allowed"
             />
             <div className="flex items-center justify-between mt-1">
               <p className="text-[11px] text-gray-500">
@@ -229,7 +229,7 @@ export function AppearanceTab({
               placeholder="Bem-vindo à área de membros de {nome do workspace} — automático"
               rows={3}
               maxLength={200}
-              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[80px] disabled:cursor-not-allowed"
+              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors resize-y min-h-[80px] disabled:cursor-not-allowed"
             />
             <div className="flex items-center justify-between mt-1">
               <p className="text-[11px] text-gray-500">

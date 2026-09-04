@@ -84,7 +84,7 @@ const tabs = [
 ];
 
 const baseCls = "flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors";
-const activeCls = "border-primary text-gray-900 dark:text-white";
+const activeCls = "border-[#191919] dark:border-primary text-gray-900 dark:text-white";
 const inactiveCls = "border-transparent text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300";
 
 export default function SettingsLayout({
