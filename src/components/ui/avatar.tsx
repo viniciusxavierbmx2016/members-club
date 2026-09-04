@@ -43,7 +43,7 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
   return (
     <div
       className={cn(
-        "rounded-full bg-blue-600 flex items-center justify-center text-white font-medium",
+        "rounded-full bg-blue-600 flex items-center justify-center text-[var(--producer-button-text,#ffffff)] font-medium",
         sizes[size],
         className
       )}

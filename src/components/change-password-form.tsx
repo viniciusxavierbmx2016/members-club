@@ -124,7 +124,7 @@ export function ChangePasswordForm({ workspaceSlug }: { workspaceSlug?: string }
         <button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition"
+          className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] text-sm font-semibold rounded-lg transition"
         >
           {loading ? "Salvando..." : "Alterar senha"}
         </button>
