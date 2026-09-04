@@ -22,7 +22,7 @@ export function DynamicFavicon() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
-    const faviconUrl = customFaviconUrl || "/logo.png";
+    const faviconUrl = customFaviconUrl || "/logo-v2.png";
 
     function setLinkHref(href: string) {
       let link = document.querySelector<HTMLLinkElement>('link[rel~="icon"]');
