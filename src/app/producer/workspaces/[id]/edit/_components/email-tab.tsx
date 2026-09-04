@@ -158,7 +158,7 @@ export function EmailTab({
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              className={`inline-block h-4 w-4 rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                 config.emailUseCustomHtml ? "translate-x-[18px]" : "translate-x-0.5"
               }`}
             />

@@ -62,7 +62,7 @@ function Toggle({ checked, onChange, label, description }: {
         }`}
       >
         <span
-          className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform mt-0.5 ${
+          className={`inline-block h-4 w-4 rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform mt-0.5 ${
             checked ? "translate-x-[18px] ml-0" : "translate-x-0.5"
           }`}
         />

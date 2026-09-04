@@ -137,7 +137,7 @@ export default function SettingsPage() {
                 style={{ backgroundColor: theme.mode === "dark" ? theme.primaryColor : "#d1d5db" }}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                  className={`inline-block h-5 w-5 transform rounded-full bg-[var(--producer-button-text,#ffffff)] shadow transition-transform ${
                     theme.mode === "dark" ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
