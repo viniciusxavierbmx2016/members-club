@@ -403,7 +403,7 @@ export default function AdminIntegrationsPage() {
                   onChange={(e) => setNewLabel(e.target.value)}
                   placeholder="Rótulo (opcional)"
                   maxLength={100}
-                  className="sm:w-48 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50"
+                  className="sm:w-48 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                 />
                 <input
                   type="text"
@@ -425,7 +425,7 @@ export default function AdminIntegrationsPage() {
                       addToken();
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50"
+                  className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                 />
                 <button
                   type="button"
@@ -514,7 +514,7 @@ export default function AdminIntegrationsPage() {
                               }
                             }}
                             placeholder="ex: KSA912"
-                            className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50"
+                            className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
                           />
                           <button
                             type="button"

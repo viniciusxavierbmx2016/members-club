@@ -530,7 +530,7 @@ function RequestModal({ onClose }: { onClose: () => void }) {
                   required
                   maxLength={100}
                   placeholder="Ex: Kiwify, Eduzz, Monetizze..."
-                  className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition"
                 />
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {GATEWAY_SUGGESTIONS.map((s) => (
@@ -556,7 +556,7 @@ function RequestModal({ onClose }: { onClose: () => void }) {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="voce@email.com"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition"
                 />
               </div>
 
@@ -570,7 +570,7 @@ function RequestModal({ onClose }: { onClose: () => void }) {
                   rows={3}
                   maxLength={2000}
                   placeholder="Conte um pouco sobre o uso que você pretende dar..."
-                  className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition resize-none"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition resize-none"
                 />
               </div>
 
