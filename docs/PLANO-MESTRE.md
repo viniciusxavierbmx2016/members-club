@@ -1574,6 +1574,91 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
   · **11 PERSONALIZARAM DE VERDADE** — `#00ff00`, `#ffca10` ×2, `#cc8b19`, `#00663a`, `#5900ff`, `#d3aa17`, `#d968b0`, `#000000`, `#42db00`, `#E53935`, vários com fundo próprio.
   ⇒ **O estrago real é 3 contas, não 14.** O fix impede que a lista cresça; a decisão sobre soltar os 3 é separada e mais delicada (mexe no que o produtor tem hoje).
 
+  ---
+
+  ### ⭐ DECISÃO DO DONO — 04/set/26, à noite, depois da subida da frente
+
+  A decisão tem **duas partes**, e nenhuma delas é "consertar agora".
+
+  #### (a) OS 5 CONGELADOS: avisar, não escrever
+
+  **Não haverá escrita no banco.** Os **3 do conjunto AZUL** — `ryanne22medeiros`
+  (01/09), `lucasrdsouza1` (18/08), `rangelsilva0812` (16/08) — **serão AVISADOS e
+  decidem sozinhos**, usando o botão **"Restaurar padrão"** que já existe na tela
+  (`producer/settings/page.tsx:257`, que chama o `DELETE` de
+  `api/producer/theme/route.ts:106-113` e grava `themeConfig = "{}"`).
+
+  ⭐ **Motivo, e é medido:** soltar é **irreversível**. A rota do tema **não escreve
+  auditoria** (`grep -c 'audit'` na rota = **0**) e **não existe histórico de tema**
+  no schema — `User.themeConfig` é um campo único (`schema.prisma:26`). Sobrescrever
+  com `"{}"` **perde o valor anterior para sempre**. E são **3 pessoas**: quando o
+  dado não decide, pergunta-se ao dono do dado — é a **Q3 da P0**, a mesma saída que
+  a **D6 passo 4** já tinha escolhido para os 5 campos de login.
+
+  ⓘ **Os 2 do conjunto ATUAL** (`suportepresetcombo`, `anacortesmkt`) **não precisam
+  de nada**: o valor travado é byte-idêntico ao padrão vigente, então **soltar não
+  mudaria um pixel hoje**. Eles só divergem se o padrão mudar de novo.
+
+  ⚠️ **RISCO ACEITO, registrado sem suavizar:** os 5 **continuam travados**. Se a
+  marca mudar outra vez, os 5 seguem parados — e **o número cresce a cada produtor
+  que salvar**. Não é hipótese: **eram 3 pela manhã de 04/set e viraram 5 à noite,
+  no mesmo dia.** O "piora sozinho" está **medido**, não suposto.
+
+  #### (b) O MECANISMO: não é fatia, é ITEM DE PRODUTO
+
+  **Não será consertado como fatia de código.**
+
+  ⭐ **O motivo medido, e é o que muda tudo:** hoje **"Salvar tema" é a ÚNICA forma
+  de o produtor TRAVAR a aparência atual**. A tela tem **exatamente dois botões** —
+  "Salvar tema" (`:250`) e "Restaurar padrão" (`:257`) — e **não existe conceito de
+  fixar**: zero ocorrências de trava/lock/fixar no arquivo. ⇒ **O mesmo
+  comportamento é o defeito** (congela quem não pediu) **e a ferramenta** (deixa
+  travar quem quer). Consertar sem substituir isso é **perda de capacidade** — e a
+  **D6 passo 4** contava justamente com ela (*"quem salvar a cor no painel trava a
+  aparência atual e resolve a própria ambiguidade"*).
+
+  ⇒ **O conserto certo separa as duas intenções:** *salvar o que foi escolhido* ×
+  *travar de propósito*. Isso é **desenho de produto**, não troca de valor.
+
+  🔴 **E a medição provou o que limita qualquer conserto: NENHUMA das opções liberta
+  quem já está preso.** As três candidatas medidas —
+  **(a)** enviar só o que mudou *(a tela **não guarda** o valor original: `grep`
+  por estado `saved`/`original`/`initial` = **0**; e sozinha **não resolveria**,
+  porque `route.ts:85-86` re-materializa os defaults antes de gravar, mesmo com
+  corpo parcial — o schema é `.passthrough()`, `validations.ts:252-256`)*;
+  **(b)** não gravar chave igual ao default *(teria de viver no **servidor**, onde
+  o `parseTheme` injeta)*; e **(c)** o `DELETE`, que **já existe** —
+  todas mudam o que uma escrita **FUTURA** faz. O `PUT` só roda quando alguém chama
+  a rota (`route.ts:56`), então **linha já gravada só muda com escrita nova**.
+
+  #### O censo, corte de 04/set/26 à noite
+
+  | situação | qtd |
+  |---|---|
+  | 🔒 **congelados** (themeConfig byte-idêntico a algum conjunto de defaults) | **5** — 3 no AZUL, 2 no LIME |
+  | ✏️ **escolha real** (valor fora de todo conjunto) | **9** |
+  | ✅ **livres** (`themeConfig` nulo ou `"{}"`) | **122** |
+
+  #### ⚠️ O que continua NÃO PROVADO
+
+  - **Se os 2 salvamentos de 04/set foram deliberados ou efeito do defeito.** Os
+    dois cenários produzem **registro idêntico**: 8 chaves, byte-iguais ao padrão
+    vigente. Só quem clicou sabe.
+  - **Por que o `updatedAt` dos dois AVANÇOU** entre duas medições do mesmo dia
+    (`anacortesmkt` 21:33 → 22:37; `suportepresetcombo` 22:07 → 23:23 UTC). Ou
+    salvaram mais de uma vez, ou `User.updatedAt` se move por outro motivo.
+  - **Se `cursos-pv` mexeu em COR.** O `updatedAt` da linha avançou **4 dias** após
+    a criação (13/05 16:51 → 18/05 02:35), mas é o carimbo da **linha inteira** —
+    pode ter sido qualquer campo. ⭐ **E o dono, perguntado, NÃO LEMBRA.** Fica
+    **indistinguível** — e é exatamente o caso que prova por que a **D6** existe:
+    a régua não é "quem mexeu", é "para quem posso trocar sem risco".
+
+  ⓘ **Controle contra vacuidade que passou (medido em 04/set):** dos 12 workspaces
+  do **grupo B** da D6 (personalizaram o login), **0 têm `createdAt == updatedAt`** —
+  todos salvaram alguma vez, como a régua prevê. Do **grupo A** (esmagador), **9 dos
+  15 nunca salvaram nada**. Se algum B aparecesse intacto, a régua estaria furada.
+
+
 - [x] **9.217 — Dois pontos da landing pintam texto BRANCO sobre a marca — e já reprovavam no azul** 🟢 — **sem fix — fatia própria, pequena (04/set/26).** Achados pelo fan-out da F5 e **confirmados pelo gate humano** da F5.1 nos dois.
   **Os pontos:** (a) `src/app/landing/page.tsx:462` — o badge do card de preço **destacado**, `bg-[var(--mc-accent)] text-white`, que só aparece no ramo `featured`; na página é o **"★ Mais escolhido · Mensalidade ZERO"** do card **"Members Club + Applyfy"** (`:439-440`). (b) `src/components/landing-mockups.tsx:257` — o texto **"Começar agora"** dentro do **mockup SVG**, `fill="#fff"` sobre um `rect` com `fill="var(--accent)"`.
   📏 **JÁ REPROVAVAM NO AZUL:** branco sobre `#3b82f6` = **3,68:1** (abaixo dos 4,5 de texto). Com o lime viram **1,11:1** — **o rebranding não criou o defeito, tornou-o visível**. *(Controles: `#000`/`#fff` = 21,00 · `#777`/`#888` = 1,26.)*
