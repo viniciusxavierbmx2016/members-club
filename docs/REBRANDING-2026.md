@@ -997,8 +997,12 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 > 184 pontos) · **9.218** (o foco do `/admin`, já falha hoje) · **9.209**
 > (o favicon borra a 16px, é design) · **9.221**, **9.222**, **9.223**, **9.212**.
 >
-> ⛔ **A MAIN SEGUE INTOCADA em `d388389`.** Todo o trabalho vive na integração;
-> o merge para `main` e o deploy são decisão do dono.
+> 🚀 **A FRENTE ENCOSTOU NA MAIN — 04/set/26, 17:22 BRT (§6-I).** Subiu **só o
+> certificado**, por cherry-pick: `e236b55`, **1 arquivo, 5 linhas**. Deployment
+> de produção `success` em 87 segundos. Os outros **124 arquivos continuam na
+> integração** — provado por dois controles medidos depois do deploy: `/sw.js`
+> ainda em `2.3.0` e `/manifest.json` ainda em `#0a0a1a` com zero ícones `-v2`.
+> **Rollback: `e236b55`.** O painel espera janela de madrugada em meio de semana.
 
 > ⚠️ **Atualizado em 04/set/26 pela rodada do §6-F.** O primeiro gate do
 > **estado mesclado** achou dois defeitos que a medição por fatia não pegou. A
@@ -1904,3 +1908,77 @@ As 6 branches foram apagadas com `git branch -d` — **a forma que RECUSA se nã
 mesclada** — e removidas do remoto. **6 de 6 aceitaram**, e os 6 SHA seguem
 ancestrais da integração. Restam no repo apenas `main`, `feat/rebranding` e as
 3 frentes alheias (`course-banner-carousel`, `e4.4-fatia1-marca`, as 2 sondas).
+
+---
+
+### 6-I. 🚀 A PRIMEIRA SUBIDA PARA PRODUÇÃO — só o certificado (04/set/26)
+
+**`e236b55` — cherry-pick de `76c4c7b` para a `main`. Push às 17:22:03 BRT,
+deployment de produção `success` às 17:23:30 BRT (87 segundos).**
+
+**O que subiu:** 1 arquivo, 5 linhas. `src/lib/certificate-pdf.ts`, as 5
+chamadas de cor `(37, 99, 235)` → `(25, 25, 25)`. Nada mais.
+
+**O que NÃO subiu:** os outros 124 arquivos da integração. O painel, a landing,
+os assets da marca, o service worker, os manifests e o `globals.css` continuam
+na `main` como estavam. Provado por **dois controles medidos depois do deploy**:
+`/sw.js` ainda diz `2.3.0` e `/manifest.json` ainda tem `theme_color #0a0a1a`
+com **zero** ícones `-v2`. Se qualquer um dos dois tivesse mudado, teria subido
+mais coisa do que devia.
+
+#### A decisão: subida fatiada por SUPERFÍCIE
+
+O dono decidiu **começar pela superfície mais isolada** para exercitar o
+processo de subida com risco quase nulo, em vez de estrear a frente com 125
+arquivos de uma vez. O certificado é a escolha certa para isso: é a única peça
+da frente cujo conteúdo não toca **nenhuma** das três coisas que importam —
+envio de acesso ao aluno, telas do aluno e painel do produtor (247 arquivos
+conferidos um a um contra o diff, **0 no diff**).
+
+**O painel continua esperando janela de madrugada em meio de semana.** A
+medição que sustenta isso: às 03h há **206 acessos** e **4 vendas** contra
+**4.463** e **536** no pico das 14h–15h — 20× e 100× menos exposição.
+
+#### Por que o cherry-pick era seguro por construção
+
+O blob de `certificate-pdf.ts` na `main` (`843814ed…`) era **byte-idêntico** ao
+do pai do commit. Conflito era impossível, não improvável. E o `shasum` do diff
+`main..integração` desse arquivo batia com o do commit — o commit era **toda** a
+diferença, sem nada escondido.
+
+⚠️ **A pré-checagem do roteiro estava mal formulada e eu não a segui ao pé da
+letra.** Ela mandava conferir `git diff --name-only main..76c4c7b` esperando 1
+arquivo; isso devolve **114**, porque compara ÁRVORES e o commit está 55
+commits à frente da `main`, carregando as outras fatias na árvore dele. A
+checagem correta para cherry-pick é o diff **próprio** do commit
+(`76c4c7b^ 76c4c7b`), que dá 1 arquivo / 5+/5−. Segui a correta e usei a prova
+**pós-aplicação** como portão real — mais forte que a pré-checagem.
+
+#### 🔴 CORREÇÃO de uma afirmação minha da rodada anterior
+
+Eu disse que *"os certificados já emitidos não mudam"*. **Está errado.** O
+model `Certificate` guarda só `code`, `userId`, `courseId` e `issuedAt` — **não
+guarda o PDF**. A rota chama `buildCertificatePdf` a cada requisição
+(`api/certificates/[courseId]/route.ts:80`) e devolve o Buffer direto (`:95`).
+⇒ **Os 148 certificados já emitidos passam a sair na cor nova** na próxima vez
+que alguém baixar.
+
+#### A prova que NÃO foi possível fazer, e como fazer depois
+
+O código do certificado vive **só em chunk de servidor**
+(`.next/server/chunks/[root-of-the-server]__…`, 1 ocorrência) e em **zero
+chunks cliente** (133 varridos). Chunk de servidor não é servido publicamente.
+⇒ **Não há como provar a cor nova por artefato público.** *(O zero aqui é real,
+não sonda quebrada: o discriminador acende do lado servidor.)*
+
+**Como provar:** o PDF é gerado sob demanda, então **qualquer um dos 148
+certificados já emitidos serve** — basta um aluno (ou o dono, numa conta com
+curso concluído) baixar de novo e olhar se a linha e o texto estão em cinza
+escuro em vez de azul. E a prova chega sozinha: foram **68 certificados em 30
+dias** (~2,3/dia), com o último emitido **no próprio dia da subida**.
+
+#### Rollback
+
+`e236b55`. `git revert e236b55 && git push origin main`, ou Instant Rollback na
+Vercel para o deploy de `d388389` (segundos). **Não desfaz nada além do código**
+— não houve migração, escrita em banco nem mudança de service worker.
