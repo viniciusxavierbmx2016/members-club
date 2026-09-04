@@ -947,6 +947,14 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 
 ### 6-B. ⭐ O PLACAR HONESTO DA FRENTE (04/set/26)
 
+> ⚠️ **Atualizado em 04/set/26 pela rodada do §6-F.** O primeiro gate do
+> **estado mesclado** achou dois defeitos que a medição por fatia não pegou. A
+> rodada mediu ambos e **quase não aplicou** — as recusas são o conteúdo, e cada
+> uma tem motivo próprio. Abriu **9.220** (🔴 a área de membros ficou inteira fora
+> do rebranding: 50 dos 69 cursos renderizam o azul), **9.221**, **9.222** e
+> **9.223**. Uma fatia de 2 linhas em `feat/rebranding-defaults-personalizacao`
+> @ `3a18713`, **não mesclada**.
+
 **FEITO** — tudo em `feat/rebranding`, **nada em produção**:
 `F0` (fonte única dos defaults) · `F1` (o molde da casa lê a variável) ·
 `F2b` lotes 1 e 2 (110 pontos passam a ler `--producer-button-text`) ·
@@ -1582,3 +1590,105 @@ fatia própria da tela de login (4). **Não entram na F3.**
   sobrevive por presença (a barrinha da aba do analytics).
 - **Valor único de primeiro plano: impossível** (janela de luminância vazia —
   ver D12); para contorno a janela L 0,13–0,30 existia e foi **recusada na D14**.
+
+---
+
+### 6-F. A RODADA DOS DOIS DEFEITOS DO GATE MESCLADO (04/set/26)
+
+O primeiro gate visual do **estado mesclado** achou o que 20 rodadas de medição
+por fatia não acharam. O dono nomeou dois grupos: **(A) branco sobre lime** em
+elementos onipresentes e **(B) azul residual** nos valores padrão das telas de
+personalização. A rodada mediu os dois. **O resultado é majoritariamente
+"não aplicar", e cada recusa tem motivo próprio** — estão aqui para não serem
+re-investigadas.
+
+#### O que foi APLICADO (1 fatia, 2 linhas)
+
+`feat/rebranding-defaults-personalizacao` @ `3a18713` — **não mesclada**,
+esperando gate. O seletor de cor do **fade do banner** (Personalizar Curso,
+`customize/page.tsx:591,595`) partia de `#0a0a1a`, a cor de fundo da identidade
+azul aposentada na F3.5. Passa a `#191919`. **Zero efeito no que já existe:**
+sem cor salva o render cai nos 2 gradientes legados
+(`(course)/course/[slug]/page.tsx:470-478`), então `#0a0a1a` era só o valor
+**inicial do picker** — o que um produtor salva se abrir e aceitar.
+
+#### O DEFEITO A — por que a Fase 2 ficou SEM LOTE
+
+Varredura de 4 padrões em todo o `src/`: **P1** fundo sólido da marca + primeiro
+plano claro = **73** · **P2** gradiente remapeado + texto claro = **7** ·
+**P3** `style` inline com a var da marca = **6** · **P4** tinta da marca +
+texto da marca = **34**. Total **120 linhas únicas** (1 excluída por sufixo
+`/N`, 47 semânticas).
+
+Classificação pelo grafo de imports v2: **só painel 15** · **camaleão 5**
+(2 já corrigidos na `camaleoes-2`) · **🔴 alcança vitrine 15** · fora do painel 85.
+
+🔴 **A constatação que travou a fatia: todo ponto "branco sobre lime" que
+alcança o painel alcança TAMBÉM a vitrine** — inclusive `components/ui/avatar.tsx:46`,
+o avatar do cabeçalho que o gate viu em toda tela (alcança C, D, P, V, X). Pela
+regra da sessão (*alcança vitrine → sai*), o lote esvazia. O que sobra em
+só-painel/camaleão é essencialmente P4, que é decisão (abaixo), não conserto.
+
+⭐ **O dado que questiona a própria regra, medido e registrado para o dono
+decidir** (produção `wyamxwmdgbvqrfcqfbyh`, SELECT): dos 42 workspaces, 10 têm
+`accentColor` e 9 têm `vitrineTextColor`, e **só 2 mudariam de verdade** —
+`3n-trader` cai de **4,23 → 3,94** (os dois acima de 3:1, diferença
+imperceptível) e `formacao-home-office-fho` cai de **1,54 → 1,00** (já reprovado
+hoje, e já é o item **9.195**). **O ganho seria o painel inteiro: 1,11 → 15,90**,
+no avatar que aparece em todas as telas. **Custo quase nulo, ganho grande — e
+mesmo assim a fatia não foi feita, porque a regra da sessão é explícita.**
+Fica como a decisão mais barata disponível para a próxima rodada.
+
+#### O caso P4 — o que o gate chamou de "lime sobre lime" (→ item **9.222**)
+
+**O diagnóstico do dono estava errado e o sintoma estava certo.** Não é a marca
+tingindo o fundo E pintando o texto: é **a marca como TEXTO sobre fundo claro**.
+Os remaps de `text-blue-*` têm `!important` e por isso **vencem a variante
+`dark:` do Tailwind, que não tem** — o texto é lime nos dois modos; só o fundo
+muda. Medido nos 14: **0 de 14 reprovam no escuro, 14 de 14 no claro**. E o
+modo claro tem **população zero** em produção. Detalhe completo no **9.222**.
+
+ⓘ **Reconciliação de número:** o §6-B diz "125 de 125 contas de staff no
+escuro"; esta rodada contou **135** porque incluiu `COLLABORATOR` na consulta.
+As duas medições concordam no que importa — **zero contas em claro**.
+
+#### O DEFEITO B — por que a Fase 3 quase não teve lote (→ **9.220**, **9.221**)
+
+Os azuis residuais das telas de personalização se separam em três famílias, e
+**nenhuma delas é "trocar a constante e pronto"**:
+
+1. ⛔ **`@default` do schema** (6 no `schema.prisma`) — migração, proibida pela
+   **D5** nesta frente. Ver **9.221**: 28 dos 42 workspaces carregam `#6366f1`,
+   um índigo que não pertence a identidade nenhuma.
+2. 🔴 **Fallback do CSS da área de membros** — 42 azuis, e **50 dos 69 cursos
+   dependem deles**. Ver **9.220**: a área de membros ficou inteira fora do
+   rebranding. É frente, não fatia.
+3. ✅ **Swatches que HOJE DIZEM A VERDADE** — e por isso ficam. O botão de
+   suporte renderiza `var(--member-primary, var(--primary, #3b82f6))`;
+   **`--primary` não existe** e 50 cursos não emitem `--member-primary`, logo o
+   azul do seletor **é** a cor que aparece. O placeholder
+   `"#3b82f6 (padrão do tema)"` é uma **afirmação sobre o render**. Trocar só o
+   rótulo criaria a mentira inversa.
+
+⭐ **A lição da fatia, e é a régua do rótulo aplicada a cor:** *um seletor de
+cor é uma AFIRMAÇÃO sobre o que vai renderizar.* A ordem correta é virar o
+render primeiro e o seletor depois — nunca o contrário. Foi exatamente isso que
+esvaziou a Fase 3 e transformou o "defeito B" no achado **9.220**.
+
+#### A FASE 4 — os gradientes órfãos (→ item **9.223**)
+
+15 pontos de gradiente com azul; **sobra exatamente 1 no painel**, e ele é
+decorativo (`from-blue-600 to-purple-600`, metade roxo, com `text-white`).
+Remapeá-lo faria **lime→roxo com texto branco = 1,11:1** — o remap
+**fabricaria** um camaleão onde não existe nenhum. Segunda aparição da regra do
+**9.219**: *nem todo azul é a marca.* **Sem lote, e o "sem lote" é a conclusão.**
+
+#### Placar da rodada
+
+| Fase | Veredito | Motivo |
+|---|---|---|
+| 1 — varredura do defeito A | 120 linhas classificadas | — |
+| 2 — aplicar o defeito A | **sem lote** | todo ponto do painel alcança a vitrine |
+| 3 — os valores padrão | **1 fatia, 2 linhas** (`3a18713`) | o resto é migração, frente nova, ou já é verdade |
+| 4 — gradientes órfãos | **sem lote** | o único órfão não é a marca |
+| 5 — fechar | itens **9.220-9.223** | — |
