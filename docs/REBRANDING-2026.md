@@ -1003,6 +1003,15 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 > integração** — provado por dois controles medidos depois do deploy: `/sw.js`
 > ainda em `2.3.0` e `/manifest.json` ainda em `#0a0a1a` com zero ícones `-v2`.
 > **Rollback: `e236b55`.** O painel espera janela de madrugada em meio de semana.
+> 🚀🚀 **E ÀS 18:09 DO MESMO DIA A FRENTE INTEIRA SUBIU (§6-J).** Merge
+> **`39e3d9d`**, **124 arquivos, 83 commits** — a maior mudança visual da
+> história do produto. Deployment `success` em 86 segundos; as 8 verificações
+> passaram (SW `2.3.0`→`2.4.0`, manifest `#0a0a1a`→`#191919` com 11 ícones
+> `-v2`, e o asset ANTIGO seguindo em 200, como manda a D2).
+> **Rollback: `39e3d9d`.** ⚠️ **O portão de horário foi SUSPENSO pelo dono** —
+> a medição recomendava madrugada de meio de semana, e isso fica registrado
+> no §6-J com os motivos dele.
+> ⚠️ **A F2 segue invisível** até alguém subir a arte nova em `/admin`.
 
 > ⚠️ **Atualizado em 04/set/26 pela rodada do §6-F.** O primeiro gate do
 > **estado mesclado** achou dois defeitos que a medição por fatia não pegou. A
@@ -1982,3 +1991,114 @@ dias** (~2,3/dia), com o último emitido **no próprio dia da subida**.
 `e236b55`. `git revert e236b55 && git push origin main`, ou Instant Rollback na
 Vercel para o deploy de `d388389` (segundos). **Não desfaz nada além do código**
 — não houve migração, escrita em banco nem mudança de service worker.
+
+---
+
+### 6-J. 🚀🚀 A FRENTE INTEIRA EM PRODUÇÃO (04/set/26)
+
+**`39e3d9d` — merge `--no-ff` de `feat/rebranding` na `main`. Push às 18:09:47 BRT.**
+**124 arquivos, 83 commits.** É a maior mudança visual da história do produto.
+
+*(124 e não 125: `certificate-pdf.ts` já tinha subido sozinho às 17:22 pelo
+cherry-pick `e236b55` — ver §6-I. No ensaio o arquivo resolveu-se sem conflito
+e sem duplicar: 5 ocorrências de `(25,25,25)`, 0 de `(37,99,235)`, 139 linhas.)*
+
+#### ⚠️ O PORTÃO DE HORÁRIO FOI SUSPENSO — por decisão do dono, e fica registrado
+
+A recomendação medida era **madrugada de meio de semana, 03:15–03:45 BRT**: às
+03h a produção tem **206 acessos de aluno** e **4 vendas** (90 dias), contra
+**4.463** e **536** no pico das 14h–15h. **20× e 100× menos exposição.**
+
+**A subida foi feita às 18:09 de uma sexta-feira**, com o portão suspenso
+explicitamente pelo dono. Os motivos que ele pôs na mesa:
+
+1. **ele estaria disponível nas horas seguintes** — o que muda o cálculo, já que
+   o risco real não é o deploy falhar, é ninguém estar lá quando falhar;
+2. **o rollback é instantâneo** — Instant Rollback na Vercel, segundos, sem
+   rebuild, e sem nada a desfazer no banco (não há migração);
+3. **o conteúdo estava medido**: 545 pares no word-diff, 144 inspecionados um a
+   um, **zero lógica alterada**; e o ensaio de merge deu limpo.
+
+**Registrado sem suavizar:** a decisão contraria a medição, e a medição
+continua valendo para as próximas subidas grandes. O que a justifica aqui é a
+**presença do dono**, não uma reavaliação do risco de horário.
+
+#### O que subiu
+
+| área | arquivos |
+|---|---|
+| `src/app` (painel, landing, rotas) | 67 |
+| `src/components` | 28 |
+| `public/icons` + `public/brand` + `public/` | 24 |
+| `docs/` | 4 |
+| `src/lib` | 1 |
+
+#### O que NÃO subiu, e continua registrado
+
+- 🔴 **9.220** — a **área de membros** ficou inteira fora: 50 dos 69 cursos
+  renderizam a identidade azul pelo fallback do CSS, e **é a tela do ALUNO**.
+  Decisão do dono: frente própria, depois desta subida.
+- **9.219** — o **`/admin`**: 184 substituições, é uma virada por si só.
+- **9.212** — o **e-mail**: a pergunta do texto branco sobre a cor do produtor
+  segue aberta, e a fatia foi pulada por causa dela.
+- **9.220 (parte)** — os **defaults das telas de personalização**, que hoje
+  *dizem a verdade* enquanto o render da área de membros for azul.
+- **9.216** — os **3 produtores com tema congelado sem querer**
+  (`lucasrdsouza1`, `rangelsilva0812`, `ryanne22medeiros`): eles **queriam** ver
+  a marca nova e **não vão**, porque salvaram o tema sem mudar nada.
+- **9.225** — a **lacuna de observabilidade**: 54% dos eventos de webhook são
+  ERROR e não há Sentry; um problema novo no caminho de venda seria invisível.
+
+#### ⚠️ A F2 continua INVISÍVEL até o dono agir
+
+`PlatformSettings` em produção tem `logoUrl` e `faviconUrl` gravados no Supabase
+Storage **desde 20/abr/2026** — a arte **antiga**. Como
+`platform-logo.tsx:27` e `dynamic-favicon.tsx:25` preferem o valor do banco, os
+22 assets da F2 **não aparecem**. O `DynamicFavicon` sobrescreve o
+`metadata.icons` em runtime, em toda página.
+
+⇒ **O logo e o favicon só mudam quando alguém subir a arte nova em `/admin`.**
+
+#### O deploy, medido
+
+Deployment de produção `success` às **18:11:13 BRT — 86 segundos** após o push.
+
+| verificação | antes | depois |
+|---|---|---|
+| `/` · `/landing` · `/producer/login` · `/w/3n-trader` | 200 | **200** ✅ |
+| `/sw.js` | `2.3.0` | **`2.4.0`** ✅ |
+| `/manifest.json` `theme_color` | `#0a0a1a` | **`#191919`** ✅ |
+| ícones `-v2` no manifest | 0 | **11** ✅ |
+| `/icons/icon-192x192-v2.png` | **404** | **200** ✅ |
+| `/icons/icon-192x192.png` (o ANTIGO) | 200 | **200** ✅ — D2 honrada |
+
+**A marca, provada no bundle SERVIDO** (marcador positivo, `while read`):
+`#EFFF20` aparece **4×** num chunk servido, `--mc-accent:#efff20` está na
+landing, e `primaryColor:"#3b82f6"` dá **0**. O zero vale porque os positivos
+acendem na mesma sonda. *(O default do servidor foi provado no artefato local
+antes do push: 4 arquivos com `primaryColor:"#EFFF20"`, 0 com o azul, de 1.579
+arquivos JS.)*
+
+⚠️ **Uma armadilha que quase virou falso alarme:** às 18:11:17, no meio da
+propagação, `/sw.js` já dizia `2.4.0` mas `/icons/icon-192x192-v2.png` ainda
+dava **404**. Furando o cache de borda (query nova, `no-cache`) veio **200** nas
+três sondas. Era propagação em curso — e possivelmente a **minha própria sonda
+de baseline**, feita 1 minuto antes do deploy, tendo cacheado o 404 na borda.
+É a lição do *cache de CDN sobrevive ao flip*: **furar o cache antes de concluir
+que um asset novo não subiu.**
+
+#### Rollback
+
+**`39e3d9d`.** `git revert -m 1 39e3d9d && git push origin main`, ou Instant
+Rollback na Vercel para o deploy de `e236b55` (segundos, sem rebuild).
+**Não desfaz:** nada no banco (não houve migração nem escrita), e o ícone que o
+SO já capturou de um PWA instalado. O **service worker se auto-cura**: o
+navegador rebusca `sw.js` (servido com `no-store`), instala o `2.3.0` como
+atualização, e o `activate` dele apaga o cache `v2.4.0`.
+
+#### ⭐ O PASSO DO DONO, AGORA
+
+**Entrar em `/admin` de PRODUÇÃO e subir `logo-v2.png` e `favicon-v2.svg` em
+PlatformSettings.** Enquanto o banco tiver a arte de abril, o logo e o favicon
+continuam os antigos e **a F2 fica invisível** — a paleta já virou, a marca
+ainda não.
