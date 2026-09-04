@@ -416,7 +416,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 <PlatformLogo
                   className="hidden lg:block w-8 h-8 object-contain"
                   fallback={
-                    <span className="hidden lg:flex w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white items-center justify-center text-sm font-bold shadow-sm">
+                    <span className="hidden lg:flex w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-[var(--producer-button-text,#ffffff)] items-center justify-center text-sm font-bold shadow-sm">
                       M
                     </span>
                   }
