@@ -627,7 +627,7 @@ function CollaboratorModal({
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={!!editing}
                 placeholder="colaborador@exemplo.com"
-                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 disabled:opacity-60"
+                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 disabled:opacity-60"
               />
             </div>
             <div>
@@ -639,7 +639,7 @@ function CollaboratorModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nome da pessoa"
-                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50"
+                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50"
               />
             </div>
           </div>
