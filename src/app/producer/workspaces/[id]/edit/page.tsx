@@ -532,7 +532,7 @@ export default function EditWorkspacePage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap",
                 tab === t.key
-                  ? "border-primary text-[#191919] dark:text-primary"
+                  ? "border-[#191919] dark:border-primary text-[#191919] dark:text-primary"
                   : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
               )}
             >

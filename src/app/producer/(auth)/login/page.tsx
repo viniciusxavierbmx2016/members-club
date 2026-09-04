@@ -170,7 +170,7 @@ function ProducerLoginForm() {
                         href={`/w/${w.slug}/login`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] hover:border-primary/50 transition"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] hover:border-[#191919]/50 dark:hover:border-primary/50 transition"
                       >
                         {w.logoUrl ? (
                           <Image
@@ -250,7 +250,7 @@ function ProducerLoginForm() {
                   setMfaCode(e.target.value.replace(/\D/g, ""))
                 }
                 placeholder="000000"
-                className="w-full text-center text-2xl tracking-[0.5em] font-mono bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                className="w-full text-center text-2xl tracking-[0.5em] font-mono bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-primary/20"
                 autoFocus
               />
 
@@ -291,7 +291,7 @@ function ProducerLoginForm() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     autoComplete="email"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-primary/20 transition"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -305,7 +305,7 @@ function ProducerLoginForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-primary/20 transition"
                     placeholder="••••••••"
                   />
                 </div>
@@ -371,7 +371,7 @@ function ProducerLoginForm() {
                         placeholder="seu@email.com"
                         value={lookupEmail}
                         onChange={(e) => setLookupEmail(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#191919]/50 dark:focus:ring-primary/50"
                         onKeyDown={(e) => e.key === "Enter" && handleStudentLookup()}
                       />
                       <button

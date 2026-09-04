@@ -403,7 +403,7 @@ export default function CourseCustomizePage() {
                     onClick={() => updateField("memberLayoutStyle", layout.value)}
                     className={`relative flex-1 text-left p-4 rounded-xl transition-colors ${
                       selected
-                        ? "border-2 border-primary bg-primary/5"
+                        ? "border-2 border-[#191919] dark:border-primary bg-primary/5"
                         : "border border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20"
                     }`}
                   >
@@ -499,7 +499,7 @@ export default function CourseCustomizePage() {
               placeholder="Bem-vindo à nossa comunidade!"
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors resize-y min-h-[80px]"
+              className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors resize-y min-h-[80px]"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
               {(custom.memberWelcomeText || "").length}/500
@@ -603,7 +603,7 @@ export default function CourseCustomizePage() {
                     onChange={(e) => setFade((f) => ({ ...f, color: e.target.value || null }))}
                     placeholder="vazio = padrão do tema"
                     maxLength={7}
-                    className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                    className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50"
                   />
                 </div>
               </div>
@@ -717,7 +717,7 @@ export default function CourseCustomizePage() {
                       }
                       placeholder="#3b82f6 (padrão do tema)"
                       maxLength={7}
-                      className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-primary/50"
+                      className="flex-1 px-3 py-2 text-sm font-mono bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50"
                     />
                   </div>
                 </div>

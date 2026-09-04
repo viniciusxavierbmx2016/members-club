@@ -248,7 +248,7 @@ export default function ProducerSecurityPage() {
                       setCode(e.target.value.replace(/\D/g, ""))
                     }
                     placeholder="000000"
-                    className="w-full text-center text-xl tracking-[0.3em] font-mono bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-lg px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    className="w-full text-center text-xl tracking-[0.3em] font-mono bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] rounded-lg px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 focus:ring-1 focus:ring-[#191919]/20 dark:focus:ring-primary/20"
                     autoFocus
                   />
                 </div>

@@ -315,13 +315,13 @@ export default function ProducerLiveRoomPage() {
     }
   }
 
-  const inputCls = "w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors text-sm";
+  const inputCls = "w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2.5 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors text-sm";
   const labelCls = "block text-xs text-gray-500 dark:text-gray-400 mb-1.5";
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#191919] dark:border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -550,7 +550,7 @@ export default function ProducerLiveRoomPage() {
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     placeholder="Enviar mensagem..."
                     maxLength={500}
-                    className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder-gray-600 focus:outline-none focus:border-primary/50 transition-colors"
+                    className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder-gray-600 focus:outline-none focus:border-[#191919]/50 dark:focus:border-primary/50 transition-colors"
                   />
                   <button
                     onClick={handleSend}

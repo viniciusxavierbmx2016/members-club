@@ -156,7 +156,7 @@ export default function StudentDetailPage(
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-[#191919] dark:text-primary border border-primary/20">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-[#191919] dark:text-primary border border-[#191919]/20 dark:border-primary/20">
                   Nv {user.level} · {user.points} pts
                 </span>
                 <span className="text-xs text-gray-500">
@@ -229,7 +229,7 @@ export default function StudentDetailPage(
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
-                  ? "border-primary text-[#191919] dark:text-primary"
+                  ? "border-[#191919] dark:border-primary text-[#191919] dark:text-primary"
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >

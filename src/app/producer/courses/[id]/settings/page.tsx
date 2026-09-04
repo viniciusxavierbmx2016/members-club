@@ -323,7 +323,7 @@ function Toggle({
       aria-label={label}
       disabled={disabled}
       onClick={onChange}
-      className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-white dark:focus:ring-offset-gray-900 ${
+      className={`relative shrink-0 inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#191919] dark:focus:ring-primary focus:ring-offset-white dark:focus:ring-offset-gray-900 ${
         checked ? "bg-primary" : "bg-gray-300 dark:bg-[#1a1e2e]"
       } ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
     >

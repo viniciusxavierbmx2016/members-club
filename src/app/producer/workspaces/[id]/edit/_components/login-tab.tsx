@@ -119,7 +119,7 @@ export function LoginTab({
               className={cn(
                 "group rounded-xl p-3 transition flex flex-col items-center gap-2",
                 loginLayout === opt.key
-                  ? "border-2 border-primary bg-primary/5"
+                  ? "border-2 border-[#191919] dark:border-primary bg-primary/5"
                   : "border border-gray-200 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20"
               )}
             >
