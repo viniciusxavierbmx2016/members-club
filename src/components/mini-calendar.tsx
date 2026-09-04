@@ -120,10 +120,10 @@ export function MiniCalendar({
 
           let dayClass = "w-8 h-8 flex items-center justify-center text-sm rounded-full transition-colors relative z-10 ";
           if (isEdge) {
-            dayClass += "bg-blue-600 text-white font-medium";
+            dayClass += "bg-blue-600 text-[var(--producer-button-text,#ffffff)] font-medium";
           } else if (isT) {
             if (inRange) {
-              dayClass += "bg-blue-600 text-white font-medium";
+              dayClass += "bg-blue-600 text-[var(--producer-button-text,#ffffff)] font-medium";
             } else {
               dayClass += "ring-2 ring-inset ring-blue-500 text-gray-700 dark:text-gray-300 font-medium";
             }
