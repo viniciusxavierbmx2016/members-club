@@ -201,6 +201,16 @@ NULL.)*
 **Decisão do dono, ainda não tomada.** O que mudou é que agora ela é tomada
 **depois** do passo 1, não antes.
 
+⭐ **REFINAMENTO DA D6 (04/set/26) — o passo 1 muda, o processo NÃO.** O item
+**9.216** provou que **"ter `themeConfig` salvo" ≠ "ter personalizado"**: um clique
+em *Salvar tema*, **sem alterar nada**, grava as 8 chaves e congela o padrão do
+momento. Foi assim que nasceram os **3 workspaces com `primaryColor` = `#3b82f6`**
+que a arqueologia da D6 já tinha achado sem explicar.
+⇒ **A medição do passo 1 tem de distinguir "salvou sem mexer" de "escolheu cor"** —
+comparando chave a chave contra os defaults **da época**, não só verificando se o
+campo existe. Isso **não invalida** o processo de 6 passos da D6: refina o critério
+de entrada dele.
+
 ### D7 — Os 12 fallbacks de `--member-primary` ficam para a F4 · 01/set/26
 Unificá-los **muda pixel para quem não personalizou** — é mudança visual real,
 não refactor. Não entra junto com outra coisa.
@@ -619,6 +629,7 @@ com investigação própria.
 | **F3.3b** ✅ | **Foco visível no modo ESCURO: 52 ocorrências em 47 linhas / 23 arquivos** — `dark:focus:(border\|ring)-primary/N` → `…-white/N`, espelhando a F3.3 (que resolveu o lado claro com hex literal). ⚠️ **52 e não 45**: aquele número contava só `border/50`; o lote soma **border/50 ×45 + ring/20 ×6 + ring/50 ×1**. **Molde:** `border-white/N`, porque a casa já usa (**188** de `/10`, 158 de `/5`, 82 de `[0.08]`) — **cinza novo foi recusado**. ⭐ **O `ring/20` ficou fraco (1,78) DE PROPÓSITO**, por simetria com o claro (1,53): **espelhar, não melhorar por conta própria** — o ganho do elemento vem da borda `/50` (5,27), no mesmo input. **Exclusões, ambas provadas automáticas** (nenhuma tem prefixo `dark:focus:`): `register:313` (ali o `focus:ring-1` **já pinta** pelo `--tw-ring-color` default do Tailwind — acordar o `/20` **pioraria**) e os 5 de cor-sobre-a-própria-matiz. | **23** (+47/−47) | `893022c` → merge **`ad95414`** | ⭐ **A prova que salvou a fatia, feita ANTES de aplicar:** `border-white/10` já existia no bundle como `#ffffff1a` — `white` é cor **real** do Tailwind e o alpha funciona, ao contrário do token `primary` (`var()` crua). **Sem essa checagem, a fatia poderia trocar uma classe morta por outra e o gate passaria como "sem mudança".** Depois: **3 regras nasceram (antes 0)** — `border-color:#ffffff80`, `--tw-ring-color:#fff3`, `#ffffff80` · **Portão do claro:** regras `[#191919]` da F3.3 **idênticas** (2/2 e 3/3) · `tsc` exit 0 · build `pvMbRp9bkQIEIFwZYXQVf`, alvo prod 0/staging 2 | ⚠️ **GATE PARCIAL — escrito como parcial, não como provado:** **11 pontos vistos** por teclado em 3 telas (workspaces→Email de Acesso, integrations/hubla, modal Solicitar integração). **Os 7 do `/producer/login` NÃO foram vistos** — o agente de navegador não faz logout; provados **apenas por CSS/HTML** (classe presente no HTML servido, regra presente no bundle). ⭐ **Caso NOVO medido ali, reportado e não consertado:** o login tem fundo `#060612` **FIXO**, então no modo **claro** vale a metade clara (`[#191919]/50`) sobre superfície escura = **1,06 🔴**; no escuro, **5,27 ✅**. **Não é regressão** — antes da F3.3 aquele ponto não tinha foco em modo nenhum: é ganho no escuro e permanência do nada no claro | 04/set/26 |
 | **F3.5** ⭐✅ | **A VIRADA — a paleta nova entra no painel.** 7 valores em `theme-constants.ts`: `primaryColor` **`#3b82f6` → `#EFFF20`** · `bgColor`/`headerColor`/`sidebarColor` **`#0a0a1a` → `#191919`** (chapa única) · `cardColor` **`#111827` → `#202020`** · `secondaryColor` **`#1a1e2e` → `#262626`** · `buttonTextColor` **`#ffffff` → `#191919`** (D15). `mode` segue `dark` (D10). Nenhum outro arquivo tocado. | **1** (+22/−14) | `6d0028e` → merge **`3c65e69`** | ⭐ **Prova no ARTEFATO COMPILADO** (determinística): o objeto literal aparece virado no `.next/server`, e **`primaryColor:"#3b82f6"` = 0 no servidor** — o azul sobrevive só como *fallback* de `var()`, que é o desenho · hexes antigos **0/6 no bloco do objeto** (as 5 ocorrências restantes são o comentário que documenta a origem, provado por linha) · `tsc` exit 0 · build `_U3ZjsaYtQjJZwYvOgnEE`, alvo prod 0/staging 2 | ✅ **Aprovado pelo dono no palco.** ⭐ **A conferência que só a virada tornou possível — todos os pares preparados PASSARAM:** botão primário **15,90** (era **3,68**, sub-AA no azul) · knob sobre trilho lime **15,90** · marca como texto **15,90** (bg) e **14,74** (card) · borda e anel **15,90** · foco branco/50 **5,23** · texto do guia `#F6F6F2` **13,97–16,23**. Nada abaixo do limiar | 04/set/26 |
 | **F2·assets** ✅ | *(= a `F1` da tabela do §5 — ver a nota de nomenclatura lá)* **22 arquivos do kit com NOME NOVO (D2, sufixo `-v2`)**: 8 ícones PWA, **2 maskable com ARTE PRÓPRIA** (antes o manifest reusava o mesmo PNG do `any`), apple-touch-icon, `favicon.ico`, `favicon.svg`, logo, og-image e 7 SVGs em `public/brand/`. **5 consumidores apontados:** `manifest.json` (11 srcs + `theme_color`/`background_color` **`#0a0a1a` → `#191919`**), `layout.tsx` (`icons` svg+ico+png e os 4 `apple-touch-icon`), a rota de manifest dinâmica (4 srcs de fallback + theme), `sw.js` (precache, push, badge e ⭐ **`SW_VERSION` 2.3.0 → 2.4.0**, que é o que invalida o precache do ícone velho) e a landing (`IMAGES.logo` → `/brand/simbolo-lime.svg`, escolhido por medição: lime **15,93–18,30** nos 4 fundos `--mc-g*`, o escuro daria 1,00–1,15). | **5 código + 22 novos** (+128/−30) | `59f02a8` → merge **`e955f9d`** | ⭐ **Prova da D2 por SHA-256:** os **13 antigos INTACTOS**, nenhum sobrescrito — `images/applyfy-logo.png` (marca de terceiro, **D8**) **byte-idêntico** (`268f6a97…` antes e depois). ⭐ **Defeito histórico corrigido:** os 9 ícones antigos tinham dimensão real **1,30×** a declarada; os novos conferem **10/10**. 🔴 **E o portão pegou um erro meu ANTES do gate:** a entrada `180x180` apontava para `icon-180x180-v2.png`, **que não existe** (no kit o 180 vem como `apple-touch-icon.png`) — corrigido; depois, **11/11 entradas existem em disco E a dimensão declarada bate com a real** · `tsc` exit 0 · build `CXsdMtk6LtDkJPfOVA2Ca`, alvo prod 0/staging 2 · manifest servido com `theme_color #191919` e todos os srcs `-v2` | ✅ **4/4, com HEAD 200 nas 11 URLs.** ⚠️ Ficou explícito no roteiro: **favicon e logo da plataforma vêm do BANCO** (`PlatformSettings`, preenchido em produção desde 20/abr) — **não mudam com esta fatia**; muda o fallback, os ícones PWA, o apple-touch, o og e a landing. **3 itens abertos:** 9.209 (favicon borra a 16px), 9.210 (og-image), 9.211 (`--mc-accent`) | 04/set/26 |
+| **9.213 camaleões** ✅ | **7 pontos** que **já pintavam branco sobre lime na integração** — o único defeito ATIVO que a frente tinha. `text-white` → `text-[var(--producer-button-text,#ffffff)]` (a string idêntica do `ui/button.tsx:17`) em `date-range-selector:358/:419`, `mini-calendar:123/:126`, `rich-text-editor:353/:431/:641`. ⚠️ **7 e não 14**: dos 79 brutos, 67 não alcançam o painel, 1 tem sufixo `/N` e ⭐ **5 saíram por alcançarem a VITRINE** (lá a var carrega `vitrineTextColor`; no FHO a troca iria de **1,54 → 1,00**, piorando o 9.195). 🔴 **Pendência registrada:** 4 pontos que a varredura por CLASSE não vê — **gradiente** (`sidebar:419`) e **`style` inline** (`workspace-switcher:106`), mais 2 de `bg-primary`+vitrine. | **3** (+7/−7) | `d273eb4` → merge **`4351708`** | `text-white` 957→**950** · classe nova 112→**119** · **word-diff em token único** com aspas normalizadas e controle de não-vacuidade · asserção tripla com inverso byte a byte · prova nos 3 destinos (painel 1,11→**15,90**; `/admin` e `(course)` **idênticos**, pois a var não é emitida lá) · `tsc` exit 0 · build `bO1F8bIy7MEy4kwGKDbas` | ✅ **Nos DOIS contextos**: `rgb(239,255,32)` \| `rgb(25,25,25)` no painel e `rgb(37,99,235)` \| `rgb(255,255,255)` no `/admin` — **o mesmo componente com os dois valores certos**, que é a prova de que `#191919` literal teria quebrado o `/admin`. ⚠️ O gate **reprovou por engano na 1ª tentativa** (conta contaminada — ver lição **9-D** e item **9.216**) | 04/set/26 |
 
 ### O que o gate humano da F0 precisa ver
 
@@ -1055,6 +1066,28 @@ ele chegou errado ao dono. Três casos nesta frente:
    ⭐ **Consequência prática para o gate:** os 5 pontos daquela aba **nunca aparecem
    juntos** — quem testar precisa **alternar o toggle "HTML personalizado"**, ou 2 dos 5
    campos jamais são vistos.
+
+### 9-D. A conta do gate pode estar CONTAMINADA — verificar a saída antes de ler
+
+O gate da fatia dos camaleões **reprovou por engano**: reportou botão azul e
+`--producer-button-text: #ffffff` com o build correto servindo. A causa não era o
+código nem o palco — era **a conta**: `producer-staging@staging.test` tem
+`themeConfig` gravado **8/8 byte-idêntico aos defaults antigos** (item **9.216**),
+e por isso **não recebe o rebranding** — exatamente como manda a regra central
+(*personalização vence o padrão*). O gate estava, sem saber, testando a regra em
+vez da fatia.
+
+**REGRA, em duas partes:**
+1. **A conta:** gates visuais desta frente usam **`dono-b@staging.test`** — a única
+   com `themeConfig` **vazio** *e* com workspace/curso/aluno. ⚠️ **Ressalva medida:**
+   ela tem **1 curso e 1 aluno** contra 4 e 18 da outra — telas que dependem de
+   massa de dados podem aparecer vazias, e isso **não** é defeito da fatia.
+   *(`admin-staging` é ADMIN e não abre `/producer`; `sem-vinculo` não tem workspace.)*
+2. **A verificação de saída:** antes de qualquer leitura, conferir no console que
+   **`getComputedStyle(document.documentElement).getPropertyValue('--producer-primary')`
+   é `#EFFF20`**. Se vier `#3b82f6`, a conta está congelada e **o gate não é válido** —
+   junto com o `document.documentElement.className` (regra do 9.202), são as duas
+   perguntas que precedem qualquer leitura de pixel.
 
 ### 9-C. Elemento com `transition`: ler o computed style DUAS vezes
 
