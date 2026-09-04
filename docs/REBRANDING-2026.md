@@ -341,6 +341,35 @@ de rebranding** — regem a interface além do lime. Foram tomadas com base em
 contraste medido e no guia da marca, que é critério correto **mas não o
 único**; **não passaram por revisão de design**.
 
+### D16 — O DEFEITO A É CORRIGIDO APESAR DE OS PONTOS ALCANÇAREM A VITRINE · 04/set/26
+
+**Decisão do dono**, com o custo **medido** na mesa — não é precaução do agente.
+
+Os pontos que pintam `text-white` sobre a marca **não são separáveis**: o mesmo
+componente serve o painel e a vitrine (o caso-símbolo é `components/ui/avatar.tsx`,
+que alcança C, D, P, V e X). Ou se conserta nos dois, ou em nenhum.
+
+- **GANHO** — o painel inteiro sai de **1,11 → 15,90**, incluindo o **avatar do
+  cabeçalho, que aparece em TODA tela** do produtor.
+- **CUSTO** — dos **42 workspaces**, **2** mudam:
+  · `3n-trader` cai **4,23 → 3,94** — os dois acima de 3:1, diferença imperceptível;
+  · `formacao-home-office-fho` cai **1,54 → 1,00** — e este **já está quebrado
+    hoje**, é o item **9.195**, porque o dono dele escolheu fundo e texto da
+    **mesma cor**.
+- ⇒ **Trocar um defeito já registrado em 1 workspace por um conserto em 42.**
+
+⚠️ **ISTO CONTRARIA A EXCLUSÃO QUE A FATIA DOS CAMALEÕES FEZ, e o registro tem de
+dizer por quê.** Lá (9.213) a regra "alcança vitrine → sai" foi **decisão do
+agente, por precaução, com o custo AINDA NÃO MEDIDO**. Agora o custo está medido,
+é de 2 workspaces, e **a decisão é do dono**. A regra antiga não estava errada
+para o que se sabia então; ela foi **substituída por medição**. Quem ler o
+histórico vai ver a contradição — ela é deliberada e esta é a explicação.
+
+ⓘ **NUMERAÇÃO:** o comando do dono chamou esta decisão de **D18**. **D16 e D17
+nunca existiram** — o documento tinha 15 decisões (D1–D15), e as duas menções a
+"D1–D17" (aqui no §6 e no `PLANO-MESTRE.md:1600`) eram **contagem errada minha**,
+corrigidas nesta mesma edição. Fica **D16**; quem procurar "D18" cai aqui.
+
 ---
 
 ## 5. Plano de fatias
@@ -826,7 +855,7 @@ claro/escuro resolve**: exige valor próprio para superfície clara.
 
 **Números finais do `/admin`:** foco 45 · fill-CTA 39 · texto 37 · tinta 20 ·
 badge 18 · borda 16 · ícone 6 · outro 3. Quebram em **ambos os modos 72**, **só no
-claro 67**, nenhum 44. **13 já falham hoje** e **4 exigem decisão** fora das D1–D17.
+claro 67**, nenhum 44. **13 já falham hoje** e **4 exigem decisão** fora das D1–D15.
 
 ⭐ **E uma diferença fina que só a medição mostra:** no painel o foco era **classe
 morta** (9.208 — não gerava regra); no `/admin` as classes são `blue-500`, cor real
@@ -954,6 +983,12 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 > do rebranding: 50 dos 69 cursos renderizam o azul), **9.221**, **9.222** e
 > **9.223**. Uma fatia de 2 linhas em `feat/rebranding-defaults-personalizacao`
 > @ `3a18713`, **não mesclada**.
+>
+> ⚠️ **04/set/26, mais tarde — o dono decidiu APLICAR o defeito A (D16).**
+> `feat/rebranding-defeito-a` @ `9a2f643`, **não mesclada**: 5 pontos passam a
+> ler `--producer-button-text`. Repouso **1,11 → 15,90**, hover **1,56 → 11,29**.
+> Na vitrine, **40 dos 42 workspaces não mudam nada**. Abriu o **9.224** —
+> 🔴 dois camaleões estão consertados numa branch que **nunca foi mesclada**.
 
 **FEITO** — tudo em `feat/rebranding`, **nada em produção**:
 `F0` (fonte única dos defaults) · `F1` (o molde da casa lê a variável) ·
@@ -1692,3 +1727,102 @@ Remapeá-lo faria **lime→roxo com texto branco = 1,11:1** — o remap
 | 3 — os valores padrão | **1 fatia, 2 linhas** (`3a18713`) | o resto é migração, frente nova, ou já é verdade |
 | 4 — gradientes órfãos | **sem lote** | o único órfão não é a marca |
 | 5 — fechar | itens **9.220-9.223** | — |
+
+---
+
+### 6-G. A FATIA DO DEFEITO A — os 5 pontos do primeiro plano sobre a marca (04/set/26)
+
+Branch `feat/rebranding-defeito-a` @ `9a2f643`, **não mesclada**. Executa a
+**D16**. Build de staging `xGZUlnheUotkmXbnig0SE`, `tsc` exit 0.
+
+#### O lote: 5 pontos, e por que só 5
+
+Varredura de 3 padrões em todo o `src/` (524 arquivos, grafo de imports v2 com
+113 entradas de rota): **78 hits** de primeiro plano claro sobre fundo que vira
+a marca — **P1** 71 · **P2** 7 · **P3** 3 (janela multi-linha).
+
+Desses 78, **apenas 6 alcançam o painel**. E dos 6, **1 sai** (já consertado
+noutra branch). Sobram **5**:
+
+| ponto | onde aparece | alcance |
+|---|---|---|
+| `components/ui/avatar.tsx:46` | avatar do cabeçalho, das listas e da comunidade | C P R V X |
+| `components/avatar-uploader.tsx:128` | botão **"Salvar foto"** | P R V |
+| `components/change-password-form.tsx:127` | botão **"Alterar senha"** | P R V |
+| `components/context-lock-notice.tsx:115` | CTA do aviso (`<button>`) | P V X |
+| `components/context-lock-notice.tsx:122` | CTA do aviso (`<Link>`) | P V X |
+
+**FORA, com o motivo de cada um:**
+- **72 não alcançam o painel** — vivem só em `(course)`, `/admin`, raiz ou
+  vitrine, onde o fundo não vira lime. Não quebram hoje.
+- **14 do "lime sobre lime"** — outro mecanismo, e a medição do **9.222** mostrou
+  **0 de 14 reprovando no escuro**, que é o único modo em uso.
+- **`producer/settings/page.tsx:233`** — parecia P3, mas o fundo ali é
+  `theme.secondaryColor` (`#262626`, neutro escuro), **não a marca**. Branco
+  sobre ele dá ~15:1. Falso positivo do padrão, descartado por leitura.
+- 🔴 **`sidebar.tsx:419` e `workspace-switcher.tsx:106`** — **já consertados** em
+  `feat/rebranding-camaleoes-2` (`ddf6eff`), que **nunca foi mesclada**. Ver
+  item **9.224**. Duplicar aqui criaria conflito no merge.
+
+#### A medição, e a suspeita que ela refutou
+
+A forma aplicada é a canônica da casa, `text-[var(--producer-button-text,#ffffff)]`
+(molde: `components/ui/button.tsx:17`), **copiada, não variada**.
+
+| estado | fundo real | hoje (branco) | com o fix (`#191919`) |
+|---|---|---|---|
+| repouso | `bg-blue-600` → `--producer-primary` = `#EFFF20` | **1,11** 🔴 | **15,90** ✅ |
+| hover | `hover:bg-blue-700/500` → `--producer-primary-hover` = `#CBD91B` | **1,56** 🔴 | **11,29** ✅ |
+
+⚠️ **Cheguei a concluir que o fix CRIARIA um defeito no hover** — texto escuro
+sobre azul literal daria 2,62. A conclusão estava errada porque eu tinha lido
+"o remap não alcança hover". Ele alcança: `globals.css:265` e `:283` mandam o
+hover para `--producer-primary-hover`, que `producer-theme-provider.tsx:84`
+emite como `darkenHex(#EFFF20, .15)` = `#CBD91B`. **O hover também é lime, e
+melhora junto.** Medir antes de aplicar era o que faltava.
+
+#### O custo na vitrine, medido em produção (D16)
+
+`app/w/[slug]/layout.tsx:47` só emite `--producer-button-text` **quando
+`vitrineTextColor` está preenchido**. Logo:
+
+- **33 workspaces sem `vitrineTextColor`** → cai no fallback `#ffffff` → **nada muda**;
+- **7 dos 9 que têm** definiram exatamente `#ffffff` → **nada muda** (delta +0,00);
+- **2 mudam:** `3n-trader` **4,23 → 3,94** (mesma faixa) e
+  `formacao-home-office-fho` **1,54 → 1,00** (já quebrado, é o **9.195**).
+
+⇒ **40 dos 42 workspaces não mudam um pixel**, e **nenhum cai de ≥3 para <3**.
+O custo da D16 é ainda menor do que a decisão supunha.
+
+ⓘ 6 dessas 9 vitrines **já reprovam hoje** (1,34 a 2,41) por escolha do próprio
+produtor — família do **9.195**, alheia a esta fatia.
+
+#### ROTEIRO DO GATE — palco `xGZUlnheUotkmXbnig0SE`, alvo staging
+
+**Persona: `dono-b@staging.test` / `Staging@2026!`** — `themeConfig = "{}"`,
+logo **herda os defaults lime**. ⚠️ **NÃO usar `producer-staging@staging.test`**:
+o `themeConfig` dele está congelado com a paleta antiga 8/8 (o defeito **9.216**),
+e o gate mostraria azul — foi assim que um gate anterior deu falso negativo.
+
+ⓘ **Nenhuma persona do staging tem foto** (`avatarUrl` nulo em 23/23), e
+`avatar.tsx:31` só desenha o círculo colorido **quando não há foto** — então o
+avatar aparece em todas as telas abaixo, com as iniciais **"DW"**.
+
+**No painel — o texto sobre a marca deve estar ESCURO (`#191919`), nunca branco:**
+1. **o avatar do cabeçalho** — aparece em **toda** tela do painel; é o ponto que o gate original pegou;
+2. **/producer/students** — os avatares da lista de alunos;
+3. **/producer/community** — os avatares dos posts;
+4. **/producer/profile** — os botões **"Salvar foto"** e **"Alterar senha"**;
+5. *(se aparecer)* o aviso de trava de contexto, CTA **"Ir para o painel admin"** ou **"Ir para minha área de aluno"** (rótulos de `producer/layout.tsx:44` e `:58`).
+
+**Na vitrine — os DOIS lados, porque o palco foi montado para discriminar:**
+6. 🟢 **`/w/staging-teste`** — **sem** `accentColor` e **sem** `vitrineTextColor`.
+   É o **controle de NÃO-MUDANÇA**, e espelha **40 dos 42** workspaces reais.
+   O avatar deve continuar **branco sobre azul**, exatamente como antes.
+   **Se mudar aqui, a fatia está errada.**
+7. 🟠 **`/w/workspace-b-staging`** — configurado nesta rodada com
+   `accentColor #E53935` e `vitrineTextColor #F5F7FA`, **espelhando o
+   `3n-trader` de produção**, que é 1 dos 2 que mudam. O avatar deve ficar
+   **quase-branco sobre vermelho** (3,94) — legível, e é essa a mudança que a
+   D16 aceitou. *(Dado de teste de staging; produção não foi tocada — o slug
+   `workspace-b-staging` não existe lá.)*
