@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     images: [
       {
-        url: "https://mymembersclub.com.br/og-image.png",
+        url: "https://mymembersclub.com.br/og-image-v2.png",
         width: 1200,
         height: 630,
         alt: "Members Club — A área de membros premium do Brasil",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title: "Members Club — A Plataforma de Área de Membros Premium",
     description:
       "Plataforma 100% brasileira para criar e gerenciar sua área de membros.",
-    images: ["https://mymembersclub.com.br/og-image.png"],
+    images: ["https://mymembersclub.com.br/og-image-v2.png"],
   },
 };
 
