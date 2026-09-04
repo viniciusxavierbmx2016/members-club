@@ -811,6 +811,23 @@ substituições**, e com par claro/escuro, porque o `/admin` usa **os dois modos
 item **9.219**; o foco que **já falha hoje** (1,85 claro / 2,13 escuro) virou o
 item **9.218**. ⚠️ **23 CTAs acoplados**, não 18 — a estimativa anterior era baixa.
 
+⭐ **O FAN-OUT VOLTOU (6/6, 184/184 classificados) e trouxe uma regra que não
+estava em decisão nenhuma: nem todo azul do `/admin` é a MARCA — parte é ESTADO.**
+**9 pontos** são badges e bolinhas de status onde o azul convive com `emerald`,
+`amber`, `red` e `gray` num **código de cores** ("Pendente", "Em andamento", "Em
+análise"). Virá-los para lime faria o **status colidir com a marca** e leria como
+ação, não como dado. **Ficam azuis literais** — é a D13 ao contrário: a pista deve
+continuar cromática e **alheia** à marca.
+
+🔴 **E um achado que nenhuma régua de texto pega:** `admin/page.tsx:287`, a **barra
+de progresso** (`bg-blue-500` sobre trilho `gray-100`), hoje em **3,34**, iria a
+**1,00** com o lime — **sumiria**. Não é texto, é componente, e **nenhum par
+claro/escuro resolve**: exige valor próprio para superfície clara.
+
+**Números finais do `/admin`:** foco 45 · fill-CTA 39 · texto 37 · tinta 20 ·
+badge 18 · borda 16 · ícone 6 · outro 3. Quebram em **ambos os modos 72**, **só no
+claro 67**, nenhum 44. **13 já falham hoje** e **4 exigem decisão** fora das D1–D17.
+
 ⭐ **E uma diferença fina que só a medição mostra:** no painel o foco era **classe
 morta** (9.208 — não gerava regra); no `/admin` as classes são `blue-500`, cor real
 do Tailwind, então **geram**: lá o foco **não existia**, aqui ele **existe e é
