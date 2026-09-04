@@ -801,6 +801,36 @@ E o dado sustenta a separação: as **26** ocorrências do `/admin` são **todas
 o balde A, **26 estão no `/admin`**; as outras 21 se espalham por componentes (5)
 e telas soltas (16).
 
+### 6-D. Sessão de 04/set/26 (tarde) — 3 branches prontas e o número do 9.216
+
+**O certificado ganhou prova visual sem tocar no banco.** A rota exige 100% de
+progresso e **nenhum aluno do palco chega lá** (o único curso com aulas tem o
+melhor aluno em **1/4**), então gerei **dois PDFs por script fora da rota**, com
+dados fictícios: `/tmp/cert-gate/certificado-NOVO.pdf` e `…-ANTIGO.pdf`.
+⭐ **A prova está DENTRO do PDF, e quase escapou:** procurei os operadores `rg`/`RG`
+e o `(25,25,25)` **não apareceu** — parecia defeito. A causa: **o jsPDF converte
+cinza puro (R=G=B) para o operador `g`/`G`**, que o regex de `rg` não pega. Com a
+sonda certa: o NOVO tem **`0.098 g` = cinza 25 = `#191919`** e **zero azul**; o
+ANTIGO tem `rgb(37,99,235)`/`rgb(38,99,235)`. *(Lição irmã da 9-E: o valor pode
+estar em outra FORMA, não só em outro arquivo.)*
+
+**Duas fatias de uma linha e uma de duas linhas, todas em branch própria:**
+
+| branch | o que faz | prova |
+|---|---|---|
+| `feat/rebranding-config-marca` (`e7e5fb8`) | **9.214** `meta theme-color` `#0a0a1a`→`#191919` (varredura: é a **única** do projeto) · **9.215** fallback do favicon `/logo.png`→`/logo-v2.png` | ⭐ **Recusei o SVG com evidência:** o `DynamicFavicon` **rasteriza tudo num canvas 64×64** (`:43-45`, `toDataURL`) — o SVG não traria ganho e adicionaria risco. PNG é o formato certo ali |
+| `feat/rebranding-f5-1b-gemeos` (`83d57a5`) | **9.217** o badge "★ Mais escolhido" (`page.tsx:462`) e o "Começar agora" do mockup SVG (`landing-mockups.tsx:257`): **1,11 → 15,90** | ⭐ **Valor literal é o certo aqui, e provei:** a landing tem **0** ocorrências de `--producer-*`/`--member-*` e não monta em shell de produtor — é o **oposto dos camaleões**, que exigiam a variável |
+| `feat/rebranding-f5-4-certificado` (`7fa5d8d`) | **F5.4**, já pronta desde a madrugada | os 2 PDFs acima |
+
+⭐ **O NÚMERO DO 9.216, que separa "personalizou" de "clicou em Salvar":** comparei
+os 14 `themeConfig` de produção contra os **5 conjuntos de defaults que já
+existiram** (levantados por `git show`, incluindo o **índigo `#6366F1`** de abr/26).
+**3 são congelados sem querer** — byte-idênticos ao conjunto azul — e **11
+personalizaram de verdade**. ⇒ **O estrago real é 3 contas, não 14**, e os 3 são
+exatamente os que a **D6** havia achado sem explicar.
+
+---
+
 ### 6-C. ⭐ O PORTÃO DA F5 — medido na sessão de 04/set/26 (madrugada)
 
 **A conclusão que organiza tudo:** cada superfície restante precisa da **mesma
