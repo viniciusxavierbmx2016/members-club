@@ -254,7 +254,7 @@ export function BrandingMockup() {
     <rect x="436" y="268" width="380" height="11" rx="2" fill="rgba(255,255,255,.4)"/>
     <rect x="436" y="284" width="280" height="11" rx="2" fill="rgba(255,255,255,.4)"/>
     <rect x="436" y="316" width="160" height="38" rx="10" fill="var(--accent)"/>
-    <text x="516" y="340" textAnchor="middle" fontFamily="Outfit" fontWeight="700" fontSize="13" fill="#fff">Começar agora</text>
+    <text x="516" y="340" textAnchor="middle" fontFamily="Outfit" fontWeight="700" fontSize="13" fill="#191919">Começar agora</text>
     {/* card preview */}
     {[0,1,2].map(i => (
       <g key={i}>

@@ -459,7 +459,7 @@ function PriceCard({ featured, title, badge, desc, value, period, cta, fine, hre
     <div className={`mc-reveal relative overflow-hidden rounded-[28px] p-12 border ${featured ? 'border-[var(--mc-accent)] shadow-[0_0_140px_var(--mc-accent-soft),0_0_0_1px_var(--mc-accent)_inset]' : 'border-[var(--mc-accent-ring)] shadow-[0_0_100px_var(--mc-accent-soft)]'}`}
          style={{ background: featured ? 'linear-gradient(180deg, color-mix(in oklab, var(--mc-accent) 18%, var(--mc-g2)), var(--mc-g2))' : 'var(--mc-g2)' }}>
       <div className="absolute top-0 inset-x-0 h-0.5" style={{ background: 'linear-gradient(90deg, transparent, var(--mc-accent), transparent)' }}/>
-      <div className={`inline-flex px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.14em] mb-7 ${featured ? 'bg-[var(--mc-accent)] text-white' : 'bg-[var(--mc-accent-soft)] border border-[var(--mc-accent-ring)] text-[var(--mc-accent)]'}`}>{badge}</div>
+      <div className={`inline-flex px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.14em] mb-7 ${featured ? 'bg-[var(--mc-accent)] text-[#191919]' : 'bg-[var(--mc-accent-soft)] border border-[var(--mc-accent-ring)] text-[var(--mc-accent)]'}`}>{badge}</div>
       <div className="font-display text-[28px] font-bold tracking-tight mb-2">{title}</div>
       <div className="text-[15px] text-[var(--mc-ink2)] mb-7">{desc}</div>
       <div className="flex items-baseline gap-1.5 mb-2">
