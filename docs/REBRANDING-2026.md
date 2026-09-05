@@ -1003,6 +1003,24 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 > integração** — provado por dois controles medidos depois do deploy: `/sw.js`
 > ainda em `2.3.0` e `/manifest.json` ainda em `#0a0a1a` com zero ícones `-v2`.
 > **Rollback: `e236b55`.** O painel espera janela de madrugada em meio de semana.
+> 🚀🚀 **E ÀS 18:09 DO MESMO DIA A FRENTE INTEIRA SUBIU (§6-J).** Merge
+> **`39e3d9d`**, **124 arquivos, 83 commits** — a maior mudança visual da
+> história do produto. Deployment `success` em 86 segundos; as 8 verificações
+> passaram (SW `2.3.0`→`2.4.0`, manifest `#0a0a1a`→`#191919` com 11 ícones
+> `-v2`, e o asset ANTIGO seguindo em 200, como manda a D2).
+> **Rollback: `39e3d9d`.** ⚠️ **O portão de horário foi SUSPENSO pelo dono** —
+> a medição recomendava madrugada de meio de semana, e isso fica registrado
+> no §6-J com os motivos dele.
+> ⚠️ **A F2 segue invisível** até alguém subir a arte nova em `/admin`.
+>
+> ⭐ **04/set/26, noite — a leva do gate visual (§6-K).** O gate em produção
+> achou resíduo de `gray-900`/`gray-950` no painel e duas telas de login azuis.
+> **4 fatias mescladas na integração** (`bda54ed` · `ed1e501` · `c43b12a` ·
+> `da758c2`), **nada em produção**. Build de gate `WpeIIb6tpOKcuQAIyVv4j`.
+> 🔴 **Achou também uma REGRESSÃO da própria frente** em `/producer/login`
+> (par claro/escuro sobre fundo fixo: 5,48 → 1,15 no modo claro), que esteve em
+> produção desde 04/set 18:09 e agora está corrigida na integração.
+> Abriu o **9.227** (o `#030712` do `<body>` é global).
 
 > ⚠️ **Atualizado em 04/set/26 pela rodada do §6-F.** O primeiro gate do
 > **estado mesclado** achou dois defeitos que a medição por fatia não pegou. A
@@ -1982,3 +2000,501 @@ dias** (~2,3/dia), com o último emitido **no próprio dia da subida**.
 `e236b55`. `git revert e236b55 && git push origin main`, ou Instant Rollback na
 Vercel para o deploy de `d388389` (segundos). **Não desfaz nada além do código**
 — não houve migração, escrita em banco nem mudança de service worker.
+
+---
+
+### 6-J. 🚀🚀 A FRENTE INTEIRA EM PRODUÇÃO (04/set/26)
+
+**`39e3d9d` — merge `--no-ff` de `feat/rebranding` na `main`. Push às 18:09:47 BRT.**
+**124 arquivos, 83 commits.** É a maior mudança visual da história do produto.
+
+*(124 e não 125: `certificate-pdf.ts` já tinha subido sozinho às 17:22 pelo
+cherry-pick `e236b55` — ver §6-I. No ensaio o arquivo resolveu-se sem conflito
+e sem duplicar: 5 ocorrências de `(25,25,25)`, 0 de `(37,99,235)`, 139 linhas.)*
+
+#### ⚠️ O PORTÃO DE HORÁRIO FOI SUSPENSO — por decisão do dono, e fica registrado
+
+A recomendação medida era **madrugada de meio de semana, 03:15–03:45 BRT**: às
+03h a produção tem **206 acessos de aluno** e **4 vendas** (90 dias), contra
+**4.463** e **536** no pico das 14h–15h. **20× e 100× menos exposição.**
+
+**A subida foi feita às 18:09 de uma sexta-feira**, com o portão suspenso
+explicitamente pelo dono. Os motivos que ele pôs na mesa:
+
+1. **ele estaria disponível nas horas seguintes** — o que muda o cálculo, já que
+   o risco real não é o deploy falhar, é ninguém estar lá quando falhar;
+2. **o rollback é instantâneo** — Instant Rollback na Vercel, segundos, sem
+   rebuild, e sem nada a desfazer no banco (não há migração);
+3. **o conteúdo estava medido**: 545 pares no word-diff, 144 inspecionados um a
+   um, **zero lógica alterada**; e o ensaio de merge deu limpo.
+
+**Registrado sem suavizar:** a decisão contraria a medição, e a medição
+continua valendo para as próximas subidas grandes. O que a justifica aqui é a
+**presença do dono**, não uma reavaliação do risco de horário.
+
+#### O que subiu
+
+| área | arquivos |
+|---|---|
+| `src/app` (painel, landing, rotas) | 67 |
+| `src/components` | 28 |
+| `public/icons` + `public/brand` + `public/` | 24 |
+| `docs/` | 4 |
+| `src/lib` | 1 |
+
+#### O que NÃO subiu, e continua registrado
+
+- 🔴 **9.220** — a **área de membros** ficou inteira fora: 50 dos 69 cursos
+  renderizam a identidade azul pelo fallback do CSS, e **é a tela do ALUNO**.
+  Decisão do dono: frente própria, depois desta subida.
+- **9.219** — o **`/admin`**: 184 substituições, é uma virada por si só.
+- **9.212** — o **e-mail**: a pergunta do texto branco sobre a cor do produtor
+  segue aberta, e a fatia foi pulada por causa dela.
+- **9.220 (parte)** — os **defaults das telas de personalização**, que hoje
+  *dizem a verdade* enquanto o render da área de membros for azul.
+- **9.216** — os **3 produtores com tema congelado sem querer**
+  (`lucasrdsouza1`, `rangelsilva0812`, `ryanne22medeiros`): eles **queriam** ver
+  a marca nova e **não vão**, porque salvaram o tema sem mudar nada.
+- **9.225** — a **lacuna de observabilidade**: 54% dos eventos de webhook são
+  ERROR e não há Sentry; um problema novo no caminho de venda seria invisível.
+
+#### ⚠️ A F2 continua INVISÍVEL até o dono agir
+
+`PlatformSettings` em produção tem `logoUrl` e `faviconUrl` gravados no Supabase
+Storage **desde 20/abr/2026** — a arte **antiga**. Como
+`platform-logo.tsx:27` e `dynamic-favicon.tsx:25` preferem o valor do banco, os
+22 assets da F2 **não aparecem**. O `DynamicFavicon` sobrescreve o
+`metadata.icons` em runtime, em toda página.
+
+⇒ **O logo e o favicon só mudam quando alguém subir a arte nova em `/admin`.**
+
+#### O deploy, medido
+
+Deployment de produção `success` às **18:11:13 BRT — 86 segundos** após o push.
+
+| verificação | antes | depois |
+|---|---|---|
+| `/` · `/landing` · `/producer/login` · `/w/3n-trader` | 200 | **200** ✅ |
+| `/sw.js` | `2.3.0` | **`2.4.0`** ✅ |
+| `/manifest.json` `theme_color` | `#0a0a1a` | **`#191919`** ✅ |
+| ícones `-v2` no manifest | 0 | **11** ✅ |
+| `/icons/icon-192x192-v2.png` | **404** | **200** ✅ |
+| `/icons/icon-192x192.png` (o ANTIGO) | 200 | **200** ✅ — D2 honrada |
+
+**A marca, provada no bundle SERVIDO** (marcador positivo, `while read`):
+`#EFFF20` aparece **4×** num chunk servido, `--mc-accent:#efff20` está na
+landing, e `primaryColor:"#3b82f6"` dá **0**. O zero vale porque os positivos
+acendem na mesma sonda. *(O default do servidor foi provado no artefato local
+antes do push: 4 arquivos com `primaryColor:"#EFFF20"`, 0 com o azul, de 1.579
+arquivos JS.)*
+
+⚠️ **Uma armadilha que quase virou falso alarme:** às 18:11:17, no meio da
+propagação, `/sw.js` já dizia `2.4.0` mas `/icons/icon-192x192-v2.png` ainda
+dava **404**. Furando o cache de borda (query nova, `no-cache`) veio **200** nas
+três sondas. Era propagação em curso — e possivelmente a **minha própria sonda
+de baseline**, feita 1 minuto antes do deploy, tendo cacheado o 404 na borda.
+É a lição do *cache de CDN sobrevive ao flip*: **furar o cache antes de concluir
+que um asset novo não subiu.**
+
+#### Rollback
+
+**`39e3d9d`.** `git revert -m 1 39e3d9d && git push origin main`, ou Instant
+Rollback na Vercel para o deploy de `e236b55` (segundos, sem rebuild).
+**Não desfaz:** nada no banco (não houve migração nem escrita), e o ícone que o
+SO já capturou de um PWA instalado. O **service worker se auto-cura**: o
+navegador rebusca `sw.js` (servido com `no-store`), instala o `2.3.0` como
+atualização, e o `activate` dele apaga o cache `v2.4.0`.
+
+#### ⭐ O PASSO DO DONO, AGORA
+
+**Entrar em `/admin` de PRODUÇÃO e subir `logo-v2.png` e `favicon-v2.svg` em
+PlatformSettings.** Enquanto o banco tiver a arte de abril, o logo e o favicon
+continuam os antigos e **a F2 fica invisível** — a paleta já virou, a marca
+ainda não.
+
+---
+
+### 6-K. A LEVA DO GATE VISUAL DE PRODUÇÃO — 4 fatias (04/set/26, noite)
+
+Depois da subida da frente, um gate visual em produção achou dois grupos de
+resíduo e duas telas de login azuis. Isto é o conserto, em 4 fatias mescladas
+na integração — **nada foi para produção**.
+
+| # | fatia | SHA | merge | o que entrou |
+|---|---|---|---|---|
+| 1 | `gray500-par` | `996bc91` | **`bda54ed`** | **16** pontos ganham o par escuro `dark:text-gray-400` |
+| 2 | `gray950` | `ff55188` | **`ed1e501`** | **28** superfícies `gray-950` → `#262626` (elevated) |
+| 3 | `gray900` | `3217e99` | **`c43b12a`** | **47** superfícies `gray-900` → `#202020` (45) e `#262626` (2 flutuantes) |
+| 4 | `login-produtor` | `f2596e1` | **`da758c2`** | a tela de login do produtor recebe a paleta nova |
+
+`tsc` exit 0 depois de cada merge. Build de staging **`WpeIIb6tpOKcuQAIyVv4j`**,
+alvo discriminado (23 personas `@staging.test` × 0 em produção), e os **4
+marcadores acendem no bundle servido**.
+
+#### ⭐ O lote do gray-500 foi 16, não 8 — e por que isso importa
+
+O gate apontou **8** pontos onde `text-gray-500` cairia para 3,13 com a
+superfície mais clara. Varrer **além dos apontados** — `text-gray-500` *bare*
+sobre **qualquer** superfície que esta frente tocou (os 47 do gray-900 + os 28
+do gray-950) — achou **8 irmãos idênticos**: `course-support:383` e `:387`,
+`custom-select:58`, `modules-manager:366/495/577`, `quiz-manager:122` e
+`workspaces/edit:488`. **Consertar só os 8 apontados teria deixado metade para
+trás**, e o defeito voltaria no próximo gate como se fosse novo.
+
+**16 de 16 saem de REPROVADO para APROVADO:**
+
+| superfície | cor final | antes | depois |
+|---|---|---|---|
+| `gray-950` → `#262626` | `#262626` | 3,13 🔴 | **5,96** ✅ |
+| `gray-900` → `#202020` | `#202020` | 3,37 🔴 | **6,42** ✅ |
+| `gray-950/40` | `#1e1e1e` | 3,45 🔴 | **6,57** ✅ |
+| `gray-900/50` | `#1c1c1c` | 3,53 🔴 | **6,71** ✅ |
+
+#### ⭐ OS 2 CONFLITOS — e a lição, que é sobre ORDEM
+
+A fatia do **texto** entrou **antes** das de **fundo**, pela razão certa: assim
+não existe janela na história do repositório com o defeito ativo. **O custo
+disso é conflito garantido** — o lote do `gray500-par` foi *derivado das
+superfícies* que as outras duas tocam, então compartilha **11 arquivos com cada
+uma**.
+
+Deram conflito **2 blocos, um em cada arquivo**:
+`analytics-overview.tsx` (`:601` fundo × `:602` texto) e
+`modules-manager.tsx` (`:365` fundo × `:366` texto). Sempre a mesma forma:
+**linhas VIZINHAS no mesmo hunk, sem sobreposição semântica** — uma fatia mexe
+no fundo, a outra no texto. **Resolução autorizada pelo dono: manter as duas.**
+
+> **A lição:** pôr a fatia de TEXTO antes das de FUNDO não é erro de ordem — é
+> **o custo dela**, e é benigno **quando as fatias tocam papéis diferentes na
+> mesma região**. O que torna a resolução segura não é o conflito ser pequeno,
+> é ele ser **textual e não semântico**. Verificar isso antes de resolver é a
+> condição; sem ela, a autorização não vale.
+
+ⓘ O `modules-manager` recebeu **7** trocas do gray-900 e **só 1 conflitou** —
+as outras 6 mesclaram sozinhas por não serem vizinhas de nada.
+
+#### O portão pós-resolução manual
+
+Conflito resolvido à mão é onde se perde trabalho em silêncio. Provado:
+
+- `bg-[#202020]` = **45**, `bg-[#262626]` = **30**, molde completo
+  `text-gray-500 dark:text-gray-400` = **227** (211 na `main` + 16) — as três batem;
+- `gray-900` restante = **115**, `gray-950` restante = **32** — batem com os
+  excluídos deliberadamente;
+- nos 2 arquivos conflitados, **todas** as mudanças das duas fatias presentes;
+- **zero** marcadores de conflito no repo, e as duas linhas idênticas do
+  `modules-manager` (`:295` e `:330`) são **blocos irmãos pré-existentes** —
+  provado: idênticas na `main`, e o arquivo tem **723 linhas nos dois**.
+
+#### 🔴 A REGRESSÃO QUE A PRÓPRIA FRENTE INTRODUZIU — e esteve em produção
+
+`producer/(auth)/login/page.tsx:116` tem um **`style` inline** que pinta a
+página de escuro **nos dois modos** (inline vence `className`; o `bg-white` ali
+é letra morta). A frente aplicou **6 pares D12** (`text-[#191919] dark:text-primary`)
+pressupondo fundo claro no modo claro.
+
+| modo claro, nessa tela | contraste |
+|---|---|
+| antes da frente (`text-primary` sobre `#060612`) | **5,48** ✅ |
+| depois da frente (`#191919` sobre `#060612`) | **1,15** 🔴 |
+
+**Esteve em produção de 04/set 18:09 até esta correção.** **Severidade baixa:**
+`defaultTheme="dark"` e **zero** contas em modo claro, então o efeito real era o
+**flash entre o SSR e a hidratação** (o `.dark` é injetado no cliente), mais
+quem tivesse alternado para claro.
+
+> ⭐ **A LIÇÃO, e nenhuma varredura da frente a checou:** *o par claro/escuro
+> pressupõe que o fundo VIRA com o modo.* Onde há `style` inline com fundo fixo,
+> **o par é ERRADO** — valor único é o certo. A condição a verificar antes de
+> aplicar um par é: *este elemento fica sobre um fundo que muda com o modo?*
+
+ⓘ E o `:127` ("Entre na sua conta") era o **único `text-primary` sem par** no
+arquivo — a frente passou por ele. Já reprovava no claro (3,68) e viraria 1,11
+com lime.
+
+#### Correções de registro
+
+- **O rótulo do BB3 estava errado.** O que chamei de *"overlay"* é
+  `mobile-flow-editor.tsx:44`, um `fixed inset-0` **opaco** com cabeçalho
+  próprio: é a **página de tela cheia** do editor mobile. **Não há véu nenhum**
+  entre os 29 (um véu teria alfa e nenhum conteúdo). Sai do lote do mesmo jeito,
+  mas por ser **fundo de página** — que pela paleta seria `#191919`, não `#262626`.
+- **O molde tem 211 usos, não 75.** Recontagem de
+  `text-gray-500 dark:text-gray-400` no `src/`.
+
+#### O gray-950 como decisão de GOSTO, com o trade-off medido
+
+O `gray-950` **nunca fez parte de paleta nenhuma no painel** — é o cinza do
+Tailwind. A troca para `#262626`: o contraste do texto branco **cai**
+(20,13 → 15,13, segue muito acima do limiar), a distinção contra o fundo **não
+muda** (1,15 → 1,16), e o que se ganha é **matiz** (viés azul +15 → 0) e
+**linguagem**: hoje o modal *afunda*, com `#262626` ele *flutua*.
+**É hierarquia visual, não correção de defeito.**
+
+#### Pendências com motivo — não são esquecimento
+
+- **23 pontos `gray-900` não couberam na regra** `#202020`/`#262626`: **11 são
+  TOAST invertido** (`bg-gray-900 dark:bg-white text-white dark:text-gray-900`,
+  deliberadamente escuro no CLARO), **2 são help-tooltip** e **10 são
+  superfícies sempre-escuras**. Aplicam nos **dois** modos e têm outro papel.
+- **O `#030712` do `<body>` é GLOBAL** — ver item **9.227**.
+
+---
+
+### 6-L. O RESÍDUO QUE A EXCLUSÃO POR ÁREA CRIOU (04/set/26)
+
+Branch `feat/rebranding-residuos` @ `3aea4f6`, **não mesclada**. Build de gate
+**`bRMOI9yk7mSPCG75W0tWf`**.
+
+O gate viu dois seletores lado a lado em `/producer/analytics`: **"Todos os
+cursos" já em `#202020`, "Últimos 30 dias" ainda em `gray-900/50`.**
+
+#### 🔴 NÃO foi cegueira de padrão — foi a minha regra de exclusão
+
+O enquadramento natural seria "quarta cegueira de padrão da frente". **A
+medição desmente isso.** A varredura do gray-900 **ACHOU** os 3 pontos do
+`date-range-selector`; quem os tirou foi a regra *"não tocar em nada que
+alcance o `/admin`"* — o componente é importado por `admin/page.tsx:11` e
+`admin/reports/page.tsx:9`. O `custom-select`, que faz **a mesma coisa na
+tela**, alcança só o painel e entrou.
+
+> **A lição, e ela é sobre EXCLUSÃO, não sobre busca:** *uma regra de exclusão
+> por ÁREA pode partir ao meio um PAPEL VISUAL.* Dois componentes que exercem a
+> mesma função lado a lado receberam tratamentos diferentes porque um deles é
+> reusado por outra área. **A varredura por padrão funcionou; foi o critério de
+> corte que produziu a inconsistência — e ela aparece exatamente onde o dono
+> olha.** Antes de excluir por área, perguntar: *isto deixa dois elementos de
+> mesmo papel com aparências diferentes na mesma tela?*
+
+⭐ **E a exclusão não protegia nada — medido.** No `/admin` (fundo `#030712`) o
+dropdown do `date-range` é **exatamente a cor do fundo: 1,00** — só se vê pela
+borda. Com `#262626` vai a **1,33**. O botão vai de 1,06 a 1,09. **Melhora nos
+dois contextos.**
+
+#### O lote — 9 pontos em 4 arquivos
+
+| ponto | de | para | papel |
+|---|---|---|---|
+| `date-range-selector:298 :339 :348` | `gray-900/50` | `#202020/50` | botão e inputs |
+| `date-range-selector:306` | `gray-950` | `#262626` | dropdown (`absolute z-50 shadow-2xl`) |
+| `global-search:135` · `header:113` | `#0f0f1e` | `#262626` | dropdowns flutuantes |
+| 3 pontos | `text-gray-500` | `+ dark:text-gray-400` | o molde (227 → **230**) |
+| `register/page.tsx` | 18 substituições | a paleta nova | **o gêmeo do login** |
+
+ⓘ O `#0f0f1e` **nem estava na lista de remap** do `globals.css` (que cobre 8
+hexes: `#0a0a1a`, `#0a0c14`, `#0a0e19`, `#0f1320`, `#141416`, `#1a1e2e`,
+`#1d1d21`, `#28282e`).
+
+#### 🔴 O REGISTER É O GÊMEO DO LOGIN — e só o login tinha sido corrigido
+
+A frente tocou **os dois** arquivos, mas só mudou `text-white` no register (4
+linhas). Ele ficou com o **mesmo `#060612`**, o **mesmo gradiente índigo**,
+**18 tokens `primary`** caindo no fallback azul e **4 `producer-button-text`**
+que, sem provider, resolvem para **branco**. Depois da fatia do login, as duas
+telas irmãs **divergiam**: uma lime, outra azul.
+
+> É a lição *"conferir a rota IRMÃ"* aplicada a TELAS: quando uma fatia arruma
+> uma tela de um par (login/register, criar/editar), **a irmã entra no mesmo
+> commit ou vira divergência garantida**.
+
+#### Fora do lote, com motivo
+
+- **26 já excluídos** — 11 toast invertido, 10 sempre-escuras, 5 tooltip;
+- **6 `bg-[#141416]` sem `dark:`** — mesma classe das sempre-escuras;
+- **`mobile-flow-editor:44`** — página de tela cheia, não superfície;
+- 🔴 **`layout-illustration:8`** — `bg-gradient-to-br … dark:from-gray-800
+  dark:to-gray-900`: **gradiente decorativo**. Trocar só a metade `to-`
+  quebraria o gradiente, e a regra `#202020`/`#262626` não descreve uma
+  ilustração. **Não cabe — reportado, não inventado.**
+- **10 hex arbitrários** já cobertos pelo remap do `globals.css`.
+
+#### ⚠️ Pendência: o halo azul sob o botão lime
+
+Sobram tokens `primary` que caem no `#3b82f6` nas duas telas de auth —
+**1 no login** (`shadow-primary/20`, que a fatia anterior deixou) e **7 no
+register** (3 `shadow`, 2 `focus:ring`, 2 `border`). São **sombra, anel e
+borda**, não superfície: a regra desta rodada não os cobre. Efeito medido:
+`#3b82f6` a 20% sobre `#191919` = `#202e45` — **halo azul sob botão lime**.
+Cosmético, simétrico nas duas telas, **fica para decisão**.
+
+---
+
+### 6-M. AS TRÊS DECISÕES DE "ARRUMAR TUDO" (04/set/26)
+
+Branch `feat/rebranding-residuos` @ `2dfd7a6`, **não mesclada**. Build de gate
+**`4v1BgrCfiWOARKsgro-I1`**.
+
+#### D-a · O halo azul sai — e não era cosmético
+
+Todos os tokens `primary` de **sombra, anel e borda** nas telas de login e
+register viram literal lime. Sem provider eles caíam no fallback `#3b82f6`.
+**Resultado: `primary` = 0 nas duas telas.**
+
+| | azul (hoje) | lime |
+|---|---|---|
+| halo `shadow/20` vs fundo | 1,29 | **1,81** |
+| anel de foco | 4,78 | **15,90** |
+| borda `/50` vs fundo | **2,13** 🔴 | **4,81** ✅ |
+
+⭐ **A borda hoje REPROVA no limiar de componente (3,00) e passa a aprovar.**
+E o halo lime a 20% é **mais visível** que o azul no mesmo alfa — **não há
+motivo medido para mudar o alfa**, que era a pergunta do comando.
+
+#### D-c · As 3 telas de erro recebem a paleta — com um alerta
+
+`not-found.tsx`, `error.tsx` e `offline/page.tsx`: fundo `#0a0a1a` → `#191919`,
+ícone → `#EFFF20`/60, botão → lime com **texto `#191919`**.
+⭐ **O texto do botão era a armadilha**: branco sobre lime daria **1,11**; com
+`#191919` vai a **15,90**.
+
+⚠️ 🔴 **AS 3 APARECEM PARA O ALUNO, e isso muda a base da decisão.**
+`not-found.tsx` e `error.tsx` são do **ROOT** e capturam **qualquer** rota,
+inclusive `(course)/**` e `/w/**`. O único interceptador mais específico é o
+`error.tsx` do curso — que pega **erro**, não **404**. ⇒ Um aluno que erre a
+URL dentro do curso verá uma tela **lime** no meio de uma área ainda **azul**
+(item **9.220**). **Está aplicado, e reverter é 1 arquivo** se a decisão mudar.
+
+ⓘ O `error.tsx` do curso ficou **fora**: está sob `(course)/`, proibido nesta
+rodada.
+
+ⓘ **E a 404 só é alcançável LOGADO** — medido: deslogado, o proxy responde
+**307 para o login** em toda rota desconhecida (`/producer/rota-inexistente`,
+`/landing/nada`, `/w/nao-existe`). Só `/api/*` devolve 404, e é JSON.
+
+#### D-b · A regra do `/admin` suspensa — e ela já não segurava nada
+
+A revarredura mostra que os **6 pontos** que a regra segurava (`date-range` ×4,
+`global-search`, `header`) **já tinham sido aplicados** na rodada anterior desta
+mesma branch. Restam **3 pontos** em componentes compartilhados, e os **3 são
+TOOLTIP** (`group-hover` + `absolute`, escuros nos dois modos) — excluídos por
+**PAPEL**, não pelo `/admin`.
+
+**A tabela dos dois contextos, que a decisão exigia:**
+
+| ponto | no `/admin` (`#030712`) | no painel (`#191919`) |
+|---|---|---|
+| `date-range:298/339/348` | 1,06 → 1,09 ✅ | 1,01 → 1,03 ✅ |
+| `date-range:306` | **1,00 → 1,33** ✅ | 1,15 → 1,16 ✅ |
+| `global-search:135` | 1,06 → 1,33 ✅ | 1,08 → 1,16 ✅ |
+| `header:113` | 1,06 → 1,33 ✅ | 1,08 → 1,16 ✅ |
+
+**Zero pontos pioram no `/admin`** — nenhum sai pela condição do comando.
+No `/admin` o dropdown do `date-range` era **exatamente a cor do fundo (1,00)**:
+só se via pela borda.
+
+#### II5 · O que mais está fora dos três escopos — listado, NÃO aplicado
+
+Varri `src/app/` fora de `producer/`, `(course)/`, `w/` e `admin/`: **9
+arquivos** com cor antiga.
+
+| arquivo | alcance | veredito |
+|---|---|---|
+| `(dashboard)/profile/page.tsx` | **DV** | 🔴 **SAI** — alcança a vitrine |
+| `invite/[id]`, `verify-email`, `forgot-password`, `reset-password`, `(auth)/register`, `auth/impersonate`, `verify/[code]` | R | **registrado, não aplicado** |
+| `(dashboard)/page.tsx` | D | **registrado** — é o dashboard do **ALUNO** |
+
+⭐ **Por que não apliquei:** eles não são casos de **superfície**
+(`#202020`/`#262626`, a regra autorizada) — são casos de **cor de marca**
+(`bg-blue-600`, `text-blue-400`, `from-blue-500 to-blue-700`, `bg-blue-500/10`),
+que exigem a decisão do par D12 **ponto a ponto** e o cuidado com o texto do
+botão. **Regra diferente da desta rodada.** Pela disciplina do II7, registro e
+sigo. → vira o item da próxima leva.
+
+#### ⭐ A LIÇÃO QUE CORRIGE A MINHA TESE ANTERIOR
+
+Eu havia enquadrado o caso do `date-range` como *"quarta cegueira de padrão"*.
+**Está errado, e a correção importa mais que o conserto:**
+
+> **Não foi a busca que falhou — foi a REGRA DE EXCLUSÃO.** A varredura
+> **achou** os pontos; a regra *"não tocar no que alcança o `/admin`"* é que os
+> tirou. **Uma exclusão por ÁREA pode partir ao meio um PAPEL VISUAL**, e a
+> inconsistência aparece exatamente onde o usuário olha — dois seletores lado a
+> lado com cores diferentes.
+>
+> **E pior: a exclusão estava PRESERVANDO um defeito nos dois lados.** No
+> `/admin` aquele dropdown era 1,00 contra o fundo. **Antes de excluir por área,
+> medir o que a exclusão protege** — se a resposta for "nada", ela só produz
+> divergência.
+
+E a lição irmã, do mesmo dia: **o `register` ficou azul enquanto o `login`
+virou lime**. Quando uma fatia arruma uma tela de um par (login/register,
+criar/editar), **a irmã entra no mesmo commit ou vira divergência garantida**.
+É *"conferir a rota IRMÃ"* aplicado a **telas**.
+
+E a terceira: **a 404 escapou de todas as varreduras porque renderiza fora dos
+três escopos** (`.producer-layout`, `.course-customized`, `.vitrine-customized`).
+Varrer por escopo deixa de fora exatamente o que não tem escopo.
+
+---
+
+### 6-N. MERGE DOS RESÍDUOS — gate 7/7 (04/set/26)
+
+**`dc086a4`** — merge de `feat/rebranding-residuos` (`2dfd7a6`) na integração.
+8 arquivos, 29+/29−, `tsc` 0, ensaio limpo. Build de gate
+**`GrBTfexWnZI2aq-aUIMf0`**. **Nada em produção.**
+
+O conteúdo e as lições estão em **§6-L** (o resíduo que a exclusão criou) e
+**§6-M** (as três decisões de "arrumar tudo"). Este bloco registra **o merge**,
+**a checagem que o precedeu** e **o risco que o dono aceitou**.
+
+#### ⭐ A checagem antes do merge: o botão "Total" estava coberto
+
+O gate não reconferiu o botão **"Total"** de `/producer/students`. Provado por
+código antes de mesclar:
+
+- **"Total" é uma OPÇÃO do próprio dropdown de período** —
+  `date-range-selector.tsx:36`, `{ id: "total", label: "Total" }` — ao lado de
+  "Últimos 30 dias". Não é um botão separado.
+- **O botão fechado é UMA linha** (`:298`, `dark:bg-[#202020]/50`), **idêntica**
+  à do `custom-select.tsx:56`. Ela serve `students`, `dashboard`, `analytics`,
+  `admin/page` e `admin/reports` — **não pode divergir entre telas**.
+- A superfície do dropdown aberto (`:306`) foi para `#262626`.
+
+⇒ **Coberto.** O que resta de `blue-*` no componente é o **realce do item
+selecionado** (`bg-blue-500/10` + `text-blue-600`, linhas `:317` e `:376`) — que
+é o item **9.222**, a família "lime sobre lime" que reprova **só no modo claro**
+(0 de 14 no escuro, e **zero contas** em claro) — e os botões "Aplicar", que são
+`bg-blue-600` corretamente remapeado.
+
+#### O portão do conjunto
+
+| medida | valor |
+|---|---|
+| `bg-[#202020]` | **48** ✅ |
+| `bg-[#262626]` | **33** ✅ |
+| molde `text-gray-500 dark:text-gray-400` | **230** ✅ |
+| `bg-gray-900` restante | **112** ✅ |
+| `bg-gray-950` restante | **31** ✅ |
+| telas de auth: `#3b82f6` · `#060612` · `rgba(99,102,241)` · `primary` | **0 · 0 · 0 · 0** |
+| telas de erro: `#0a0a1a` · `#2563eb` · `blue-*` | **0 · 0 · 0** |
+
+ⓘ Minha expectativa de `bg-gray-900` era 111 e o real é **112**: subtraí 4 do
+`date-range` quando só **3** eram `gray-900` (o `:306` era `gray-950`).
+115−3 = 112 e 32−1 = 31 — **os dois batem**.
+
+#### ⚠️ RISCO ACEITO — não é descuido, é decisão registrada
+
+`not-found.tsx` e `error.tsx` são do **ROOT** e capturam rotas do **ALUNO**
+também, que ainda vive no azul (**9.220**). Um aluno que erre a URL dentro do
+curso verá uma tela **lime** numa área **azul**.
+
+**Decisão do dono: MANTER APLICADO.** Os motivos que ele pôs na mesa:
+1. **errar URL é raro** — não é caminho de uso;
+2. **a área de membros vai virar lime depois** — a divergência é temporária;
+3. **aquela tela já estava com a paleta antiga de qualquer forma** — antes era
+   `#0a0a1a`, que também não é a cor da área de membros.
+
+**Fica registrado como risco aceito.** Reverter é 1 arquivo se a leitura mudar.
+
+#### O que ficou de fora, com motivo
+
+- **`(course)/course/[slug]/error.tsx`** — sob `(course)/`, proibido na rodada;
+- **`layout-illustration:8`** — gradiente **decorativo**, não cabe na regra;
+- **3 tooltips** compartilhados com o `/admin` — excluídos por **PAPEL**
+  (`group-hover` + `absolute`, escuros nos dois modos), não pela área;
+- 🔴 **9 arquivos fora dos três escopos** — `invite/[id]`, `verify-email`,
+  `forgot-password`, `reset-password`, `(auth)/register`, `auth/impersonate`,
+  `verify/[code]`, `(dashboard)/page` (o dashboard do **aluno**) e
+  `(dashboard)/profile` (que **alcança a vitrine** e sai de qualquer forma).
+  **São caso de COR DE MARCA, não de superfície** — exigem a decisão do par D12
+  ponto a ponto. **Regra diferente ⇒ fatia própria.**

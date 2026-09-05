@@ -233,7 +233,7 @@ function SortableLesson({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-gray-400 dark:hover:border-gray-700 transition"
+      className="flex items-center gap-2 p-3 bg-white dark:bg-[#202020] border border-gray-200 dark:border-gray-800 rounded-lg hover:border-gray-400 dark:hover:border-gray-700 transition"
     >
       <button
         {...attributes}
@@ -327,7 +327,7 @@ function LessonForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 bg-white dark:bg-gray-900 border border-blue-500/30 rounded-lg p-4">
+    <form onSubmit={handleSubmit} className="space-y-3 bg-white dark:bg-[#202020] border border-blue-500/30 rounded-lg p-4">
       <input
         autoFocus
         type="text"

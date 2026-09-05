@@ -477,7 +477,7 @@ export default function EditWorkspacePage() {
     return (
       <div className="max-w-5xl mx-auto">
         <div className="h-5 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse mb-4" />
-        <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+        <div className="h-48 bg-gray-100 dark:bg-[#202020] rounded-xl animate-pulse" />
       </div>
     );
   }
@@ -485,7 +485,7 @@ export default function EditWorkspacePage() {
   if (!ws) {
     return (
       <div className="max-w-xl mx-auto text-center py-12">
-        <p className="text-gray-500">Workspace não encontrado.</p>
+        <p className="text-gray-500 dark:text-gray-400">Workspace não encontrado.</p>
         <Link
           href="/producer/workspaces"
           className="inline-block mt-4 text-[#191919] dark:text-primary"
@@ -664,7 +664,7 @@ export default function EditWorkspacePage() {
       </form>
 
       {/* Footer sticky único */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-t border-gray-200 dark:border-white/10">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-[#262626]/80 backdrop-blur-sm border-t border-gray-200 dark:border-white/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex justify-end gap-3">
           <button
             type="button"

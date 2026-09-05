@@ -118,7 +118,7 @@ export default function SettingsPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-12 bg-gray-100 dark:bg-gray-900/50 rounded-xl animate-pulse" />
+              <div key={i} className="h-12 bg-gray-100 dark:bg-[#202020]/50 rounded-xl animate-pulse" />
             ))}
           </div>
         ) : (
@@ -360,7 +360,7 @@ function ColorPicker({
               handleHexInput(e.target.value);
             }
           }}
-          className="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white font-mono focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors"
+          className="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-[#202020]/50 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white font-mono focus:outline-none focus:border-[#191919]/50 dark:focus:border-white/50 transition-colors"
           placeholder="#000000"
           maxLength={7}
         />

@@ -357,7 +357,7 @@ export function AnalyticsOverview({
           </SectionCard>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-500 dark:text-gray-400 bg-white/40 dark:bg-gray-900/40">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-500 dark:text-gray-400 bg-white/40 dark:bg-[#202020]/40">
           Selecione um curso específico no filtro acima para ver módulos com maior abandono e aulas mais assistidas.
         </div>
       )}
@@ -405,7 +405,7 @@ export function AnalyticsOverview({
               />
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 px-6 py-12 text-center">
+            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/40 dark:bg-[#202020]/40 px-6 py-12 text-center">
               <span className="text-3xl block mb-2" aria-hidden>📊</span>
               <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
                 Adicione mais alunos e conteúdo para gerar diagnósticos automáticos sobre seus cursos.
@@ -598,8 +598,8 @@ function CustomTooltip({ active, payload, label, color }: { active?: boolean; pa
   if (!active || !payload || !payload.length) return null;
   const p = payload[0];
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-950 px-3 py-2 shadow-lg text-xs">
-      <p className="text-gray-500 mb-0.5">{label || p.payload?.label}</p>
+    <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#262626] px-3 py-2 shadow-lg text-xs">
+      <p className="text-gray-500 dark:text-gray-400 mb-0.5">{label || p.payload?.label}</p>
       <p className="font-semibold tabular-nums" style={{ color: color || "#3b82f6" }}>
         {p.name}: {p.value}
       </p>

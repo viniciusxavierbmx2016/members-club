@@ -341,7 +341,7 @@ export default function AdminIntegrationsPage() {
               URL do webhook
             </label>
             <div className="flex flex-col sm:flex-row gap-2 mb-5">
-              <code className="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg text-xs sm:text-sm text-gray-800 dark:text-gray-200 break-all">
+              <code className="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg text-xs sm:text-sm text-gray-800 dark:text-gray-200 break-all">
                 {webhookUrl}
               </code>
               <button
@@ -458,13 +458,13 @@ export default function AdminIntegrationsPage() {
                   return (
                     <div
                       key={c.id}
-                      className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-950/40"
+                      className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#262626]/40"
                     >
                       <div className="min-w-0 sm:w-56 flex-shrink-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                           {c.title}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {c.slug}
                           {!c.isPublished && (
                             <span className="ml-1.5 text-amber-500">
@@ -566,7 +566,7 @@ export default function AdminIntegrationsPage() {
                   className={`text-xs px-3 py-1.5 rounded-full border transition ${
                     eventFilter === ev
                       ? "bg-primary border-primary text-[var(--producer-button-text,#ffffff)]"
-                      : "bg-gray-100 dark:bg-gray-900/50 border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600"
+                      : "bg-gray-100 dark:bg-[#202020]/50 border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600"
                   }`}
                 >
                   {ev === "ALL" ? "Todos" : ev}
@@ -591,7 +591,7 @@ export default function AdminIntegrationsPage() {
                   {logs.map((l) => (
                     <div
                       key={l.id}
-                      className="border border-gray-200 dark:border-white/10 rounded-lg p-3 bg-gray-50 dark:bg-gray-950/40"
+                      className="border border-gray-200 dark:border-white/10 rounded-lg p-3 bg-gray-50 dark:bg-[#262626]/40"
                     >
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <span className="text-xs font-mono text-gray-800 dark:text-gray-200 truncate">
@@ -682,15 +682,15 @@ export default function AdminIntegrationsPage() {
               </li>
               <li>
                 Cole a URL, selecione os produtos e os eventos{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   TRANSACTION_PAID
                 </code>
                 ,{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   TRANSACTION_REFUNDED
                 </code>
                 ,{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   TRANSACTION_CHARGED_BACK
                 </code>
                 .

@@ -1574,6 +1574,91 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
   · **11 PERSONALIZARAM DE VERDADE** — `#00ff00`, `#ffca10` ×2, `#cc8b19`, `#00663a`, `#5900ff`, `#d3aa17`, `#d968b0`, `#000000`, `#42db00`, `#E53935`, vários com fundo próprio.
   ⇒ **O estrago real é 3 contas, não 14.** O fix impede que a lista cresça; a decisão sobre soltar os 3 é separada e mais delicada (mexe no que o produtor tem hoje).
 
+  ---
+
+  ### ⭐ DECISÃO DO DONO — 04/set/26, à noite, depois da subida da frente
+
+  A decisão tem **duas partes**, e nenhuma delas é "consertar agora".
+
+  #### (a) OS 5 CONGELADOS: avisar, não escrever
+
+  **Não haverá escrita no banco.** Os **3 do conjunto AZUL** — `ryanne22medeiros`
+  (01/09), `lucasrdsouza1` (18/08), `rangelsilva0812` (16/08) — **serão AVISADOS e
+  decidem sozinhos**, usando o botão **"Restaurar padrão"** que já existe na tela
+  (`producer/settings/page.tsx:257`, que chama o `DELETE` de
+  `api/producer/theme/route.ts:106-113` e grava `themeConfig = "{}"`).
+
+  ⭐ **Motivo, e é medido:** soltar é **irreversível**. A rota do tema **não escreve
+  auditoria** (`grep -c 'audit'` na rota = **0**) e **não existe histórico de tema**
+  no schema — `User.themeConfig` é um campo único (`schema.prisma:26`). Sobrescrever
+  com `"{}"` **perde o valor anterior para sempre**. E são **3 pessoas**: quando o
+  dado não decide, pergunta-se ao dono do dado — é a **Q3 da P0**, a mesma saída que
+  a **D6 passo 4** já tinha escolhido para os 5 campos de login.
+
+  ⓘ **Os 2 do conjunto ATUAL** (`suportepresetcombo`, `anacortesmkt`) **não precisam
+  de nada**: o valor travado é byte-idêntico ao padrão vigente, então **soltar não
+  mudaria um pixel hoje**. Eles só divergem se o padrão mudar de novo.
+
+  ⚠️ **RISCO ACEITO, registrado sem suavizar:** os 5 **continuam travados**. Se a
+  marca mudar outra vez, os 5 seguem parados — e **o número cresce a cada produtor
+  que salvar**. Não é hipótese: **eram 3 pela manhã de 04/set e viraram 5 à noite,
+  no mesmo dia.** O "piora sozinho" está **medido**, não suposto.
+
+  #### (b) O MECANISMO: não é fatia, é ITEM DE PRODUTO
+
+  **Não será consertado como fatia de código.**
+
+  ⭐ **O motivo medido, e é o que muda tudo:** hoje **"Salvar tema" é a ÚNICA forma
+  de o produtor TRAVAR a aparência atual**. A tela tem **exatamente dois botões** —
+  "Salvar tema" (`:250`) e "Restaurar padrão" (`:257`) — e **não existe conceito de
+  fixar**: zero ocorrências de trava/lock/fixar no arquivo. ⇒ **O mesmo
+  comportamento é o defeito** (congela quem não pediu) **e a ferramenta** (deixa
+  travar quem quer). Consertar sem substituir isso é **perda de capacidade** — e a
+  **D6 passo 4** contava justamente com ela (*"quem salvar a cor no painel trava a
+  aparência atual e resolve a própria ambiguidade"*).
+
+  ⇒ **O conserto certo separa as duas intenções:** *salvar o que foi escolhido* ×
+  *travar de propósito*. Isso é **desenho de produto**, não troca de valor.
+
+  🔴 **E a medição provou o que limita qualquer conserto: NENHUMA das opções liberta
+  quem já está preso.** As três candidatas medidas —
+  **(a)** enviar só o que mudou *(a tela **não guarda** o valor original: `grep`
+  por estado `saved`/`original`/`initial` = **0**; e sozinha **não resolveria**,
+  porque `route.ts:85-86` re-materializa os defaults antes de gravar, mesmo com
+  corpo parcial — o schema é `.passthrough()`, `validations.ts:252-256`)*;
+  **(b)** não gravar chave igual ao default *(teria de viver no **servidor**, onde
+  o `parseTheme` injeta)*; e **(c)** o `DELETE`, que **já existe** —
+  todas mudam o que uma escrita **FUTURA** faz. O `PUT` só roda quando alguém chama
+  a rota (`route.ts:56`), então **linha já gravada só muda com escrita nova**.
+
+  #### O censo, corte de 04/set/26 à noite
+
+  | situação | qtd |
+  |---|---|
+  | 🔒 **congelados** (themeConfig byte-idêntico a algum conjunto de defaults) | **5** — 3 no AZUL, 2 no LIME |
+  | ✏️ **escolha real** (valor fora de todo conjunto) | **9** |
+  | ✅ **livres** (`themeConfig` nulo ou `"{}"`) | **122** |
+
+  #### ⚠️ O que continua NÃO PROVADO
+
+  - **Se os 2 salvamentos de 04/set foram deliberados ou efeito do defeito.** Os
+    dois cenários produzem **registro idêntico**: 8 chaves, byte-iguais ao padrão
+    vigente. Só quem clicou sabe.
+  - **Por que o `updatedAt` dos dois AVANÇOU** entre duas medições do mesmo dia
+    (`anacortesmkt` 21:33 → 22:37; `suportepresetcombo` 22:07 → 23:23 UTC). Ou
+    salvaram mais de uma vez, ou `User.updatedAt` se move por outro motivo.
+  - **Se `cursos-pv` mexeu em COR.** O `updatedAt` da linha avançou **4 dias** após
+    a criação (13/05 16:51 → 18/05 02:35), mas é o carimbo da **linha inteira** —
+    pode ter sido qualquer campo. ⭐ **E o dono, perguntado, NÃO LEMBRA.** Fica
+    **indistinguível** — e é exatamente o caso que prova por que a **D6** existe:
+    a régua não é "quem mexeu", é "para quem posso trocar sem risco".
+
+  ⓘ **Controle contra vacuidade que passou (medido em 04/set):** dos 12 workspaces
+  do **grupo B** da D6 (personalizaram o login), **0 têm `createdAt == updatedAt`** —
+  todos salvaram alguma vez, como a régua prevê. Do **grupo A** (esmagador), **9 dos
+  15 nunca salvaram nada**. Se algum B aparecesse intacto, a régua estaria furada.
+
+
 - [x] **9.217 — Dois pontos da landing pintam texto BRANCO sobre a marca — e já reprovavam no azul** 🟢 — **sem fix — fatia própria, pequena (04/set/26).** Achados pelo fan-out da F5 e **confirmados pelo gate humano** da F5.1 nos dois.
   **Os pontos:** (a) `src/app/landing/page.tsx:462` — o badge do card de preço **destacado**, `bg-[var(--mc-accent)] text-white`, que só aparece no ramo `featured`; na página é o **"★ Mais escolhido · Mensalidade ZERO"** do card **"Members Club + Applyfy"** (`:439-440`). (b) `src/components/landing-mockups.tsx:257` — o texto **"Começar agora"** dentro do **mockup SVG**, `fill="#fff"` sobre um `rect` com `fill="var(--accent)"`.
   📏 **JÁ REPROVAVAM NO AZUL:** branco sobre `#3b82f6` = **3,68:1** (abaixo dos 4,5 de texto). Com o lime viram **1,11:1** — **o rebranding não criou o defeito, tornou-o visível**. *(Controles: `#000`/`#fff` = 21,00 · `#777`/`#888` = 1,26.)*
@@ -1616,6 +1701,10 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
   ⭐ **A LIÇÃO, e ela é de método:** *item marcado como FECHADO cuja correção vive em branch NÃO MESCLADA — o papel dizia feito e o código não estava.* O 9.213 constava fechado no §6 desde a rodada dos camaleões, mas metade do conserto (os 2 pontos que a varredura por CLASSE não via) ficou parada em `feat/rebranding-camaleoes-2` por rodadas, e só apareceu porque a varredura do defeito A **reencontrou os mesmos 2 pontos ainda quebrados na integração**. **REGRA: só marcar item como fechado DEPOIS DO MERGE, nunca no commit da fatia.** É o espelho do *merge sem papelada = item-fantasma*: lá o código entrou sem o papel; aqui o papel saiu sem o código. Os dois se previnem com a mesma disciplina — **o estado do item é o estado da ÁRVORE DE INTEGRAÇÃO, não o da branch**.
 
 - [ ] **9.225 — 🔴 54% DOS EVENTOS DE WEBHOOK SÃO ERRO, e o ruído esconderia um problema de deploy** 🟠 — **sem fix — medido em 04/set/26 ao avaliar o risco da primeira subida; virou frente própria.** `SELECT` em produção (`wyamxwmdgbvqrfcqfbyh`), 90 dias: **14.892 ERROR · 7.804 SUCCESS · 4.765 IGNORED = 27.461 eventos**. ⭐ **E os erros NÃO são de infraestrutura** — discriminei: **7.574 são `Missing client.email`** (payload de gateway sem e-mail do comprador) e a maior parte do resto é **produto sem curso vinculado** (`No course linked to externalId=…`, os 6 maiores somam ~4.200, cada um preso a um `productId` específico). Erro de infra (pool/timeout/Prisma/504) é **~208, ou 0,76%** dos eventos — e **168 deles caíram num único dia**, 14/07/26, o que é incidente pontual, não padrão. ⚠️ **A consequência prática, e é ela que faz disto um item:** a rota devolve **`status: 200` mesmo no catch mais externo** (`api/webhooks/applyfy/route.ts:559-562`, com o comentário *"Applyfy requires 200 OK to avoid retries"*), então **evento que falha não é reentregue pelo gateway** — fica só o `rawPayload` no `WebhookLog` para resgate manual. Com 14.892 erros de baseline, **ninguém enxerga um erro novo entrando**, e **não há Sentry nem nenhum pacote de observabilidade no `package.json`** (medido). ⇒ Um problema de deploy no caminho de venda seria invisível. ⓘ **Contraponto medido, que impede o pânico:** correlacionei os **58 dias com commit na `main`** (proxy de deploy) contra o sucesso diário do webhook em 90 dias — **nenhum dia zerou**, e dias com deploy têm média **maior** (94,2/dia contra 70,9). Deploy nunca derrubou o webhook. **O item é sobre o RUÍDO e a cegueira, não sobre uma quebra existente.** ⭐ Frente própria, com três perguntas: (1) por que 7.574 payloads chegam sem e-mail — é um gateway específico? um evento que não devia ser processado? (2) os `productId` órfãos são produtos desativados ou vínculo que ninguém fez? (3) vale separar `IGNORED` de `ERROR` para o log voltar a ser legível. → Camada 3.
+
+- [ ] **9.226 — As 4 telas de ERRO/OFFLINE ficaram na paleta ANTIGA, e agora destoam do app inteiro** 🟢 — **sem fix — achado na medição pós-subida da frente (04/set/26).** Varrendo o HTML servido de `/producer/login` em produção depois do merge `39e3d9d`, sobrou **1 ocorrência de `#0a0a1a`** — o payload do componente `notFound`. A varredura do conjunto achou **4 telas** com `bg-[#0a0a1a]` cravado, **nenhuma delas no diff da subida**: `app/not-found.tsx:31` · `app/error.tsx:44` · `app/offline/page.tsx` · `(course)/course/[slug]/error.tsx`. ⓘ **Não é regressão desta subida** — `git show d388389:src/app/not-found.tsx` confirma que já era `#0a0a1a` **antes** da frente. **O que mudou é o contraste com o resto:** até hoje o app inteiro era `#0a0a1a` e essas telas combinavam; agora o app é `#191919` e elas ficaram sendo as **únicas** superfícies com o azul-escuro aposentado. ⚠️ **E são telas de momento ruim** — 404, erro de runtime, app offline — justamente onde uma inconsistência visual passa a impressão de que algo quebrou de verdade. ⭐ **Por que ficaram de fora:** são hex **arbitrários entre colchetes** (`bg-[#0a0a1a]`), não classes `bg-blue-*`, então nenhum remap do `globals.css` as alcança, e a varredura por CLASSE das fatias não as via — é a mesma cegueira do **9.213** (os camaleões que só a varredura por gradiente/inline pegou). **Fix candidato:** trocar os 4 literais para `#191919`. Quatro linhas, zero risco, nenhuma delas sob `.producer-layout`. → Camada 3.
+
+- [ ] **9.227 — O `<body>` do root layout ainda pinta `#030712`, e é GLOBAL** 🟢 — **sem fix — achado no gate visual de produção de 04/set/26; NÃO tocado de propósito.** `src/app/layout.tsx:88` tem `dark:bg-gray-950` no `<body>`, e `gray-950` do Tailwind é **`#030712`** (lido do pacote instalado). ⚠️ **É o ROOT layout**: todas as rotas do app passam por ali — painel, área de membros, vitrine, `/admin`, landing e as telas de erro. É o **único** `<body>` do app (os outros 4 casamentos de `<body>` no `src/` são strings de template de e-mail, em `email-tab.tsx` e `email-templates.ts`). ⓘ **Hoje é invisível em `/producer/login`**, que foi onde o gate o encontrou: o wrapper de `producer/(auth)/login/page.tsx:116` pinta `#191919` por cima com `style` inline. Mas ele aparece em **qualquer rota cujo conteúdo não cubra a viewport inteira**, e nas margens/overscroll. ⭐ **Por que não entrou na leva do §6-K:** aquelas 4 fatias eram escopadas ao **painel**; esta linha alcança **tudo**, inclusive as três áreas que estavam explicitamente proibidas na rodada (área de membros, `/admin`, vitrine). **Trocar por `#191919` é uma linha** — mas é uma linha que repinta o app inteiro, e merece fatia e gate próprios. ⚠️ **E não é escolha óbvia:** o `#030712` do body é mais escuro que o `#191919` do painel; quem decidir precisa olhar a área de membros e a vitrine, que têm fundos próprios e podem estar contando com esse contraste de borda. → Camada 3.
 
 ---
 

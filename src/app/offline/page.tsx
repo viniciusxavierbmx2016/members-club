@@ -2,7 +2,7 @@
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a1a] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#191919] px-4">
       <div className="text-center max-w-sm">
         <div className="mx-auto w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-6">
           <svg
@@ -35,7 +35,7 @@ export default function OfflinePage() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#EFFF20] hover:bg-[#EFFF20]/90 text-[#191919] text-sm font-semibold rounded-xl transition"
         >
           <svg
             className="w-4 h-4"

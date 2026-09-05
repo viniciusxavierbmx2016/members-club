@@ -292,7 +292,7 @@ export function ModulesManager({
       </div>
 
       {creatingSection && (
-        <div className="bg-white dark:bg-gray-900 border border-blue-500/30 rounded-xl p-4 flex gap-2">
+        <div className="bg-white dark:bg-[#202020] border border-blue-500/30 rounded-xl p-4 flex gap-2">
           <input
             type="text"
             value={newSectionTitle}
@@ -327,7 +327,7 @@ export function ModulesManager({
       )}
 
       {creatingModule && (
-        <div className="bg-white dark:bg-gray-900 border border-blue-500/30 rounded-xl p-4 flex gap-2">
+        <div className="bg-white dark:bg-[#202020] border border-blue-500/30 rounded-xl p-4 flex gap-2">
           <input
             type="text"
             value={newModuleTitle}
@@ -362,8 +362,8 @@ export function ModulesManager({
       )}
 
       {items.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-500 text-sm">
+        <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             Nenhum módulo criado ainda. Clique em &ldquo;Novo módulo&rdquo; para começar.
           </p>
         </div>
@@ -480,19 +480,19 @@ function SortableSection({
               setEditing(false);
             }
           }}
-          className="flex-1 px-2 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded text-gray-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="flex-1 px-2 py-1 bg-white dark:bg-[#202020] border border-gray-300 dark:border-gray-700 rounded text-gray-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       ) : (
         <h3
           onClick={() => setEditing(true)}
-          className="flex-1 text-gray-900 dark:text-white font-semibold cursor-text hover:bg-white/40 dark:hover:bg-gray-900/40 px-2 py-1 rounded text-sm"
+          className="flex-1 text-gray-900 dark:text-white font-semibold cursor-text hover:bg-white/40 dark:hover:bg-[#202020]/40 px-2 py-1 rounded text-sm"
         >
           {section.title}
         </h3>
       )}
       <button
         onClick={() => onDelete(section.id)}
-        className="p-1.5 text-gray-500 hover:text-red-400 transition"
+        className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-400 transition"
         aria-label="Excluir divisão"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -568,13 +568,13 @@ function SortableModule({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden"
+      className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden"
     >
-      <div className="flex items-center gap-2 p-4 bg-white dark:bg-gray-900">
+      <div className="flex items-center gap-2 p-4 bg-white dark:bg-[#202020]">
         <button
           {...attributes}
           {...listeners}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none"
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none"
           aria-label="Arrastar módulo"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -653,7 +653,7 @@ function SortableModule({
       </div>
 
       {expanded && (
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 p-4 space-y-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#262626]/40 p-4 space-y-4">
           <ThumbnailUpload
             value={module.thumbnailUrl}
             onChange={(url) => onUpdate(module.id, { thumbnailUrl: url })}

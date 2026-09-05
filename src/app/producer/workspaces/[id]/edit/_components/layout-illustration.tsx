@@ -17,7 +17,7 @@ export function LayoutIllustration({ kind }: { kind: LoginLayout }) {
   if (kind === "lateral-left") {
     return (
       <div className="w-full h-full rounded-md border border-gray-200 dark:border-white/10 flex overflow-hidden">
-        <div className="w-1/2 bg-gray-800 dark:bg-gray-950 flex items-center justify-center">
+        <div className="w-1/2 bg-gray-800 dark:bg-[#262626] flex items-center justify-center">
           <div className="w-7 h-9 rounded-sm bg-white/80 flex flex-col items-center justify-center gap-0.5 p-0.5">
             <div className="w-full h-0.5 rounded bg-gray-300" />
             <div className="w-full h-0.5 rounded bg-gray-300" />
@@ -31,7 +31,7 @@ export function LayoutIllustration({ kind }: { kind: LoginLayout }) {
   return (
     <div className="w-full h-full rounded-md border border-gray-200 dark:border-white/10 flex overflow-hidden">
       <div className="w-1/2 bg-gradient-to-br from-blue-400 to-purple-500" />
-      <div className="w-1/2 bg-gray-800 dark:bg-gray-950 flex items-center justify-center">
+      <div className="w-1/2 bg-gray-800 dark:bg-[#262626] flex items-center justify-center">
         <div className="w-7 h-9 rounded-sm bg-white/80 flex flex-col items-center justify-center gap-0.5 p-0.5">
           <div className="w-full h-0.5 rounded bg-gray-300" />
           <div className="w-full h-0.5 rounded bg-gray-300" />

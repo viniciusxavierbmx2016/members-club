@@ -78,7 +78,7 @@ function Toggle({ checked, onChange, label, description }: {
 }
 
 const inputClass =
-  "w-full px-3 py-2.5 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors text-sm";
+  "w-full px-3 py-2.5 bg-white dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors text-sm";
 
 const labelClass = "block text-xs text-gray-500 dark:text-gray-400 mb-1.5";
 
@@ -282,7 +282,7 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
                 readOnly={mode === "edit"}
                 className={`${inputClass} ${
                   mode === "edit"
-                    ? "bg-gray-100 dark:bg-gray-900 cursor-not-allowed opacity-70"
+                    ? "bg-gray-100 dark:bg-[#202020] cursor-not-allowed opacity-70"
                     : ""
                 }`}
                 title={
@@ -576,7 +576,7 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
         <div className="mb-4">
           <label className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 block">Arquivo PDF (opcional)</label>
           {termsFileUrl ? (
-            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg">
               <svg className="w-8 h-8 text-red-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
@@ -654,7 +654,7 @@ export function CourseForm({ initial, mode }: CourseFormProps) {
       </div>
 
       {/* Footer sticky */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-t border-gray-200 dark:border-white/10">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-[#262626]/80 backdrop-blur-sm border-t border-gray-200 dark:border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-end gap-3">
           <button
             type="button"

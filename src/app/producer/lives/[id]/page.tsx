@@ -365,7 +365,7 @@ export default function ProducerLiveRoomPage() {
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-gray-950 border border-white/10 rounded-xl w-full max-w-sm p-6">
+          <div className="relative bg-[#262626] border border-white/10 rounded-xl w-full max-w-sm p-6">
             <h3 className="text-lg font-bold text-white mb-2">Deletar mensagem?</h3>
             <p className="text-gray-400 text-sm mb-4">Esta ação não pode ser desfeita.</p>
             <div className="flex justify-end gap-3">
@@ -617,7 +617,7 @@ export default function ProducerLiveRoomPage() {
       {endConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" onClick={() => setEndConfirm(false)} />
-          <div className="relative bg-gray-950 border border-white/10 rounded-xl w-full max-w-sm p-6">
+          <div className="relative bg-[#262626] border border-white/10 rounded-xl w-full max-w-sm p-6">
             <h3 className="text-lg font-bold text-white mb-2">Encerrar live?</h3>
             <p className="text-gray-400 text-sm mb-4">
               &quot;{live.title}&quot; será encerrada. O chat será desabilitado.
@@ -641,7 +641,7 @@ export default function ProducerLiveRoomPage() {
       {showLessonModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" />
-          <div className="relative bg-gray-950 border border-white/10 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-[#262626] border border-white/10 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-green-400 text-lg">✅</span>
