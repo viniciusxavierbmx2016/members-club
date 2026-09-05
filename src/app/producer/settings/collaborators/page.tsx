@@ -575,7 +575,7 @@ function CollaboratorModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-[#262626] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
       >
         <div className="px-6 py-5 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">

@@ -458,7 +458,7 @@ export default function AdminIntegrationsPage() {
                   return (
                     <div
                       key={c.id}
-                      className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-950/40"
+                      className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#262626]/40"
                     >
                       <div className="min-w-0 sm:w-56 flex-shrink-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -591,7 +591,7 @@ export default function AdminIntegrationsPage() {
                   {logs.map((l) => (
                     <div
                       key={l.id}
-                      className="border border-gray-200 dark:border-white/10 rounded-lg p-3 bg-gray-50 dark:bg-gray-950/40"
+                      className="border border-gray-200 dark:border-white/10 rounded-lg p-3 bg-gray-50 dark:bg-[#262626]/40"
                     >
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <span className="text-xs font-mono text-gray-800 dark:text-gray-200 truncate">

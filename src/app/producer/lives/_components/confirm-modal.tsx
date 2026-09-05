@@ -18,7 +18,7 @@ export function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
-      <div className="relative bg-white dark:bg-gray-950 border border-gray-200 dark:border-white/10 rounded-xl w-full max-w-sm p-6">
+      <div className="relative bg-white dark:bg-[#262626] border border-gray-200 dark:border-white/10 rounded-xl w-full max-w-sm p-6">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           {action.type === "start"
             ? "Iniciar Live?"

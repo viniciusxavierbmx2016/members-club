@@ -787,7 +787,7 @@ export default function CourseCustomizePage() {
           </div>
 
           {/* Footer sticky */}
-          <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-t border-gray-200 dark:border-white/10">
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-[#262626]/80 backdrop-blur-sm border-t border-gray-200 dark:border-white/10">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-end gap-3">
               <button
                 type="button"
