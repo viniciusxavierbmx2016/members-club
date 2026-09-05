@@ -201,7 +201,7 @@ export function CoursePreview({
       href={course.checkoutUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-500 hover:to-blue-500 text-white text-[15px] font-semibold rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 transition-[colors,box-shadow] duration-200"
+      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-500 hover:to-blue-500 text-[var(--member-button-text,#ffffff)] text-[15px] font-semibold rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-500/30 transition-[colors,box-shadow] duration-200"
     >
       Comprar agora
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -512,7 +512,7 @@ export function CoursePreview({
                 href={course.checkoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-b from-blue-500 to-blue-600 text-white text-sm font-semibold rounded-xl shadow-md shadow-blue-600/20"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-b from-blue-500 to-blue-600 text-[var(--member-button-text,#ffffff)] text-sm font-semibold rounded-xl shadow-md shadow-blue-600/20"
               >
                 Comprar agora
               </a>
