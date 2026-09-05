@@ -653,7 +653,7 @@ function SortableModule({
       </div>
 
       {expanded && (
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/40 p-4 space-y-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#262626]/40 p-4 space-y-4">
           <ThumbnailUpload
             value={module.thumbnailUrl}
             onChange={(url) => onUpdate(module.id, { thumbnailUrl: url })}

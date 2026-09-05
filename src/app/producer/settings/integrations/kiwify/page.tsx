@@ -381,7 +381,7 @@ export default function KiwifyIntegrationPage() {
                   return (
                     <div
                       key={c.id}
-                      className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-950/40"
+                      className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3 p-3 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#262626]/40"
                     >
                       <div className="min-w-0 sm:w-56 flex-shrink-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">

@@ -19,7 +19,7 @@ export function PreviewModal({ slug, reloadKey, onClose }: PreviewModalProps) {
         style={{ maxHeight: "85vh", height: "85vh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gray-950 flex-shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#262626] flex-shrink-0">
           <p className="text-sm font-semibold text-white">
             Pré-visualização da tela de login
           </p>
@@ -35,7 +35,7 @@ export function PreviewModal({ slug, reloadKey, onClose }: PreviewModalProps) {
           </button>
         </div>
         <div className="flex-1 min-h-0 overflow-hidden p-4 bg-gray-900">
-          <div className="h-full w-full rounded-xl overflow-hidden border border-white/10 flex flex-col bg-gray-950">
+          <div className="h-full w-full rounded-xl overflow-hidden border border-white/10 flex flex-col bg-[#262626]">
             <div className="h-9 px-3 bg-gray-800 flex items-center gap-2 flex-shrink-0">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#ff5f57" }} />
@@ -53,7 +53,7 @@ export function PreviewModal({ slug, reloadKey, onClose }: PreviewModalProps) {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-white/10 bg-gray-950 flex-shrink-0">
+        <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-white/10 bg-[#262626] flex-shrink-0">
           <button
             type="button"
             onClick={onClose}
