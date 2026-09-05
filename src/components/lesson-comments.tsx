@@ -125,7 +125,7 @@ function CommentBubble({
               <button
                 onClick={submitReply}
                 disabled={submitting || !replyText.trim()}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg disabled:opacity-50"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-xs font-medium rounded-lg disabled:opacity-50"
               >
                 {submitting ? "..." : "Enviar"}
               </button>
@@ -209,7 +209,7 @@ export function LessonComments({ lessonId }: { lessonId: string }) {
           <button
             type="submit"
             disabled={!content.trim() || submitting}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
           >
             {submitting ? "Enviando..." : "Comentar"}
           </button>

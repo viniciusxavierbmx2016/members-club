@@ -148,7 +148,7 @@ export function ReviewsSection({
             <button
               type="submit"
               disabled={submitting || rating < 1}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
             >
               {submitting
                 ? "Enviando..."

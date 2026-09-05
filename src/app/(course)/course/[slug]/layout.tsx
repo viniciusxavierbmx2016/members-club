@@ -15,6 +15,7 @@ import { prisma } from "@/lib/prisma";
 import { CourseShell } from "@/components/course-shell";
 import { CourseSupportWidget } from "@/components/course-support-widget";
 import { WorkspaceThemeLock } from "@/components/workspace-theme-lock";
+import { contrastingTextColor } from "@/lib/color-utils";
 import type { EnrollmentStatus } from "@prisma/client";
 
 export default async function CourseSlugLayout(props: {
@@ -142,6 +143,9 @@ export default async function CourseSlugLayout(props: {
     course.memberHeaderColor && `--member-header: ${course.memberHeaderColor}`,
     course.memberCardColor && `--member-card: ${course.memberCardColor}`,
     course.memberPrimaryColor && `--member-primary: ${course.memberPrimaryColor}`,
+    // A1 · calculada da marca por max-contraste; NÃO emitida sem marca própria
+    course.memberPrimaryColor &&
+      `--member-button-text: ${contrastingTextColor(course.memberPrimaryColor)}`,
     course.memberTextColor && `--member-text: ${course.memberTextColor}`,
   ]
     .filter(Boolean)

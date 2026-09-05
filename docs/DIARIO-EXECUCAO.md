@@ -35,6 +35,41 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-05 — FRENTE REBRANDING, ETAPA A1 — O TEXTO SOBRE A MARCA É CALCULADO, NÃO GUARDADO
+
+**Estado antes:** main em `eb5ef81` · integração `feat/rebranding` em `4d48781`
+**O que foi feito:** Conserto de DEFEITO, não rebranding. 12 cursos de produção já serviam
+botão ilegível com o azul — `Formação Home Office` branco sobre `#ffc845` (**1,54:1**),
+`Kingdom Academy` branco sobre `#ffffff` (**1,00:1**). **3.699 alunos ativos.** A cor do
+texto passou a ser CALCULADA da marca por max-contraste, dispensando o campo novo que
+travava a frente na D5. ⭐ A regra por LIMIAR (a hipótese original, minha) foi **REFUTADA
+e o registro foi mantido**: acertava 10 dos 72 cursos, porque a fronteira do critério 4,5
+fica em BT.601 ≈0,469 e o `#3b82f6` — fallback de 58 dos 72 — mede 0,478 e cai na fresta.
+**Arquivos tocados:** `src/lib/color-utils.ts` (+`contrastingTextColor`) · `app/(course)/course/[slug]/layout.tsx` (emite `--member-button-text`) · 15 arquivos com os 23 pontos `text-white → text-[var(--member-button-text,#ffffff)]`
+**Como foi provado:** `tsc` exit 0 · build de staging verde (BUILD_ID `mw67SYtEbVB8iIIZ_Pfvj`) ·
+regra confirmada no CSS SERVIDO — `.text-\[var\(--member-button-text\,\#ffffff\)\]{color:var(--member-button-text,#fff)}`,
+**uma** regra, sem duplicação por modo · **Chrome headless sobre o bundle real com a `className`
+real de `lesson-quiz.tsx:266`**: sem var → `rgb(255,255,255)` ≡ `text-white` (0 pixel muda) ·
+com var → `rgb(10,10,10)` · **FHO** `rgb(255,200,69)` **antes e depois idêntico**, 1,54 → **12,82** ·
+**Kingdom** → **19,80** · 72/72 acima de 4,5 contra os dados reais de produção (`wyamxwmdgbvqrfcqfbyh`,
+só SELECT) · 0 regressões · discriminador real (escuro em 70, claro em 2).
+⚠️ **O palco NÃO consegue mostrar o conserto:** os 5 cursos de staging têm `memberPrimaryColor`
+NULL e escrever em banco estava proibido. O palco prova o **controle negativo**; o conserto foi
+provado pelo navegador sobre o bundle real e pelos dados de produção. **Gate humano pendente.**
+**SHA do merge:** — (**NÃO MESCLADO** — parada para o gate)  ·  **Rollback:** `git branch -D feat/a1-contraste-texto-marca`
+**Mudou em produção para quem:** ninguém ainda — nada subiu. Ao subir: **3.699 alunos** em 12 cursos
+passam a ver texto legível no botão; os outros **25.000+** não mudam **um pixel** (var não emitida ⇒
+fallback `#ffffff` ⇒ idêntico ao `text-white` de hoje, provado no navegador).
+**Ficou aberto:** **9.230** (os 11 pontos fora do `.course-customized` — D-3) · **9.231** (os 5 cursos
+sem marca própria, 310 alunos — D-4) · **9.232** (`workspace-auth-shell.tsx:133` — `buttonTextColor`
+branco cravado: **o mesmo defeito no login do aluno**) · **9.233** (os 53 sem personalização servem
+branco sobre `emerald-500` = **2,54**, 24.618 matrículas)
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ (build de staging; limite do palco declarado) ·
+gate humano ⏳ **PENDENTE** · papelada ✅ (PLANO-MESTRE 9.230-9.233 · REBRANDING-2026 §14)
+
+---
+
+
 ## 2026-08-31 — CAMADA 4, ETAPA E4.4 (etapa 5) — AS DECISÕES DA MARCA DE PERTENCIMENTO, REGISTRADAS
 
 **Estado antes:** main em `ae908f6`

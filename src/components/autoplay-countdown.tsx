@@ -73,7 +73,7 @@ export function AutoplayCountdown({
           <button
             type="button"
             onClick={onComplete}
-            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] rounded-lg font-medium"
           >
             Assistir agora
           </button>

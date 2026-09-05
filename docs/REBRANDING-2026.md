@@ -2645,3 +2645,174 @@ Fora também: `admin/login` e `invite/admin/[id]` — **exclusivas do fluxo admi
 **Os dois últimos entraram sem verificação visual.** Provados só por código e
 contagem (`blue-*` = 0, `#3b82f6` = 0, `#0a0a0b` = 0). **Registrado como não
 visto, não como aprovado.**
+
+---
+
+### 6-Q. 🚀 A TERCEIRA SUBIDA PARA PRODUÇÃO (05/set/26, 11:46)
+
+**`eb5ef81`** — merge de `feat/rebranding` na `main`. Push às **11:46:49 BRT**,
+deployment **`success` às 11:48:15 — 86 segundos**. **7 arquivos** (5 de
+código, 2 de docs).
+
+O que subiu: a **tela de offline que o usuário realmente vê**
+(`public/offline.html`), `verify-email`, o **register da raiz**, `invite/[id]`
+e `auth/impersonate`. O conteúdo e as lições estão em **§6-P**.
+
+#### O gate — o que foi visto e o que NÃO foi
+
+| tela | gate |
+|---|---|
+| `public/offline.html` | ✅ visto |
+| `verify-email` | ✅ visto |
+| `(auth)/register` (raiz) | ✅ visto |
+| `invite/<id>` | ⚠️ **NÃO VISTO** — exigia gerar um convite à mão |
+| `auth/impersonate` | ⚠️ **NÃO VISTO** — exigia sessão de admin |
+
+**3 vistos, 2 não vistos.** Os dois últimos subiram provados **só por código e
+contagem** (`blue-*` = 0, `#3b82f6` = 0, `#0a0a0b` = 0). **Registrado como não
+visto, não como aprovado** — se aparecer defeito neles, não foi surpresa, foi
+risco assumido.
+
+#### O portão, medido
+
+- `prisma/` **0** · migração `20260831190000` **0** · `tsc` exit 0
+- áreas intocadas: `(course)/` **0**, `w/` **0**, `admin/` **0**, `prisma/` **0**
+- **comportamento**: 20 pares no word-diff do `src/`, **19 cosméticos**, 1
+  inspecionado — e é `#3b82f6"` → `#EFFF20"`, um hex em `style` inline. **Zero lógica.**
+- ⭐ **`public/offline.html` conferido tag a tag**, por ser HTML puro servido
+  pelo service worker: o diff são **3 linhas, todas dentro do `<style>`, todas
+  valor de cor**. `<div>`, `<svg>`, `<button>`, `<style>`, `<body>`, `<html>`,
+  `onclick` e `class=` com **contagem idêntica** antes e depois; **zero
+  `<script>`** nos dois; **33 linhas** nos dois.
+
+#### Depois do deploy
+
+| verificação | resultado |
+|---|---|
+| `/` · `/landing` · `/producer/login` · `/w/3n-trader` · `/verify-email` · `/register` | **200** |
+| `/sw.js` (esta leva não o toca) | **`2.4.0`** ✅ |
+| `manifest.json` (idem) | **`#191919`** ✅ |
+| `/verify-email` · `/register` · `/producer/login` | lime presente; `blue-*`, `#3b82f6` e `#0a0a1a` = **0 nas três** |
+
+⚠️ **`/offline.html` não pôde ser lido por HTTP** — deslogado devolve **307
+para o login**, que é exatamente o item **9.228**. Fica como **baseline
+medido** daquele item. A prova foi feita **pelo artefato**: o arquivo na `main`
+tem `#191919`, `#9ca3af` e `#EFFF20`, e **zero** de `#0a0a1a`/`#3b82f6`.
+
+#### Rollback
+
+**`eb5ef81`.** `git revert -m 1 eb5ef81 && git push origin main`, ou Instant
+Rollback para o deploy de `bb51e6c`.
+⚠️ Reverter **devolve a tela de offline ao azul** — e é a que o usuário de fato
+vê. Não desfaz nada no banco nem no service worker.
+
+
+---
+
+## 14. A1 — o texto sobre a marca é CALCULADO (05/set/26)
+
+**Não é rebranding. É conserto de defeito.** Antes de qualquer troca de cor,
+**12 cursos de produção já serviam botão ilegível** com o azul: `Formação Home
+Office` servia branco sobre `#ffc845` (**1,54:1**) e `Kingdom Academy` branco
+sobre `#ffffff` (**1,00:1** — literalmente invisível). **3.699 alunos ativos.**
+
+### 14.1 ⭐ A REFUTAÇÃO — registrada, não apagada
+
+A hipótese original era por **LIMIAR de luminância**: "marca clara ⇒ texto
+escuro; escura ⇒ texto claro", reusando o `0.6` que o
+`components/workspace-auth-shell.tsx:74` já usava.
+
+**Medida contra os 72 cursos reais, ela acertava 10.**
+
+| forma | passa em 4,5 | alunos |
+|---|---|---|
+| hoje (branco cravado) | 2 / 72 | 64 |
+| **limiar BT.601 > 0,6** | **10 / 72** 🔴 | 3.480 |
+| **max-contraste** | ⭐ **72 / 72** ✅ | 28.687 |
+
+**Por que falha, exatamente:** a fronteira real do critério 4,5 fica em
+BT.601 ≈ **0,469**. O `#3b82f6` — fallback de **58 dos 72** cursos — mede
+**0,478** e cai na fresta: o limiar escolhe CLARO (**3,68** 🔴) onde o ESCURO
+media **5,38** ✅. **O limiar escolhe o pior dos dois.**
+
+⚠️ **O 0.6 não está errado no `auth-shell`**: lá ele decide a CAIXA, não o
+critério de 4,5. **Copiá-lo para cá é que seria o erro.** A lição é da família
+do [[feedback_mold_cite_file_line]]: o molde existia, servia para outra
+pergunta, e reusá-lo sem medir teria produzido um fix que não conserta.
+
+### 14.2 As 5 decisões do dono
+
+| # | decisão | motivo MEDIDO |
+|---|---|---|
+| **D-1** | max-contraste, não limiar | 10/72 × 72/72 |
+| **D-2** | o escuro é `#0a0a0a`, não `#191919` | o `#191919` perde 4 cursos (278 alunos): `#526eff` mede 4,21 e `#e53935` 4,23. Aqui o critério é **contraste**, não identidade |
+| **D-3** | os 11 fora do `.course-customized` ficam FORA | manter a fatia isolável é o que a torna segura → item **9.230** |
+| **D-4** | os 5 cursos sem marca própria ficam FORA | sem valor de entrada a conta não roda; inventar seria adivinhar → item **9.231** |
+| **D-5** | o produtor **não** pode sobrepor a conta | exigiria schema e traria de volta o defeito do 9.216 — produtor escolhendo texto ilegível. **A conta ser automática é a vantagem** |
+
+### 14.3 O mecanismo — e por que dispensa schema
+
+O portão da área do aluno concluiu que faltaria um campo `memberButtonTextColor`,
+o que travava a frente na **D5**. **Não falta.** A cor da marca é conhecida no
+**mesmo lugar** onde a cor do texto precisa ser decidida:
+
+```
+lib/course-meta.ts:17        memberPrimaryColor: true          ← já no select
+(course)/…/layout.tsx:144    `--member-primary: ${...}`
+(course)/…/layout.tsx:145-147 `--member-button-text: ${contrastingTextColor(…)}`
+```
+
+Server component, **zero query nova**, **0,124 µs** por chamada.
+
+### 14.4 ⭐ A preocupação da duplicação por modo SE DISSOLVEU
+
+A medição alertava que as regras do `globals.css` são duplicadas
+(`.dark .course-customized` × `html:not(.dark)`) e que a regra nova precisaria
+das duas. **Não precisa** — porque o mecanismo não é remap do `globals.css`,
+é **valor arbitrário do Tailwind**. O bundle servido tem **uma** regra:
+
+```css
+.text-\[var\(--member-button-text\,\#ffffff\)\]{color:var(--member-button-text,#fff)}
+```
+
+### 14.5 As provas
+
+**Chrome headless sobre o bundle real, com a `className` real de `lesson-quiz.tsx:266`:**
+
+| caso | fundo | texto | contraste |
+|---|---|---|---|
+| sem a var | `rgb(37,99,235)` | `rgb(255,255,255)` | ≡ `text-white` ⇒ **0 pixel muda** |
+| com a var | | `rgb(10,10,10)` | |
+| **FHO antes** | `rgb(255,200,69)` | branco | **1,54** 🔴 |
+| **FHO depois** | `rgb(255,200,69)` **idêntico** | `rgb(10,10,10)` | **12,82** ✅ |
+| **Kingdom depois** | `rgb(255,255,255)` | `rgb(10,10,10)` | **19,80** ✅ |
+
+⭐ **O fundo é byte-idêntico antes e depois** — a cor do produtor não se move.
+
+**Controle contra vacuidade:** a conta escolhe **escuro em 70** e **claro em 2**
+(`PSV` `#000000`, `Pilates na Parede` `#9e6457`). Se escolhesse escuro em 72,
+não seria discriminador.
+
+### 14.6 Duas correções da MINHA própria medição
+
+1. **O A0.4 contou 25 alvos; são 23.** Dois eram **tinte translúcido**, não a
+   marca como superfície: `dislike-feedback-modal.tsx:60` (`bg-blue-600/20`) e
+   `lessons-sidebar.tsx:238` (`bg-blue-500/[0.08]`, que no modo escuro é 8% —
+   texto escuro ali **REGREDIRIA**). A varredura casava "texto claro + fundo-marca
+   na mesma linha" sem separar preenchimento sólido de tinte.
+   ⭐ **Lição:** *o modificador de opacidade muda a NATUREZA da superfície, não
+   só a intensidade.* Uma varredura por classe é cega a isso — só a leitura da
+   linha inteira separa.
+2. **A tabela do OO6 dizia "17 cursos / 4.009 alunos".** Cinco deles têm
+   `memberPrimaryColor` NULL — são a lacuna da D-4, e para eles a var não é
+   emitida. **Alcance real: 12 cursos / 3.699 alunos.** O predicado certo é
+   `memberPrimaryColor != null`, não `hasCustomization`.
+
+### 14.7 O que ficou aberto
+
+| item | o quê | alcance |
+|---|---|---|
+| **9.230** | os 11 pontos fora do `.course-customized` | vitrine, `course-card`, `auth-provider`, `push-opt-in` |
+| **9.231** | os 5 cursos sem marca própria | 310 alunos |
+| **9.232** | `auth-shell:133` — `buttonTextColor` branco cravado | o MESMO defeito, no login do aluno |
+| **9.233** | os 53 sem personalização: branco sobre `emerald-500` = **2,54** | 24.618 matrículas |
