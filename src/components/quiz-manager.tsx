@@ -119,7 +119,7 @@ export function QuizManager({ lessonId }: Props) {
   if (!quiz) {
     return (
       <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-6 text-center">
-        <p className="text-sm text-gray-500 mb-3">Nenhum quiz nesta aula</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Nenhum quiz nesta aula</p>
         <button
           type="button"
           onClick={createQuiz}
