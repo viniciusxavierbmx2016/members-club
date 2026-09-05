@@ -56,8 +56,9 @@ só SELECT) · 0 regressões · discriminador real (escuro em 70, claro em 2).
 ⚠️ **O palco NÃO consegue mostrar o conserto:** os 5 cursos de staging têm `memberPrimaryColor`
 NULL e escrever em banco estava proibido. O palco prova o **controle negativo**; o conserto foi
 provado pelo navegador sobre o bundle real e pelos dados de produção. **Gate humano pendente.**
-**SHA do merge:** — (**NÃO MESCLADO** — parada para o gate)  ·  **Rollback:** `git branch -D feat/a1-contraste-texto-marca`
-**Mudou em produção para quem:** ninguém ainda — nada subiu. Ao subir: **3.699 alunos** em 12 cursos
+**SHA do merge:** `b5a91fc` (integração) → **`1d7b7d8` (main, EM PRODUÇÃO)**  ·  **Rollback:** `git revert -m 1 1d7b7d8` ou Instant Rollback para **`eb5ef81`**
+**Subida:** push 05/set/26 **16:20:44 BRT** · deployment `success` **16:22:19** (1min38s) · build de produção `qsdCk36eCVSwJHD0GptHl` · **0 respostas 500** · `sw.js` 2.4.0 e manifest `#191919` intocados · regra CSS **viva** em `/_next/static/chunks/0yn0ja2ht9iyu.css`
+**Mudou em produção para quem:** **3.699 alunos** em 12 cursos
 passam a ver texto legível no botão; os outros **25.000+** não mudam **um pixel** (var não emitida ⇒
 fallback `#ffffff` ⇒ idêntico ao `text-white` de hoje, provado no navegador).
 **Ficou aberto:** **9.230** (os 11 pontos fora do `.course-customized` — D-3) · **9.231** (os 5 cursos
@@ -65,7 +66,7 @@ sem marca própria, 310 alunos — D-4) · **9.232** (`workspace-auth-shell.tsx:
 branco cravado: **o mesmo defeito no login do aluno**) · **9.233** (os 53 sem personalização servem
 branco sobre `emerald-500` = **2,54**, 24.618 matrículas)
 **Regras conferidas:** §17 respondido ✅ · staging-first ✅ (build de staging; limite do palco declarado) ·
-gate humano ⏳ **PENDENTE** · papelada ✅ (PLANO-MESTRE 9.230-9.233 · REBRANDING-2026 §14)
+gate humano ⏳ **PENDENTE** (só logado: `/course/kingdomacademy` e `/course/formacao-home-office-fho`) · papelada ✅ (PLANO-MESTRE 9.230-9.233 · REBRANDING-2026 §14)
 
 ---
 

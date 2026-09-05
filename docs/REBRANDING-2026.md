@@ -2709,6 +2709,94 @@ vê. Não desfaz nada no banco nem no service worker.
 
 ---
 
+### 6-R. 🚀 A QUARTA SUBIDA PARA PRODUÇÃO — a primeira que conserta DEFEITO DA ÁREA DO ALUNO (05/set/26, 16:20)
+
+**`1d7b7d8` — merge `--no-ff` de `feat/rebranding` na `main`. Push às 16:20:44 BRT.**
+Deployment da Vercel **`success` às 16:22:19** (1min38s). **Rollback: `eb5ef81`**
+(salvo em `/tmp/sha-rollback-a1.txt`).
+
+⭐ **É a primeira subida da frente que NÃO é rebranding.** As três anteriores
+mudaram cor por identidade (§6-I `e236b55` · §6-J `39e3d9d` · §6-O `bb51e6c` ·
+§6-Q `eb5ef81`). Esta **conserta um defeito que já estava em produção antes de
+qualquer troca de cor**: 12 cursos serviam botão ilegível **com o azul**.
+`Formação Home Office` servia branco sobre `#ffc845` = **1,54:1**;
+`Kingdom Academy` branco sobre `#ffffff` = **1,00:1**, literalmente invisível.
+**3.699 alunos ativos.**
+
+**20 arquivos** — 17 de código (todos em `(course)/`, `components/` e `lib/`) e
+3 de papelada. **0 em `prisma/`, 0 em `producer/`, 0 em `admin/`, 0 em `app/w/`.**
+
+| portão | resultado |
+|---|---|
+| ensaio na integração | 0 conflitos |
+| ensaio na `main` | 0 conflitos |
+| `tsc --noEmit` | exit 0 (3×) |
+| build com env de PRODUÇÃO | verde · `qsdCk36eCVSwJHD0GptHl` |
+| medição pós-deploy | **0 respostas 500** |
+| `sw.js` · `manifest` | `2.4.0` · `#191919` — **intocados**, como previsto |
+
+#### A prova pelo ARTEFATO SERVIDO por produção
+
+```css
+.text-\[var\(--member-button-text\,\#ffffff\)\]{color:var(--member-button-text,#fff)}
+```
+Viva em `/_next/static/chunks/0yn0ja2ht9iyu.css`, **1 regra**, e `.text-white`
+sobrevive na mesma folha (controle negativo — os 11 pontos do 9.230 dependem dela).
+
+E a conta inteira, **compilada e minificada**, no bundle do servidor:
+
+```js
+let b="#0a0a0a",c="#ffffff";
+function d(a){let b=parseInt(a.slice(1),16),[c,d,e]=[b>>16&255,b>>8&255,255&b]
+  .map(a=>{let b=a/255;return b<=.03928?b/12.92:Math.pow((b+.055)/1.055,2.4)});
+  return .2126*c+.7152*d+.0722*e}
+function e(a,b){return(Math.max(a,b)+.05)/(Math.min(a,b)+.05)}
+a.s(["contrastingTextColor",0,function(a){if(!/^#[0-9a-fA-F]{6}$/.test(a))return c;
+  let f=d(a);return e(f,d(b))>=e(f,d(c))?b:c}, "darkenHex",0,…
+```
+
+⭐ `e(f,d(b))>=e(f,d(c))?b:c` — **a comparação, não um limiar.** É a refutação
+do §14.1 sobrevivendo até o binário.
+
+E a emissão, guardada pela marca (§14.3):
+```js
+r.memberPrimaryColor&&`--member-button-text: ${(0,m.contrastingTextColor)(r.memberPrimaryColor)}`
+```
+
+⚠️ **Duas armadilhas de sonda nesta rodada, ambas do mesmo tipo:**
+`grep -rl '0.03928'` devolveu **3 arquivos** e a busca literal do Python devolveu
+**0** — o `.` do grep é curinga e casava `0503928`. E `0.2126` não existe no
+bundle: o minificador escreve `.2126`. **Contar por `grep` sem `-F` e sem conhecer
+a forma minificada produz tanto falso-positivo quanto falso-negativo.** Mesma
+família do [[feedback_pattern_sweep_finds_misplaced_secrets]] e do
+[[feedback_compiled_bundle_beats_navigation_probe]].
+
+#### 🔴 O que produção NÃO prova por `curl`, e como fechar
+
+`/course/*` responde **307 → `/producer/login`** para quem não tem sessão, então
+o `<style>` com a var **não é alcançável sem autenticar**. A cadeia provada é:
+o SHA no deployment (`1d7b7d8`) + a regra CSS viva + o bundle do servidor do
+MESMO commit contendo a emissão guardada.
+
+⭐ **A prova FINAL é humana:** o dono, logado, abrindo
+`/course/kingdomacademy` (marca `#ffffff`, **1.382 alunos** — hoje o botão é
+invisível) e `/course/formacao-home-office-fho` (marca `#ffc845`, **1.635 alunos**).
+O botão deve aparecer com **texto quase preto**, e o **fundo não pode ter mudado**.
+
+#### As duas correções da própria medição, que esta subida carrega
+
+1. **25 → 23 pontos.** Dois eram **tinte translúcido**, não a marca como
+   superfície: `bg-blue-600/20` e `bg-blue-500/[0.08]` (8% no modo escuro — texto
+   escuro ali **REGREDIRIA**). ⭐ *O modificador de opacidade muda a NATUREZA da
+   superfície, não a intensidade; varredura por nome de classe é cega a isso.*
+2. **17 → 12 cursos, 4.009 → 3.699 alunos.** Cinco tinham `memberPrimaryColor`
+   NULL — a lacuna da D-4, para quem a var não é emitida. ⭐ *O predicado certo é
+   `memberPrimaryColor != null`, não `hasCustomization`: a classe existe, a
+   entrada da conta não.*
+
+---
+
+
 ## 14. A1 — o texto sobre a marca é CALCULADO (05/set/26)
 
 **Não é rebranding. É conserto de defeito.** Antes de qualquer troca de cor,
