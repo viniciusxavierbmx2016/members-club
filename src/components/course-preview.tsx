@@ -149,7 +149,7 @@ export function CoursePreview({
       type="button"
       onClick={() => setConfirmando(true)}
       disabled={resgatando}
-      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-500 hover:to-emerald-500 text-white text-[15px] font-semibold rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 transition-[colors,box-shadow] duration-200 disabled:opacity-60"
+      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-500 hover:to-emerald-500 text-[var(--member-button-text,#ffffff)] text-[15px] font-semibold rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 transition-[colors,box-shadow] duration-200 disabled:opacity-60"
     >
       {resgatando ? "Resgatando\u2026" : "Resgatar acesso"}
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
