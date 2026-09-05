@@ -485,7 +485,7 @@ export default function EditWorkspacePage() {
   if (!ws) {
     return (
       <div className="max-w-xl mx-auto text-center py-12">
-        <p className="text-gray-500">Workspace não encontrado.</p>
+        <p className="text-gray-500 dark:text-gray-400">Workspace não encontrado.</p>
         <Link
           href="/producer/workspaces"
           className="inline-block mt-4 text-[#191919] dark:text-primary"

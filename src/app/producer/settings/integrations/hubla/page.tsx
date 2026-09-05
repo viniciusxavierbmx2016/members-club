@@ -387,7 +387,7 @@ export default function HublaIntegrationPage() {
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                           {c.title}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {c.slug}
                           {!c.isPublished && (
                             <span className="ml-1.5 text-amber-500">(rascunho)</span>

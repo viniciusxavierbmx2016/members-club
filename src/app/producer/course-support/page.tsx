@@ -380,11 +380,11 @@ export default function CourseSupportInboxPage() {
           }`}
         >
           {!activeId ? (
-            <div className="flex-1 flex items-center justify-center px-6 text-center text-sm text-gray-500">
+            <div className="flex-1 flex items-center justify-center px-6 text-center text-sm text-gray-500 dark:text-gray-400">
               Selecione um chamado para ver a conversa.
             </div>
           ) : !active ? (
-            <div className="flex-1 flex items-center justify-center text-xs text-gray-500">
+            <div className="flex-1 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
               Carregando…
             </div>
           ) : (

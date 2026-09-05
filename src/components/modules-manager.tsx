@@ -363,7 +363,7 @@ export function ModulesManager({
 
       {items.length === 0 ? (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             Nenhum módulo criado ainda. Clique em &ldquo;Novo módulo&rdquo; para começar.
           </p>
         </div>
@@ -492,7 +492,7 @@ function SortableSection({
       )}
       <button
         onClick={() => onDelete(section.id)}
-        className="p-1.5 text-gray-500 hover:text-red-400 transition"
+        className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-400 transition"
         aria-label="Excluir divisão"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -574,7 +574,7 @@ function SortableModule({
         <button
           {...attributes}
           {...listeners}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none"
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none"
           aria-label="Arrastar módulo"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
