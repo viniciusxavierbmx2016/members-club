@@ -144,7 +144,7 @@ export default function InviteAcceptPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#191919] dark:border-[#EFFF20] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -191,7 +191,7 @@ export default function InviteAcceptPage() {
           </p>
           <button
             onClick={() => router.push("/login")}
-            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg"
+            className="mt-4 px-4 py-2 bg-[#EFFF20] hover:bg-[#EFFF20]/90 text-[#191919] text-sm font-medium rounded-lg"
           >
             Ir para o login
           </button>
@@ -216,7 +216,7 @@ export default function InviteAcceptPage() {
                 />
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-semibold text-lg">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#EFFF20] to-[#D6E600] flex items-center justify-center text-[#191919] font-semibold text-lg">
                 {invite.workspace.name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -314,7 +314,7 @@ export default function InviteAcceptPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#191919]/40 dark:focus:ring-white/40"
                 />
               </div>
             )}
@@ -328,7 +328,7 @@ export default function InviteAcceptPage() {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#191919]/40 dark:focus:ring-white/40"
               />
             </div>
 
@@ -341,7 +341,7 @@ export default function InviteAcceptPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              className="w-full px-4 py-2.5 bg-[#EFFF20] hover:bg-[#EFFF20]/90 disabled:opacity-50 text-[#191919] text-sm font-medium rounded-lg transition-colors"
             >
               {submitting
                 ? "Processando…"

@@ -13,13 +13,13 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-800 text-center space-y-4">
+        <div className="bg-white dark:bg-[#202020] rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-800 text-center space-y-4">
           <p className="text-sm text-gray-700 dark:text-gray-300">
             Para criar conta de produtor, acesse a página dedicada.
           </p>
           <Link
             href="/producer/register"
-            className="inline-flex items-center justify-center w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
+            className="inline-flex items-center justify-center w-full py-3 bg-[#EFFF20] hover:bg-[#EFFF20]/90 text-[#191919] font-medium rounded-lg transition"
           >
             Criar conta de produtor
           </Link>
@@ -29,7 +29,7 @@ export default function RegisterPage() {
           </p>
           <Link
             href="/login"
-            className="inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="inline-block text-sm text-[#191919] dark:text-[#EFFF20] hover:underline"
           >
             Voltar ao login
           </Link>

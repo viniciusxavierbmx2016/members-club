@@ -2498,3 +2498,150 @@ curso verá uma tela **lime** numa área **azul**.
   `(dashboard)/profile` (que **alcança a vitrine** e sai de qualquer forma).
   **São caso de COR DE MARCA, não de superfície** — exigem a decisão do par D12
   ponto a ponto. **Regra diferente ⇒ fatia própria.**
+
+---
+
+### 6-O. 🚀 A SEGUNDA SUBIDA PARA PRODUÇÃO (05/set/26, 00:20)
+
+**`bb51e6c`** — merge de `feat/rebranding` na `main`. Push às **00:20:23 BRT**,
+deployment de produção **`success` às 00:21:46 — 83 segundos**.
+**42 arquivos, 18 commits.**
+
+#### ⭐ Esta leva CORRIGE UMA REGRESSÃO QUE A PRÓPRIA FRENTE PÔS NO AR
+
+`producer/(auth)/login/page.tsx:116` tem um `style` inline que pinta a página de
+escuro **nos dois modos**. A primeira subida (`39e3d9d`) aplicou ali 6 pares
+D12, que pressupõem fundo que **vira com o modo** — no modo claro o texto ia a
+**1,15** (contra 5,48 antes da frente).
+
+**Tempo em produção: de 04/set 18:09 a 05/set 00:21 — 6 horas e 12 minutos.**
+Severidade baixa (`defaultTheme="dark"`, zero contas em claro; o efeito real era
+o flash entre SSR e hidratação), mas **é regressão nossa e fica registrada como
+tal**. Medido depois da subida: `/producer/login` serve **0** de `#060612`,
+**0** de `rgba(99,102,241)` e **0** de `#3b82f6`.
+
+> **A lição, que nenhuma varredura da frente checou:** *o par claro/escuro
+> pressupõe que o fundo VIRA com o modo.* Onde há `style` inline com fundo fixo,
+> **o par é errado** — valor único é o certo.
+
+#### O horário
+
+⚠️ **O portão de horário (03:15–03:45) segue suspenso por decisão do dono**, que
+estava disponível. ⓘ Ainda assim, esta subida caiu às **00:20 de sábado** —
+bem mais perto da janela recomendada que a primeira (18:09 de sexta): pela
+medição, 00h tem **1.354 acessos/hora** contra **4.463** do pico das 15h.
+
+#### O portão, medido
+
+- `prisma/` no diff: **0** · migração `20260831190000`: **0** · `tsc` exit 0
+- **áreas intocadas provadas**: `(course)/` **0**, `w/` **0**, `admin/` **0**, `prisma/` **0**
+- **comportamento**: 145 pares no word-diff, **132 cosméticos**, 13 inspecionados
+  — e os 13 são todos `+ dark:text-gray-400`, classe CSS pura. **Zero lógica.**
+- ensaio de merge **limpo**, 42 arquivos
+
+#### Depois do deploy
+
+| verificação | resultado |
+|---|---|
+| `/` · `/landing` · `/producer/login` · `/producer/register` · `/offline` · `/w/3n-trader` | **200** |
+| `/sw.js` (esta leva NÃO o toca) | **`2.4.0`** ✅ |
+| `manifest.json` (idem) | **`#191919`**, 11 ícones `-v2` ✅ |
+| `/producer/login` · `/producer/register` · `/offline` | `#0a0a1a`, `#060612`, `#2563eb`, `#3b82f6` = **0 em todas**; lime presente |
+
+⚠️ **Uma expectativa do roteiro estava errada e a medição a corrigiu:** o
+controle negativo pedia `#111827` e `#030712` **ausentes do bundle**. Eles
+**continuam lá** — e devem: são os **142 pontos deliberadamente não tocados**
+(112 de `gray-900` + 31 de `gray-950`: área de membros, `/admin`, vitrine,
+toasts invertidos, tooltips e superfícies sempre-escuras). O controle correto é
+**por TELA SERVIDA**, e nas 3 telas tocadas ele dá **zero**.
+
+⚠️ **O que não consegui medir:** a **404 exige estar logado** — medido,
+deslogado o proxy responde **307 para o login** em toda rota desconhecida.
+Fica para o dono conferir com a sessão aberta.
+
+#### Rollback
+
+**`bb51e6c`.** `git revert -m 1 bb51e6c && git push origin main`, ou Instant
+Rollback na Vercel para o deploy de `39e3d9d`.
+⚠️ **Reverter REINTRODUZ a regressão do login** que esta subida corrige — é o
+que se perde. Não desfaz nada no banco (sem migração nem escrita) nem no service
+worker (esta leva não o toca).
+
+---
+
+### 6-P. A TELA DE OFFLINE QUE O USUÁRIO REALMENTE VÊ (05/set/26)
+
+**`9faccb2`** — merge de `feat/rebranding-auth-offline` (`5d59234`). 5 arquivos,
+20+/20−, `tsc` 0. Build de gate **`fqHoLYlCgX1MfVbU0-jGX`**. **Nada em produção.**
+
+#### 🔴 O ERRO QUE O DONO PEGOU: corrigimos a tela que ninguém vê
+
+Existem **DUAS** telas de offline. A leva anterior arrumou a errada.
+
+| | quem serve | quem alcança |
+|---|---|---|
+| `public/offline.html` | **`sw.js:5`** precacheia e **`sw.js:33`** serve no `catch` do fetch | **todo mundo** que fica sem rede |
+| `src/app/offline/page.tsx` | rota Next `/offline` | **ninguém** — 0 referências no `src/`; só digitando a URL, o que não se faz sem internet |
+
+> ⭐ **A LIÇÃO:** quando existem **duas implementações da mesma tela**, medir
+> **QUAL o usuário alcança** antes de corrigir — não a que o `grep` achou
+> primeiro. O caminho da prova aqui foi ler o `sw.js` e seguir o `catch`, não
+> confiar no nome do arquivo.
+
+`public/offline.html` é **HTML puro, sem Tailwind** — hex direto, confirmado:
+fundo `#0a0a1a` → `#191919`; botão `#3b82f6` com `color:white` → `#EFFF20` com
+`color:#191919` (branco sobre lime daria **1,11**; agora **15,90**).
+
+#### ⭐ Uma regressão que EU ia introduzir, pega pela medição
+
+O parágrafo `#7a7a82` **PASSA hoje** sobre `#0a0a1a` (**4,61**) e **reprovaria**
+sobre `#191919` (**4,13**). ⚠️ **O meu próprio script imprimiu "já reprova hoje"
+e estava errado** — 4,61 ≥ 4,5. Foi a tabela de medição que corrigiu a
+afirmação, não a leitura. Usei o molde `gray-400` (`#9ca3af`, **6,93**), que já
+está em 230 pontos do app, em vez de inventar um valor.
+
+#### As outras 4 telas, e a forma escolhida por PROVA
+
+| tela | quem chega | forma |
+|---|---|---|
+| `verify-email` | só o register do produtor (`register:138`) | **par D12** |
+| `invite/[id]` | convite de **colaborador** (`PERMISSION_LABELS`) | **par D12** |
+| `(auth)/register` | ⭐ **irmã que ninguém citou** — um **terceiro** register, na raiz, que só desambigua | **par D12** |
+| `auth/impersonate` | só o admin (`admin/producers/[id]`) | **valor único** |
+
+⭐ **Por que formas diferentes:** as três primeiras usam `bg-white dark:bg-gray-950`
+— **o fundo VIRA com o modo**, então o par é o certo. O `auth/impersonate` tem
+`style` inline com fundo **FIXO**, então valor único. **É a lição do login
+aplicada ao contrário** — lá o par estava errado porque o fundo não virava.
+
+ⓘ Nos 2 anéis de foco do `invite` usei a forma da casa
+`focus:ring-[#191919]/40 dark:focus:ring-white/40` (6 usos) — o
+`dark:focus:ring-primary` cairia no **azul** ali, por estar fora do
+`.producer-layout`.
+
+#### 🔴 3 telas PARARAM por alcançarem o ALUNO
+
+O aluno ainda vive no azul (**9.220**), então pintá-las de lime criaria uma tela
+lime no meio de uma área azul.
+
+| tela | a prova de que o aluno chega |
+|---|---|
+| `reset-password` | `webhook-helpers.ts:178` (o e-mail de acesso do comprador) **e** `api/w/[slug]/forgot-password:83` |
+| `forgot-password` | o link de volta do reset (`reset-password:21`, ramo `?workspace=`) |
+| `verify/[code]` | é a **verificação de certificado**, pública — aluno ou terceiro |
+
+Fora também: `admin/login` e `invite/admin/[id]` — **exclusivas do fluxo admin**.
+
+#### O gate: o que foi visto e o que NÃO foi
+
+| tela | gate |
+|---|---|
+| `offline.html` | ✅ visto |
+| `verify-email` | ✅ visto |
+| `(auth)/register` (raiz) | ✅ visto |
+| `invite/<id>` | ⚠️ **NÃO VISTO** — exigia gerar um convite à mão |
+| `auth/impersonate` | ⚠️ **NÃO VISTO** — exigia sessão de admin |
+
+**Os dois últimos entraram sem verificação visual.** Provados só por código e
+contagem (`blue-*` = 0, `#3b82f6` = 0, `#0a0a0b` = 0). **Registrado como não
+visto, não como aprovado.**
