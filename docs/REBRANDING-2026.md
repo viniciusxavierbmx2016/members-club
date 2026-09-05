@@ -3078,6 +3078,85 @@ por acidente**, e o mecanismo ali está errado.
 
 ---
 
+### 6-T. 🚀 A SEXTA SUBIDA — a família da marca fecha em 12/12 (05/set/26, 18:42)
+
+**`b8d62e6` — merge `--no-ff` na `main`. Push às 18:42:53 BRT.** Deployment
+`success` às **18:44:20** (1min27s). **Rollback: `9eb262e`**
+(`/tmp/sha-rollback-9234.txt`). Build de produção `RdHjEGOigzrQEmCg5Nx5q`.
+
+**5 arquivos**: 3 de código (**+12/−4**) e 2 de papelada. **0 em `prisma/`,
+`producer/`, `admin/`, `app/w/`** · **0 lógica, 0 import, 0 arquivo `.ts`**.
+
+⭐ **Controle de escopo do CSS:** as 4 regras novas são **4/4 escopadas em
+`.course-customized`** — **0 seletores soltos**. Uma regra fora do escopo
+alcançaria o app inteiro.
+
+| prova | resultado |
+|---|---|
+| ensaio na integração / `main` | 0 conflitos |
+| `tsc --noEmit` | exit 0 (3×) |
+| medição pós-deploy | **0 respostas 500** |
+| `sw.js` · `manifest` | `2.4.0` · `#191919` intocados |
+| as 4 regras no CSS **servido por produção** | ✅ **4/4 vivas** |
+| controle negativo `to-blue-800` | **ausente** ✅ |
+| controle positivo `to-blue-700` (pré-existente) | **presente** ✅ |
+| pontos no fonte | **28** (25 + 3) |
+
+#### ⭐ Duas coisas que valem além desta fatia
+
+**(a) A MÉTRICA CORRIGIDA.** A A1b barrou `course-preview.tsx:204` e `:515`
+comparando só a **ponta** do gradiente (`to-blue-600`: 5,17 com branco → 3,83 com
+escuro). Mas o texto atravessa a **faixa inteira**, e o certo é o **MÍNIMO ao
+longo do span**. Em 41 amostras de `#3b82f6 → #2563eb`:
+
+| | mínimo | onde |
+|---|---|---|
+| hoje, branco | **3,68** 🔴 | `t=0,00` — a ponta `from`, **que já reprovava** |
+| depois, escuro | **3,83** 🔴 | `t=1,00` |
+
+**Melhora 0,15 — ninguém regride.** A A1b tinha lido só o lado que piorava.
+
+⚠️ **E a métrica foi testada CONTRA SI MESMA:** remedi o `page.tsx:518` (9.235)
+por ela e ele **SEGUE BARRADO** (3,68 → 2,95). **Uma métrica que só absolvesse
+não seria métrica.**
+
+**(b) O AGRUPAMENTO, provado empiricamente.** O cenário `SB_ANTES` no Chrome
+— markup de hoje com o CSS novo — deu **1,00 / 1,00**. Não é dedução: **o remap
+sozinho é a regressão**, e é por isso que remap e troca subiram no mesmo commit.
+
+**(c) E o hover fechou um defeito JÁ EM PRODUÇÃO.** O remap de
+`hover:from-emerald-500` alcança `course-preview.tsx:152`, subido pela A1b, onde
+o `from` ficava `#10b981` literal enquanto o `to` já era a marca:
+**de 2 de 14 cursos reprovando para 0 de 14.**
+
+#### O balanço da área do aluno, depois desta subida (UU9)
+
+**Universo: 72 cursos · 28.711 matrículas ativas** — 14 cursos (3.769 alunos) com
+marca própria, 58 (24.942) sem.
+
+| item | pontos | quem sente | depende de decisão? |
+|---|---|---|---|
+| **9.230** | **9** — vitrine `lives/[id]` ×4 e `page:254`, `course-card` ×2, `auth-provider`, `push-opt-in` | outro namespace (`--producer-*`) e a raiz | **sim** — é decisão de escopo, não de contraste |
+| **9.235** | **1** — `page.tsx:518` | visitante sem vínculo | **sim** — **nenhuma cor passa** (branco 3,68 · escuro 2,95) |
+| **9.233** | **9** | **53 cursos · 24.632 matrículas** | **sim** — muda a cara do padrão |
+| **9.231** | — | **5 cursos · 310 alunos** | **sim** — o que é "a marca" de um curso sem marca |
+| **9.237** | 6 stops de superfície | toda a área do aluno | não — é família de `--member-bg`, trabalho próprio |
+
+⭐ **Cobertura da família da marca: 12/12.** Os **10 pontos** que ainda têm texto
+claro sobre a marca são exatamente os **9 do 9.230** + o **1 do 9.235** — e
+**apenas 1 dos 10 está dentro de `(course)/`**.
+
+**As opções do 9.235, com custo — nenhuma escolhida:**
+1. Trocar `to-blue-700` por `to-blue-500` no gradiente: mínimo com escuro vai a
+   **5,38** ✅. **1 linha** — mas muda o **visual** do avatar.
+2. Guardar a emissão da var pela mesma condição da classe: resolveria a classe
+   inteira de casos "var sem classe" — ⚠️ mas **mexe no layout e afeta a A1 toda**.
+3. Deixar: é um **avatar decorativo** com a inicial do curso, não um botão.
+   Custo zero, defeito cosmético.
+
+---
+
+
 ## 16. 9.234 — o lote agrupado, e a métrica errada que produziu uma exclusão errada (05/set/26)
 
 **4 remaps + 3 trocas de texto, no mesmo commit.** `4ff4aa8`, branch
