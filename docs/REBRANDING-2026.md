@@ -2424,3 +2424,77 @@ criar/editar), **a irmã entra no mesmo commit ou vira divergência garantida**.
 E a terceira: **a 404 escapou de todas as varreduras porque renderiza fora dos
 três escopos** (`.producer-layout`, `.course-customized`, `.vitrine-customized`).
 Varrer por escopo deixa de fora exatamente o que não tem escopo.
+
+---
+
+### 6-N. MERGE DOS RESÍDUOS — gate 7/7 (04/set/26)
+
+**`dc086a4`** — merge de `feat/rebranding-residuos` (`2dfd7a6`) na integração.
+8 arquivos, 29+/29−, `tsc` 0, ensaio limpo. Build de gate
+**`GrBTfexWnZI2aq-aUIMf0`**. **Nada em produção.**
+
+O conteúdo e as lições estão em **§6-L** (o resíduo que a exclusão criou) e
+**§6-M** (as três decisões de "arrumar tudo"). Este bloco registra **o merge**,
+**a checagem que o precedeu** e **o risco que o dono aceitou**.
+
+#### ⭐ A checagem antes do merge: o botão "Total" estava coberto
+
+O gate não reconferiu o botão **"Total"** de `/producer/students`. Provado por
+código antes de mesclar:
+
+- **"Total" é uma OPÇÃO do próprio dropdown de período** —
+  `date-range-selector.tsx:36`, `{ id: "total", label: "Total" }` — ao lado de
+  "Últimos 30 dias". Não é um botão separado.
+- **O botão fechado é UMA linha** (`:298`, `dark:bg-[#202020]/50`), **idêntica**
+  à do `custom-select.tsx:56`. Ela serve `students`, `dashboard`, `analytics`,
+  `admin/page` e `admin/reports` — **não pode divergir entre telas**.
+- A superfície do dropdown aberto (`:306`) foi para `#262626`.
+
+⇒ **Coberto.** O que resta de `blue-*` no componente é o **realce do item
+selecionado** (`bg-blue-500/10` + `text-blue-600`, linhas `:317` e `:376`) — que
+é o item **9.222**, a família "lime sobre lime" que reprova **só no modo claro**
+(0 de 14 no escuro, e **zero contas** em claro) — e os botões "Aplicar", que são
+`bg-blue-600` corretamente remapeado.
+
+#### O portão do conjunto
+
+| medida | valor |
+|---|---|
+| `bg-[#202020]` | **48** ✅ |
+| `bg-[#262626]` | **33** ✅ |
+| molde `text-gray-500 dark:text-gray-400` | **230** ✅ |
+| `bg-gray-900` restante | **112** ✅ |
+| `bg-gray-950` restante | **31** ✅ |
+| telas de auth: `#3b82f6` · `#060612` · `rgba(99,102,241)` · `primary` | **0 · 0 · 0 · 0** |
+| telas de erro: `#0a0a1a` · `#2563eb` · `blue-*` | **0 · 0 · 0** |
+
+ⓘ Minha expectativa de `bg-gray-900` era 111 e o real é **112**: subtraí 4 do
+`date-range` quando só **3** eram `gray-900` (o `:306` era `gray-950`).
+115−3 = 112 e 32−1 = 31 — **os dois batem**.
+
+#### ⚠️ RISCO ACEITO — não é descuido, é decisão registrada
+
+`not-found.tsx` e `error.tsx` são do **ROOT** e capturam rotas do **ALUNO**
+também, que ainda vive no azul (**9.220**). Um aluno que erre a URL dentro do
+curso verá uma tela **lime** numa área **azul**.
+
+**Decisão do dono: MANTER APLICADO.** Os motivos que ele pôs na mesa:
+1. **errar URL é raro** — não é caminho de uso;
+2. **a área de membros vai virar lime depois** — a divergência é temporária;
+3. **aquela tela já estava com a paleta antiga de qualquer forma** — antes era
+   `#0a0a1a`, que também não é a cor da área de membros.
+
+**Fica registrado como risco aceito.** Reverter é 1 arquivo se a leitura mudar.
+
+#### O que ficou de fora, com motivo
+
+- **`(course)/course/[slug]/error.tsx`** — sob `(course)/`, proibido na rodada;
+- **`layout-illustration:8`** — gradiente **decorativo**, não cabe na regra;
+- **3 tooltips** compartilhados com o `/admin` — excluídos por **PAPEL**
+  (`group-hover` + `absolute`, escuros nos dois modos), não pela área;
+- 🔴 **9 arquivos fora dos três escopos** — `invite/[id]`, `verify-email`,
+  `forgot-password`, `reset-password`, `(auth)/register`, `auth/impersonate`,
+  `verify/[code]`, `(dashboard)/page` (o dashboard do **aluno**) e
+  `(dashboard)/profile` (que **alcança a vitrine** e sai de qualquer forma).
+  **São caso de COR DE MARCA, não de superfície** — exigem a decisão do par D12
+  ponto a ponto. **Regra diferente ⇒ fatia própria.**
