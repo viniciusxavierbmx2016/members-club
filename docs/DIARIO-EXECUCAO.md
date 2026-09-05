@@ -35,6 +35,40 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-05 — FRENTE REBRANDING, ETAPA A1b — OS GRADIENTES, E A PROVA QUE BARROU 4 DOS 6
+
+**Estado antes:** main em `e7b7834` (A1 em produção) · integração `feat/rebranding` em `b5a91fc`
+**O que foi feito:** O gate em produção achou o botão "Concluir aula" do `Kingdom Academy`
+ainda **branco sobre branco**. Causa: `bg-gradient-to-r from-emerald-600 to-emerald-500` —
+a linha **contém `bg-`**, mas `bg-gradient-to-r` declara DIREÇÃO, não cor; a cor vem de
+`from-`/`to-`, e a varredura da A1 exigia `bg-` colado à cor. ⭐ **A lição:** provar que uma
+família é ALCANÇÁVEL não a coloca na lista de ALVOS — os 6 gradientes foram medidos no A0.6,
+a conta foi provada neles, e o resultado virou "risco descartado" em vez de "6 alvos".
+⭐ **O antídoto, adotado como método:** derivar a lista de alvos DO CSS que define a família
+(parsear o `globals.css`), nunca de padrão de busca escrito à mão.
+**Arquivos tocados:** `(course)/course/[slug]/lesson/[id]/page.tsx:508` · `components/course-preview.tsx:152` — **2 linhas**
+**Como foi provado:** `tsc` exit 0 · build de staging verde (`rpAPv65D2qKQRUknfbMtO`) ·
+**Chrome headless sobre o bundle real**, com a `className` real montada de `:505`+`:508`:
+ANTES Kingdom = gradiente `rgb(255,255,255)→rgb(255,255,255)` **sólido** com texto branco = **1,00** ·
+KING depois = **19,80** · FHO = fundo `rgb(255,200,69)` **idêntico** e **12,82** ·
+SEM VAR (58 cursos, 24.936 alunos) = emerald real + branco = **pixel idêntico a hoje** ·
+SEM CLASSE (visitante) = emerald real + escuro = **5,25 e 7,80, ambas passam**.
+12/12 cursos acima de 4,5 · 0 regressões · 0 escritas a `member*Color`.
+⭐ **A prova que BARRA foi o valor da fatia:** 4 dos 6 foram EXCLUÍDOS com medição —
+3 são gradiente PARCIAL (`to-blue-600` sem remap ⇒ ponta azul de **5,17 para 3,83**) e 1
+renderiza SEM acesso (`to-blue-700` de **6,70 para 2,95**).
+⚠️ O palco tem 5 cursos, todos sem marca própria: **só o controle negativo é visível ali**.
+**SHA do merge:** — (**NÃO MESCLADO** — parada para o gate) · commit `5ab8c2c` · **Rollback:** `git branch -D feat/a1b-gradientes`
+**Mudou em produção para quem:** ninguém ainda. Ao subir: **3.700 alunos** em 12 cursos passam
+a ler o botão "Concluir aula" e o CTA do preview; **24.936** não mudam um pixel.
+**Ficou aberto:** **9.234** (os 3 gradientes parciais) · **9.235** (`page.tsx:518`, renderiza sem
+acesso) · **9.236** (`bg-emerald-600` sem remap — a A1 acertou por acidente em `course-preview:190`)
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ (limite do palco declarado) ·
+gate humano ⏳ **PENDENTE** · papelada ✅ (PLANO-MESTRE 9.234-9.236 · REBRANDING-2026 §15)
+
+---
+
+
 ## 2026-09-05 — FRENTE REBRANDING, ETAPA A1 — O TEXTO SOBRE A MARCA É CALCULADO, NÃO GUARDADO
 
 **Estado antes:** main em `eb5ef81` · integração `feat/rebranding` em `4d48781`
