@@ -3074,3 +3074,74 @@ tem 5 regras. Auditei **os 23 pontos da A1** por esse critério: **22 corretos**
 **1** (`course-preview.tsx:190`) com o texto calculado caindo sobre `#059669`
 literal. **Não é regressão** — 3,77 → 5,25 em 12 cursos, 0 pioram — mas **acertou
 por acidente**, e o mecanismo ali está errado.
+
+
+---
+
+## 16. 9.234 — o lote agrupado, e a métrica errada que produziu uma exclusão errada (05/set/26)
+
+**4 remaps + 3 trocas de texto, no mesmo commit.** `4ff4aa8`, branch
+`feat/9234-gradientes-agrupado`, aguardando gate.
+
+### 16.1 Por que AGRUPADO — a regressão que o agrupamento evita
+
+Os 3 pontos ainda tinham `text-white` cravado (barrados na A1b). Com o remap e
+**sem** a troca, o gradiente colapsa na marca e o branco fica por cima:
+
+| | ponta azul hoje | só com o remap |
+|---|---|---|
+| Kingdom Academy | **5,17** ✅ | **1,00** 🔴 |
+| Formação Home Office | 5,17 ✅ | 1,54 🔴 |
+| **12 cursos · 3.702 alunos** | ✅ | 🔴 |
+
+⭐ **O Chrome confirmou no bundle real:** `SB_ANTES` — markup de hoje com o CSS
+novo — deu **1,00 / 1,00**. A fatia de "1 linha de CSS" nunca existiu.
+
+### 16.2 ⭐ A CORREÇÃO: a A1b usou a métrica errada
+
+A A1b barrou `course-preview.tsx:204` e `:515` comparando **só a ponta** do
+gradiente: `to-blue-600` dava 5,17 com branco e 3,83 com escuro.
+
+**Para texto sobre um gradiente, a métrica certa é o MÍNIMO ao longo do span** —
+o texto atravessa a faixa inteira, não só as extremidades. Medido em 41 amostras:
+
+| `#3b82f6 → #2563eb` | mínimo | onde |
+|---|---|---|
+| **hoje**, texto branco | **3,68** 🔴 | `t = 0,00` (a ponta `from`) |
+| **depois**, texto escuro | **3,83** 🔴 | `t = 1,00` (a ponta `to`) |
+
+**Melhora 0,15. Nenhuma das duas passa, mas ninguém regride** — e a A1b tinha
+lido só o lado que piorava.
+
+⚠️ **A correção não é conveniência.** Remedi o `page.tsx:518` (**9.235**) pela
+mesma métrica nova: `#3b82f6 → #1d4ed8` dá mínimo **3,68** com branco e **2,95**
+com escuro. **Segue barrado, com razão.** Uma métrica que só absolvesse não
+seria métrica.
+
+### 16.3 O que o TT2 definiu — a mesma checagem que barrou o `:518`
+
+| ponto | renderiza sem acesso? | |
+|---|---|---|
+| `course-sidebar.tsx:135` | **não** — o `CourseSidebar` está na `course-shell.tsx:133`, **depois** do `return` do ramo `!hasAccess` (`:117`), cujo comentário diz *"Preview mode: no sidebar"* | ✅ classe sempre aplica |
+| `course-preview.tsx:204` · `:515` | **sim** — `page.tsx:390-393`: *"Pré-visualização para quem não tem acesso"* | ✅ entram pela métrica do span |
+
+### 16.4 As provas
+
+| prova | resultado |
+|---|---|
+| (a) as 4 regras geram no CSS servido | ✅ · controle negativo `to-blue-800` **ausente** · controle positivo `to-blue-700` **presente** |
+| (b) o raio | `sidebar.tsx:419` **byte-idêntico** (`20705f3582a8`) · 4/4 regras escopadas em `.course-customized` |
+| (c) as duas pontas, 14 cursos | **14/14 acima de 4,5** |
+| (d) Chrome no bundle real | `SB_SEMVAR` = **3,68 / 5,17**, pixel idêntico ao de hoje · `SB_K` **19,80** · `SB_F` **12,82** com os stops **colapsados** |
+| (e) o hover de `course-preview.tsx:152`, **já em produção** | de **2 de 14** cursos reprovando sobre o `#10b981` literal para **0 de 14** |
+| (f) controle contra vacuidade | escuro em **12**, claro em **2** ✅ |
+
+### 16.5 Cobertura da família da marca, depois desta fatia
+
+| | antes | depois |
+|---|---|---|
+| stops sólidos da marca com remap | **8 / 12** | ⭐ **12 / 12** |
+
+Os 6 stops de **superfície** (`from-gray-950`, `via-gray-200`…) seguem sem remap
+e **não são desta família** — o alvo deles é `--member-bg`/`--member-card`.
+São o **9.237**, e não foram tocados (0 no diff).
