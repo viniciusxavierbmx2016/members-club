@@ -2316,3 +2316,111 @@ register** (3 `shadow`, 2 `focus:ring`, 2 `border`). São **sombra, anel e
 borda**, não superfície: a regra desta rodada não os cobre. Efeito medido:
 `#3b82f6` a 20% sobre `#191919` = `#202e45` — **halo azul sob botão lime**.
 Cosmético, simétrico nas duas telas, **fica para decisão**.
+
+---
+
+### 6-M. AS TRÊS DECISÕES DE "ARRUMAR TUDO" (04/set/26)
+
+Branch `feat/rebranding-residuos` @ `2dfd7a6`, **não mesclada**. Build de gate
+**`4v1BgrCfiWOARKsgro-I1`**.
+
+#### D-a · O halo azul sai — e não era cosmético
+
+Todos os tokens `primary` de **sombra, anel e borda** nas telas de login e
+register viram literal lime. Sem provider eles caíam no fallback `#3b82f6`.
+**Resultado: `primary` = 0 nas duas telas.**
+
+| | azul (hoje) | lime |
+|---|---|---|
+| halo `shadow/20` vs fundo | 1,29 | **1,81** |
+| anel de foco | 4,78 | **15,90** |
+| borda `/50` vs fundo | **2,13** 🔴 | **4,81** ✅ |
+
+⭐ **A borda hoje REPROVA no limiar de componente (3,00) e passa a aprovar.**
+E o halo lime a 20% é **mais visível** que o azul no mesmo alfa — **não há
+motivo medido para mudar o alfa**, que era a pergunta do comando.
+
+#### D-c · As 3 telas de erro recebem a paleta — com um alerta
+
+`not-found.tsx`, `error.tsx` e `offline/page.tsx`: fundo `#0a0a1a` → `#191919`,
+ícone → `#EFFF20`/60, botão → lime com **texto `#191919`**.
+⭐ **O texto do botão era a armadilha**: branco sobre lime daria **1,11**; com
+`#191919` vai a **15,90**.
+
+⚠️ 🔴 **AS 3 APARECEM PARA O ALUNO, e isso muda a base da decisão.**
+`not-found.tsx` e `error.tsx` são do **ROOT** e capturam **qualquer** rota,
+inclusive `(course)/**` e `/w/**`. O único interceptador mais específico é o
+`error.tsx` do curso — que pega **erro**, não **404**. ⇒ Um aluno que erre a
+URL dentro do curso verá uma tela **lime** no meio de uma área ainda **azul**
+(item **9.220**). **Está aplicado, e reverter é 1 arquivo** se a decisão mudar.
+
+ⓘ O `error.tsx` do curso ficou **fora**: está sob `(course)/`, proibido nesta
+rodada.
+
+ⓘ **E a 404 só é alcançável LOGADO** — medido: deslogado, o proxy responde
+**307 para o login** em toda rota desconhecida (`/producer/rota-inexistente`,
+`/landing/nada`, `/w/nao-existe`). Só `/api/*` devolve 404, e é JSON.
+
+#### D-b · A regra do `/admin` suspensa — e ela já não segurava nada
+
+A revarredura mostra que os **6 pontos** que a regra segurava (`date-range` ×4,
+`global-search`, `header`) **já tinham sido aplicados** na rodada anterior desta
+mesma branch. Restam **3 pontos** em componentes compartilhados, e os **3 são
+TOOLTIP** (`group-hover` + `absolute`, escuros nos dois modos) — excluídos por
+**PAPEL**, não pelo `/admin`.
+
+**A tabela dos dois contextos, que a decisão exigia:**
+
+| ponto | no `/admin` (`#030712`) | no painel (`#191919`) |
+|---|---|---|
+| `date-range:298/339/348` | 1,06 → 1,09 ✅ | 1,01 → 1,03 ✅ |
+| `date-range:306` | **1,00 → 1,33** ✅ | 1,15 → 1,16 ✅ |
+| `global-search:135` | 1,06 → 1,33 ✅ | 1,08 → 1,16 ✅ |
+| `header:113` | 1,06 → 1,33 ✅ | 1,08 → 1,16 ✅ |
+
+**Zero pontos pioram no `/admin`** — nenhum sai pela condição do comando.
+No `/admin` o dropdown do `date-range` era **exatamente a cor do fundo (1,00)**:
+só se via pela borda.
+
+#### II5 · O que mais está fora dos três escopos — listado, NÃO aplicado
+
+Varri `src/app/` fora de `producer/`, `(course)/`, `w/` e `admin/`: **9
+arquivos** com cor antiga.
+
+| arquivo | alcance | veredito |
+|---|---|---|
+| `(dashboard)/profile/page.tsx` | **DV** | 🔴 **SAI** — alcança a vitrine |
+| `invite/[id]`, `verify-email`, `forgot-password`, `reset-password`, `(auth)/register`, `auth/impersonate`, `verify/[code]` | R | **registrado, não aplicado** |
+| `(dashboard)/page.tsx` | D | **registrado** — é o dashboard do **ALUNO** |
+
+⭐ **Por que não apliquei:** eles não são casos de **superfície**
+(`#202020`/`#262626`, a regra autorizada) — são casos de **cor de marca**
+(`bg-blue-600`, `text-blue-400`, `from-blue-500 to-blue-700`, `bg-blue-500/10`),
+que exigem a decisão do par D12 **ponto a ponto** e o cuidado com o texto do
+botão. **Regra diferente da desta rodada.** Pela disciplina do II7, registro e
+sigo. → vira o item da próxima leva.
+
+#### ⭐ A LIÇÃO QUE CORRIGE A MINHA TESE ANTERIOR
+
+Eu havia enquadrado o caso do `date-range` como *"quarta cegueira de padrão"*.
+**Está errado, e a correção importa mais que o conserto:**
+
+> **Não foi a busca que falhou — foi a REGRA DE EXCLUSÃO.** A varredura
+> **achou** os pontos; a regra *"não tocar no que alcança o `/admin`"* é que os
+> tirou. **Uma exclusão por ÁREA pode partir ao meio um PAPEL VISUAL**, e a
+> inconsistência aparece exatamente onde o usuário olha — dois seletores lado a
+> lado com cores diferentes.
+>
+> **E pior: a exclusão estava PRESERVANDO um defeito nos dois lados.** No
+> `/admin` aquele dropdown era 1,00 contra o fundo. **Antes de excluir por área,
+> medir o que a exclusão protege** — se a resposta for "nada", ela só produz
+> divergência.
+
+E a lição irmã, do mesmo dia: **o `register` ficou azul enquanto o `login`
+virou lime**. Quando uma fatia arruma uma tela de um par (login/register,
+criar/editar), **a irmã entra no mesmo commit ou vira divergência garantida**.
+É *"conferir a rota IRMÃ"* aplicado a **telas**.
+
+E a terceira: **a 404 escapou de todas as varreduras porque renderiza fora dos
+três escopos** (`.producer-layout`, `.course-customized`, `.vitrine-customized`).
+Varrer por escopo deixa de fora exatamente o que não tem escopo.
