@@ -44,9 +44,9 @@ function VerifyEmailContent() {
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 px-4">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-800 text-center">
-          <div className="mx-auto w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center mb-6">
+          <div className="mx-auto w-20 h-20 rounded-full bg-[#EFFF20]/10 flex items-center justify-center mb-6">
             <svg
-              className="w-10 h-10 text-blue-500"
+              className="w-10 h-10 text-[#191919] dark:text-[#EFFF20]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -89,14 +89,14 @@ function VerifyEmailContent() {
           <button
             onClick={handleResend}
             disabled={resending || !email}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition mb-3"
+            className="w-full py-3 bg-[#EFFF20] hover:bg-[#EFFF20]/90 disabled:opacity-50 text-[#191919] font-medium rounded-lg transition mb-3"
           >
             {resending ? "Reenviando..." : "Reenviar email"}
           </button>
 
           <Link
             href={loginHref}
-            className="inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="inline-block text-sm text-[#191919] dark:text-[#EFFF20] hover:underline"
           >
             Voltar ao login
           </Link>
@@ -111,7 +111,7 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#191919] dark:border-[#EFFF20] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

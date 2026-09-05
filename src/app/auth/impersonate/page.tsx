@@ -75,7 +75,7 @@ function ImpersonateContent() {
   return (
     <div
       style={{
-        background: "#0a0a0b",
+        background: "#191919",
         color: "#fff",
         fontFamily: "sans-serif",
         display: "flex",
@@ -97,7 +97,7 @@ function ImpersonateContent() {
             >
               {error}
             </p>
-            <a href="/admin" style={{ color: "#3b82f6", fontSize: "14px" }}>
+            <a href="/admin" style={{ color: "#EFFF20", fontSize: "14px" }}>
               Voltar ao admin
             </a>
           </>
@@ -107,7 +107,7 @@ function ImpersonateContent() {
               style={{
                 width: "32px",
                 height: "32px",
-                border: "3px solid #3b82f6",
+                border: "3px solid #EFFF20",
                 borderTopColor: "transparent",
                 borderRadius: "50%",
                 animation: "spin 0.8s linear infinite",
