@@ -20,7 +20,7 @@ const ReportsOverviewTab = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-900/50 rounded-xl animate-pulse" />
+      <div className="h-64 bg-gray-100 dark:bg-[#202020]/50 rounded-xl animate-pulse" />
     ),
   }
 );
@@ -31,7 +31,7 @@ const ReportsContentTab = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-900/50 rounded-xl animate-pulse" />
+      <div className="h-64 bg-gray-100 dark:bg-[#202020]/50 rounded-xl animate-pulse" />
     ),
   }
 );
@@ -44,7 +44,7 @@ const ReportsStudentsTab = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-900/50 rounded-xl animate-pulse" />
+      <div className="h-64 bg-gray-100 dark:bg-[#202020]/50 rounded-xl animate-pulse" />
     ),
   }
 );
@@ -57,7 +57,7 @@ const ReportsFeedbackTab = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-900/50 rounded-xl animate-pulse" />
+      <div className="h-64 bg-gray-100 dark:bg-[#202020]/50 rounded-xl animate-pulse" />
     ),
   }
 );

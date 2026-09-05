@@ -42,7 +42,7 @@ export function MobileFlowEditor({
 
   return (
     <div className="fixed inset-0 z-[60] bg-white dark:bg-gray-950 overflow-y-auto">
-      <div className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-10 bg-gray-50 dark:bg-[#262626] border-b border-gray-200 dark:border-white/10 px-4 py-3 flex items-center justify-between">
         <button type="button" onClick={onBack} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>Voltar
         </button>

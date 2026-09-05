@@ -357,7 +357,7 @@ export function AnalyticsOverview({
           </SectionCard>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-500 dark:text-gray-400 bg-white/40 dark:bg-gray-900/40">
+        <div className="rounded-xl border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-500 dark:text-gray-400 bg-white/40 dark:bg-[#202020]/40">
           Selecione um curso específico no filtro acima para ver módulos com maior abandono e aulas mais assistidas.
         </div>
       )}
@@ -405,7 +405,7 @@ export function AnalyticsOverview({
               />
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 px-6 py-12 text-center">
+            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/10 bg-white/40 dark:bg-[#202020]/40 px-6 py-12 text-center">
               <span className="text-3xl block mb-2" aria-hidden>📊</span>
               <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
                 Adicione mais alunos e conteúdo para gerar diagnósticos automáticos sobre seus cursos.

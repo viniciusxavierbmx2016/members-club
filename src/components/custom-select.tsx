@@ -53,7 +53,7 @@ export const CustomSelect = React.memo(function CustomSelect({ value, onChange, 
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 w-full bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-white/20 transition"
+        className="inline-flex items-center gap-2 w-full bg-white dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-white/20 transition"
       >
         {icon && <span className="text-gray-500 flex-shrink-0">{icon}</span>}
         <span className="flex-1 text-left truncate">{label}</span>

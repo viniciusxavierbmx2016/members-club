@@ -292,7 +292,7 @@ export function ModulesManager({
       </div>
 
       {creatingSection && (
-        <div className="bg-white dark:bg-gray-900 border border-blue-500/30 rounded-xl p-4 flex gap-2">
+        <div className="bg-white dark:bg-[#202020] border border-blue-500/30 rounded-xl p-4 flex gap-2">
           <input
             type="text"
             value={newSectionTitle}
@@ -327,7 +327,7 @@ export function ModulesManager({
       )}
 
       {creatingModule && (
-        <div className="bg-white dark:bg-gray-900 border border-blue-500/30 rounded-xl p-4 flex gap-2">
+        <div className="bg-white dark:bg-[#202020] border border-blue-500/30 rounded-xl p-4 flex gap-2">
           <input
             type="text"
             value={newModuleTitle}
@@ -362,7 +362,7 @@ export function ModulesManager({
       )}
 
       {items.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
+        <div className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
           <p className="text-gray-500 text-sm">
             Nenhum módulo criado ainda. Clique em &ldquo;Novo módulo&rdquo; para começar.
           </p>
@@ -480,12 +480,12 @@ function SortableSection({
               setEditing(false);
             }
           }}
-          className="flex-1 px-2 py-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded text-gray-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="flex-1 px-2 py-1 bg-white dark:bg-[#202020] border border-gray-300 dark:border-gray-700 rounded text-gray-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       ) : (
         <h3
           onClick={() => setEditing(true)}
-          className="flex-1 text-gray-900 dark:text-white font-semibold cursor-text hover:bg-white/40 dark:hover:bg-gray-900/40 px-2 py-1 rounded text-sm"
+          className="flex-1 text-gray-900 dark:text-white font-semibold cursor-text hover:bg-white/40 dark:hover:bg-[#202020]/40 px-2 py-1 rounded text-sm"
         >
           {section.title}
         </h3>
@@ -568,9 +568,9 @@ function SortableModule({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden"
+      className="bg-white dark:bg-[#202020] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden"
     >
-      <div className="flex items-center gap-2 p-4 bg-white dark:bg-gray-900">
+      <div className="flex items-center gap-2 p-4 bg-white dark:bg-[#202020]">
         <button
           {...attributes}
           {...listeners}

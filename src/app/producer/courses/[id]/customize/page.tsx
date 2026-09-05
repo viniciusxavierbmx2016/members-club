@@ -367,7 +367,7 @@ export default function CourseCustomizePage() {
       {loading ? (
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-32 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+            <div key={i} className="h-32 bg-gray-100 dark:bg-[#202020] rounded-xl animate-pulse" />
           ))}
         </div>
       ) : loadError ? (

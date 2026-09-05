@@ -224,7 +224,7 @@ export function LessonMaterials({ lessonId }: { lessonId: string }) {
     return (
       <div className="mt-4 space-y-2">
         <div className="h-4 w-40 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-        <div className="h-12 bg-gray-100 dark:bg-gray-900 rounded-lg animate-pulse" />
+        <div className="h-12 bg-gray-100 dark:bg-[#202020] rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -247,7 +247,7 @@ export function LessonMaterials({ lessonId }: { lessonId: string }) {
             return (
               <li
                 key={mat.id}
-                className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-lg text-sm"
+                className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-[#202020]/60 border border-gray-200 dark:border-gray-800 rounded-lg text-sm"
               >
                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-md text-[10px] font-bold ${icon.color}`}>
                   {icon.label}
