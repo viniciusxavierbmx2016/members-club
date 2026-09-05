@@ -370,7 +370,7 @@ export default function CourseHomePage() {
           </p>
           <button
             onClick={() => load()}
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg transition"
+            className="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-[var(--member-button-text,#ffffff)] text-sm font-semibold rounded-lg transition"
           >
             Tentar novamente
           </button>
@@ -576,7 +576,7 @@ export default function CourseHomePage() {
               href={course.checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow"
             >
               Comprar agora
             </a>

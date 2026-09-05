@@ -381,7 +381,7 @@ const ModuleCard = React.memo(function ModuleCard({
       )}
 
       {mod.progressPct >= 100 && !mod.locked && (
-        <div className="absolute top-3 right-3 w-7 h-7 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg ring-2 ring-white/30">
+        <div className="absolute top-3 right-3 w-7 h-7 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-[var(--member-button-text,#ffffff)] flex items-center justify-center shadow-lg ring-2 ring-white/30">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>

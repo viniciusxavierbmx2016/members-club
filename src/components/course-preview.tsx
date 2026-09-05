@@ -187,7 +187,7 @@ export function CoursePreview({
             type="button"
             onClick={resgatar}
             disabled={resgatando}
-            className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-60"
+            className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[var(--member-button-text,#ffffff)] disabled:opacity-60"
           >
             {resgatando ? "Resgatando\u2026" : "Confirmar"}
           </button>

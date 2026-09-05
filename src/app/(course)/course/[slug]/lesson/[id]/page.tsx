@@ -388,7 +388,7 @@ export default function LessonPage(
             {isExpiredError && (
               <a
                 href={`/course/${params.slug}`}
-                className="inline-flex items-center justify-center px-4 py-2 mb-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition"
+                className="inline-flex items-center justify-center px-4 py-2 mb-4 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-semibold rounded-lg transition"
               >
                 Renovar acesso
               </a>
@@ -810,7 +810,7 @@ export default function LessonPage(
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-blue-600 text-white rounded-lg shadow-xl text-sm font-medium animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-blue-600 text-[var(--member-button-text,#ffffff)] rounded-lg shadow-xl text-sm font-medium animate-in fade-in slide-in-from-bottom-4">
           {toast}
         </div>
       )}

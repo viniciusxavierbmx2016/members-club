@@ -61,7 +61,7 @@ export function CongratulationsModal({
             <a
               href={`/api/certificates/${courseId}`}
               download
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-3 mt-6 font-semibold inline-flex items-center gap-2 transition"
+              className="bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] rounded-xl px-6 py-3 mt-6 font-semibold inline-flex items-center gap-2 transition"
             >
               <svg
                 className="w-5 h-5"
