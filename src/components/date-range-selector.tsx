@@ -295,7 +295,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-white/20 transition min-w-[180px]"
+        className="inline-flex items-center gap-2 bg-white dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-white/20 transition min-w-[180px]"
       >
         <FunnelIcon className="w-4 h-4 text-gray-500" />
         <span className="flex-1 text-left truncate">{value.label}</span>
@@ -303,7 +303,7 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-50 bg-white dark:bg-gray-950 border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden sm:min-w-[720px]">
+        <div className="absolute right-0 top-full mt-2 z-50 bg-white dark:bg-[#262626] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden sm:min-w-[720px]">
           {/* Mobile: presets only */}
           <div className="sm:hidden">
             <div className="py-2 max-h-[60vh] overflow-y-auto">
@@ -336,16 +336,16 @@ export function DateRangeSelector({ value, onChange }: DateRangeSelectorProps) {
                       type="date"
                       value={mobileCustomStart}
                       onChange={(e) => setMobileCustomStart(e.target.value)}
-                      className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-md px-2 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                      className="bg-white dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-md px-2 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
                     />
                   </label>
-                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-wider text-gray-500">
+                  <label className="flex flex-col gap-1 text-[11px] uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Até
                     <input
                       type="date"
                       value={mobileCustomEnd}
                       onChange={(e) => setMobileCustomEnd(e.target.value)}
-                      className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-md px-2 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                      className="bg-white dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-md px-2 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
                     />
                   </label>
                 </div>
