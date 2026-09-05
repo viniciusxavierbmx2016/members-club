@@ -1012,6 +1012,15 @@ catalogados**) e trouxe o que a medição manual não tinha alcançado:
 > a medição recomendava madrugada de meio de semana, e isso fica registrado
 > no §6-J com os motivos dele.
 > ⚠️ **A F2 segue invisível** até alguém subir a arte nova em `/admin`.
+>
+> ⭐ **04/set/26, noite — a leva do gate visual (§6-K).** O gate em produção
+> achou resíduo de `gray-900`/`gray-950` no painel e duas telas de login azuis.
+> **4 fatias mescladas na integração** (`bda54ed` · `ed1e501` · `c43b12a` ·
+> `da758c2`), **nada em produção**. Build de gate `WpeIIb6tpOKcuQAIyVv4j`.
+> 🔴 **Achou também uma REGRESSÃO da própria frente** em `/producer/login`
+> (par claro/escuro sobre fundo fixo: 5,48 → 1,15 no modo claro), que esteve em
+> produção desde 04/set 18:09 e agora está corrigida na integração.
+> Abriu o **9.227** (o `#030712` do `<body>` é global).
 
 > ⚠️ **Atualizado em 04/set/26 pela rodada do §6-F.** O primeiro gate do
 > **estado mesclado** achou dois defeitos que a medição por fatia não pegou. A
@@ -2102,3 +2111,130 @@ atualização, e o `activate` dele apaga o cache `v2.4.0`.
 PlatformSettings.** Enquanto o banco tiver a arte de abril, o logo e o favicon
 continuam os antigos e **a F2 fica invisível** — a paleta já virou, a marca
 ainda não.
+
+---
+
+### 6-K. A LEVA DO GATE VISUAL DE PRODUÇÃO — 4 fatias (04/set/26, noite)
+
+Depois da subida da frente, um gate visual em produção achou dois grupos de
+resíduo e duas telas de login azuis. Isto é o conserto, em 4 fatias mescladas
+na integração — **nada foi para produção**.
+
+| # | fatia | SHA | merge | o que entrou |
+|---|---|---|---|---|
+| 1 | `gray500-par` | `996bc91` | **`bda54ed`** | **16** pontos ganham o par escuro `dark:text-gray-400` |
+| 2 | `gray950` | `ff55188` | **`ed1e501`** | **28** superfícies `gray-950` → `#262626` (elevated) |
+| 3 | `gray900` | `3217e99` | **`c43b12a`** | **47** superfícies `gray-900` → `#202020` (45) e `#262626` (2 flutuantes) |
+| 4 | `login-produtor` | `f2596e1` | **`da758c2`** | a tela de login do produtor recebe a paleta nova |
+
+`tsc` exit 0 depois de cada merge. Build de staging **`WpeIIb6tpOKcuQAIyVv4j`**,
+alvo discriminado (23 personas `@staging.test` × 0 em produção), e os **4
+marcadores acendem no bundle servido**.
+
+#### ⭐ O lote do gray-500 foi 16, não 8 — e por que isso importa
+
+O gate apontou **8** pontos onde `text-gray-500` cairia para 3,13 com a
+superfície mais clara. Varrer **além dos apontados** — `text-gray-500` *bare*
+sobre **qualquer** superfície que esta frente tocou (os 47 do gray-900 + os 28
+do gray-950) — achou **8 irmãos idênticos**: `course-support:383` e `:387`,
+`custom-select:58`, `modules-manager:366/495/577`, `quiz-manager:122` e
+`workspaces/edit:488`. **Consertar só os 8 apontados teria deixado metade para
+trás**, e o defeito voltaria no próximo gate como se fosse novo.
+
+**16 de 16 saem de REPROVADO para APROVADO:**
+
+| superfície | cor final | antes | depois |
+|---|---|---|---|
+| `gray-950` → `#262626` | `#262626` | 3,13 🔴 | **5,96** ✅ |
+| `gray-900` → `#202020` | `#202020` | 3,37 🔴 | **6,42** ✅ |
+| `gray-950/40` | `#1e1e1e` | 3,45 🔴 | **6,57** ✅ |
+| `gray-900/50` | `#1c1c1c` | 3,53 🔴 | **6,71** ✅ |
+
+#### ⭐ OS 2 CONFLITOS — e a lição, que é sobre ORDEM
+
+A fatia do **texto** entrou **antes** das de **fundo**, pela razão certa: assim
+não existe janela na história do repositório com o defeito ativo. **O custo
+disso é conflito garantido** — o lote do `gray500-par` foi *derivado das
+superfícies* que as outras duas tocam, então compartilha **11 arquivos com cada
+uma**.
+
+Deram conflito **2 blocos, um em cada arquivo**:
+`analytics-overview.tsx` (`:601` fundo × `:602` texto) e
+`modules-manager.tsx` (`:365` fundo × `:366` texto). Sempre a mesma forma:
+**linhas VIZINHAS no mesmo hunk, sem sobreposição semântica** — uma fatia mexe
+no fundo, a outra no texto. **Resolução autorizada pelo dono: manter as duas.**
+
+> **A lição:** pôr a fatia de TEXTO antes das de FUNDO não é erro de ordem — é
+> **o custo dela**, e é benigno **quando as fatias tocam papéis diferentes na
+> mesma região**. O que torna a resolução segura não é o conflito ser pequeno,
+> é ele ser **textual e não semântico**. Verificar isso antes de resolver é a
+> condição; sem ela, a autorização não vale.
+
+ⓘ O `modules-manager` recebeu **7** trocas do gray-900 e **só 1 conflitou** —
+as outras 6 mesclaram sozinhas por não serem vizinhas de nada.
+
+#### O portão pós-resolução manual
+
+Conflito resolvido à mão é onde se perde trabalho em silêncio. Provado:
+
+- `bg-[#202020]` = **45**, `bg-[#262626]` = **30**, molde completo
+  `text-gray-500 dark:text-gray-400` = **227** (211 na `main` + 16) — as três batem;
+- `gray-900` restante = **115**, `gray-950` restante = **32** — batem com os
+  excluídos deliberadamente;
+- nos 2 arquivos conflitados, **todas** as mudanças das duas fatias presentes;
+- **zero** marcadores de conflito no repo, e as duas linhas idênticas do
+  `modules-manager` (`:295` e `:330`) são **blocos irmãos pré-existentes** —
+  provado: idênticas na `main`, e o arquivo tem **723 linhas nos dois**.
+
+#### 🔴 A REGRESSÃO QUE A PRÓPRIA FRENTE INTRODUZIU — e esteve em produção
+
+`producer/(auth)/login/page.tsx:116` tem um **`style` inline** que pinta a
+página de escuro **nos dois modos** (inline vence `className`; o `bg-white` ali
+é letra morta). A frente aplicou **6 pares D12** (`text-[#191919] dark:text-primary`)
+pressupondo fundo claro no modo claro.
+
+| modo claro, nessa tela | contraste |
+|---|---|
+| antes da frente (`text-primary` sobre `#060612`) | **5,48** ✅ |
+| depois da frente (`#191919` sobre `#060612`) | **1,15** 🔴 |
+
+**Esteve em produção de 04/set 18:09 até esta correção.** **Severidade baixa:**
+`defaultTheme="dark"` e **zero** contas em modo claro, então o efeito real era o
+**flash entre o SSR e a hidratação** (o `.dark` é injetado no cliente), mais
+quem tivesse alternado para claro.
+
+> ⭐ **A LIÇÃO, e nenhuma varredura da frente a checou:** *o par claro/escuro
+> pressupõe que o fundo VIRA com o modo.* Onde há `style` inline com fundo fixo,
+> **o par é ERRADO** — valor único é o certo. A condição a verificar antes de
+> aplicar um par é: *este elemento fica sobre um fundo que muda com o modo?*
+
+ⓘ E o `:127` ("Entre na sua conta") era o **único `text-primary` sem par** no
+arquivo — a frente passou por ele. Já reprovava no claro (3,68) e viraria 1,11
+com lime.
+
+#### Correções de registro
+
+- **O rótulo do BB3 estava errado.** O que chamei de *"overlay"* é
+  `mobile-flow-editor.tsx:44`, um `fixed inset-0` **opaco** com cabeçalho
+  próprio: é a **página de tela cheia** do editor mobile. **Não há véu nenhum**
+  entre os 29 (um véu teria alfa e nenhum conteúdo). Sai do lote do mesmo jeito,
+  mas por ser **fundo de página** — que pela paleta seria `#191919`, não `#262626`.
+- **O molde tem 211 usos, não 75.** Recontagem de
+  `text-gray-500 dark:text-gray-400` no `src/`.
+
+#### O gray-950 como decisão de GOSTO, com o trade-off medido
+
+O `gray-950` **nunca fez parte de paleta nenhuma no painel** — é o cinza do
+Tailwind. A troca para `#262626`: o contraste do texto branco **cai**
+(20,13 → 15,13, segue muito acima do limiar), a distinção contra o fundo **não
+muda** (1,15 → 1,16), e o que se ganha é **matiz** (viés azul +15 → 0) e
+**linguagem**: hoje o modal *afunda*, com `#262626` ele *flutua*.
+**É hierarquia visual, não correção de defeito.**
+
+#### Pendências com motivo — não são esquecimento
+
+- **23 pontos `gray-900` não couberam na regra** `#202020`/`#262626`: **11 são
+  TOAST invertido** (`bg-gray-900 dark:bg-white text-white dark:text-gray-900`,
+  deliberadamente escuro no CLARO), **2 são help-tooltip** e **10 são
+  superfícies sempre-escuras**. Aplicam nos **dois** modos e têm outro papel.
+- **O `#030712` do `<body>` é GLOBAL** — ver item **9.227**.
