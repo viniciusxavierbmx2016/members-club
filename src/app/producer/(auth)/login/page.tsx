@@ -113,7 +113,7 @@ function ProducerLoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#060612] px-4" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 60%), #060612" }}>
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#191919] px-4" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(239,255,32,0.15) 0%, transparent 60%), #191919" }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -124,7 +124,7 @@ function ProducerLoginForm() {
               }
             />
           </div>
-          <p className="text-sm font-medium text-primary">
+          <p className="text-sm font-medium text-[#EFFF20]">
             Entre na sua conta
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -170,7 +170,7 @@ function ProducerLoginForm() {
                         href={`/w/${w.slug}/login`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] hover:border-[#191919]/50 dark:hover:border-primary/50 transition"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/[0.04] border border-gray-300 dark:border-white/[0.08] hover:border-[#191919]/50 hover:border-[#EFFF20]/50 transition"
                       >
                         {w.logoUrl ? (
                           <Image
@@ -181,7 +181,7 @@ function ProducerLoginForm() {
                             className="w-9 h-9 rounded-lg object-cover shrink-0"
                           />
                         ) : (
-                          <span className="w-9 h-9 rounded-lg bg-primary/15 text-[#191919] dark:text-primary flex items-center justify-center font-bold shrink-0">
+                          <span className="w-9 h-9 rounded-lg bg-[#EFFF20]/15 text-[#EFFF20] flex items-center justify-center font-bold shrink-0">
                             {w.name.charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -218,9 +218,9 @@ function ProducerLoginForm() {
           ) : mfaRequired ? (
             <form onSubmit={handleMfaVerify} className="space-y-4">
               <div className="text-center mb-6">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 rounded-full bg-[#EFFF20]/10 flex items-center justify-center mx-auto mb-3">
                   <svg
-                    className="w-7 h-7 text-[#191919] dark:text-primary"
+                    className="w-7 h-7 text-[#EFFF20]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -261,7 +261,7 @@ function ProducerLoginForm() {
               <button
                 type="submit"
                 disabled={mfaCode.length !== 6 || loading}
-                className="w-full py-2.5 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-[var(--producer-button-text,#ffffff)] rounded-xl font-medium transition-colors"
+                className="w-full py-2.5 bg-[#EFFF20] hover:bg-[#EFFF20] disabled:opacity-40 disabled:cursor-not-allowed text-[#191919] rounded-xl font-medium transition-colors"
               >
                 {loading ? "Verificando..." : "Verificar"}
               </button>
@@ -312,7 +312,7 @@ function ProducerLoginForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-primary hover:bg-primary disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition"
+                  className="w-full py-3 bg-[#EFFF20] hover:bg-[#EFFF20] disabled:opacity-50 text-[#191919] font-medium rounded-xl shadow-lg shadow-primary/20 transition"
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </button>
@@ -321,13 +321,13 @@ function ProducerLoginForm() {
               <div className="mt-6 flex items-center justify-between text-sm">
                 <Link
                   href="/forgot-password?from=producer"
-                  className="text-[#191919] dark:text-primary hover:underline"
+                  className="text-[#EFFF20] hover:underline"
                 >
                   Esqueci minha senha
                 </Link>
                 <Link
                   href="/producer/register"
-                  className="text-[#191919] dark:text-primary hover:underline"
+                  className="text-[#EFFF20] hover:underline"
                 >
                   Criar conta
                 </Link>
@@ -337,7 +337,7 @@ function ProducerLoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowStudentLookup(!showStudentLookup)}
-                  className="text-sm text-[#191919] dark:text-primary hover:underline"
+                  className="text-sm text-[#EFFF20] hover:underline"
                 >
                   É aluno? Encontre seu curso
                 </button>
@@ -356,7 +356,7 @@ function ProducerLoginForm() {
                           setLookupSent(false);
                           setLookupEmail("");
                         }}
-                        className="mt-2 text-xs text-[#191919] dark:text-primary hover:underline"
+                        className="mt-2 text-xs text-[#EFFF20] hover:underline"
                       >
                         Enviar para outro email
                       </button>
@@ -378,7 +378,7 @@ function ProducerLoginForm() {
                         type="button"
                         onClick={handleStudentLookup}
                         disabled={lookupLoading || !lookupEmail.trim()}
-                        className="mt-3 w-full py-2.5 rounded-lg bg-primary text-[var(--producer-button-text,#ffffff)] text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                        className="mt-3 w-full py-2.5 rounded-lg bg-[#EFFF20] text-[#191919] text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
                       >
                         {lookupLoading ? "Enviando..." : "Enviar links de acesso"}
                       </button>
