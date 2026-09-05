@@ -132,7 +132,7 @@ export function CourseSidebar({
                 className="w-8 h-8 rounded-lg object-cover flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10"
               />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-[var(--member-button-text,#ffffff)] flex items-center justify-center text-sm font-semibold flex-shrink-0 shadow-sm">
                 {(course.workspaceName || course.title).charAt(0).toUpperCase()}
               </div>
             )}

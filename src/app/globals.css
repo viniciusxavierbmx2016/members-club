@@ -446,6 +446,15 @@ html:not(.dark) .course-customized .text-primary { color: var(--member-primary, 
 .course-customized .text-blue-300 { color: var(--member-primary, #93c5fd) !important; }
 .course-customized .text-emerald-300 { color: var(--member-primary, #6ee7b7) !important; }
 .course-customized .to-blue-700 { --tw-gradient-to: var(--member-primary, #1d4ed8) !important; }
+/* 9.234 — as 4 lacunas de STOP da família da marca, achadas pela tabela de
+   cobertura derivada do CSS (o antídoto da A1b). Sem elas o gradiente não
+   colapsa e o texto calculado cai sobre uma cor que não é a marca.
+   ⚠️ Sobem NO MESMO COMMIT que a troca do texto nos 3 pontos: o remap sozinho
+   levaria o branco cravado de 5,17 para 1,00 no Kingdom (3.702 alunos). */
+.course-customized .to-blue-600 { --tw-gradient-to: var(--member-primary, #2563eb) !important; }
+.course-customized .hover\:from-blue-500:hover { --tw-gradient-from: var(--member-primary, #3b82f6) !important; }
+.course-customized .hover\:to-blue-500:hover { --tw-gradient-to: var(--member-primary, #3b82f6) !important; }
+.course-customized .hover\:from-emerald-500:hover { --tw-gradient-from: var(--member-primary, #10b981) !important; }
 /* Espelho da regra do produtor: a borda de foco do editor (focus-within) não
    era coberta por ruleset nenhum. Alpha /50 preservado como na :415 logo acima. */
 .course-customized .focus-within\:border-blue-500\/50:focus-within { border-color: color-mix(in srgb, var(--member-primary, #3b82f6) 50%, transparent) !important; }
