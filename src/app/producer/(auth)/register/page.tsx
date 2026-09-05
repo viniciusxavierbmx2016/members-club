@@ -143,7 +143,7 @@ export default function ProducerRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#060612] px-4 py-8" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 60%), #060612" }}>
+    <div className="min-h-screen flex items-center justify-center bg-[#191919] px-4 py-8" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(239,255,32,0.15) 0%, transparent 60%), #191919" }}>
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-2">
@@ -154,7 +154,7 @@ export default function ProducerRegisterPage() {
               }
             />
           </div>
-          <p className="text-sm font-medium text-primary mt-2">Crie sua conta de produtor</p>
+          <p className="text-sm font-medium text-[#EFFF20] mt-2">Crie sua conta de produtor</p>
         </div>
 
         {/* Progress bar */}
@@ -164,7 +164,7 @@ export default function ProducerRegisterPage() {
               <div className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                   i <= step
-                    ? "bg-primary text-[var(--producer-button-text,#ffffff)] shadow-lg shadow-primary/20"
+                    ? "bg-[#EFFF20] text-[#191919] shadow-lg shadow-[#EFFF20]/20"
                     : "bg-white/[0.04] text-gray-500 border border-white/[0.08]"
                 }`}>
                   {i < step ? (
@@ -175,12 +175,12 @@ export default function ProducerRegisterPage() {
                     i + 1
                   )}
                 </div>
-                <span className={`text-xs mt-1 ${i <= step ? "text-primary" : "text-gray-600"}`}>
+                <span className={`text-xs mt-1 ${i <= step ? "text-[#EFFF20]" : "text-gray-600"}`}>
                   {label}
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-12 h-0.5 mx-1 mb-4 ${i < step ? "bg-primary" : "bg-white/[0.08]"}`} />
+                <div className={`w-12 h-0.5 mx-1 mb-4 ${i < step ? "bg-[#EFFF20]" : "bg-white/[0.08]"}`} />
               )}
             </div>
           ))}
@@ -212,11 +212,11 @@ export default function ProducerRegisterPage() {
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="mt-0.5 rounded border-white/[0.08] bg-white/[0.04] text-primary focus:ring-primary"
+                  className="mt-0.5 rounded border-white/[0.08] bg-white/[0.04] text-[#EFFF20] focus:ring-[#EFFF20]"
                 />
                 Concordo com os Termos de Uso e Política de Privacidade
               </label>
-              <button onClick={next} className="w-full py-3 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition">
+              <button onClick={next} className="w-full py-3 bg-[#EFFF20] hover:bg-[#EFFF20] text-[#191919] font-medium rounded-xl shadow-lg shadow-[#EFFF20]/20 transition">
                 Próximo
               </button>
             </div>
@@ -271,7 +271,7 @@ export default function ProducerRegisterPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="flex-1 py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 text-[var(--producer-button-text,#ffffff)] font-medium rounded-lg transition"
+                  className="flex-1 py-3 bg-[#EFFF20] hover:bg-[#EFFF20]-hover disabled:opacity-50 text-[#191919] font-medium rounded-lg transition"
                 >
                   {loading ? "Criando conta..." : "Criar conta"}
                 </button>
@@ -281,7 +281,7 @@ export default function ProducerRegisterPage() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Já tem conta?{" "}
-            <Link href="/producer/login" className="text-primary hover:underline font-medium">
+            <Link href="/producer/login" className="text-[#EFFF20] hover:underline font-medium">
               Fazer login
             </Link>
           </p>
@@ -310,7 +310,7 @@ function Input({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition"
+        className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#EFFF20]/50 focus:ring-1 focus:ring-[#EFFF20]/20 transition"
       />
     </div>
   );
@@ -323,7 +323,7 @@ function SelectCard({ label, selected, onClick }: { label: string; selected: boo
       onClick={onClick}
       className={`px-4 py-3 rounded-xl text-sm font-medium text-left transition border ${
         selected
-          ? "border-primary/50 bg-primary/10 text-primary shadow-lg shadow-primary/10"
+          ? "border-[#EFFF20]/50 bg-[#EFFF20]/10 text-[#EFFF20] shadow-lg shadow-[#EFFF20]/10"
           : "border-white/[0.06] bg-white/[0.03] text-gray-300 hover:border-white/[0.12]"
       }`}
     >
@@ -338,7 +338,7 @@ function StepButtons({ onBack, onNext }: { onBack: () => void; onNext: () => voi
       <button onClick={onBack} className="flex-1 py-3 border border-white/[0.08] text-gray-300 hover:bg-white/[0.04] font-medium rounded-xl transition">
         Voltar
       </button>
-      <button onClick={onNext} className="flex-1 py-3 bg-primary hover:bg-primary text-[var(--producer-button-text,#ffffff)] font-medium rounded-xl shadow-lg shadow-primary/20 transition">
+      <button onClick={onNext} className="flex-1 py-3 bg-[#EFFF20] hover:bg-[#EFFF20] text-[#191919] font-medium rounded-xl shadow-lg shadow-[#EFFF20]/20 transition">
         Próximo
       </button>
     </div>

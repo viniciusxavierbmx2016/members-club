@@ -2,11 +2,11 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#191919] flex items-center justify-center px-4">
       <div className="text-center max-w-md">
         <div className="mb-6 flex justify-center">
           <svg
-            className="w-20 h-20 text-blue-500/60"
+            className="w-20 h-20 text-[#EFFF20]/60"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -28,7 +28,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#EFFF20] hover:bg-[#EFFF20]/90 text-[#191919] font-medium rounded-lg transition"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

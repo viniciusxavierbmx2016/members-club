@@ -132,13 +132,13 @@ export function GlobalSearch() {
       />
 
       {showDropdown && (
-        <div className="absolute left-0 right-0 mt-2 max-h-[70vh] overflow-y-auto bg-white dark:bg-[#0f0f1e] border border-gray-200 dark:border-white/[0.08] rounded-xl shadow-2xl z-50">
+        <div className="absolute left-0 right-0 mt-2 max-h-[70vh] overflow-y-auto bg-white dark:bg-[#262626] border border-gray-200 dark:border-white/[0.08] rounded-xl shadow-2xl z-50">
           {loading && total === 0 ? (
-            <div className="p-6 text-center text-sm text-gray-500">
+            <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
               Buscando...
             </div>
           ) : total === 0 ? (
-            <div className="p-6 text-center text-sm text-gray-500">
+            <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
               Nenhum resultado para &ldquo;{term}&rdquo;
             </div>
           ) : (

@@ -110,7 +110,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#0f0f1e] border border-gray-200 dark:border-white/[0.08] rounded-xl shadow-2xl py-1 z-50">
+              <div className="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#262626] border border-gray-200 dark:border-white/[0.08] rounded-xl shadow-2xl py-1 z-50">
                 <div className="px-4 py-2 border-b border-gray-200 dark:border-white/[0.06]">
                   <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {user?.name}
