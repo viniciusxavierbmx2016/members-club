@@ -2904,3 +2904,105 @@ não seria discriminador.
 | **9.231** | os 5 cursos sem marca própria | 310 alunos |
 | **9.232** | `auth-shell:133` — `buttonTextColor` branco cravado | o MESMO defeito, no login do aluno |
 | **9.233** | os 53 sem personalização: branco sobre `emerald-500` = **2,54** | 24.618 matrículas |
+
+
+---
+
+## 15. A1b — os gradientes, e a lição que custou uma subida (05/set/26)
+
+O gate em produção achou o botão **"Concluir aula"** do `Kingdom Academy` ainda
+**branco sobre branco**. Depois de clicado, "Concluída" fica legível. **Um botão,
+dois ramos de um ternário** — um pegou a A1, o outro não.
+
+### 15.1 A causa, em uma linha
+
+```
+:508  bg-gradient-to-r from-emerald-600 to-emerald-500  text-white
+```
+
+A linha **contém `bg-`** — mas é `bg-gradient-to-r`, que declara a **DIREÇÃO**.
+**A cor vem de `from-`/`to-`**, e a varredura da A1 exigia o prefixo `bg-` colado
+à cor. A regex nunca casou. *(Provado com controle positivo: a mesma regex casa
+na `:391`, que a A1 pegou.)*
+
+⭐ E o `globals.css:430-431` remapeia **os dois stops** para a **mesma**
+`var(--member-primary)` ⇒ sob `.course-customized` o gradiente **vira sólido na
+marca**. Confirmado no navegador: `rgb(255,255,255) → rgb(255,255,255)`.
+
+**Por que o outro ramo era legível:** não foi conserto, foi **estrutura**. O
+`:507` tem fundo translúcido (`bg-emerald-500/12` → `color-mix` 12%) e texto
+`text-emerald-400`, **que também é remapeado para a marca**. No Kingdom: marca
+sobre marca-a-12%-sobre-o-card `#4e4e4e` = **8,32** ✅.
+
+### 15.2 ⭐ A LIÇÃO, com todas as letras
+
+> **Provar que uma família é ALCANÇÁVEL não a coloca na lista de ALVOS.**
+
+Os 6 gradientes **foram medidos no A0.6**. Eu escrevi, com prova: *"9 regras
+colapsam `from` e `to` na mesma var — o gradiente vira sólido, e uma cor só
+serve"*. A pergunta que eu respondia era **"a conta funciona aqui?"**. A resposta
+*sim* foi arquivada como **risco descartado** — e a lista de alvos saiu só do
+A0.4, que varria `bg-*`.
+
+**Duas perguntas parecidas — "quebra?" e "está na lista?" — e responder a primeira
+deu a sensação de ter respondido a segunda.** O A0.6d listou os 6 no terminal e
+**nunca virou `file:line` neste documento** (`grep 'page.tsx:508'` devolvia zero).
+
+### 15.3 ⭐ O ANTÍDOTO — método padrão daqui para a frente
+
+**A lista de alvos é derivada DO CSS que define a família, nunca de padrão de
+busca escrito à mão.** Parsear o `globals.css`, extrair toda classe que pinta a
+marca, e varrer por essa lista. Um comando, e a cobertura sai por família:
+
+| família | classes | com a var | falta | cobertura |
+|---|---|---|---|---|
+| **SÓLIDA** | 6 | 22 | 9 | **70%** — e as 9 são exatamente o **9.230** |
+| **GRADIENTE** | 8 | 0 | 6 | **0%** 🔴 — o furo |
+| **TINTE** (`color-mix`) | 12 | — | 1 | fora por decisão (não é superfície) |
+
+Foi essa checagem que fechou a conta. Uma regex escrita à mão nunca teria
+denunciado a própria omissão.
+
+### 15.4 Aplicados: 2. Excluídos com prova: 4.
+
+**A prova que barra é o valor desta fatia**, não a que aplica.
+
+| ponto | stops | veredito |
+|---|---|---|
+| `lesson/[id]/page.tsx:508` | `from-emerald-600` ✅ + `to-emerald-500` ✅ | **APLICADO** |
+| `course-preview.tsx:152` | `from-emerald-500` ✅ + `to-emerald-600` ✅ | **APLICADO** |
+| `course-preview.tsx:204` · `:515` · `course-sidebar.tsx:135` | `from-blue-500` ✅ + **`to-blue-600` 🔴** | **9.234** |
+| `course/[slug]/page.tsx:518` | ambos ✅, **mas renderiza sem acesso** | **9.235** |
+
+🔴 **Os 3 parciais:** `to-blue-600` não tem regra de remap. O gradiente vira
+**marca → `#2563eb` literal**, e o texto escuro levaria a ponta azul de **5,17
+(passa hoje) para 3,83** — regressão em **12 cursos, 3.700 alunos**.
+
+🔴 **O `:518`:** os condicionais de acesso do arquivo estão em `:540` e `:564`,
+**depois** dele ⇒ renderiza para visitante sem vínculo, onde
+`course-shell.tsx:112` **não** aplica a classe. `to-blue-700` iria de **6,70
+para 2,95**.
+
+### 15.5 As provas, pelo navegador sobre o bundle real
+
+`className` real montada de `:505` (parte fixa) + `:508` (o ramo):
+
+| caso | gradiente renderizado | texto | |
+|---|---|---|---|
+| **ANTES** Kingdom | `rgb(255,255,255) → rgb(255,255,255)` **sólido** | branco | **1,00** 🔴 |
+| **KING** depois | mesmo fundo | `rgb(10,10,10)` | **19,80** ✅ |
+| **FHO** depois | `rgb(255,200,69)` **idêntico ao do produtor** | `rgb(10,10,10)` | **12,82** ✅ |
+| **SEM VAR** (58 cursos, 24.936 alunos) | `rgb(5,150,105) → rgb(16,185,129)` real | branco | **pixel idêntico** ✅ |
+| **SEM CLASSE** (visitante) | emerald real | `rgb(10,10,10)` | 5,25 e 7,80 ✅ |
+
+⭐ A linha **SEM CLASSE** é a que justifica a exclusão dos 4: no emerald as duas
+pontas passam com texto escuro; **no azul não passam**. A mesma fatia, dois
+resultados opostos, e só a medição separa.
+
+### 15.6 Achado colateral — `9.236`
+
+`bg-emerald-600` **sólido não é remapeado** (só `/30`), enquanto `bg-emerald-500`
+tem 5 regras. Auditei **os 23 pontos da A1** por esse critério: **22 corretos**,
+**1** (`course-preview.tsx:190`) com o texto calculado caindo sobre `#059669`
+literal. **Não é regressão** — 3,77 → 5,25 em 12 cursos, 0 pioram — mas **acertou
+por acidente**, e o mecanismo ali está errado.
