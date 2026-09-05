@@ -113,7 +113,7 @@ export function QuizManager({ lessonId }: Props) {
   }
 
   if (loading) {
-    return <div className="h-20 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />;
+    return <div className="h-20 bg-gray-100 dark:bg-[#202020] rounded-xl animate-pulse" />;
   }
 
   if (!quiz) {

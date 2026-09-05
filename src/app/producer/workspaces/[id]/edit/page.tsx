@@ -477,7 +477,7 @@ export default function EditWorkspacePage() {
     return (
       <div className="max-w-5xl mx-auto">
         <div className="h-5 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse mb-4" />
-        <div className="h-48 bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse" />
+        <div className="h-48 bg-gray-100 dark:bg-[#202020] rounded-xl animate-pulse" />
       </div>
     );
   }

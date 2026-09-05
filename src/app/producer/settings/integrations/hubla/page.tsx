@@ -263,7 +263,7 @@ export default function HublaIntegrationPage() {
               URL do webhook
             </label>
             <div className="flex flex-col sm:flex-row gap-2 mb-5">
-              <code className="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg text-xs sm:text-sm text-gray-800 dark:text-gray-200 break-all">
+              <code className="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg text-xs sm:text-sm text-gray-800 dark:text-gray-200 break-all">
                 {webhookUrl}
               </code>
               <button
@@ -464,18 +464,18 @@ export default function HublaIntegrationPage() {
               <li>
                 No painel da Hubla, crie um webhook apontando para essa URL e
                 selecione os eventos{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   customer.member_added
                 </code>{" "}
                 e{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   customer.member_removed
                 </code>
                 .
               </li>
               <li>
                 Configure o token de autenticação (cabeçalho{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   x-hubla-token
                 </code>
                 ) e cole o mesmo valor no campo acima.

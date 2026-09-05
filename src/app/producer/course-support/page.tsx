@@ -296,7 +296,7 @@ export default function CourseSupportInboxPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 h-[calc(100vh-12rem)] min-h-[500px]">
         {/* LIST */}
         <aside
-          className={`rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 flex flex-col overflow-hidden ${
+          className={`rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#202020] flex flex-col overflow-hidden ${
             activeId ? "hidden lg:flex" : "flex"
           }`}
         >
@@ -375,7 +375,7 @@ export default function CourseSupportInboxPage() {
 
         {/* CHAT */}
         <section
-          className={`rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 flex flex-col overflow-hidden ${
+          className={`rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#202020] flex flex-col overflow-hidden ${
             activeId ? "flex" : "hidden lg:flex"
           }`}
         >

@@ -272,7 +272,7 @@ export default function CaktoIntegrationPage() {
               URL do webhook
             </label>
             <div className="flex flex-col sm:flex-row gap-2 mb-5">
-              <code className="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-gray-900/50 border border-gray-200 dark:border-white/10 rounded-lg text-xs sm:text-sm text-gray-800 dark:text-gray-200 break-all">
+              <code className="flex-1 px-3 py-2.5 bg-gray-100 dark:bg-[#202020]/50 border border-gray-200 dark:border-white/10 rounded-lg text-xs sm:text-sm text-gray-800 dark:text-gray-200 break-all">
                 {webhookUrl}
               </code>
               <button
@@ -490,7 +490,7 @@ export default function CaktoIntegrationPage() {
               <li>
                 No painel da Cakto, crie um webhook apontando para essa URL, no
                 evento{" "}
-                <code className="text-xs bg-gray-100 dark:bg-gray-900/50 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-gray-100 dark:bg-[#202020]/50 px-1.5 py-0.5 rounded">
                   purchase_approved
                 </code>
                 , e cole a mesma chave no campo de segredo.
