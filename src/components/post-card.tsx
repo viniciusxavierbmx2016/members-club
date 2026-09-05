@@ -589,7 +589,7 @@ export const PostCard = memo(function PostCard({
               type="button"
               onClick={saveEdit}
               disabled={!hasPostContent(editContent) || savingEdit}
-              className="px-3 pt-3.5 pb-1.5 -mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+              className="px-3 pt-3.5 pb-1.5 -mt-2 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
             >
               {savingEdit ? "Salvando..." : "Salvar"}
             </button>
@@ -787,7 +787,7 @@ export const PostCard = memo(function PostCard({
                               type="button"
                               onClick={() => submitReply(c.id)}
                               disabled={!hasPostContent(replyContent) || postingReply}
-                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
                             >
                               {postingReply ? "Enviando..." : "Responder"}
                             </button>
@@ -814,7 +814,7 @@ export const PostCard = memo(function PostCard({
                     <button
                       type="submit"
                       disabled={!hasPostContent(newComment) || posting}
-                      className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+                      className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
                     >
                       {posting ? "Enviando..." : "Enviar"}
                     </button>

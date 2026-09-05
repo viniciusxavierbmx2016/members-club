@@ -89,7 +89,7 @@ export function TermsModal({ courseId, termsContent, termsFileUrl, onAccepted }:
           <button
             onClick={handleAccept}
             disabled={!checked || accepting}
-            className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-white"
+            className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-500 text-[var(--member-button-text,#ffffff)]"
           >
             {accepting ? "Aceitando..." : "Aceitar e continuar"}
           </button>

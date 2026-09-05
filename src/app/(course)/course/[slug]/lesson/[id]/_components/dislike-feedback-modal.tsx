@@ -80,7 +80,7 @@ export function DislikeFeedbackModal({ onSubmit, onClose }: Props) {
           type="button"
           onClick={handleSubmit}
           disabled={!reason}
-          className="mt-4 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="mt-4 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Enviar feedback
         </button>

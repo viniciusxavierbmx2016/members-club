@@ -629,7 +629,7 @@ export default function CommunityPage() {
                   onClick={() => setType(t.value)}
                   className={`text-xs px-3 py-1.5 rounded-full border transition ${
                     type === t.value
-                      ? "bg-blue-600 border-blue-500 text-white"
+                      ? "bg-blue-600 border-blue-500 text-[var(--member-button-text,#ffffff)]"
                       : "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-600"
                   }`}
                 >
@@ -647,7 +647,7 @@ export default function CommunityPage() {
             <button
               type="submit"
               disabled={!hasPostContent(content) || submitting}
-              className="px-4 py-3 -my-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg disabled:opacity-50"
+              className="px-4 py-3 -my-1 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] text-sm font-medium rounded-lg disabled:opacity-50"
             >
               {submitting ? "Publicando..." : "Publicar"}
             </button>
@@ -770,7 +770,7 @@ export default function CommunityPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-blue-600 text-white rounded-lg shadow-xl text-sm font-medium">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-blue-600 text-[var(--member-button-text,#ffffff)] rounded-lg shadow-xl text-sm font-medium">
           {toast}
         </div>
       )}

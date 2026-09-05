@@ -263,7 +263,7 @@ export function LessonQuiz({ lessonId }: Props) {
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors"
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-[var(--member-button-text,#ffffff)] text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors"
           >
             {submitting ? "Enviando..." : "Enviar respostas"}
           </button>
@@ -271,7 +271,7 @@ export function LessonQuiz({ lessonId }: Props) {
           <button
             type="button"
             onClick={retry}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-[var(--member-button-text,#ffffff)] text-sm font-semibold rounded-xl transition-colors"
           >
             Tentar novamente
           </button>

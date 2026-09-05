@@ -46,7 +46,7 @@ export default function CourseError({
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={reset}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-[var(--member-button-text,#ffffff)] font-medium rounded-lg transition"
           >
             Tentar novamente
           </button>
