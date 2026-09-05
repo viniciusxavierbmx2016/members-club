@@ -2908,6 +2908,74 @@ não seria discriminador.
 
 ---
 
+### 6-S. 🚀 A QUINTA SUBIDA — os 2 gradientes, e as 4 exclusões que a medição impôs (05/set/26, 17:41)
+
+**`a7f2c12` — merge `--no-ff` na `main`. Push às 17:41:25 BRT.** Deployment
+`success` às **17:42:40** (1min15s). **Rollback: `e7b7834`**
+(`/tmp/sha-rollback-a1b.txt`). Build de produção `2jCs_kU09McqHOMqmYTTy`.
+
+**5 arquivos**: 2 de código (**+2/−2 linhas**) e 3 de papelada. **0 em `prisma/`,
+`producer/`, `admin/`, `app/w/`.**
+
+⭐ **Zero lógica nova** — o `word-diff` prova: só `text-white` → a var, duas vezes.
+0 imports, 0 funções, 0 arquivos `.ts`. A A1 é que trouxe a função; esta é troca
+de classe pura.
+
+| portão | resultado |
+|---|---|
+| ensaio na integração / na `main` | 0 conflitos |
+| `tsc --noEmit` | exit 0 (3×) |
+| medição pós-deploy | **0 respostas 500** |
+| `sw.js` · `manifest` | `2.4.0` · `#191919` — intocados |
+| regra CSS no servido | **viva**, e `.text-white` sobrevive |
+| pontos no fonte | **25** (23 da A1 + 2) |
+| controle negativo no bundle | a forma antiga `from-emerald-600 to-emerald-500 text-white`: **0 chunks** |
+
+#### ⭐ O valor desta subida são as 4 EXCLUSÕES, não os 2 aplicados
+
+| barrado | por quê | item |
+|---|---|---|
+| `course-preview.tsx:204` · `:515` · `course-sidebar.tsx:135` | gradiente **PARCIAL**: `to-blue-600` sem remap ⇒ ponta azul de **5,17 → 3,83** em 12 cursos / 3.700 alunos | **9.234** |
+| `course/[slug]/page.tsx:518` | renderiza **sem acesso** (condicionais em `:540`/`:564`) ⇒ `to-blue-700` de **6,70 → 2,95** | **9.235** |
+
+E o achado colateral: `bg-emerald-600` **sólido não é remapeado** — auditei os 23
+pontos da A1, **22 corretos, 1** (`course-preview.tsx:190`) com o texto calculado
+caindo sobre `#059669` literal. **Não é regressão** (3,77 → 5,25, 0 pioram), mas
+acertou por acidente → **9.236**.
+
+#### O que a medição do "depois" já apurou (RR9)
+
+**9.234 — raio de alcance da regra `.course-customized .to-blue-600`:** o app
+inteiro tem **4** usos de `to-blue-600`. Três são os alvos; o quarto é
+`components/sidebar.tsx:419`, que só renderiza em **admin/painel** — e uma regra
+escopada em `.course-customized` **nunca o alcança**. ⇒ raio exato: os 3. O molde
+já existe (`globals.css:395` e `:448` fazem o mesmo para `to-blue-400`/`700`).
+
+**9.233 — o defeito é MENOR do que se pensava: 9 pontos, não 25.** Dos 25 pontos
+com a var, **16 rendem `bg-blue-600` (`#2563eb`)** no caso sem personalização, e
+branco ali dá **5,17 ✅**. Só **9** reprovam. E não existe uma cor de texto única:
+
+| cor literal | branco | escuro |
+|---|---|---|
+| `emerald-500` `#10b981` | 2,54 🔴 | **7,80** ✅ |
+| `emerald-600` `#059669` | 3,77 🔴 | **5,25** ✅ |
+| `blue-500` `#3b82f6` | 3,68 🔴 | **5,38** ✅ |
+| `blue-600` `#2563eb` | **5,17** ✅ | 3,83 🔴 |
+| `blue-700` `#1d4ed8` | **6,70** ✅ | 2,95 🔴 |
+
+**As opções, com custo — nenhuma escolhida:**
+1. **Trocar o FALLBACK dos 9**: `text-[var(--member-button-text,#0a0a0a)]`. 9 linhas,
+   zero CSS, zero mecanismo, zero schema; personalizado segue pela conta.
+   ⚠️ o fallback deixa de ser "o pixel de hoje" — muda a cara de **24.618 matrículas**.
+2. **Regra CSS por classe**, escopada numa classe **sempre-ligada** do shell.
+   ⚠️ hoje `.course-customized` é CONDICIONAL: exige classe nova no shell, que
+   serve 100% da área do aluno.
+3. **Virar o padrão da área do aluno** (emitir `--member-primary` para todos).
+   É o épico, não uma fatia — mas resolve junto a colcha de 9 fallbacks.
+
+---
+
+
 ## 15. A1b — os gradientes, e a lição que custou uma subida (05/set/26)
 
 O gate em produção achou o botão **"Concluir aula"** do `Kingdom Academy` ainda
