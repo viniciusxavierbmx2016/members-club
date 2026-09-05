@@ -2498,3 +2498,71 @@ curso verá uma tela **lime** numa área **azul**.
   `(dashboard)/profile` (que **alcança a vitrine** e sai de qualquer forma).
   **São caso de COR DE MARCA, não de superfície** — exigem a decisão do par D12
   ponto a ponto. **Regra diferente ⇒ fatia própria.**
+
+---
+
+### 6-O. 🚀 A SEGUNDA SUBIDA PARA PRODUÇÃO (05/set/26, 00:20)
+
+**`bb51e6c`** — merge de `feat/rebranding` na `main`. Push às **00:20:23 BRT**,
+deployment de produção **`success` às 00:21:46 — 83 segundos**.
+**42 arquivos, 18 commits.**
+
+#### ⭐ Esta leva CORRIGE UMA REGRESSÃO QUE A PRÓPRIA FRENTE PÔS NO AR
+
+`producer/(auth)/login/page.tsx:116` tem um `style` inline que pinta a página de
+escuro **nos dois modos**. A primeira subida (`39e3d9d`) aplicou ali 6 pares
+D12, que pressupõem fundo que **vira com o modo** — no modo claro o texto ia a
+**1,15** (contra 5,48 antes da frente).
+
+**Tempo em produção: de 04/set 18:09 a 05/set 00:21 — 6 horas e 12 minutos.**
+Severidade baixa (`defaultTheme="dark"`, zero contas em claro; o efeito real era
+o flash entre SSR e hidratação), mas **é regressão nossa e fica registrada como
+tal**. Medido depois da subida: `/producer/login` serve **0** de `#060612`,
+**0** de `rgba(99,102,241)` e **0** de `#3b82f6`.
+
+> **A lição, que nenhuma varredura da frente checou:** *o par claro/escuro
+> pressupõe que o fundo VIRA com o modo.* Onde há `style` inline com fundo fixo,
+> **o par é errado** — valor único é o certo.
+
+#### O horário
+
+⚠️ **O portão de horário (03:15–03:45) segue suspenso por decisão do dono**, que
+estava disponível. ⓘ Ainda assim, esta subida caiu às **00:20 de sábado** —
+bem mais perto da janela recomendada que a primeira (18:09 de sexta): pela
+medição, 00h tem **1.354 acessos/hora** contra **4.463** do pico das 15h.
+
+#### O portão, medido
+
+- `prisma/` no diff: **0** · migração `20260831190000`: **0** · `tsc` exit 0
+- **áreas intocadas provadas**: `(course)/` **0**, `w/` **0**, `admin/` **0**, `prisma/` **0**
+- **comportamento**: 145 pares no word-diff, **132 cosméticos**, 13 inspecionados
+  — e os 13 são todos `+ dark:text-gray-400`, classe CSS pura. **Zero lógica.**
+- ensaio de merge **limpo**, 42 arquivos
+
+#### Depois do deploy
+
+| verificação | resultado |
+|---|---|
+| `/` · `/landing` · `/producer/login` · `/producer/register` · `/offline` · `/w/3n-trader` | **200** |
+| `/sw.js` (esta leva NÃO o toca) | **`2.4.0`** ✅ |
+| `manifest.json` (idem) | **`#191919`**, 11 ícones `-v2` ✅ |
+| `/producer/login` · `/producer/register` · `/offline` | `#0a0a1a`, `#060612`, `#2563eb`, `#3b82f6` = **0 em todas**; lime presente |
+
+⚠️ **Uma expectativa do roteiro estava errada e a medição a corrigiu:** o
+controle negativo pedia `#111827` e `#030712` **ausentes do bundle**. Eles
+**continuam lá** — e devem: são os **142 pontos deliberadamente não tocados**
+(112 de `gray-900` + 31 de `gray-950`: área de membros, `/admin`, vitrine,
+toasts invertidos, tooltips e superfícies sempre-escuras). O controle correto é
+**por TELA SERVIDA**, e nas 3 telas tocadas ele dá **zero**.
+
+⚠️ **O que não consegui medir:** a **404 exige estar logado** — medido,
+deslogado o proxy responde **307 para o login** em toda rota desconhecida.
+Fica para o dono conferir com a sessão aberta.
+
+#### Rollback
+
+**`bb51e6c`.** `git revert -m 1 bb51e6c && git push origin main`, ou Instant
+Rollback na Vercel para o deploy de `39e3d9d`.
+⚠️ **Reverter REINTRODUZ a regressão do login** que esta subida corrige — é o
+que se perde. Não desfaz nada no banco (sem migração nem escrita) nem no service
+worker (esta leva não o toca).
