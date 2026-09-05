@@ -41,7 +41,7 @@ function contrastRatio(a: number, b: number): number {
  * porque a fronteira real do critério 4,5 fica em BT.601 ≈ 0,469 e o
  * `#3b82f6` — fallback de 58 dos 72 — mede 0,478 e cai na fresta: o limiar
  * escolhe CLARO (3,68 🔴) quando o ESCURO media 5,38 ✅. A comparação acerta
- * 72/72. Ver `docs/REBRANDING-2026.md` §7-A.
+ * 72/72. Ver `docs/REBRANDING-2026.md` §14.
  *
  * ⓘ O limiar 0,6 não está errado no `auth-shell`: lá ele decide a CAIXA, não
  * o critério de 4,5. Copiá-lo para cá é que seria o erro.
