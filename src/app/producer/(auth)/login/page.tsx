@@ -312,7 +312,7 @@ function ProducerLoginForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#EFFF20] hover:bg-[#EFFF20] disabled:opacity-50 text-[#191919] font-medium rounded-xl shadow-lg shadow-primary/20 transition"
+                  className="w-full py-3 bg-[#EFFF20] hover:bg-[#EFFF20] disabled:opacity-50 text-[#191919] font-medium rounded-xl shadow-lg shadow-[#EFFF20]/20 transition"
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </button>
