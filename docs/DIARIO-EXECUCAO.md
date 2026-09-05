@@ -35,6 +35,40 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-05 — FRENTE REBRANDING, ETAPA A1b — OS GRADIENTES, E A PROVA QUE BARROU 4 DOS 6
+
+**Estado antes:** main em `e7b7834` (A1 em produção) · integração `feat/rebranding` em `b5a91fc`
+**O que foi feito:** O gate em produção achou o botão "Concluir aula" do `Kingdom Academy`
+ainda **branco sobre branco**. Causa: `bg-gradient-to-r from-emerald-600 to-emerald-500` —
+a linha **contém `bg-`**, mas `bg-gradient-to-r` declara DIREÇÃO, não cor; a cor vem de
+`from-`/`to-`, e a varredura da A1 exigia `bg-` colado à cor. ⭐ **A lição:** provar que uma
+família é ALCANÇÁVEL não a coloca na lista de ALVOS — os 6 gradientes foram medidos no A0.6,
+a conta foi provada neles, e o resultado virou "risco descartado" em vez de "6 alvos".
+⭐ **O antídoto, adotado como método:** derivar a lista de alvos DO CSS que define a família
+(parsear o `globals.css`), nunca de padrão de busca escrito à mão.
+**Arquivos tocados:** `(course)/course/[slug]/lesson/[id]/page.tsx:508` · `components/course-preview.tsx:152` — **2 linhas**
+**Como foi provado:** `tsc` exit 0 · build de staging verde (`rpAPv65D2qKQRUknfbMtO`) ·
+**Chrome headless sobre o bundle real**, com a `className` real montada de `:505`+`:508`:
+ANTES Kingdom = gradiente `rgb(255,255,255)→rgb(255,255,255)` **sólido** com texto branco = **1,00** ·
+KING depois = **19,80** · FHO = fundo `rgb(255,200,69)` **idêntico** e **12,82** ·
+SEM VAR (58 cursos, 24.936 alunos) = emerald real + branco = **pixel idêntico a hoje** ·
+SEM CLASSE (visitante) = emerald real + escuro = **5,25 e 7,80, ambas passam**.
+12/12 cursos acima de 4,5 · 0 regressões · 0 escritas a `member*Color`.
+⭐ **A prova que BARRA foi o valor da fatia:** 4 dos 6 foram EXCLUÍDOS com medição —
+3 são gradiente PARCIAL (`to-blue-600` sem remap ⇒ ponta azul de **5,17 para 3,83**) e 1
+renderiza SEM acesso (`to-blue-700` de **6,70 para 2,95**).
+⚠️ O palco tem 5 cursos, todos sem marca própria: **só o controle negativo é visível ali**.
+**SHA do merge:** — (**NÃO MESCLADO** — parada para o gate) · commit `5ab8c2c` · **Rollback:** `git branch -D feat/a1b-gradientes`
+**Mudou em produção para quem:** ninguém ainda. Ao subir: **3.700 alunos** em 12 cursos passam
+a ler o botão "Concluir aula" e o CTA do preview; **24.936** não mudam um pixel.
+**Ficou aberto:** **9.234** (os 3 gradientes parciais) · **9.235** (`page.tsx:518`, renderiza sem
+acesso) · **9.236** (`bg-emerald-600` sem remap — a A1 acertou por acidente em `course-preview:190`)
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ (limite do palco declarado) ·
+gate humano ⏳ **PENDENTE** · papelada ✅ (PLANO-MESTRE 9.234-9.236 · REBRANDING-2026 §15)
+
+---
+
+
 ## 2026-09-05 — FRENTE REBRANDING, ETAPA A1 — O TEXTO SOBRE A MARCA É CALCULADO, NÃO GUARDADO
 
 **Estado antes:** main em `eb5ef81` · integração `feat/rebranding` em `4d48781`
@@ -56,8 +90,9 @@ só SELECT) · 0 regressões · discriminador real (escuro em 70, claro em 2).
 ⚠️ **O palco NÃO consegue mostrar o conserto:** os 5 cursos de staging têm `memberPrimaryColor`
 NULL e escrever em banco estava proibido. O palco prova o **controle negativo**; o conserto foi
 provado pelo navegador sobre o bundle real e pelos dados de produção. **Gate humano pendente.**
-**SHA do merge:** — (**NÃO MESCLADO** — parada para o gate)  ·  **Rollback:** `git branch -D feat/a1-contraste-texto-marca`
-**Mudou em produção para quem:** ninguém ainda — nada subiu. Ao subir: **3.699 alunos** em 12 cursos
+**SHA do merge:** `b5a91fc` (integração) → **`1d7b7d8` (main, EM PRODUÇÃO)**  ·  **Rollback:** `git revert -m 1 1d7b7d8` ou Instant Rollback para **`eb5ef81`**
+**Subida:** push 05/set/26 **16:20:44 BRT** · deployment `success` **16:22:19** (1min38s) · build de produção `qsdCk36eCVSwJHD0GptHl` · **0 respostas 500** · `sw.js` 2.4.0 e manifest `#191919` intocados · regra CSS **viva** em `/_next/static/chunks/0yn0ja2ht9iyu.css`
+**Mudou em produção para quem:** **3.699 alunos** em 12 cursos
 passam a ver texto legível no botão; os outros **25.000+** não mudam **um pixel** (var não emitida ⇒
 fallback `#ffffff` ⇒ idêntico ao `text-white` de hoje, provado no navegador).
 **Ficou aberto:** **9.230** (os 11 pontos fora do `.course-customized` — D-3) · **9.231** (os 5 cursos
@@ -65,7 +100,7 @@ sem marca própria, 310 alunos — D-4) · **9.232** (`workspace-auth-shell.tsx:
 branco cravado: **o mesmo defeito no login do aluno**) · **9.233** (os 53 sem personalização servem
 branco sobre `emerald-500` = **2,54**, 24.618 matrículas)
 **Regras conferidas:** §17 respondido ✅ · staging-first ✅ (build de staging; limite do palco declarado) ·
-gate humano ⏳ **PENDENTE** · papelada ✅ (PLANO-MESTRE 9.230-9.233 · REBRANDING-2026 §14)
+gate humano ⏳ **PENDENTE** (só logado: `/course/kingdomacademy` e `/course/formacao-home-office-fho`) · papelada ✅ (PLANO-MESTRE 9.230-9.233 · REBRANDING-2026 §14)
 
 ---
 

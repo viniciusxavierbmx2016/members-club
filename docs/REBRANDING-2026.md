@@ -2709,6 +2709,94 @@ vê. Não desfaz nada no banco nem no service worker.
 
 ---
 
+### 6-R. 🚀 A QUARTA SUBIDA PARA PRODUÇÃO — a primeira que conserta DEFEITO DA ÁREA DO ALUNO (05/set/26, 16:20)
+
+**`1d7b7d8` — merge `--no-ff` de `feat/rebranding` na `main`. Push às 16:20:44 BRT.**
+Deployment da Vercel **`success` às 16:22:19** (1min38s). **Rollback: `eb5ef81`**
+(salvo em `/tmp/sha-rollback-a1.txt`).
+
+⭐ **É a primeira subida da frente que NÃO é rebranding.** As três anteriores
+mudaram cor por identidade (§6-I `e236b55` · §6-J `39e3d9d` · §6-O `bb51e6c` ·
+§6-Q `eb5ef81`). Esta **conserta um defeito que já estava em produção antes de
+qualquer troca de cor**: 12 cursos serviam botão ilegível **com o azul**.
+`Formação Home Office` servia branco sobre `#ffc845` = **1,54:1**;
+`Kingdom Academy` branco sobre `#ffffff` = **1,00:1**, literalmente invisível.
+**3.699 alunos ativos.**
+
+**20 arquivos** — 17 de código (todos em `(course)/`, `components/` e `lib/`) e
+3 de papelada. **0 em `prisma/`, 0 em `producer/`, 0 em `admin/`, 0 em `app/w/`.**
+
+| portão | resultado |
+|---|---|
+| ensaio na integração | 0 conflitos |
+| ensaio na `main` | 0 conflitos |
+| `tsc --noEmit` | exit 0 (3×) |
+| build com env de PRODUÇÃO | verde · `qsdCk36eCVSwJHD0GptHl` |
+| medição pós-deploy | **0 respostas 500** |
+| `sw.js` · `manifest` | `2.4.0` · `#191919` — **intocados**, como previsto |
+
+#### A prova pelo ARTEFATO SERVIDO por produção
+
+```css
+.text-\[var\(--member-button-text\,\#ffffff\)\]{color:var(--member-button-text,#fff)}
+```
+Viva em `/_next/static/chunks/0yn0ja2ht9iyu.css`, **1 regra**, e `.text-white`
+sobrevive na mesma folha (controle negativo — os 11 pontos do 9.230 dependem dela).
+
+E a conta inteira, **compilada e minificada**, no bundle do servidor:
+
+```js
+let b="#0a0a0a",c="#ffffff";
+function d(a){let b=parseInt(a.slice(1),16),[c,d,e]=[b>>16&255,b>>8&255,255&b]
+  .map(a=>{let b=a/255;return b<=.03928?b/12.92:Math.pow((b+.055)/1.055,2.4)});
+  return .2126*c+.7152*d+.0722*e}
+function e(a,b){return(Math.max(a,b)+.05)/(Math.min(a,b)+.05)}
+a.s(["contrastingTextColor",0,function(a){if(!/^#[0-9a-fA-F]{6}$/.test(a))return c;
+  let f=d(a);return e(f,d(b))>=e(f,d(c))?b:c}, "darkenHex",0,…
+```
+
+⭐ `e(f,d(b))>=e(f,d(c))?b:c` — **a comparação, não um limiar.** É a refutação
+do §14.1 sobrevivendo até o binário.
+
+E a emissão, guardada pela marca (§14.3):
+```js
+r.memberPrimaryColor&&`--member-button-text: ${(0,m.contrastingTextColor)(r.memberPrimaryColor)}`
+```
+
+⚠️ **Duas armadilhas de sonda nesta rodada, ambas do mesmo tipo:**
+`grep -rl '0.03928'` devolveu **3 arquivos** e a busca literal do Python devolveu
+**0** — o `.` do grep é curinga e casava `0503928`. E `0.2126` não existe no
+bundle: o minificador escreve `.2126`. **Contar por `grep` sem `-F` e sem conhecer
+a forma minificada produz tanto falso-positivo quanto falso-negativo.** Mesma
+família do [[feedback_pattern_sweep_finds_misplaced_secrets]] e do
+[[feedback_compiled_bundle_beats_navigation_probe]].
+
+#### 🔴 O que produção NÃO prova por `curl`, e como fechar
+
+`/course/*` responde **307 → `/producer/login`** para quem não tem sessão, então
+o `<style>` com a var **não é alcançável sem autenticar**. A cadeia provada é:
+o SHA no deployment (`1d7b7d8`) + a regra CSS viva + o bundle do servidor do
+MESMO commit contendo a emissão guardada.
+
+⭐ **A prova FINAL é humana:** o dono, logado, abrindo
+`/course/kingdomacademy` (marca `#ffffff`, **1.382 alunos** — hoje o botão é
+invisível) e `/course/formacao-home-office-fho` (marca `#ffc845`, **1.635 alunos**).
+O botão deve aparecer com **texto quase preto**, e o **fundo não pode ter mudado**.
+
+#### As duas correções da própria medição, que esta subida carrega
+
+1. **25 → 23 pontos.** Dois eram **tinte translúcido**, não a marca como
+   superfície: `bg-blue-600/20` e `bg-blue-500/[0.08]` (8% no modo escuro — texto
+   escuro ali **REGREDIRIA**). ⭐ *O modificador de opacidade muda a NATUREZA da
+   superfície, não a intensidade; varredura por nome de classe é cega a isso.*
+2. **17 → 12 cursos, 4.009 → 3.699 alunos.** Cinco tinham `memberPrimaryColor`
+   NULL — a lacuna da D-4, para quem a var não é emitida. ⭐ *O predicado certo é
+   `memberPrimaryColor != null`, não `hasCustomization`: a classe existe, a
+   entrada da conta não.*
+
+---
+
+
 ## 14. A1 — o texto sobre a marca é CALCULADO (05/set/26)
 
 **Não é rebranding. É conserto de defeito.** Antes de qualquer troca de cor,
@@ -2816,3 +2904,105 @@ não seria discriminador.
 | **9.231** | os 5 cursos sem marca própria | 310 alunos |
 | **9.232** | `auth-shell:133` — `buttonTextColor` branco cravado | o MESMO defeito, no login do aluno |
 | **9.233** | os 53 sem personalização: branco sobre `emerald-500` = **2,54** | 24.618 matrículas |
+
+
+---
+
+## 15. A1b — os gradientes, e a lição que custou uma subida (05/set/26)
+
+O gate em produção achou o botão **"Concluir aula"** do `Kingdom Academy` ainda
+**branco sobre branco**. Depois de clicado, "Concluída" fica legível. **Um botão,
+dois ramos de um ternário** — um pegou a A1, o outro não.
+
+### 15.1 A causa, em uma linha
+
+```
+:508  bg-gradient-to-r from-emerald-600 to-emerald-500  text-white
+```
+
+A linha **contém `bg-`** — mas é `bg-gradient-to-r`, que declara a **DIREÇÃO**.
+**A cor vem de `from-`/`to-`**, e a varredura da A1 exigia o prefixo `bg-` colado
+à cor. A regex nunca casou. *(Provado com controle positivo: a mesma regex casa
+na `:391`, que a A1 pegou.)*
+
+⭐ E o `globals.css:430-431` remapeia **os dois stops** para a **mesma**
+`var(--member-primary)` ⇒ sob `.course-customized` o gradiente **vira sólido na
+marca**. Confirmado no navegador: `rgb(255,255,255) → rgb(255,255,255)`.
+
+**Por que o outro ramo era legível:** não foi conserto, foi **estrutura**. O
+`:507` tem fundo translúcido (`bg-emerald-500/12` → `color-mix` 12%) e texto
+`text-emerald-400`, **que também é remapeado para a marca**. No Kingdom: marca
+sobre marca-a-12%-sobre-o-card `#4e4e4e` = **8,32** ✅.
+
+### 15.2 ⭐ A LIÇÃO, com todas as letras
+
+> **Provar que uma família é ALCANÇÁVEL não a coloca na lista de ALVOS.**
+
+Os 6 gradientes **foram medidos no A0.6**. Eu escrevi, com prova: *"9 regras
+colapsam `from` e `to` na mesma var — o gradiente vira sólido, e uma cor só
+serve"*. A pergunta que eu respondia era **"a conta funciona aqui?"**. A resposta
+*sim* foi arquivada como **risco descartado** — e a lista de alvos saiu só do
+A0.4, que varria `bg-*`.
+
+**Duas perguntas parecidas — "quebra?" e "está na lista?" — e responder a primeira
+deu a sensação de ter respondido a segunda.** O A0.6d listou os 6 no terminal e
+**nunca virou `file:line` neste documento** (`grep 'page.tsx:508'` devolvia zero).
+
+### 15.3 ⭐ O ANTÍDOTO — método padrão daqui para a frente
+
+**A lista de alvos é derivada DO CSS que define a família, nunca de padrão de
+busca escrito à mão.** Parsear o `globals.css`, extrair toda classe que pinta a
+marca, e varrer por essa lista. Um comando, e a cobertura sai por família:
+
+| família | classes | com a var | falta | cobertura |
+|---|---|---|---|---|
+| **SÓLIDA** | 6 | 22 | 9 | **70%** — e as 9 são exatamente o **9.230** |
+| **GRADIENTE** | 8 | 0 | 6 | **0%** 🔴 — o furo |
+| **TINTE** (`color-mix`) | 12 | — | 1 | fora por decisão (não é superfície) |
+
+Foi essa checagem que fechou a conta. Uma regex escrita à mão nunca teria
+denunciado a própria omissão.
+
+### 15.4 Aplicados: 2. Excluídos com prova: 4.
+
+**A prova que barra é o valor desta fatia**, não a que aplica.
+
+| ponto | stops | veredito |
+|---|---|---|
+| `lesson/[id]/page.tsx:508` | `from-emerald-600` ✅ + `to-emerald-500` ✅ | **APLICADO** |
+| `course-preview.tsx:152` | `from-emerald-500` ✅ + `to-emerald-600` ✅ | **APLICADO** |
+| `course-preview.tsx:204` · `:515` · `course-sidebar.tsx:135` | `from-blue-500` ✅ + **`to-blue-600` 🔴** | **9.234** |
+| `course/[slug]/page.tsx:518` | ambos ✅, **mas renderiza sem acesso** | **9.235** |
+
+🔴 **Os 3 parciais:** `to-blue-600` não tem regra de remap. O gradiente vira
+**marca → `#2563eb` literal**, e o texto escuro levaria a ponta azul de **5,17
+(passa hoje) para 3,83** — regressão em **12 cursos, 3.700 alunos**.
+
+🔴 **O `:518`:** os condicionais de acesso do arquivo estão em `:540` e `:564`,
+**depois** dele ⇒ renderiza para visitante sem vínculo, onde
+`course-shell.tsx:112` **não** aplica a classe. `to-blue-700` iria de **6,70
+para 2,95**.
+
+### 15.5 As provas, pelo navegador sobre o bundle real
+
+`className` real montada de `:505` (parte fixa) + `:508` (o ramo):
+
+| caso | gradiente renderizado | texto | |
+|---|---|---|---|
+| **ANTES** Kingdom | `rgb(255,255,255) → rgb(255,255,255)` **sólido** | branco | **1,00** 🔴 |
+| **KING** depois | mesmo fundo | `rgb(10,10,10)` | **19,80** ✅ |
+| **FHO** depois | `rgb(255,200,69)` **idêntico ao do produtor** | `rgb(10,10,10)` | **12,82** ✅ |
+| **SEM VAR** (58 cursos, 24.936 alunos) | `rgb(5,150,105) → rgb(16,185,129)` real | branco | **pixel idêntico** ✅ |
+| **SEM CLASSE** (visitante) | emerald real | `rgb(10,10,10)` | 5,25 e 7,80 ✅ |
+
+⭐ A linha **SEM CLASSE** é a que justifica a exclusão dos 4: no emerald as duas
+pontas passam com texto escuro; **no azul não passam**. A mesma fatia, dois
+resultados opostos, e só a medição separa.
+
+### 15.6 Achado colateral — `9.236`
+
+`bg-emerald-600` **sólido não é remapeado** (só `/30`), enquanto `bg-emerald-500`
+tem 5 regras. Auditei **os 23 pontos da A1** por esse critério: **22 corretos**,
+**1** (`course-preview.tsx:190`) com o texto calculado caindo sobre `#059669`
+literal. **Não é regressão** — 3,77 → 5,25 em 12 cursos, 0 pioram — mas **acertou
+por acidente**, e o mecanismo ali está errado.
