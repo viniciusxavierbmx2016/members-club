@@ -2645,3 +2645,63 @@ Fora também: `admin/login` e `invite/admin/[id]` — **exclusivas do fluxo admi
 **Os dois últimos entraram sem verificação visual.** Provados só por código e
 contagem (`blue-*` = 0, `#3b82f6` = 0, `#0a0a0b` = 0). **Registrado como não
 visto, não como aprovado.**
+
+---
+
+### 6-Q. 🚀 A TERCEIRA SUBIDA PARA PRODUÇÃO (05/set/26, 11:46)
+
+**`eb5ef81`** — merge de `feat/rebranding` na `main`. Push às **11:46:49 BRT**,
+deployment **`success` às 11:48:15 — 86 segundos**. **7 arquivos** (5 de
+código, 2 de docs).
+
+O que subiu: a **tela de offline que o usuário realmente vê**
+(`public/offline.html`), `verify-email`, o **register da raiz**, `invite/[id]`
+e `auth/impersonate`. O conteúdo e as lições estão em **§6-P**.
+
+#### O gate — o que foi visto e o que NÃO foi
+
+| tela | gate |
+|---|---|
+| `public/offline.html` | ✅ visto |
+| `verify-email` | ✅ visto |
+| `(auth)/register` (raiz) | ✅ visto |
+| `invite/<id>` | ⚠️ **NÃO VISTO** — exigia gerar um convite à mão |
+| `auth/impersonate` | ⚠️ **NÃO VISTO** — exigia sessão de admin |
+
+**3 vistos, 2 não vistos.** Os dois últimos subiram provados **só por código e
+contagem** (`blue-*` = 0, `#3b82f6` = 0, `#0a0a0b` = 0). **Registrado como não
+visto, não como aprovado** — se aparecer defeito neles, não foi surpresa, foi
+risco assumido.
+
+#### O portão, medido
+
+- `prisma/` **0** · migração `20260831190000` **0** · `tsc` exit 0
+- áreas intocadas: `(course)/` **0**, `w/` **0**, `admin/` **0**, `prisma/` **0**
+- **comportamento**: 20 pares no word-diff do `src/`, **19 cosméticos**, 1
+  inspecionado — e é `#3b82f6"` → `#EFFF20"`, um hex em `style` inline. **Zero lógica.**
+- ⭐ **`public/offline.html` conferido tag a tag**, por ser HTML puro servido
+  pelo service worker: o diff são **3 linhas, todas dentro do `<style>`, todas
+  valor de cor**. `<div>`, `<svg>`, `<button>`, `<style>`, `<body>`, `<html>`,
+  `onclick` e `class=` com **contagem idêntica** antes e depois; **zero
+  `<script>`** nos dois; **33 linhas** nos dois.
+
+#### Depois do deploy
+
+| verificação | resultado |
+|---|---|
+| `/` · `/landing` · `/producer/login` · `/w/3n-trader` · `/verify-email` · `/register` | **200** |
+| `/sw.js` (esta leva não o toca) | **`2.4.0`** ✅ |
+| `manifest.json` (idem) | **`#191919`** ✅ |
+| `/verify-email` · `/register` · `/producer/login` | lime presente; `blue-*`, `#3b82f6` e `#0a0a1a` = **0 nas três** |
+
+⚠️ **`/offline.html` não pôde ser lido por HTTP** — deslogado devolve **307
+para o login**, que é exatamente o item **9.228**. Fica como **baseline
+medido** daquele item. A prova foi feita **pelo artefato**: o arquivo na `main`
+tem `#191919`, `#9ca3af` e `#EFFF20`, e **zero** de `#0a0a1a`/`#3b82f6`.
+
+#### Rollback
+
+**`eb5ef81`.** `git revert -m 1 eb5ef81 && git push origin main`, ou Instant
+Rollback para o deploy de `bb51e6c`.
+⚠️ Reverter **devolve a tela de offline ao azul** — e é a que o usuário de fato
+vê. Não desfaz nada no banco nem no service worker.
