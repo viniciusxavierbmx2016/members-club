@@ -2238,3 +2238,81 @@ muda** (1,15 → 1,16), e o que se ganha é **matiz** (viés azul +15 → 0) e
   deliberadamente escuro no CLARO), **2 são help-tooltip** e **10 são
   superfícies sempre-escuras**. Aplicam nos **dois** modos e têm outro papel.
 - **O `#030712` do `<body>` é GLOBAL** — ver item **9.227**.
+
+---
+
+### 6-L. O RESÍDUO QUE A EXCLUSÃO POR ÁREA CRIOU (04/set/26)
+
+Branch `feat/rebranding-residuos` @ `3aea4f6`, **não mesclada**. Build de gate
+**`bRMOI9yk7mSPCG75W0tWf`**.
+
+O gate viu dois seletores lado a lado em `/producer/analytics`: **"Todos os
+cursos" já em `#202020`, "Últimos 30 dias" ainda em `gray-900/50`.**
+
+#### 🔴 NÃO foi cegueira de padrão — foi a minha regra de exclusão
+
+O enquadramento natural seria "quarta cegueira de padrão da frente". **A
+medição desmente isso.** A varredura do gray-900 **ACHOU** os 3 pontos do
+`date-range-selector`; quem os tirou foi a regra *"não tocar em nada que
+alcance o `/admin`"* — o componente é importado por `admin/page.tsx:11` e
+`admin/reports/page.tsx:9`. O `custom-select`, que faz **a mesma coisa na
+tela**, alcança só o painel e entrou.
+
+> **A lição, e ela é sobre EXCLUSÃO, não sobre busca:** *uma regra de exclusão
+> por ÁREA pode partir ao meio um PAPEL VISUAL.* Dois componentes que exercem a
+> mesma função lado a lado receberam tratamentos diferentes porque um deles é
+> reusado por outra área. **A varredura por padrão funcionou; foi o critério de
+> corte que produziu a inconsistência — e ela aparece exatamente onde o dono
+> olha.** Antes de excluir por área, perguntar: *isto deixa dois elementos de
+> mesmo papel com aparências diferentes na mesma tela?*
+
+⭐ **E a exclusão não protegia nada — medido.** No `/admin` (fundo `#030712`) o
+dropdown do `date-range` é **exatamente a cor do fundo: 1,00** — só se vê pela
+borda. Com `#262626` vai a **1,33**. O botão vai de 1,06 a 1,09. **Melhora nos
+dois contextos.**
+
+#### O lote — 9 pontos em 4 arquivos
+
+| ponto | de | para | papel |
+|---|---|---|---|
+| `date-range-selector:298 :339 :348` | `gray-900/50` | `#202020/50` | botão e inputs |
+| `date-range-selector:306` | `gray-950` | `#262626` | dropdown (`absolute z-50 shadow-2xl`) |
+| `global-search:135` · `header:113` | `#0f0f1e` | `#262626` | dropdowns flutuantes |
+| 3 pontos | `text-gray-500` | `+ dark:text-gray-400` | o molde (227 → **230**) |
+| `register/page.tsx` | 18 substituições | a paleta nova | **o gêmeo do login** |
+
+ⓘ O `#0f0f1e` **nem estava na lista de remap** do `globals.css` (que cobre 8
+hexes: `#0a0a1a`, `#0a0c14`, `#0a0e19`, `#0f1320`, `#141416`, `#1a1e2e`,
+`#1d1d21`, `#28282e`).
+
+#### 🔴 O REGISTER É O GÊMEO DO LOGIN — e só o login tinha sido corrigido
+
+A frente tocou **os dois** arquivos, mas só mudou `text-white` no register (4
+linhas). Ele ficou com o **mesmo `#060612`**, o **mesmo gradiente índigo**,
+**18 tokens `primary`** caindo no fallback azul e **4 `producer-button-text`**
+que, sem provider, resolvem para **branco**. Depois da fatia do login, as duas
+telas irmãs **divergiam**: uma lime, outra azul.
+
+> É a lição *"conferir a rota IRMÃ"* aplicada a TELAS: quando uma fatia arruma
+> uma tela de um par (login/register, criar/editar), **a irmã entra no mesmo
+> commit ou vira divergência garantida**.
+
+#### Fora do lote, com motivo
+
+- **26 já excluídos** — 11 toast invertido, 10 sempre-escuras, 5 tooltip;
+- **6 `bg-[#141416]` sem `dark:`** — mesma classe das sempre-escuras;
+- **`mobile-flow-editor:44`** — página de tela cheia, não superfície;
+- 🔴 **`layout-illustration:8`** — `bg-gradient-to-br … dark:from-gray-800
+  dark:to-gray-900`: **gradiente decorativo**. Trocar só a metade `to-`
+  quebraria o gradiente, e a regra `#202020`/`#262626` não descreve uma
+  ilustração. **Não cabe — reportado, não inventado.**
+- **10 hex arbitrários** já cobertos pelo remap do `globals.css`.
+
+#### ⚠️ Pendência: o halo azul sob o botão lime
+
+Sobram tokens `primary` que caem no `#3b82f6` nas duas telas de auth —
+**1 no login** (`shadow-primary/20`, que a fatia anterior deixou) e **7 no
+register** (3 `shadow`, 2 `focus:ring`, 2 `border`). São **sombra, anel e
+borda**, não superfície: a regra desta rodada não os cobre. Efeito medido:
+`#3b82f6` a 20% sobre `#191919` = `#202e45` — **halo azul sob botão lime**.
+Cosmético, simétrico nas duas telas, **fica para decisão**.
