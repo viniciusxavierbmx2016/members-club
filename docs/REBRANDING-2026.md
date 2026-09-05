@@ -2566,3 +2566,82 @@ Rollback na Vercel para o deploy de `39e3d9d`.
 ⚠️ **Reverter REINTRODUZ a regressão do login** que esta subida corrige — é o
 que se perde. Não desfaz nada no banco (sem migração nem escrita) nem no service
 worker (esta leva não o toca).
+
+---
+
+### 6-P. A TELA DE OFFLINE QUE O USUÁRIO REALMENTE VÊ (05/set/26)
+
+**`9faccb2`** — merge de `feat/rebranding-auth-offline` (`5d59234`). 5 arquivos,
+20+/20−, `tsc` 0. Build de gate **`fqHoLYlCgX1MfVbU0-jGX`**. **Nada em produção.**
+
+#### 🔴 O ERRO QUE O DONO PEGOU: corrigimos a tela que ninguém vê
+
+Existem **DUAS** telas de offline. A leva anterior arrumou a errada.
+
+| | quem serve | quem alcança |
+|---|---|---|
+| `public/offline.html` | **`sw.js:5`** precacheia e **`sw.js:33`** serve no `catch` do fetch | **todo mundo** que fica sem rede |
+| `src/app/offline/page.tsx` | rota Next `/offline` | **ninguém** — 0 referências no `src/`; só digitando a URL, o que não se faz sem internet |
+
+> ⭐ **A LIÇÃO:** quando existem **duas implementações da mesma tela**, medir
+> **QUAL o usuário alcança** antes de corrigir — não a que o `grep` achou
+> primeiro. O caminho da prova aqui foi ler o `sw.js` e seguir o `catch`, não
+> confiar no nome do arquivo.
+
+`public/offline.html` é **HTML puro, sem Tailwind** — hex direto, confirmado:
+fundo `#0a0a1a` → `#191919`; botão `#3b82f6` com `color:white` → `#EFFF20` com
+`color:#191919` (branco sobre lime daria **1,11**; agora **15,90**).
+
+#### ⭐ Uma regressão que EU ia introduzir, pega pela medição
+
+O parágrafo `#7a7a82` **PASSA hoje** sobre `#0a0a1a` (**4,61**) e **reprovaria**
+sobre `#191919` (**4,13**). ⚠️ **O meu próprio script imprimiu "já reprova hoje"
+e estava errado** — 4,61 ≥ 4,5. Foi a tabela de medição que corrigiu a
+afirmação, não a leitura. Usei o molde `gray-400` (`#9ca3af`, **6,93**), que já
+está em 230 pontos do app, em vez de inventar um valor.
+
+#### As outras 4 telas, e a forma escolhida por PROVA
+
+| tela | quem chega | forma |
+|---|---|---|
+| `verify-email` | só o register do produtor (`register:138`) | **par D12** |
+| `invite/[id]` | convite de **colaborador** (`PERMISSION_LABELS`) | **par D12** |
+| `(auth)/register` | ⭐ **irmã que ninguém citou** — um **terceiro** register, na raiz, que só desambigua | **par D12** |
+| `auth/impersonate` | só o admin (`admin/producers/[id]`) | **valor único** |
+
+⭐ **Por que formas diferentes:** as três primeiras usam `bg-white dark:bg-gray-950`
+— **o fundo VIRA com o modo**, então o par é o certo. O `auth/impersonate` tem
+`style` inline com fundo **FIXO**, então valor único. **É a lição do login
+aplicada ao contrário** — lá o par estava errado porque o fundo não virava.
+
+ⓘ Nos 2 anéis de foco do `invite` usei a forma da casa
+`focus:ring-[#191919]/40 dark:focus:ring-white/40` (6 usos) — o
+`dark:focus:ring-primary` cairia no **azul** ali, por estar fora do
+`.producer-layout`.
+
+#### 🔴 3 telas PARARAM por alcançarem o ALUNO
+
+O aluno ainda vive no azul (**9.220**), então pintá-las de lime criaria uma tela
+lime no meio de uma área azul.
+
+| tela | a prova de que o aluno chega |
+|---|---|
+| `reset-password` | `webhook-helpers.ts:178` (o e-mail de acesso do comprador) **e** `api/w/[slug]/forgot-password:83` |
+| `forgot-password` | o link de volta do reset (`reset-password:21`, ramo `?workspace=`) |
+| `verify/[code]` | é a **verificação de certificado**, pública — aluno ou terceiro |
+
+Fora também: `admin/login` e `invite/admin/[id]` — **exclusivas do fluxo admin**.
+
+#### O gate: o que foi visto e o que NÃO foi
+
+| tela | gate |
+|---|---|
+| `offline.html` | ✅ visto |
+| `verify-email` | ✅ visto |
+| `(auth)/register` (raiz) | ✅ visto |
+| `invite/<id>` | ⚠️ **NÃO VISTO** — exigia gerar um convite à mão |
+| `auth/impersonate` | ⚠️ **NÃO VISTO** — exigia sessão de admin |
+
+**Os dois últimos entraram sem verificação visual.** Provados só por código e
+contagem (`blue-*` = 0, `#3b82f6` = 0, `#0a0a0b` = 0). **Registrado como não
+visto, não como aprovado.**
