@@ -3157,6 +3157,85 @@ claro sobre a marca são exatamente os **9 do 9.230** + o **1 do 9.235** — e
 ---
 
 
+### 6-U. 🚀 A SÉTIMA SUBIDA — o fallback verde dos 2 pontos (06/set/26, 01:25)
+
+**`8265605` — merge `--no-ff` na `main`. Push às 01:25:14 BRT.** Deployment
+`success` às **01:26:40** (1min26s). **Rollback: `d05674b`**
+(`/tmp/sha-rollback-9233.txt`). Build de produção `ys-aVuAHuefeEW1FTdxap`.
+
+**3 arquivos**, `+2/−2` de código. **0** em `prisma/`, `producer/`, `admin/`,
+`app/w/` · **0 lógica, 0 import, 0 arquivo `.ts`**.
+
+⭐ **Primeira fatia sob a decisão do dono:** *a área do aluno de quem NUNCA
+personalizou passa a ter a identidade da Members Club; quem personalizou não se
+toca.*
+
+⚠️ **As duas referências do comando estavam DEFASADAS** e foram conferidas antes
+de qualquer edição: `course-sidebar.tsx:222` é um `<svg fill="none">`, e o badge
+"Concluída" é `module-carousel.tsx:384`. A linha `course-preview.tsx:190` estava
+exata.
+
+#### ⭐ A forma: o defeito não era a classe, era o FALLBACK
+
+Os dois pontos já tinham `text-[var(--member-button-text,…)]` desde a A1. Em CSS
+**a variável definida vence o fallback** — e é isso que separa os dois públicos
+sem nenhum condicional no código:
+
+| | mecanismo | resultado |
+|---|---|---|
+| **54 cursos sem tema** · 24.640 matrículas | var **não** emitida ⇒ o fallback decide | 3,77 → **5,25** · 2,54 → **7,80** |
+| **14 com marca própria** · 3.774 alunos | var emitida ⇒ o fallback **nunca é lido** | **0 pixel** |
+
+**Provas:** as duas regras vivas no CSS servido por produção · 26 pontos com
+`#ffffff` e 2 com `#0a0a0a` · **0 respostas 500** em duas medições (01:26 e 01:32)
+· `sw.js` 2.4.0 e manifest `#191919` intocados.
+
+---
+
+### 6-V. ⭐ O PORTÃO DO "RESTAURAR PADRÃO" — as duas premissas caíram (06/set/26)
+
+O portão XX2 partia de duas premissas. **A medição derrubou as duas**, e o
+resultado é que **não há nada a construir**.
+
+**PREMISSA 1 — "o botão não existe na área de membros".** 🔴 **Existe e está
+completo.** `api/producer/courses/[id]/customize/route.ts:111-137`: o `DELETE`
+grava **NULL nas 6 colunas** de cor, mais `memberWelcomeText = null` e
+`memberLayoutStyle = "netflix"`. O front o chama em `customize/page.tsx:227-244`
+e o botão é renderizado na `:798`. **O produtor já age sozinho.**
+
+**A cadeia do NULL, provada linha a linha:** `memberVars` vira string vazia
+(`layout.tsx:139-152`) → `{memberVars && <style>}` não emite nada (`:156`) →
+`hasCustomization` é falso (`:130-136`) → `.course-customized` ausente
+(`course-shell.tsx:131`) → as **111 regras** não valem → o curso renderiza
+emerald/azul literais. ✅ **Volta exatamente ao estado dos 53.**
+
+**PREMISSA 2 — "17 cursos presos, alguns só por clicar em salvar".** 🔴 **São 19,
+e os 19 são ESCOLHA REAL.** Pela régua da D6 (*fora de TODO default histórico*,
+não *diferente do atual*), medi as cores contra 11 defaults conhecidos:
+
+| | |
+|---|---|
+| escolha real (≥1 cor fora de todo default) | **19 de 19** · 4.084 alunos |
+| **indistinguíveis** (todas as cores são defaults) | **0** |
+
+Cores como `#432a26`, `#0f172a`, `#ffc845`, `#5af250`, `#a76b5b` não saem de
+default nenhum. **Ninguém foi preso por acidente.**
+
+**O risco (d):** o `DELETE` não é auditável. ⭐ Mas **`AuditLog` já existe** no
+schema, com `details String @db.Text`, e o helper `lib/audit.ts:3` (`logAudit`)
+também — e o `DELETE` já tem o `staff` na `:114`. **Auditar custa 1 chamada e
+ZERO schema: a D5 não bloqueia.** ⓘ E o que se perde são 6 hex redigitáveis, não
+conteúdo.
+
+**A alternativa sem botão (e):** perde o sentido — o botão existe. Dos 19, **18
+têm curso publicado** e **16 têm ao menos um aluno ativo**.
+
+**Síntese:** nada a construir, ninguém preso, e o único item real que sobra é a
+**auditoria do restaurar** — barata e sem schema.
+
+---
+
+
 ## 16. 9.234 — o lote agrupado, e a métrica errada que produziu uma exclusão errada (05/set/26)
 
 **4 remaps + 3 trocas de texto, no mesmo commit.** `4ff4aa8`, branch
