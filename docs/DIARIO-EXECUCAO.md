@@ -58,8 +58,9 @@ SEM CLASSE (visitante) = emerald real + escuro = **5,25 e 7,80, ambas passam**.
 3 são gradiente PARCIAL (`to-blue-600` sem remap ⇒ ponta azul de **5,17 para 3,83**) e 1
 renderiza SEM acesso (`to-blue-700` de **6,70 para 2,95**).
 ⚠️ O palco tem 5 cursos, todos sem marca própria: **só o controle negativo é visível ali**.
-**SHA do merge:** — (**NÃO MESCLADO** — parada para o gate) · commit `5ab8c2c` · **Rollback:** `git branch -D feat/a1b-gradientes`
-**Mudou em produção para quem:** ninguém ainda. Ao subir: **3.700 alunos** em 12 cursos passam
+**SHA do merge:** `98d9f32` (integração) → **`a7f2c12` (main, EM PRODUÇÃO)** · **Rollback:** `git revert -m 1 a7f2c12` ou Instant Rollback para **`e7b7834`**
+**Subida:** push 05/set/26 **17:41:25 BRT** · deployment `success` **17:42:40** (1min15s) · build `2jCs_kU09McqHOMqmYTTy` · **0 respostas 500** · regra CSS viva · controle negativo: a forma antiga (`text-white` no gradiente) tem **0 chunks** no bundle
+**Mudou em produção para quem:** **3.700 alunos** em 12 cursos passam
 a ler o botão "Concluir aula" e o CTA do preview; **24.936** não mudam um pixel.
 **Ficou aberto:** **9.234** (os 3 gradientes parciais) · **9.235** (`page.tsx:518`, renderiza sem
 acesso) · **9.236** (`bg-emerald-600` sem remap — a A1 acertou por acidente em `course-preview:190`)
