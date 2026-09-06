@@ -251,7 +251,7 @@ export function LessonsSidebar({
                         >
                           {lesson.completed && (
                             <svg
-                              className="w-2 h-2 text-white"
+                              className="w-2 h-2 text-[var(--member-button-text,#ffffff)]"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
