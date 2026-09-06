@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { contrastingTextColor } from "@/lib/color-utils";
 
 // F2 — Per-course support widget for STUDENTS.
 //
@@ -236,6 +237,13 @@ export function CourseSupportWidget({
   const buttonStyle: React.CSSProperties = {
     background:
       buttonColor || "var(--member-primary, var(--primary, #3b82f6))",
+    // O conteúdo espelha a cadeia do fundo, degrau a degrau: cor escolhida →
+    // marca do curso → padrão. O degrau da marca já vem calculado de fábrica
+    // (`layout.tsx:147-148` emite `--member-button-text` sob a MESMA guarda que
+    // `--member-primary`), então as duas ou existem juntas ou não existem.
+    color: buttonColor
+      ? contrastingTextColor(buttonColor)
+      : `var(--member-button-text, ${contrastingTextColor("#3b82f6")})`,
   };
 
   return (
@@ -244,7 +252,7 @@ export function CourseSupportWidget({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
         style={buttonStyle}
         aria-label={open ? "Fechar suporte" : "Abrir suporte"}
       >
@@ -337,7 +345,7 @@ export function CourseSupportWidget({
                     setError(null);
                     setView("new");
                   }}
-                  className="w-full text-sm font-medium text-white rounded-lg py-2.5 transition-opacity hover:opacity-90"
+                  className="w-full text-sm font-medium rounded-lg py-2.5 transition-opacity hover:opacity-90"
                   style={buttonStyle}
                 >
                   + Novo chamado
@@ -452,7 +460,7 @@ export function CourseSupportWidget({
                 <button
                   type="submit"
                   disabled={!subject.trim() || !body.trim() || submitting}
-                  className="text-sm font-medium text-white rounded-lg px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-sm font-medium rounded-lg px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={buttonStyle}
                 >
                   {submitting ? "Enviando…" : "Enviar"}
@@ -524,7 +532,7 @@ export function CourseSupportWidget({
                   <button
                     type="submit"
                     disabled={!reply.trim() || submitting}
-                    className="text-sm font-medium text-white rounded-lg px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-sm font-medium rounded-lg px-4 py-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={buttonStyle}
                     aria-label="Enviar"
                   >
