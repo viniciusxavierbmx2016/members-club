@@ -181,7 +181,7 @@ export function ModuleListView({ groups, courseSlug }: Props) {
                             >
                               {lesson.completed ? (
                                 <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                                  <svg className="w-2.5 h-2.5 text-[var(--member-button-text,#ffffff)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                   </svg>
                                 </div>

@@ -515,7 +515,7 @@ export default function CourseHomePage() {
               />
             </div>
           ) : (
-            <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-semibold text-xl flex-shrink-0 shadow-sm">
+            <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-[var(--member-button-text,#ffffff)] font-semibold text-xl flex-shrink-0 shadow-sm">
               {course.title.charAt(0).toUpperCase()}
             </div>
           )}
