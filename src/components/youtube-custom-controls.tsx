@@ -291,7 +291,7 @@ export function YouTubeCustomControls({ player, onEnded }: Props) {
             style={{ width: `${progressPct}%` }}
           />
           <div
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white rounded-full opacity-0 group-hover/scrub:opacity-100 transition-opacity shadow"
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white rounded-full opacity-0 group-hover/scrub:opacity-100 transition-opacity shadow ring-1 ring-black/60"
             style={{ left: `${progressPct}%` }}
           />
         </div>
