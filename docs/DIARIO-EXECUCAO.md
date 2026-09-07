@@ -35,6 +35,89 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-07 — FRENTE REBRANDING — VIRADA, LEVA 1: 16 WORKSPACES LIGADOS (9.257)
+
+> ⛔ **Entrada sem SHA de merge, e isso é correto:** a leva 1 é **`UPDATE` de banco**, sem deploy,
+> sem push, sem build. O código que a executa já estava em produção desde `0f4b2f2` (item 9.255).
+
+**Estado antes:** main em `6d30336` (deploy `success`), árvore limpa, integração `1f1b777` alinhada,
+tag `7d57c40` e `feat/aluno-f1-comunidade-quiz` `dbe161d` intocadas · produção **44 workspaces, 0 ligados**
+**O que foi feito:** ligado o `memberBrandDefault` em **16 workspaces**, os que somam **zero matrículas
+ativas**. ⭐ A régua de "ativa" veio de `lib/auth.ts:100-108` — `status = 'ACTIVE' AND (expiresAt IS NULL
+OR expiresAt >= now())` — copiada para SQL, não parafraseada.
+⚠️ **O comando esperava 10; são 16.** Seguido com o número real, como mandado.
+**Arquivos tocados:** **nenhum** — 1 campo, 16 linhas, na tabela `Workspace`.
+**Como foi provado:**
+**L2 (leitura):** dos 44, **16 com 0 ativas** e **28 somando 28.762**. Dos 16: **5 sem curso nenhum**,
+**10 com curso e nenhuma matrícula jamais**, **1 (`ApplyFy Cursos`) com 1 matrícula `ACTIVE` vencida em
+2026-05-13** — 0 ativas pela régua, **reativável**, registrada por isso.
+⭐ **Controle de vacuidade:** a MESMA query devolve 10.990 (`Mentoria Junção Milionária`) e 6.361
+(`Grupo SM`); soma dos 44 = **28.762**. A sonda enxerga, logo o zero dos 16 é real.
+**L3 (dry-run):** 16 linhas, **todas partindo de `false`**; 28 ficariam desligados; **21 cursos**
+alcançados — **20 recebem o lime** (13 publicados), **1 mantém a marca própria** (`desdobra`, `#f5b82e`).
+**L4 (escrita):** `SUPABASE_REF = wyamxwmdgbvqrfcqfbyh` impresso imediatamente antes.
+⭐ **Trava no instante da escrita:** o script reconta as ativas dos 16 ids **logo antes** do `UPDATE` e
+aborta se ≠ 0 — a medição do L2 não vale por decurso de tempo. Resultado: `0` → escreveu.
+⚠️ **A 1ª tentativa morreu no pooler** (`Can't reach database server … :6543`) **antes** do `UPDATE`,
+porque a trava roda antes dele. Conferi `LIGADOS=0`, e só então repeti. **Fail-closed por construção.**
+**Depois:** 16 ligados / 28 desligados de 44 ✅ · **workspaces ligados COM aluno ativo: 0** ✅ ·
+alunos ativos sob ligados **0** ✅, sob desligados **28.762** (o controle de que a soma enxerga).
+⛔ **Nenhum `member*Color` de curso escrito:** os 20 recebem o lime pelo CÓDIGO, com `memberPrimaryColor`
+ainda `NULL` — o produtor segue distinguindo "nunca escolhi" de "escolhi esta cor".
+⚠️ **L5 NÃO FOI PROVADO NA TELA SERVIDA.** `/course/**` exige sessão: **307 → `/producer/login`**
+(`proxy.ts:75-86`), corpo de 15 bytes, tanto no ligado quanto no desligado — e **não se autentica como
+cliente**. O que ficou provado, sem isso: o estado que o layout lê (SELECT nos 2 cursos), o caminho no
+código (`layout.tsx:162-166`, `:174`, `:176`, `:188`), e **`contrastingTextColor("#EFFF20") = #0a0a0a`
+rodando a função do repo** — não afirmado de cabeça.
+⭐ **Sem risco de cache:** `getCourseMeta` usa o `cache` do **React** (`course-meta.ts:1,4` — dedupe por
+requisição, não persistente), o layout não declara `revalidate`/`dynamic`, e lê cookies ⇒ render dinâmico.
+⛔ **L6 PAROU, como mandado.** O artefato de palco **não existe mais**: `BUILD_ID` é
+`n34swhyFqcWfUJEocRk5u` (12:16:50), não o `4bN2H-pnt_tvoTouBTD_h` da leva anterior, e a **prova de alvo
+discriminante do D4 reprovou** — ref de produção BAKED em **194 arquivos**, ref de staging em **0**.
+Não buildei. Item **9.258** aberto para a causa.
+**SHA do merge:** — (não há) · **Rollback:** desligar os 16, um comando:
+```
+npx dotenv -e .env -- node -e '
+const {PrismaClient}=require("./node_modules/@prisma/client");const p=new PrismaClient();
+(async()=>{const ref=(process.env.DATABASE_URL.match(/postgres\.([a-z0-9]{20})/)||[])[1];
+ console.log("SUPABASE_REF =",ref); if(ref!=="wyamxwmdgbvqrfcqfbyh")process.exit(1);
+ const r=await p.workspace.updateMany({where:{id:{in:IDS}},data:{memberBrandDefault:false}});
+ console.log("desligados:",r.count);p.$disconnect();})()'
+```
+com `IDS` =
+```
+  [
+   "22668ccc-d23b-4d54-b992-e1f7955fd755",
+   "e8dd5232-2c01-45f0-8b11-6a5dbf35a775",
+   "a57711fb-b786-4532-85aa-a6d235cf2626",
+   "9a4b2355-b21c-4b0a-a7f1-3b605fff26bf",
+   "049e9318-399c-4dbe-8081-8ec38e5a0670",
+   "e7dc7db4-8ed0-43cd-b1ab-8d720b29c9cb",
+   "0e6e6aa0-590e-4f39-aeee-6fc39d270001",
+   "774cb548-b360-4567-97c6-928fe8feece0",
+   "cd235b94-7c0e-43f5-bdc3-869eff64f766",
+   "572fcf29-cda1-412d-85bd-1af8009aa290",
+   "503f90ae-2066-4592-bdb7-fa0475c0dfbb",
+   "3aedb3ea-df96-49e3-a00b-22de1e1908fa",
+   "8c3a445b-bcff-4cb8-8537-26f015ee9f5a",
+   "2386a3e1-b60b-4055-9213-3a6828a8dc7c",
+   "9b09096e-ede0-459c-a091-f1e3fc759689",
+   "ae33b24d-3a30-44b9-ad0d-1ea358aa45d6"
+  ]
+```
+ⓘ Alternativa que desliga tudo, inclusive levas futuras: `UPDATE "Workspace" SET "memberBrandDefault" = false;`
+**Mudou em produção para quem:** **0 alunos ativos.** Quem sente hoje são os **16 donos PRODUCER** ao
+abrirem o próprio curso. Nos 16 há **5 usuários** com `workspaceId` (1 + 4 no `Desdobra`), **todos sem
+matrícula**, e **0 colaboradores aceitos** — nenhum deles alcança a área do curso.
+**Ficou aberto:** **9.258** (o gate de commit destrói o palco) · **L6** (religar o palco — precisa de
+build novo, não feito) · **L5 na tela servida** · a **leva 2**, cujo critério tem de subir de "0 ativas"
+para uma faixa — e aí **a prova na tela deixa de ser opcional**, porque alcança aluno pagante.
+**Regras conferidas:** §17 respondido ✅ · `SUPABASE_REF` impresso antes de cada escrita ✅ ·
+dry-run antes do `UPDATE` ✅ · nenhum campo além do interruptor ✅ · nenhum deploy/push/merge/build ✅ ·
+papelada ✅ · **gate humano: não houve** — a leva não passou por olho humano em tela, e o relatório diz isso.
+
+---
+
 ## 2026-09-07 — FRENTE REBRANDING — A VIRADA, FATIA 1: O INTERRUPTOR (9.255)
 
 > ⚠️ **A mensagem do merge `0f4b2f2` diz "9.253" — errata.** 9.253 é outro item (sujeira do palco,
