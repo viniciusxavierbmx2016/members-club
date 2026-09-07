@@ -120,6 +120,25 @@ model Workspace {
   emailUseCustomHtml Boolean  @default(false)
   faviconUrl        String?
   forceTheme        String?
+  // VIRADA DA IDENTIDADE (fatia 1/N) — o INTERRUPTOR, por workspace.
+  //
+  // ⚠️ NASCE DESLIGADO e assim fica: `@default(false)` garante que os 44 workspaces
+  // de produção e todo workspace NOVO ficam com o tema de hoje. Ligar é decisão
+  // humana, um workspace por vez.
+  //
+  // ⭐ Por que aqui e não em Course: o layout do curso JÁ consulta o Workspace
+  // (`app/(course)/course/[slug]/layout.tsx:38-41`, o `forceTheme`) — este campo
+  // entra no MESMO `select` e não cria query nova. E por que não escrever a cor
+  // nos cursos: isso preencheria `memberPrimaryColor` e o produtor perderia a
+  // distinção entre "nunca escolhi" e "escolhi esta cor".
+  //
+  // ⭐ Desliga SEM DEPLOY: é o único caminho de reversão que não depende de build.
+  //
+  // ⓘ Workspace novo nasce DESLIGADO por construção: `api/workspaces/route.ts:92-99`
+  // passa só slug/name/loginBgColor/ownerId, então o default vale. Isso é
+  // fail-safe durante as levas; quando a virada terminar, o default vira decisão
+  // própria (item separado).
+  memberBrandDefault Boolean @default(false)
   customDomain      String?  @unique
   masterPassword    String?
   // Contato de suporte do workspace — fallback do curso, antes do dono.
