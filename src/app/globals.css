@@ -442,6 +442,23 @@ html:not(.dark) .course-customized .text-primary { color: var(--member-primary, 
 .dark .course-customized .dark\:bg-blue-500\/10 { background-color: color-mix(in srgb, var(--member-primary, #3b82f6) 10%, transparent) !important; }
 .dark .course-customized .dark\:bg-emerald-500\/10 { background-color: color-mix(in srgb, var(--member-primary, #10b981) 10%, transparent) !important; }
 .course-customized .focus\:ring-blue-500:focus { --tw-ring-color: var(--member-primary, #3b82f6) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   FATIA 2/3 · a marca como BORDA/ANEL no MODO CLARO.
+   As 3 regras acima pintam a borda com `--member-primary` cheia. No modo
+   ESCURO isso funciona (o azul de hoje mede 5,47 e o lime 18,21). No CLARO
+   não: a marca some contra o branco — o azul mede 3,68 e o lime 1,11, os
+   dois abaixo do limiar 3,0 de elemento não textual.
+   `--member-ink` (fatia 1/3) é a mesma marca escurecida a 45%.
+
+   ⚠️ ESCOPO: `html:not(.dark)` — no ESCURO estas regras NEM CASAM, e as de
+   cima seguem valendo intocadas. Molde copiado de `globals.css:337`.
+   ⚠️ CADEIA: `var(--member-ink, var(--member-primary, #3b82f6))` — sem marca
+   nenhuma das duas vars existe e o `#3b82f6` é o pixel de hoje, byte-idêntico.
+   ───────────────────────────────────────────────────────────────────────── */
+html:not(.dark) .course-customized .border-blue-500,
+html:not(.dark) .course-customized .focus\:border-blue-500:focus { border-color: var(--member-ink, var(--member-primary, #3b82f6)) !important; }
+html:not(.dark) .course-customized .focus\:ring-blue-500:focus { --tw-ring-color: var(--member-ink, var(--member-primary, #3b82f6)) !important; }
 .course-customized .hover\:border-blue-500\/50:hover { border-color: color-mix(in srgb, var(--member-primary, #3b82f6) 50%, transparent) !important; }
 .course-customized .text-blue-300 { color: var(--member-primary, #93c5fd) !important; }
 .course-customized .text-emerald-300 { color: var(--member-primary, #6ee7b7) !important; }
