@@ -35,6 +35,104 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-07 — FRENTE REBRANDING — A VIRADA, FATIA 1: O INTERRUPTOR (9.255)
+
+> ⚠️ **A mensagem do merge `0f4b2f2` diz "9.253" — errata.** 9.253 é outro item (sujeira do palco,
+> aberto). Escrevi o número conferindo só a árvore da `main`, sem olhar a `feat/rebranding`, onde
+> 9.250–9.254 já estavam ocupados. **O item é o 9.255.** Para achar pelo repo:
+> `git log --grep memberBrandDefault`.
+
+**Estado antes:** main em `169437b` · integração `feat/rebranding` em `8a3683a`
+**O que foi feito:** Campo `Workspace.memberBrandDefault Boolean @default(false)` e o caminho no
+código para a virada da identidade na área do aluno. **Ninguém é virado nesta fatia** — os 44
+workspaces de produção nascem `false` e assim ficam; ligar é decisão do dono, **uma linha no banco,
+sem deploy**. ⭐ O campo é do **WORKSPACE**, não do curso: a virada é do produto, e por curso seriam
+54 escritas para dizer uma coisa só. ⛔ **O banco do curso NÃO é tocado** — `memberPrimaryColor`
+segue **NULL nos 61 cursos sem marca**, senão o produtor perderia a distinção entre "nunca escolhi" e
+"escolhi esta cor". ⭐ Regra A (decisão do dono): quem não tem MARCA recebe o padrão **mesmo tendo
+personalizado outro campo** (4 cursos), senão ficaria fundo personalizado com acento azul num produto
+lime. ⭐ Zero query nova — entra no **mesmo `select`** do `forceTheme`; o `catch` deixa `false`.
+**Arquivos tocados:** `prisma/schema.prisma` · `src/app/(course)/course/[slug]/layout.tsx` ·
+`prisma/migrations/20260907140000_add_workspace_member_brand_default/migration.sql` — **+56/−10**
+**Como foi provado:** `tsc --noEmit` exit 0 · `npm run build` exit 0 (gate encadeado `build && commit`)
+· build de staging `BUILD_ID 4bN2H-pnt_tvoTouBTD_h`.
+⚠️ **O `db push` do staging RECUSOU** — queria dropar `WorkspaceMembership` (1 linha), tabela que
+**só existe no staging**, não está entre os 60 models do schema e **não existe em produção**: deriva
+do palco, não desta mudança. **Recusei `--accept-data-loss`** e apliquei **só a coluna** com
+`prisma db execute`. Prova dupla: staging
+`{"column_name":"memberBrandDefault","data_type":"boolean","column_default":"false","is_nullable":"NO"}`
+· produção naquele momento **`COLUNA NAO EXISTE`**.
+⭐ **TESTE DO INTERRUPTOR** (staging, **mesmo BUILD_ID, sem redeploy** — liga, prova, desliga, prova):
+desligado → `:root` **vazio**, `.course-customized` **0** · **LIGADO** → `:root{--member-primary: #EFFF20;
+--member-button-text: #0a0a0a; --member-ink: color-mix(in srgb, #EFFF20 45%, black)}`, classe **1** ·
+desligado → `:root` **vazio**, classe **0**.
+**PRODUÇÃO, na ordem (a migração ANTES do push):** `migrate deploy` **89→90 migrations, 0 quebradas** ·
+`information_schema` **boolean / NOT NULL / default false** ✅ · **44 workspaces, 0 ligados** ✅ ·
+76 cursos intactos, **61 ainda NULL** ✅. Deploy `success`. Controle: `/sw.js` **byte-idêntico**
+(sha256 `dbf0c4cf…`, `SW_VERSION 2.4.0`).
+⭐ **A prova de que nada muda hoje não é curl, é ÁLGEBRA:** com `viradaLigada === false`,
+`memberPrimaryColor ?? (false ? PADRÃO : null)` ≡ `memberPrimaryColor` — a expressão de antes; e o
+SELECT dá **0 workspaces com valor ≠ false**, logo **nenhum dos 76 cursos alcança o ramo novo**.
+⚠️ **O controle por curso real de produção NÃO foi possível:** `/course/<slug>` exige sessão (307 →
+`/producer/login`) e a URL do deploy anterior está atrás do **Vercel SSO**. A comparação antes×depois
+por `curl` seria **vazio-igual-vazio** — registrada aqui como **inconclusiva**, não como prova.
+**SHA do merge:** `3795d03` (fatia) → **`0f4b2f2` (main, EM PRODUÇÃO)** ·
+**Rollback:** `git revert -m 1 0f4b2f2` ou Instant Rollback para **`169437b`** —
+⚠️ **o revert do código NÃO remove a coluna**, e não precisa: ela é `default false` e inerte.
+**Mudou em produção para quem:** **ninguém** — 0 pixels, 0 workspaces ligados. O que mudou é a
+capacidade: o dono agora **pode** virar um workspace por vez.
+**Ficou aberto:** **9.256** (o comentário de escopo de `theme-constants.ts:24-30` ficou mentindo) ·
+a virada em si (ligar para alguém) segue **decisão do dono, não executada**.
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · ordem da migração (staging → validar →
+prod → prova → push) ✅ · papelada ✅ · **gate humano: NÃO SE APLICA** — a fatia não muda pixel; a
+prova é a álgebra + o SELECT, colados acima.
+⚠️ **Erro do dia, registrado:** numerei o item sem olhar a branch de integração, e a primeira leva de
+docs (`b8871e2`) colidiu com 9.250/9.251/9.253/9.254 — revertida em `5045c99`. **O repo não é UMA
+árvore:** conferir "o que já existe" exige varrer as branches vivas (`git show <branch>:docs/...`).
+
+---
+
+## 2026-09-06/07 — FRENTE REBRANDING — ENTRADA RETROATIVA: OS 4 MERGES DE CONTRASTE
+
+> ⚠️ **Entrada retroativa, escrita em 07/set/26.** Quatro merges subiram para produção em 06–07/set
+> **sem entrada no diário**. ⓘ **Item e linha FEITO eles TÊM** — na branch `feat/rebranding`, que só
+> chegou à main hoje (merge `66dd3a7`). O que faltava, nas duas árvores, era **só o diário**: sonda
+> nas 8 branches deu **0 ocorrências** dos 4 SHAs, com controle positivo (`a7f2c12` → 4).
+> Os fatos abaixo vêm das mensagens de merge e do PLANO-MESTRE; **nada reconstruído de memória**.
+
+**Estado antes:** main em `815a8e0`
+**O que foi feito:** quatro fatias da mesma frente — *contraste na área do aluno* — na ordem em que subiram:
+1. **`4ec6e0b` (9.247)** — branco fixo **SOBRE** a marca, onde a marca vira **preenchimento**: 4 pontos
+   (`lesson-quiz.tsx:176` · `lessons-sidebar.tsx:254` · `module-list-view.tsx:184` ·
+   `(course)/course/[slug]/page.tsx:518`) passam a `text-[var(--member-button-text,#ffffff)]`.
+   **8 de 14 cursos reprovavam** (3.630 matrículas); `kingdomacademy` media **1,00** — branco sobre branco.
+   Depois: **0 de 14**, pior caso 4,68.
+2. **`df1030b` (9.248)** — o **widget de suporte**: ícone e 3 textos eram `text-white` cravado sobre um fundo
+   de 4 degraus. **72 de 73 cursos abaixo de 4,5**; com o widget efetivamente ligado, **61 cursos e 24.976
+   matrículas ativas**. A regra passou a espelhar a cadeia do fundo **degrau a degrau**. Depois: **0 reprovam**.
+3. **`ecb719d` (9.251)** — o caso **oposto**: a marca como **TINTA** no modo claro, **51 pontos**, resolvidos com
+   a var nova `--member-ink` = `color-mix(in srgb, MARCA 45%, black)`. Três fatias (emitir a var · borda/anel · texto).
+4. **`169437b` (9.249)** — o **knob** da barra do player: **1,73 → 8,21** com `ring-1 ring-black/60`.
+   Veio **antes da virada** de propósito: com a virada em lime os cursos que falham iriam de 1.647 para
+   **19.462** matrículas.
+**Arquivos tocados:** ver cada item no PLANO-MESTRE (9.247 · 9.248 · 9.251 · 9.249) — este arquivo aponta, não copia.
+**Como foi provado:** medição em produção por SELECT (ref `wyamxwmdgbvqrfcqfbyh`, leitura) antes de cada fatia,
+**Chrome headless sobre o bundle/CSS servido** depois, e o controle `/sw.js` **byte-idêntico** (`dbf0c4cf…`) em
+todos. As contagens e os pares antes×depois estão colados item a item no PLANO-MESTRE.
+**SHA do merge:** `4ec6e0b` · `df1030b` · `ecb719d` · `169437b` (todos em main, **EM PRODUÇÃO**) ·
+**Rollback:** `git revert -m 1 <sha>` — pais respectivos `815a8e0` · `c885fd1` · `2f52cc5` · `ecb719d`
+**Mudou em produção para quem:** sim, **muda pixel**. O maior alcance é o do 9.248: **24.957 matrículas ativas**
+em 58 cursos sem cor própria veem o ícone do suporte passar de branco para escuro **sobre o mesmo azul** —
+melhora medida, e a regra não tem exceção.
+**Ficou aberto:** o fallback escuro nos 3 pontos emerald dos cursos **sem** marca (24.958 matrículas) — fora do
+escopo do 9.247, segue aberto lá. Também **9.252**, **9.253** e **9.254** (abertos na integração).
+**Regras conferidas:** staging-first ✅ · papelada ⚠️ **o diário estava em atraso — corrigido aqui** ·
+**gate humano:** ⚠️ **o resultado NÃO é afirmado** — as quatro mensagens de merge registram, cada uma,
+"*O resultado do gate humano NÃO é afirmado aqui. O dono autorizou a subida*". O texto colado do gate
+**não é recuperável** hoje; esta entrada registra o fato, não o transcreve.
+
+---
+
 ## 2026-09-05 — FRENTE REBRANDING, ETAPA A1b — OS GRADIENTES, E A PROVA QUE BARROU 4 DOS 6
 
 **Estado antes:** main em `e7b7834` (A1 em produção) · integração `feat/rebranding` em `b5a91fc`
