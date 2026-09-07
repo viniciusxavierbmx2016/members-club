@@ -146,6 +146,19 @@ export default async function CourseSlugLayout(props: {
     // A1 · calculada da marca por max-contraste; NÃO emitida sem marca própria
     course.memberPrimaryColor &&
       `--member-button-text: ${contrastingTextColor(course.memberPrimaryColor)}`,
+    // FATIA 1/3 · a marca ESCURECIDA, para servir de TINTA no modo claro.
+    // ⚠️ NADA a consome ainda — as regras de `html:not(.dark)` são a fatia 2/3.
+    //
+    // ⭐ `color-mix` e não `darkenHex`: a função do repo recebe um `amount`
+    // PRONTO, e o repo não tem quem CALCULE o amount necessário por marca
+    // (medido: −0% no `#000000`, −54% no `#ffffff`). `color-mix` já é o
+    // mecanismo da casa — 63 regras no `globals.css` — e resolve sem código.
+    //
+    // ⭐ 45% é SUFICIENTE PARA QUALQUER MARCA, e a prova é o limite: nenhuma
+    // cor tem luminância maior que a do branco, e `#ffffff` a 45% vira
+    // `#737373` = 4,74 sobre branco. Varredura de 4096 cores: 0 falham.
+    course.memberPrimaryColor &&
+      `--member-ink: color-mix(in srgb, ${course.memberPrimaryColor} 45%, black)`,
     course.memberTextColor && `--member-text: ${course.memberTextColor}`,
   ]
     .filter(Boolean)
