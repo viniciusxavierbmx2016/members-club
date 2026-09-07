@@ -459,6 +459,40 @@ html:not(.dark) .course-customized .text-primary { color: var(--member-primary, 
 html:not(.dark) .course-customized .border-blue-500,
 html:not(.dark) .course-customized .focus\:border-blue-500:focus { border-color: var(--member-ink, var(--member-primary, #3b82f6)) !important; }
 html:not(.dark) .course-customized .focus\:ring-blue-500:focus { --tw-ring-color: var(--member-ink, var(--member-primary, #3b82f6)) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   FATIA 3/3 · a marca como TEXTO no MODO CLARO.
+   9 classes, 34 pontos. No ESCURO a marca cheia funciona (azul 5,47, lime
+   18,21); no CLARO some — azul 3,68 e lime 1,11, abaixo de 4,5.
+
+   ⚠️ UMA REGRA POR FALLBACK, e não uma só agrupada: cada classe carrega um
+   fallback DIFERENTE (`#60a5fa`, `#93c5fd`, `#10b981`…). Juntar todas num
+   valor só trocaria a cor dos 4 cursos que têm a CLASSE mas não a MARCA
+   (`mentoria-orion`, `mentoria-individual`, `bento-cards`, `cva` — medidos em
+   produção hoje), que dependem exatamente desse fallback.
+
+   ⚠️ ESCOPO `html:not(.dark)`: no ESCURO estas regras NEM CASAM.
+   ⛔ As 3 classes `dark:` (`dark:text-blue-400`, `dark:text-blue-500`,
+   `dark:text-emerald-400`) NÃO entram — elas só valem no escuro, onde está
+   tudo certo. As 4 linhas de `lesson-quiz.tsx` (:157 :188 :218 :222) que só
+   têm classe `dark:` seguem intocadas: no claro elas usam `text-*-700`, que
+   nunca foi remapeado.
+   ⓘ `text-primary` fica de fora: 0 pontos na área do aluno.
+
+   ⭐ Resolve os DOIS casos medidos, e por construção: sobre BRANCO e sobre
+   TINTE da marca crua. O tinte CLAREIA contra o branco e a tinta ESCURECE —
+   andam em sentidos opostos, então o par só se afasta. 0 de 13 marcas abaixo
+   de 4,5 em qualquer tinte de 8% a 30%.
+   ───────────────────────────────────────────────────────────────────────── */
+html:not(.dark) .course-customized .text-blue-500 { color: var(--member-ink, var(--member-primary, #3b82f6)) !important; }
+html:not(.dark) .course-customized .text-blue-400,
+html:not(.dark) .course-customized .hover\:text-blue-400:hover { color: var(--member-ink, var(--member-primary, #60a5fa)) !important; }
+html:not(.dark) .course-customized .text-blue-600 { color: var(--member-ink, var(--member-primary, #2563eb)) !important; }
+html:not(.dark) .course-customized .text-blue-300,
+html:not(.dark) .course-customized .hover\:text-blue-300:hover { color: var(--member-ink, var(--member-primary, #93c5fd)) !important; }
+html:not(.dark) .course-customized .text-emerald-500 { color: var(--member-ink, var(--member-primary, #10b981)) !important; }
+html:not(.dark) .course-customized .text-emerald-600 { color: var(--member-ink, var(--member-primary, #059669)) !important; }
+html:not(.dark) .course-customized .text-emerald-300 { color: var(--member-ink, var(--member-primary, #6ee7b7)) !important; }
 .course-customized .hover\:border-blue-500\/50:hover { border-color: color-mix(in srgb, var(--member-primary, #3b82f6) 50%, transparent) !important; }
 .course-customized .text-blue-300 { color: var(--member-primary, #93c5fd) !important; }
 .course-customized .text-emerald-300 { color: var(--member-primary, #6ee7b7) !important; }
