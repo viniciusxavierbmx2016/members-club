@@ -35,6 +35,70 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — FRENTE REBRANDING — A REGRA DE PALCO REESCRITA E O `build:staging` (9.258)
+
+> ⚠️ **Muda pixel? NÃO.** 1 linha no `package.json` e texto de documento. Zero `src/`, zero
+> `prisma/`, zero banco, zero interruptor. **Os dois textos foram aprovados pelo dono** como
+> propostos na fatia anterior, e entraram **verbatim**.
+
+**Estado antes:** main `100a22e` == origin · integração `2e70016` == origin · árvore limpa ·
+tag `7d57c40` e F1 `dbe161d` intocadas · palco de pé (**PID 6134**, `BUILD_ID Jw2dF7wQ8njlk1C8gTp5A`,
+alvo staging 194 / produção 0) · produção **16 ligados / 28 desligados**, **1 ativo sob ligados**
+(o Backstage, esperado). ⓘ Ativos sob desligados: **28.782** — eram 28.777 ontem; a plataforma segue
+vendendo, o que é a própria lição do adendo da leva 1.
+
+**O que foi feito:**
+1. **A REGRA DE PALCO foi REESCRITA** em `docs/PLANO-MESTRE.md`, lição de método (3) do item 9.134 —
+   **substituída, não duplicada**. Prova: a frase da versão antiga (*"REGRA DE PALCO — com palco de
+   pé"*) foi de **1 → 0** ocorrências, e a da nova (*"o `.next` é de UM alvo só"*) de **0 → 2**
+   (título + bloco). O total de menções a "REGRA DE PALCO" no arquivo foi de 2 → 3, e a terceira é a
+   referência narrativa dentro do próprio 9.258.
+   ⭐ **A evidência de 27/08 foi PRESERVADA** e não descartada: o cenário do `PostAttachmentPicker`
+   (que subiria arquivo para o Supabase de **produção** se o gate tivesse conseguido anexar) segue no
+   documento como "versão anterior", porque é o **pior caso concreto** do dano (b) e a nova redação
+   não o repete. `grep PostAttachmentPicker` = 1, mantido.
+2. **`"build:staging": "dotenv -e .env.staging -- next build"`** acrescentado ao `package.json`,
+   **espelhando a forma exata do `dev:staging`** que já existia (sem `npx`, `dotenv -e … -- next …`).
+   `git diff --numstat`: **1 adicionada, 0 removidas** — nenhum script existente tocado.
+3. **O comando canônico entrou no `SYSTEM-MAP`** (doc de início de sessão), que era onde a lacuna L3
+   doía: quem procura "como subo o palco" agora acha.
+
+**Onde a regra vive — provado por busca, não assumido:** `REGRA DE PALCO` aparece **0 vezes** no
+`DEV-BRABO.md` e **0 vezes** no `SYSTEM-MAP.md` (controle positivo: "palco" dá 22 no PLANO-MESTRE, a
+sonda enxerga). Não havia nada a espelhar como regra nos outros dois.
+
+⭐ **ACHADO DE BÔNUS — a receita do DEV-BRABO (d) confirmada AO VIVO no palco.** A constituição avisa
+que provar o alvo por `curl` em `/w/<slug>` **sem seguir o redirect é prova VAZIA**. Medido agora:
+`/w/staging-teste`, `/w/workspace-b-staging`, `/w/desdobra` e `/w/rota-do-criador` devolvem **307 os
+quatro** sem `-L` — exatamente a armadilha descrita. Com `-L`: **200 · 200 · 404 · 404**. A variante
+que usei na prova viva de ontem, `/w/<slug>/login`, discrimina **sem** precisar de `-L`: **200 · 200 ·
+404 · 404**. E o marcador literal que o DEV-BRABO prescreve confere: `/w/staging-teste/login` renderiza
+**`<title>Login · Staging Teste</title>`** — nome que **vem do banco** — contra `Login | Members Club`
+no slug que só existe em produção. ⓘ **Nada foi editado no DEV-BRABO**: a regra dele está certa como
+está, e a aprovação do dono cobria só os dois textos propostos.
+
+**Como foi provado:**
+`tsc --noEmit` **exit 0** · `package.json` faz parse por **Python e Node** · `npm run` (sem argumento,
+que **lista** e não executa) mostra `build:staging` com o comando exato · `node_modules/.bin/dotenv` e
+`node_modules/.bin/next` existem, então `npm run` e `npx` resolvem para **o mesmo binário**.
+⛔ **NÃO rodei `npm run build`** — é literalmente a regra que este commit escreve; rodá-la destruiria o
+palco que ela existe para proteger. **Exceção registrada**, e o portão foi `tsc` + a validação do JSON.
+⛔ **NÃO tentei `npm run build:staging --dry-run`**: o npm **não documenta** `--dry-run` para
+`run-script`; se a flag fosse ignorada, o script **executaria** e apagaria o palco. Risco assimétrico.
+⚠️ **LIMITE HONESTO: o script nunca foi EXECUTADO.** A equivalência com o comando do Q4 está provada
+por resolução de binário, não por execução. **A verificação fica para o próximo build natural de
+palco** — quem rodar `npm run build:staging` pela primeira vez deve conferir o `BUILD_ID` novo e a
+prova de alvo (staging > 0, produção = 0) antes de confiar.
+**SHA do merge:** ver o commit desta leva · **Rollback:** `git revert` do commit — nada de runtime
+depende dele; o script novo é aditivo e nenhum caminho existente o chama.
+**Mudou em produção para quem:** **ninguém.** Nenhum byte de runtime mudou.
+**Ficou aberto:** a execução real do `build:staging` (acima) · a **leva 2**.
+**Regras conferidas:** §17 ✅ · nenhum script existente alterado ✅ · nenhuma escrita em banco ✅ ·
+palco preservado (mesmo PID e BUILD_ID no fim) ✅ · papelada ✅ ·
+**gate humano: não se aplica** — a fatia não muda pixel nenhum.
+
+---
+
 ## 2026-09-08 — FRENTE REBRANDING — 9.258: O PALCO CONTAMINADO, DESTRUÍDO E REFEITO
 
 > ⛔ **Sem SHA de código:** a fatia é de **artefato local + papelada**. Zero `src/`, zero `prisma/`,
