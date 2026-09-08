@@ -35,6 +35,92 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — 9.252 FATIA 2 — UMA SEGUNDA CHANCE NO 401 DA AULA (9.262)
+
+> ⚠️ **Muda pixel SÓ no caminho de erro.** O fluxo normal é idêntico, medido: 1 chamada, 0 espera.
+> **1 arquivo, +60/−1.** Gate humano aprovado.
+
+**Estado antes:** main `595464f` == origin · integração `aeb673a` · branch `feat/9252-fatia2-retry-401`
+@ `ed78d97` · produção 25/19 · palco `rXlJxWtfZCXRSqFyrFICl`, alvo 194/0.
+**O que foi feito:** no 401 da página da aula — **e só no 401** — espera 400 ms e tenta **uma** vez
+mais. Segunda deu certo? o aluno **não vê nada**. Falhou de novo? vai para o login **dele**.
+
+⭐ **AS 7 PERGUNTAS ANTES DE ESCREVER, e elas mudaram o desenho:** o molde **já existia na casa**.
+`auth-provider.tsx:65-84` faz exatamente isto para `/api/auth/me` — *"Retry once after a short delay; a
+second 401 means genuinely logged out"* — inclusive a espera de **400 ms**, que copiei em vez de
+inventar. Não há SWR nem react-query no projeto, e não havia outro helper de retry.
+
+⛔ **NO MÁXIMO 1 RETRY, e a garantia é ESTRUTURAL, não um contador:** a segunda chamada vive dentro da
+mesma função `async` — **não passa por estado nem por re-render** — e as deps do efeito
+(`params.id`, `params.slug`, `router`) **não incluem estado nenhum**, então `setError`/`setData`/
+`setLoading` não re-disparam nada. Medido no código: **1 `await sleep`, 2 `await fetch`, 0 `while`,
+0 recursão**.
+⛔ **SÓ 401.** O trecho do chain do `if (res.status === 403)` até o cleanup é **byte-idêntico**: sha
+`bcde89ce1644b03b` antes e depois, com controle — trocar `403` por `499` numa cópia leva o sha a
+`60ec0e8f…`, provando que a sonda detecta mudança.
+
+⭐ **O DESENHO QUE EU IA ESCREVER, E QUE A MEDIÇÃO REFUTOU — é a lição desta fatia.**
+Eu ia mandar o aluno direto para `/w/<slug>/login` **sem** limpar a sessão, raciocinando que essa rota
+não está em `redirectIfAuthed` (`proxy.ts:22-28`). Testei antes de escrever, com o jar de uma sessão
+válida:
+```
+/w/staging-teste/login  ->  307  ->  /w/staging-teste
+```
+A regra está em `proxy.ts:112-118`, que eu não tinha lido.
+🔴 **A raiz, e ela vale para qualquer tela de login da casa: o proxy decide por PRESENÇA de cookie,
+não por validade** (`proxy.ts:31-40`). Enquanto o cookie existir, **toda** tela de login rebate para
+dentro. Por isso o `signOut({ scope: "local" })` do molde **não é zelo, é necessidade** — e o
+comentário de `auth-provider.tsx:74-77` já descrevia esse laço (`/producer` ↔ `/producer/login`).
+Meu raciocínio estava errado; o molde da casa estava certo.
+
+⭐ **E o destino foi derivado, não chutado:** `/producer/login` seria a tela **errada** para um aluno —
+a senha dele vive em `WorkspaceCredential`, não no Supabase global. O slug vem do cookie
+`active_workspace_slug`, que é **`httpOnly: false`** (`api/w/[slug]/login/route.ts:313`, confirmado no
+jar do login) e **já é lido no cliente** em `(dashboard)/page.tsx:74-77` — molde reusado.
+
+**Arquivos tocados:** `src/app/(course)/course/[slug]/lesson/[id]/page.tsx` — **1 arquivo**.
+`git diff main...HEAD` (3 pontos) = 1, e o merge trouxe 1.
+**Como foi provado:** `tsc --noEmit` exit 0 · `npm run build` (portão de produção) exit 0 ·
+`npm run build:staging` exit 0.
+⭐ **Os três cenários, com Chrome headless por CDP e um proxy de teste FORA do repo** interceptando a
+rede — **o app não foi tocado para testar**:
+1. **sessão boa** → `VIEWS=1`, a aula carrega, **sem espera nova**.
+2. ⭐ **401 transitório** → `VIEWS=2`: `17:56:53.047Z` forçado 401 → `17:56:53.451Z` passou, **404 ms**
+   depois. **A aula carrega idêntica ao cenário 1 — o aluno NÃO vê erro nenhum.** É o caso que esta
+   fatia existe para resolver, e era o único que eu não conseguia provar sem interceptar a rede.
+3. **401 persistente** → `VIEWS=2` (**nunca 3**), URL final `/w/staging-teste/login`, tela
+   *"Acesse sua conta / Email / Senha / Entrar"* — o login do **aluno**.
+**CONTROLES EM PRODUÇÃO, contra linha de base capturada ANTES do deploy:** `/sw.js` **byte-idêntico**
+(`dbf0c4cf…`) · `/api/lessons/[id]/view` e `/api/auth/me` sem cookie com **sha idêntico**
+(`492bf944…`, 401). **Esta fatia é só cliente, e o servidor prova que não mudou.**
+⭐ **REGRA DE PALCO cumprida:** derrubar → portão `npm run build` (que contamina o `.next` de
+propósito: staging 0 / produção 194) → push → `rm -rf .next` → `npm run build:staging` → alvo **194/0**
+→ subir. Palco de pé em `DL8sZfr6gEkNOM1_Vxudb`.
+**SHA do merge:** `ed78d97` (fatia) → **`3e59746` (main, EM PRODUÇÃO)** · **Rollback:**
+`git revert -m 1 3e59746`, ou Instant Rollback para o deploy de `595464f`.
+**Mudou em produção para quem:** só quem tomar um 401 na página da aula — e para esses, **para melhor**.
+Quem não toma 401 não vê diferença nenhuma.
+
+⭐ **O QUE MEDIR AGORA — as duas fatias trabalham juntas.** O instrumento (9.260) registra o **primeiro**
+401 se ele for anômalo; o retry (9.262) o resolve em silêncio. Então:
+| no log | e o aluno | significa |
+|---|---|---|
+| `[AUTH]` | seguiu na aula | ⭐ **o retry salvou** — soluço transitório < 400 ms |
+| `[AUTH]` | caiu no login | transitório que durou **mais** que 400 ms ⇒ a espera pode ser curta demais |
+| **sem** `[AUTH]` | caiu no login | deslogado de verdade (`AuthSessionMissingError`) — **comportamento correto** |
+
+**O número que decide espalhar (9.263):** linhas `[AUTH]` cujo `tela:` é rota de aluno. **0 em ~2
+semanas** ⇒ o 9.252 tem outra causa e espalhar é custo sem retorno. **Mais que 0** ⇒ o soluço é real e
+o molde vale nos outros 5 pontos.
+**Ficou aberto:** **9.263** (espalhar, após medir) · **9.261** (o `cache()` em route handler) ·
+o 9.252 em si, que **só fecha quando um evento real aparecer no log** e disser qual das duas hipóteses
+era a certa.
+**Regras conferidas:** §17 ✅ · 7 perguntas antes de escrever ✅ · nenhuma escrita em banco ✅ ·
+1 arquivo, nada espalhado ✅ · caminho de sucesso byte-idêntico ✅ · papelada ✅ ·
+**gate humano: APROVADO** — a aula abre normal.
+
+---
+
 ## 2026-09-08 — 9.252 FATIA 1 — O 401 MUDO AGORA DEIXA RASTRO (9.260)
 
 > ⚠️ **Não muda pixel nem comportamento.** Nenhuma resposta HTTP, nenhum redirect, nenhum retorno de
