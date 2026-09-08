@@ -35,6 +35,78 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — 9.254 FECHADO SEM CÓDIGO: o 50% estava certo (e o 9.264, 9.265)
+
+> ⚠️ **Nenhum código foi alterado.** A investigação foi somente leitura, e o veredito é
+> **não havia defeito**. O que ela achou de real foi outra coisa, que ninguém tinha relatado.
+
+**Estado antes:** main `c0adbbd` == origin · integração `504fc5a` · produção 25/19 · palco
+`DL8sZfr6gEkNOM1_Vxudb`, alvo 194/0.
+⚠️ **O palco tinha caído** entre as levas (PID vazio, HTTP 000). O artefato estava intacto e com
+alvo provado, então subi o servidor sobre o **mesmo `.next`**, **sem rebuild** — a REGRA DE PALCO
+proíbe *reusar artefato sem provar o alvo*, não subir servidor sobre artefato provado. Reconferi o
+alvo **antes** de subir.
+
+**O que foi feito:** apurada a cena do relato *"50% concluído com 1 de 4 aulas"*.
+
+🔴 **A CONTA, e é ela que fecha o item: eram 2 de 4 aulas concluídas. 2÷4 = 50%.**
+**Módulo 1**: ✅ *Aula de Teste* · ⬜ *Aula Nova Item C* = **1 de 2**.
+**Palco 9.player**: ⬜ *PLAYER chrome NATIVO* · ✅ *PLAYER chrome NOSSO* = **1 de 2**.
+O print dizia **"1 de 2" em CADA módulo**; o relato leu um dos dois como o total do curso.
+E nada estava bloqueado escondendo denominador: `daysToRelease = 0` em tudo, `releaseAt` nulo,
+matrícula de 27 dias. Controle: 4 linhas de `LessonProgress`, 2 `true` e 2 `false`.
+
+⭐ **AS CINCO EXPRESSÕES CONCORDAM** — e isso foi **medido**, não lido: chamei as 3 rotas que
+alimentam as telas com a sessão do mesmo aluno, e as três devolveram **4 aulas, 2 concluídas**.
+
+| tela | file:line | resultado |
+|---|---|---|
+| sidebar — cabeçalho | `lessons-sidebar.tsx:72` | 50% |
+| sidebar — por módulo | `lessons-sidebar.tsx:91` | 50% e 50% |
+| página do curso — total | `(course)/course/[slug]/page.tsx:336` | 50% |
+| página do curso — por módulo | `:103` | 50% e 50% |
+| vitrine — cartão | `lib/utils.ts:78-85` | 50,00% (única sem `Math.round`) |
+
+Todas contam **AULA**, nunca módulo. E o `/api/lessons/[id]/view` **não filtra**: usa `.map()` com um
+flag `locked`, não `.filter()` — por isso os denominadores batem entre as telas.
+
+⚠️ **ERRO MEU NO MEIO DA APURAÇÃO, registrado:** meu primeiro probe da vitrine leu a chave `courses`
+e devolveu **0 cursos**. O payload usa **`enrolled`**. Inspecionei o formato **antes** de aceitar o
+zero, e refiz — é exatamente o tipo de zero que passa por "ausência" sem controle de vacuidade.
+
+⭐ **O ACHADO QUE NINGUÉM RELATOU — e virou decisão, não conserto (9.264).** As cinco expressões
+contam **aulas bloqueadas no denominador**. No palco isso não aparece (0 bloqueadas); em produção,
+**3.285 matrículas ativas (11,40% das 28.817)** têm pelo menos um módulo **ainda bloqueado hoje** —
+`infinityia` 2.803, `shop-club` 207, `mentoria-juncao-milionaria` 67, e mais cinco.
+⚠️ **Não são 22.955.** Esse é o total de matrículas em cursos *que têm* drip — e um drip de 7 dias
+numa matrícula antiga já liberou tudo. Controle: as duas queries dão números diferentes, logo a
+condição de tempo está discriminando.
+⚠️ **Ressalva declarada:** o cálculo real também passa por `loadEnrollmentOverrides` e
+`automation-locks`, que mudam a liberação **por matrícula** e **não foram modelados**. O 3.285 é o
+caso **base**.
+⭐ **DECISÃO DO DONO: manter como está.** O aluno comprou o curso inteiro; o percentual mede o curso
+inteiro. Registrado como **9.264 — DECIDIDO**, não como item aberto. ⛔ Não alterar as 5 sem nova
+decisão — **mudar uma só cria a divergência entre telas que o 9.254 procurou e não achou**.
+
+⭐ **E A LIÇÃO DE MÉTODO (9.265):** diante de relato de tela por descrição humana, o **primeiro**
+passo é **reproduzir a cena no DADO** — qual curso, qual aluno, quantas linhas no banco — e **não**
+abrir o código procurando o defeito. Custou uma investigação somente-leitura; evitou uma **fatia
+inteira de conserto naquilo que estava certo**, e evitou introduzir divergência onde hoje há acordo.
+ⓘ Vale o inverso também: investigar o relato errado **ainda produziu conhecimento certo** — o 9.264
+não tinha sido relatado por ninguém.
+
+**Arquivos tocados:** **nenhum de código.** Só `docs/`.
+**Como foi provado:** SELECT no palco (ref `wxynnsyartxcvglqwmdw`) para a cena; 3 chamadas HTTP
+autenticadas para os denominadores; SELECT em produção (ref `wyamxwmdgbvqrfcqfbyh`) para o alcance.
+Tudo somente leitura.
+**SHA do merge:** — (não há código) · **Rollback:** não se aplica.
+**Mudou em produção para quem:** **ninguém.**
+**Ficou aberto:** nada desta frente. O 9.254 fecha, o 9.264 é decisão, o 9.265 é lição.
+**Regras conferidas:** §17 ✅ · somente leitura ✅ · nenhuma expressão alterada ✅ · palco preservado ✅ ·
+papelada ✅ · **gate humano: não se aplica** — não muda pixel nenhum.
+
+---
+
 ## 2026-09-08 — 9.252 FATIA 2 — UMA SEGUNDA CHANCE NO 401 DA AULA (9.262)
 
 > ⚠️ **Muda pixel SÓ no caminho de erro.** O fluxo normal é idêntico, medido: 1 chamada, 0 espera.
