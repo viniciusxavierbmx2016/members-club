@@ -1,6 +1,8 @@
 import { cache } from "react";
+import { headers } from "next/headers";
 import { createServerSupabaseClient } from "./supabase-server";
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 import type { Enrollment, User } from "@prisma/client";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -115,14 +117,65 @@ export async function getSession() {
   return session;
 }
 
+/**
+ * 9.252 · INSTRUMENTAÇÃO — o diagnóstico da falha de autenticação.
+ *
+ * ⚠️ NÃO muda comportamento nenhum: nenhuma resposta HTTP, nenhum redirect,
+ * nenhum retorno de função. É só registro.
+ *
+ * ⭐ POR QUE ISTO EXISTE: `supabase.auth.getUser()` **não lança** quando a
+ * chamada ao Supabase Auth falha — ele devolve `{ data: { user: null }, error }`
+ * e o `error` era **descartado** aqui. O resultado é que um soluço de rede ficava
+ * indistinguível de "não tem sessão": os dois viravam `null`, e o chamador
+ * devolvia 401 "Não autenticado". Provado no código instalado
+ * (`GoTrueClient.js:2506-2517` + `fetch.js:36,122`): falha de rede vira
+ * `AuthRetryableFetchError`, que é um `AuthError`, e por isso é engolida.
+ *
+ * ⭐ O NOME DO ERRO É O DISCRIMINADOR, e ele já carrega a presença do cookie —
+ * por isso não sondamos cookie separadamente:
+ *   `AuthSessionMissingError`   = não havia token na requisição (caso NORMAL de
+ *                                 visitante anônimo; NÃO é anomalia)
+ *   `AuthRetryableFetchError`   = o token existia e a chamada ao Auth falhou
+ *   qualquer outro nome         = anomalia desconhecida, quero saber
+ *
+ * ⛔ NADA PESSOAL É REGISTRADO: sem e-mail, sem id, sem token, sem valor de
+ * cookie. Só o nome da classe do erro, o status, a duração e o `referer` — que
+ * é URL do nosso próprio app e já tem precedente no repo (o `AccessLog` grava
+ * `path: referer`, `api/auth/me/route.ts:41`).
+ *
+ * ⚠️ POR QUE UMA LINHA SÓ, AQUI, E NENHUMA NAS ROTAS: a primeira versão desta
+ * fatia guardava o diagnóstico num holder `cache()` do React para as rotas
+ * lerem e acrescentarem o próprio caminho. **Medido no palco: não funciona** —
+ * a linha `[AUTH]` saiu 2/2 requisições e a das rotas 0/2, ou seja, o objeto
+ * gravado aqui e o lido na rota não são o mesmo. Em vez de insistir, o log
+ * passou a carregar o `referer`, que diz **a tela onde a pessoa estava** — mais
+ * útil que o caminho da API — e cobre os 84 call-sites de uma vez.
+ */
 // React `cache()` deduplicates within a single request — multiple calls
 // (getCurrentUser + requireAuth + requireStaff in the same handler) now hit
 // Supabase Auth + Prisma exactly once per request.
 export const getCurrentUser = cache(async (): Promise<User | null> => {
   const supabase = await createServerSupabaseClient();
+  const t0 = Date.now();
+  // 9.252 · o `error` era descartado aqui. Destruturá-lo NÃO muda o tipo de
+  // retorno (`Promise<User | null>`), então os 84 call-sites seguem intactos.
   const {
     data: { user: authUser },
+    error: authError,
   } = await supabase.auth.getUser();
+  const authMs = Date.now() - t0;
+
+  // Só a ANOMALIA é registrada. "Visitante sem sessão" é o caso normal e sai
+  // como `AuthSessionMissingError` — se ele entrasse aqui, o log viraria ruído
+  // proporcional ao tráfego anônimo.
+  if (authError && authError.name !== "AuthSessionMissingError") {
+    const referer = (await headers()).get("referer") || "-";
+    logger.warn(
+      "AUTH",
+      `getUser falhou sem lançar — user tratado como null (vira 401 "Não autenticado"). name:${authError.name} status:${authError.status ?? "-"} auth:${authMs}ms tela:${referer}`
+    );
+  }
+
   if (!authUser?.email) return null;
 
   const user = await prisma.user.findUnique({
