@@ -35,6 +35,96 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — FRENTE REBRANDING — 9.258: O PALCO CONTAMINADO, DESTRUÍDO E REFEITO
+
+> ⛔ **Sem SHA de código:** a fatia é de **artefato local + papelada**. Zero `src/`, zero `prisma/`,
+> zero deploy, zero escrita em banco, zero mexida no interruptor.
+
+**Estado antes:** main `c02872c` (commit de docs ainda local) · origin `6d30336` · integração `1f1b777`
+· tag `7d57c40` e F1 `dbe161d` intocadas · produção **16 ligados / 28 desligados**, 1 ativo sob ligados
+(o Backstage, esperado e confirmado; **os outros 15 seguem em zero**).
+**O que foi feito:** destruído o `.next` contaminado, reconstruído com o env de staging, provado o alvo
+dos dois lados, palco de pé — e a papelada da leva 1 corrigida com o adendo do aluno que chegou depois.
+
+**A CAUSA, provada pelo que está ESCRITO (não de memória):**
+`package.json` → `"build": "next build"`, **sem** `-e .env.staging` ⇒ lê o `.env` padrão, cujo
+`NEXT_PUBLIC_SUPABASE_URL` carrega o ref `wyamxwmdgbvqrfcqfbyh` — e é essa variável que vai para o
+bundle do navegador. O `dev:staging` **existe** no mesmo arquivo: a casa sabe passar env quando quer,
+só nunca fez para o `build`.
+
+**EVIDÊNCIA, capturada antes de apagar:** `BUILD_ID n34swhyFqcWfUJEocRk5u` (07/set 12:16:50), 84 MB,
+**194 arquivos** com a ref de produção (`.next/server` 192 + `.next/static` 2) e **0** com a de staging.
+Nos 2 chunks do browser, a URL literal `https://wyamxwmdgbvqrfcqfbyh.supabase.co`.
+
+⭐ **A REGRA JÁ EXISTIA — e esse é o achado.** `PLANO-MESTRE.md` **`:1766`** no `815a8e0` (a linha que o
+comando citou; minhas edições de 07/set a empurraram para `:1790`), lição de método **(3)** do item
+**9.134**, "REGRA DE PALCO". Ela **prevê o dano**, **mede o mesmo sintoma** ("2 chunks apontando para
+`wyamxwmdgbvqrfcqfbyh` e 0 para o staging") e **prescreve a sonda que o pegou** ("conferir sempre o REF
+nos chunks; o grep do ref de produção deve dar 0"). **Três lacunas:**
+- **L1 — a condição do título é estreita.** "**Com palco de pé**, NUNCA `npm run build`". São **dois**
+  danos com **um** gatilho declarado: (a) trocar o `.next` sob o servidor (`ChunkLoadError`) só ocorre
+  com palco de pé; (b) **carimbar a URL de produção no bundle ocorre SEMPRE, e FICA**. Em 07/set eu
+  **derrubei o palco antes** (porta 3000 = 0) e segui a ordem prescrita — e contaminei assim mesmo.
+- **L2 — nada diz o que fazer com o `.next` que o portão DEIXA.** A ordem termina em "build de staging
+  por ÚLTIMO → servidor sobe depois", presumindo rebuild na sequência. Quem para no commit deixa para
+  trás um artefato de produção que **parece** palco.
+- **L3 — não existe comando canônico de "build de staging".** `package.json` tem `dev:staging` mas
+  **não** `build:staging`; e o comando literal **não aparece em doc nenhum** (busca por
+  `dotenv -e .env.staging -- next build`: **0 arquivos**; controle positivo: o comando de seed aparece
+  em **2**). A ordem prescreve um passo que ninguém consegue copiar.
+
+**CORREÇÃO PROPOSTA — aguardando aprovação do dono, NÃO aplicada.** Texto exato:
+```
+🔴 (3) REGRA DE PALCO — o `.next` é de UM alvo só, e o alvo fica CARIMBADO nele.
+`npm run build` é `next build` SEM env: lê o `.env` de PRODUÇÃO e grava
+`NEXT_PUBLIC_SUPABASE_URL` de produção DENTRO do bundle do cliente. Isso vale
+com palco de pé OU derrubado — e o carimbo SOBREVIVE ao commit.
+Dois danos, gatilhos diferentes:
+  (a) com palco de pé, troca o `.next` sob o servidor -> ChunkLoadError;
+  (b) sempre, deixa um artefato que PARECE palco e serve o Supabase de PRODUÇÃO.
+⭐ REGRA: um `.next` que não teve o alvo provado é LIXO, não palco.
+   Antes de `next start`, SEMPRE:
+     grep -rl "<ref de produção>" .next | wc -l   -> tem de dar 0
+     grep -rl "<ref de staging>"  .next | wc -l   -> tem de dar > 0
+   Zero nos DOIS lados = sonda cega, não aprovação.
+Ordem correta: derrubar o palco -> portão (`tsc` + `npm run build`) -> commit ->
+`rm -rf .next` -> build de staging -> subir -> prova de alvo.
+⭐ O `rm -rf .next` depois do commit não é higiene: é o que impede o artefato de
+produção de ser reusado como palco na sessão seguinte.
+Comando canônico do build de palco (não existe script; é este):
+   npx dotenv -e .env.staging -- npx next build
+   npx dotenv -e .env.staging -- npx next start
+```
+⇒ E, se o dono quiser resolver na raiz em vez de no papel: **`"build:staging": "dotenv -e .env.staging -- next build"`**
+no `package.json`, espelhando o `dev:staging` que já existe. **Isso é código — fica fora desta fatia**, como candidato.
+
+**Como foi provado (a reconstrução):**
+`rm -rf .next` → ref de produção no compilado **194 → 0** (controle: a mesma sonda acha **3** ocorrências
+no `.env`, logo não está cega) · `npx dotenv -e .env.staging -- npx next build` exit 0 →
+**`BUILD_ID Jw2dF7wQ8njlk1C8gTp5A`**.
+⭐ **PROVA DE ALVO, o espelho exato do contaminado:** staging **194** arquivos (server 192 + static 2) ·
+produção **0** (0 + 0). Nos 2 chunks do browser, `https://wxynnsyartxcvglqwmdw.supabase.co`. E no MESMO
+arquivo servido a sonda acha staging=1 e produção=0 — dois resultados diferentes, mesma agulha, mesmo
+comando: o zero é discriminação, não cegueira.
+⭐ **PROVA VIVA pelo servidor de pé** (PID 6134; `/producer/login` **200**, home **307**):
+`/w/staging-teste/login` **200** e `/w/workspace-b-staging/login` **200** — workspaces que **só existem no
+palco** — contra `/w/desdobra/login`, `/w/rota-do-criador/login` e `/w/backstage-o-arquiteto/login`
+**404**, que **só existem em produção**. Com o palco no alvo errado o padrão viria **invertido**.
+E os dados batem: **5 cursos** no palco contra **77** em produção.
+⚠️ **Limitação declarada do palco:** `.env.staging` não tem `VAPID_*` nem `MEMBERS_CLUB_WEBHOOK_TOKEN` —
+push e webhook não funcionam ali. Não afeta a frente de cor.
+**SHA do merge:** — (não há; docs em `PENDENTE`) · **Rollback:** não se aplica — nenhum estado de produção
+foi tocado. Para desfazer o palco: `kill` do PID e `rm -rf .next`.
+**Mudou em produção para quem:** **ninguém.** Nenhum byte de produção mudou nesta fatia.
+**Ficou aberto:** a **correção do procedimento** (texto acima, aguardando aprovação) · o candidato
+`build:staging` no `package.json` (é código) · a **leva 2**, que precisa de critério novo ou janela de
+reconferência, conforme o adendo da entrada de 07/set.
+**Regras conferidas:** §17 respondido ✅ · nada de código ✅ · nenhuma escrita em banco ✅ ·
+prova de alvo dos dois lados com controle ✅ · papelada ✅ ·
+**gate humano: não se aplica** — a fatia não muda pixel nenhum em produção.
+
+---
+
 ## 2026-09-07 — FRENTE REBRANDING — VIRADA, LEVA 1: 16 WORKSPACES LIGADOS (9.257)
 
 > ⛔ **Entrada sem SHA de merge, e isso é correto:** a leva 1 é **`UPDATE` de banco**, sem deploy,
@@ -106,7 +196,7 @@ com `IDS` =
   ]
 ```
 ⓘ Alternativa que desliga tudo, inclusive levas futuras: `UPDATE "Workspace" SET "memberBrandDefault" = false;`
-**Mudou em produção para quem:** **0 alunos ativos.** Quem sente hoje são os **16 donos PRODUCER** ao
+**Mudou em produção para quem:** **0 alunos ativos NO INSTANTE DA VIRADA** — ver o adendo de 08/set abaixo. Quem sente hoje são os **16 donos PRODUCER** ao
 abrirem o próprio curso. Nos 16 há **5 usuários** com `workspaceId` (1 + 4 no `Desdobra`), **todos sem
 matrícula**, e **0 colaboradores aceitos** — nenhum deles alcança a área do curso.
 **Ficou aberto:** **9.258** (o gate de commit destrói o palco) · **L6** (religar o palco — precisa de
@@ -115,6 +205,22 @@ para uma faixa — e aí **a prova na tela deixa de ser opcional**, porque alcan
 **Regras conferidas:** §17 respondido ✅ · `SUPABASE_REF` impresso antes de cada escrita ✅ ·
 dry-run antes do `UPDATE` ✅ · nenhum campo além do interruptor ✅ · nenhum deploy/push/merge/build ✅ ·
 papelada ✅ · **gate humano: não houve** — a leva não passou por olho humano em tela, e o relatório diz isso.
+
+> ⚠️ **ADENDO DE 08/set/26 — o "0" durou 1h01.**
+> `Backstage | O Arquiteto` recebeu **1 matrícula NOVA** em `2026-09-07T23:06:37.065Z`, **1h01 depois**
+> de eu ligar o campo (`Workspace.updatedAt = 2026-09-07T22:05:30.449Z`).
+> ⓘ **Não é a vencida do `ApplyFy Cursos` revivendo** — essa segue `expiresAt = 2026-05-13`, `updatedAt = null`.
+> É **venda nova**: `User` `STUDENT` criado 236 ms antes da matrícula, `expiresAt = null` (vitalício),
+> `origin = UNKNOWN`, e-mail `@gmail.com` (endereço não registrado — é dado de cliente).
+> **Os outros 15 seguem em zero**, reconferido em 08/set.
+> ⭐ **DECISÃO DO DONO: MANTER ligado (opção C).** O motivo é medido, não estético: **esse aluno nunca viu
+> a versão azul** — entrou com o lime já no ar. Desligar não *restauraria* a tela dele, **mudaria pela
+> primeira vez**, e para pior (o lime vence o azul em todos os pontos medidos, no modo escuro).
+> 🔴 **A LIÇÃO: "0 ativas" é RETRATO, não garantia.** O critério envelhece em minutos numa plataforma que
+> vende — nas mesmas 6h a produção criou 3 matrículas e os ativos foram de **28.762 → 28.777**.
+> ⛔ **E não adianta endurecer só a trava do `UPDATE`:** ela já reconferia no instante da escrita, e passou —
+> o aluno chegou **depois**. Para a leva 2, uma das duas: critério que não dependa de contagem instantânea,
+> **ou** janela de reconferência declarada (medir → agir → **remedir em T**, com ação definida se divergir).
 
 ---
 
