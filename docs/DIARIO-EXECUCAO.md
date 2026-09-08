@@ -35,6 +35,85 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — FRENTE REBRANDING — VIRADA, LEVA 2: 9 WORKSPACES, 20 ALUNOS (9.259)
+
+> ⛔ **Sem SHA de código:** `UPDATE` de banco + papelada. O código está em produção desde
+> `0f4b2f2` (9.255). ⚠️ **MUDA PIXEL: 20 alunos reais.** **Gate humano APROVADO 5/5**, com o
+> controle limpo (o workspace desligado do palco continuou azul).
+
+**Estado antes:** main `ccf24a8` == origin · integração `5417128` alinhada · árvore limpa · tag
+`7d57c40` e F1 `dbe161d` intocadas · palco de pé com **alvo reconferido** (`Jw2dF7wQ8njlk1C8gTp5A`,
+PID 6134, staging 194 / produção 0) · produção **16 ligados / 28 desligados**.
+**O que foi feito:** ligado o `memberBrandDefault` nos **9 workspaces** do corte de teto 7.
+
+**OS 9 (lista fechada, não re-derivada na hora):** 3N Trader · Arkad Select · Embarque Milionário ·
+Gustavo Pessoal · Members Club · Mentoria Individual · Orion Academy · Orion Mentorias · Protocolo Vital.
+
+⭐ **RECONFERÊNCIA ANTES DE LIGAR — a lição do 9.257 aplicada.** Os 9 foram **remedidos no dia da
+escrita** (`14:20:04Z`, contra a medição de `13:41Z`): **Δ = 0 em todos**, 28 → 28 ativos e 20 → 20
+que mudam — enquanto a plataforma inteira subiu de **28.785 para 28.789**. O retrato aguentou desta
+vez; o que provou isso foi **medir de novo**, não supor.
+
+**Como foi provado:**
+**E3 (dry-run):** 9 linhas, **todas partindo de `false`**; ficariam 25 ligados / 19 desligados.
+**E4 (escrita):** `SUPABASE_REF = wyamxwmdgbvqrfcqfbyh` impresso imediatamente antes.
+⭐ **Duas travas no instante da escrita:** (1) a lista de slugs tem de bater **exatamente** com o
+corte aprovado — comparação ordenada, aborta se divergir; (2) as 9 têm de estar **desligadas agora**
+— 9 de 9 ✅. Resultado: **9 linhas alteradas**.
+**Depois:** **25 / 19** de 44 ✅ · ⭐ **workspaces ligados fora das levas 1 e 2: 0** ✅ ·
+alunos ativos sob ligados **29** (1 da leva 1 + 28 desta), dos quais **21 mudam de tela** ·
+sob desligados **28.760**.
+**E5 (medir depois):** os **15 cursos com marca própria seguem com a marca deles** ✅ — e **4 já
+estão em workspace virado** (`desdobra` `#f5b82e`, `embarque-milionario` `#c8a15a`,
+`formacao-3n-trader` `#e53935`, `pilates-na-parede-protocolo-vital` `#9e6457`), mantendo a cor: é o
+`??` do `layout.tsx:163` funcionando, não exceção. Os **3 workspaces com `forceTheme` receberam a
+virada** ✅ — `3N Trader` (dark), `Mentoria Individual` (dark) e ⭐ **`Members Club` (light)**, o
+único da plataforma preso ao modo claro, onde o aluno **não pode escapar** (`workspace-theme-lock.tsx`)
+e onde o `--member-ink` (9.251) é a única coisa entre a marca e o fundo branco. **1 aluno.**
+⚠️ **NÃO PROVADO NA TELA DE PRODUÇÃO:** `/course/**` responde **307 → `/producer/login`**
+(`proxy.ts:75-86`) e não se autentica como cliente. O que sustenta a entrega: o **estado do banco** e
+o **mesmo código exercitado ponta-a-ponta no palco** — classe `.course-customized` e as 3 vars com
+`#EFFF20` no workspace ligado, **0 e 0** no desligado — sobre o **mesmo build** em que o gate humano
+rodou 5/5.
+**E6:** palco revertido (`SUPABASE_REF = wxynnsyartxcvglqwmdw` impresso), os 2 workspaces do palco
+**desligados**, **0 cursos com cor no banco**. ⛔ **Palco NÃO derrubado** — segue de pé para a leva 3.
+**SHA do merge:** — (não há) · **Rollback:** desligar os 9:
+```
+p.workspace.updateMany({where:{id:{in:IDS}},data:{memberBrandDefault:false}})
+```
+com `IDS` =
+```
+  [
+   "6850b795-0875-448d-b07a-39efec849063",
+   "ba0327da-8e7c-4b31-bbe7-bd77114ca90a",
+   "6ad657d7-a47d-429d-bf7f-ec88d61d7dbb",
+   "32791a99-a64e-47bd-befe-7fe87ca1da01",
+   "09d29cb0-fab9-4667-b847-37de6cc3cbfb",
+   "fa577d1a-018b-4955-918b-8ae597cd22fc",
+   "bb8bf4f6-8a9d-48f6-ad26-a912f95721bf",
+   "d2649d24-8092-4859-893c-5a4ad1d47b74",
+   "45572d6b-0201-4a2b-bee9-caa69e55e19c"
+  ]
+```
+**Mudou em produção para quem:** **20 alunos ativos**, em 10 cursos publicados, nos 9 workspaces.
+⭐ **8 alunos NÃO mudam** — `3N Trader` (1), `Embarque Milionário` (3) e `Protocolo Vital` (4), todos
+em curso com marca própria. **É o controle negativo embutido na leva:** reclamação vinda de um desses
+três não é a virada.
+**Ficou aberto:** a **leva 3**, proposta abaixo · a prova em tela de produção (exige sessão).
+**⭐ LEVA 3 — proposta com o número de 08/set:** os **6 menores dos 19 que sobram** — Vitor Pietro (15)
+· Conexusdigital (18) · O Arquiteto das Vendas (31) · CLRS Group (36) · Funil Oculto (46) · cva (64)
+= **210 ativos, 146 MUDAM de tela**. O corte sai do salto de **1,70×** entre `cva` (64) e
+`Mentoria Gabriel Do Digital` (109). ⭐ E o `cva` entra **de graça**: seus 64 alunos estão todos em
+curso com marca própria (`psv-protocolo-socio-viral`, `#000000`), então **mudam 0** — outro controle
+negativo embutido. 146 é **7× a leva 2**; o corte seguinte (8 workspaces) daria 386, quase 20×.
+⚠️ E o número tem de ser **remedido no dia**, como foi aqui.
+**Regras conferidas:** §17 ✅ · `SUPABASE_REF` impresso antes de cada escrita ✅ · dry-run antes do
+`UPDATE` ✅ · lista fechada, nenhum workspace fora dela ✅ · nenhum campo além do interruptor ✅ ·
+nenhum deploy/push de código ✅ · palco preservado ✅ · papelada ✅ ·
+**gate humano: APROVADO 5/5** — com o controle negativo (workspace desligado) conferido pelo dono.
+
+---
+
 ## 2026-09-08 — FRENTE REBRANDING — A REGRA DE PALCO REESCRITA E O `build:staging` (9.258)
 
 > ⚠️ **Muda pixel? NÃO.** 1 linha no `package.json` e texto de documento. Zero `src/`, zero
