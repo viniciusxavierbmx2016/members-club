@@ -35,6 +35,72 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — 9.252 FATIA 1 — O 401 MUDO AGORA DEIXA RASTRO (9.260)
+
+> ⚠️ **Não muda pixel nem comportamento.** Nenhuma resposta HTTP, nenhum redirect, nenhum retorno de
+> função. Só registro, e só na ANOMALIA. **1 arquivo, +53/−0.**
+
+**Estado antes:** main `855f0d5` == origin · integração `62b4d86` · branch `feat/9252-instrumentar-401`
+@ `724d642` · produção 25/19 · palco `zLeallbZNhJBux8lsxp6v`, alvo 194/0.
+**O que foi feito:** `getCurrentUser` (`lib/auth.ts`) passou a **destruturar o `error`** que já vinha de
+`supabase.auth.getUser()` e a registrar 1 linha `logger.warn` quando ele é **anômalo**.
+
+**POR QUE:** o `auth-js` **não lança** quando a chamada ao Supabase Auth falha — devolve
+`{ data:{ user:null }, error }` (`GoTrueClient.js:2506-2517`) e falha de rede vira
+`AuthRetryableFetchError` (`fetch.js:36,122`), que é um `AuthError` e por isso é engolido. Com o `error`
+descartado, **soluço de rede e "não tem sessão" viravam o mesmo `null`** → 401 "Não autenticado" → a
+página da aula joga a frase crua na tela (`lesson/[id]/page.tsx:165-167`).
+
+⭐ **O NOME DO ERRO É O DISCRIMINADOR, e já codifica a presença do cookie** — por isso **não** há sonda
+de cookie separada, o que tirou código do desenho:
+`AuthSessionMissingError` = não havia token (anônimo, **normal**) · `AuthRetryableFetchError` = havia
+token e a chamada falhou · outro nome = anomalia desconhecida.
+
+⛔ **VOLUME, que o comando exigiu provar ANTES:** só a anomalia loga. **Medido no palco:** as 2 rotas
+sem cookie devolvem 401 e geram **0 linhas**.
+⛔ **NADA PESSOAL:** sem e-mail, sem id, sem token, sem valor de cookie. Só `name`, `status`, duração e
+`referer` — URL do nosso app, com **precedente provado** no repo (`AccessLog` grava `path: referer`,
+`auth/me/route.ts:41`).
+
+⚠️ **A PRIMEIRA VERSÃO DESTA FATIA ESTAVA ERRADA, e foi a medição que pegou.** Ela guardava o
+diagnóstico num holder `cache()` do React para as **duas rotas** lerem e acrescentarem o próprio
+caminho. No palco, com token inválido: a linha `[AUTH]` saiu **2/2** requisições e a das rotas **0/2** —
+o objeto gravado em `auth.ts` e o lido na rota **não são o mesmo**. Em vez de insistir, o log passou a
+carregar o **`referer`**, que diz **a tela onde a pessoa estava** — mais útil que o caminho da API — e
+cobre os **84 call-sites** com 1 linha. As 2 rotas voltaram ao original. Abre o **9.261**.
+
+**Arquivos tocados:** `src/lib/auth.ts` — **1 arquivo, +53/−0**. `git diff main...HEAD` (3 pontos) = 1.
+**Como foi provado:**
+`tsc --noEmit` exit 0 · `npm run build` (portão de produção) exit 0 · `npm run build:staging` exit 0.
+⭐ **As três provas no palco** (`BUILD_ID zLeallbZNhJBux8lsxp6v`):
+1. **401 normal (sem cookie)**, nas 2 rotas: `{"error":"Não autenticado"}` **401**, corpo idêntico ·
+   **0 linhas de log** — o filtro silencia o tráfego anônimo.
+2. **401 anômalo (token inválido)**: **401** igual, e a linha saiu —
+   `[AUTH] getUser falhou sem lançar … name:AuthApiError status:403 auth:414ms tela:…/lesson/9be6eb11-…`
+3. ⭐ **CONTROLE com sessão**: **200**, corpo real (`lesson: "PLAYER chrome NOSSO"`), **0 linhas**.
+**CONTROLES EM PRODUÇÃO, contra linha de base capturada ANTES do deploy** (sem isso, "idêntico" seria
+comparação com memória): `/sw.js` **byte-idêntico** (`dbf0c4cf…`) · `/api/auth/me` e
+`/api/lessons/[id]/view` sem cookie com **sha idêntico** `492bf944…`, **401**, 28 bytes.
+⭐ **REGRA DE PALCO cumprida à risca:** derrubar → portão `npm run build` (que contamina o `.next` de
+propósito) → push → `rm -rf .next` → `npm run build:staging` → prova de alvo **194/0** → subir. O 9.258
+não se repetiu.
+⭐ **Primeira execução real do `npm run build:staging`** criado no 9.258 — 3 vezes, 3 alvos limpos.
+**SHA do merge:** `724d642` (fatia) → **`c2612cf` (main, EM PRODUÇÃO)** · **Rollback:**
+`git revert -m 1 c2612cf`, ou Instant Rollback para o deploy de `855f0d5`.
+⭐ O instrumento é **aditivo**: reverter não deixa resíduo, nenhum estado depende dele.
+**Mudou em produção para quem:** **ninguém.** Provado por sha, não por afirmação.
+**Ficou aberto:** **9.261** (o `cache()` em route handler) · a **fatia 2** (tratar o 401 na tela),
+**desenhada e aguardando aprovação** — ver o item 9.252.
+⚠️ **Não consigo LER o log de runtime da Vercel daqui** (sem CLI, sem token). Disparei uma
+**sonda-canário** em produção com `Referer: http://sonda-9252-instrumento/verificacao-do-deploy-c2612cf`
+para que a primeira linha `[AUTH]` do log seja **inconfundivelmente uma verificação**, não um evento
+real. Quem confere é o dono: painel da Vercel > `applyfy-mvp` > Logs > filtrar `[AUTH]`.
+**Regras conferidas:** §17 ✅ · nenhuma escrita em banco ✅ · nenhum campo de comportamento tocado ✅ ·
+volume provado antes ✅ · nada pessoal no log ✅ · papelada ✅ ·
+**gate humano: APROVADO** — o dono confirmou que nada mudou na tela.
+
+---
+
 ## 2026-09-08 — FRENTE REBRANDING — VIRADA, LEVA 2: 9 WORKSPACES, 20 ALUNOS (9.259)
 
 > ⛔ **Sem SHA de código:** `UPDATE` de banco + papelada. O código está em produção desde
