@@ -6,6 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { SkeletonPlayer, SkeletonLessonsSidebar } from "@/components/ui/skeleton";
 import { sanitizeHtml } from "@/lib/sanitize-html";
+import { createClient } from "@/lib/supabase";
 
 const VideoPlayer = dynamic(
   () => import("@/components/video-player").then((m) => m.VideoPlayer),
@@ -140,8 +141,66 @@ export default function LessonPage(
     setErrorDetails(null);
     setShowCountdown(false);
 
-    fetch(`/api/lessons/${params.id}/view`)
+    // 9.252 fatia 2 · UMA nova tentativa no 401, e só no 401.
+    //
+    // ⭐ POR QUE: o 401 desta rota nem sempre significa "não tem sessão". O
+    // `supabase.auth.getUser()` NÃO lança quando a chamada ao Auth falha — ele
+    // devolve `user: null` com o erro engolido (provado no 9.260, que instrumentou
+    // exatamente isso). Um soluço de rede virava a frase "Não autenticado" na cara
+    // do aluno, e recarregar resolvia. Uma segunda tentativa resolve sem ele ver.
+    //
+    // ⭐ MOLDE COPIADO, NÃO INVENTADO: `auth-provider.tsx:65-84` já faz isto para
+    // `/api/auth/me` — uma tentativa extra após uma espera curta, e só o SEGUNDO
+    // 401 é tratado como deslogado. A espera de 400 ms é a de lá.
+    //
+    // ⛔ NO MÁXIMO 1 RETRY, e a garantia é estrutural, não um contador: a segunda
+    // chamada vive DENTRO desta função, não passa por estado nem por re-render, e
+    // as deps do efeito (`params.id`, `params.slug`, `router`) não incluem estado
+    // nenhum — `setError`/`setData`/`setLoading` não re-disparam o efeito.
+    //
+    // ⛔ SÓ 401. 403, 404 e 500 seguem exatamente como antes, no chain abaixo.
+    const RETRY_401_MS = 400;
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+    async function buscarComUmaSegundaChance(): Promise<Response | null> {
+      const url = `/api/lessons/${params.id}/view`;
+      const primeira = await fetch(url);
+      if (primeira.status !== 401) return primeira;
+
+      await sleep(RETRY_401_MS);
+      if (cancelled) return null;
+      const segunda = await fetch(url);
+      if (segunda.status !== 401) return segunda;
+
+      // Dois 401 seguidos: aí sim é sessão morta, não soluço.
+      // ⚠️ O cookie PRECISA sair antes de navegar. O proxy decide por PRESENÇA de
+      // cookie, não por validade (`proxy.ts:31-40`), e com ele presente
+      // `/w/<slug>/login` é rebatido para `/w/<slug>` (`proxy.ts:112-118`) — o
+      // laço que o comentário de `auth-provider.tsx:74-77` descreve. `scope:
+      // "local"` não faz viagem ao servidor; o try/catch garante que a navegação
+      // acontece mesmo se o signOut falhar.
+      if (!cancelled) {
+        try {
+          await createClient().auth.signOut({ scope: "local" });
+        } catch {}
+      }
+      if (cancelled) return null;
+      // Molde de leitura do cookie: `(dashboard)/page.tsx:74-77`.
+      const wsSlug = document.cookie.match(
+        /(?:^|; )active_workspace_slug=([^;]+)/
+      )?.[1];
+      router.replace(
+        wsSlug && /^[a-z0-9-]+$/.test(wsSlug)
+          ? `/w/${wsSlug}/login`
+          : "/producer/login"
+      );
+      return null;
+    }
+
+    buscarComUmaSegundaChance()
       .then(async (res) => {
+        // `null` = a segunda chance também deu 401 e a navegação já foi disparada.
+        if (!res) return null;
         if (res.status === 403) {
           // Surface the API's reason instead of bouncing silently. The
           // payload carries `error`, plus optional `releaseDate` /
