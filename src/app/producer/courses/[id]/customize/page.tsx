@@ -60,11 +60,14 @@ const COLOR_FIELDS: Array<{
   {
     key: "memberHeaderColor",
     label: "Barra do topo",
-    // ⚠️ A ressalva é honesta, não decorativa: das 4 ocorrências de
-    // `--member-header`, 3 são `lg:hidden` ou esqueleto. No computador só sobra a
-    // barra de 52px da página da aula. O alcance é o item 9.239 — quando ele for
-    // resolvido, esta frase sai.
-    help: "A faixa fina no alto. No computador ela só aparece dentro da aula.",
+    // ⚠️ A frase diz os DOIS lados porque a medição mostrou que o campo funciona
+    // para a maioria: 61,5% dos acessos dos alunos desses cursos são de celular
+    // (AccessLog, 61.582 linhas com userAgent). O `lg:hidden` do
+    // `course-shell.tsx:143` é DESENHO CORRETO — aquela barra existe só para abrir
+    // o menu que, no computador, já está aberto (`course-sidebar.tsx:103`,
+    // `lg:translate-x-0`). Quem não vê o efeito é o produtor, que testa no
+    // computador. Ver 9.239.
+    help: "A faixa fina no alto. No celular, em todas as telas; no computador, só na aula.",
   },
   {
     key: "memberSidebarColor",
