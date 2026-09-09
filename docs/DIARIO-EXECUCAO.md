@@ -35,6 +35,99 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-09 — `next` 16.3.3 EM PRODUÇÃO: a advisory CRITICAL fechada, e o gate que reprovou por um PRINT (9.267, 9.268, 9.269, 9.270)
+
+> ⚠️ **Muda pixel? NÃO.** Bump de motor: **2 arquivos, ambos `package*`, 0 de código** no diff de três
+> pontos. Zero `src/`, zero `prisma/`, zero migração, zero mexida no interruptor.
+
+**Estado antes:** main `e9fbd42` == origin · integração `e802139` · árvore limpa · `7d57c40` e `dbe161d`
+intocadas · palco de pé (`BUILD_ID pE2fV_60oRzeZXCAe2Tff`, alvo staging 162 / produção 0) · produção
+**25 ligados / 19 desligados** (conferido por SELECT antes de qualquer coisa).
+
+**O que foi feito:** `next` 16.2.12 → **16.3.3**, a **menor** versão fora do range das duas advisories,
+para fechar a `1 critical` que reprovava o `Security Audit` desde o `485eedd`. Merge `--no-ff` `c433bf3`,
+deploy `success`. Em seguida o palco foi limpo (cores de teste e o banner-print) e reconstruído pela
+REGRA DE PALCO.
+
+**Arquivos tocados:** `package.json` (1 linha) · `package-lock.json` · e, só de papelada,
+`docs/PLANO-MESTRE.md`, `docs/SYSTEM-MAP.md`, `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:**
+- **Alcance da vulnerabilidade, antes de tudo:** `next.config.mjs:9-15` liga AVIF, e `/_next/image` **em
+  produção** devolve `content-type: image/avif`. ⚠️ **Só com o header `Accept`** — sem ele a resposta é
+  `image/png` e a conclusão se inverteria. Controle negativo: origem fora do `remotePatterns` = **400**.
+- **L25 nos quatro lugares:** `package.json ^16.3.3` · lockfile `16.3.3` · `node_modules 16.3.3` ·
+  binário `Next.js v16.3.3`. ⛔ Sem `npm audit fix` e sem `npm update`.
+- **Portão:** diff de **três pontos** = 2 arquivos, 0 de código · `tsc --noEmit` **exit 0** ·
+  `npm run build` **exit 0**, zero warning.
+- **Palco:** 58 rotas de página e 99 de API varridas (sem e com cookie de aluno) — **0 5xx nas páginas**;
+  4 telas do curso em 200; login de aluno 200 com cookie; proxy barrando 7/7; família
+  9.247/9.248/9.249/9.251 intacta; e **no pixel, via CDP**: 296 elementos, **0 erro de console**, cor
+  computada do ✓ = `rgb(10,10,10)`.
+- **GATE HUMANO — resultado colado, não afirmado: `9/9 aprovado` pelo dono**, roteiro largo (área do
+  aluno, home, módulo, aula com player nativo, aula com player nosso, comunidade, widget de suporte,
+  navegação repetida e redimensionamento).
+- **Controles em produção contra linha de base capturada ANTES do deploy:** `/sw.js` sha
+  `dbf0c4cfb179f839` **idêntico** · 3 rotas de API 401 sha `492bf9448aeed6cb` **idêntico** ·
+  `/course/curso` **307 → `/producer/login`** idêntico · `/_next/image` **AVIF byte-idêntico** nos dois
+  arquivos · controle negativo **400** · `/producer/login` e `/admin/login` **200**, renderizando no
+  navegador com **0 erro**. ⓘ O sha das páginas HTML mudou — **esperado e declarado antes de medir** (o
+  `BUILD_ID` entra no HTML).
+- **CI:** de `39 vulnerabilities (1 low, 34 moderate, 3 high, 1 critical)` para
+  `37 vulnerabilities (1 low, 34 moderate, 2 high)`. **`Security Audit` = success.**
+
+⭐ **O GATE REPROVOU NA PRIMEIRA RODADA — e o achado virou o 9.268.** O dono viu, como aluno, texto da
+tela de edição do produtor na home do curso. **Não era código.** As strings não estavam no HTML, nem no
+DOM, nem no shadow DOM, nem em `::before/::after`, nem em nenhum dos **17 chunks** servidos — e os dois
+chunks que as contêm **não foram baixados**. Eram **pixels de um JPEG**: o `bannerUrl` do `curso-teste`
+apontava para um **print da tela do produtor**, subido em 18/ago/26 por `colab-lessons@staging.test`.
+**Gravidade baixa e medida:** só rótulo e *placeholder*; checkout e preço estavam **vazios**; e-mail e
+WhatsApp de suporte **ilegíveis nos próprios pixels** (a barra fixa tem `backdrop-blur`); alcance em
+produção **zero** (o arquivo no bucket de produção responde 400). ⛔ **Não rodei o rebuild em 16.2.12**
+que o roteiro previa: o diff da branch tem **0 arquivo de código**, então nenhuma versão podia explicar
+o sintoma, e reconstruir destruiria o palco que era a evidência. **Custo real: um gate inteiro.**
+
+**ESCRITAS EM STAGING (as duas desta fatia), com `SUPABASE_REF wxynnsyartxcvglqwmdw` impresso e
+conferido imediatamente antes:**
+1. As **6 cores de teste** que eu mesmo escrevi no `curso-teste` para provar o motor do tema —
+   revertidas para `null`. Valores anteriores: `memberPrimaryColor #ffe066` · `memberBgColor #101014` ·
+   `memberHeaderColor #17171d` · `memberSidebarColor #1c1c24` · `memberCardColor #22222c` ·
+   `memberTextColor #f2f2f7`.
+2. O **banner-print**: `bannerUrl = null`. Valor anterior, para rollback:
+   `https://wxynnsyartxcvglqwmdw.supabase.co/storage/v1/object/public/thumbnails/banners/3e1b93b2-87c6-430c-a324-d143c2e6bb3e-1787021194699.png`
+   ⛔ **O arquivo NÃO foi apagado do bucket** — segue em 200, 52.289 bytes. Só o curso foi desapontado.
+
+Estado final dos **5 cursos do palco**: `curso-b`, `curso-corrida-923`, `curso-pago-palco`, `curso-teste`
+e `curso-teste-2` — todos **0/6 cores** e **sem banner**.
+
+⚠️ **ARMADILHA DE SONDA REGISTRADA:** `3e1b93b2` é ao mesmo tempo o prefixo do arquivo **e o `id` do
+curso** (`<courseId>-<timestamp>.png`). O `grep` por ele **não discrimina** — reconferi com o marcador
+não-ambíguo (`1787021194699`): **1 no HTML antes, 0 depois**. A conclusão anterior se manteve, mas a
+medida que a sustentava estava ambígua.
+
+⚠️ **MEDIDO E NÃO EXPLICADO:** o JS do navegador caiu **21,3%** (5.177.265 → 4.072.674 bytes,
+149 → 145 arquivos), staging contra staging com `.next` fresco nos dois. A queda está **espalhada** — o
+maior chunk tem 380KB. Nada acusou nas varreduras nem no gate humano. Registrado como **observação**.
+
+**REGRA DE PALCO cumprida à risca:** derrubar → portão (`tsc` + `npm run build`, que contamina o `.next`
+de propósito) → merge → push → `rm -rf .next` → `npm run build:staging` → **alvo provado**
+(staging **162** / produção **0**; controle de vacuidade: `supabase.co` = 172) → subir. Palco final:
+`BUILD_ID NQPDxiGQRMt0HfoP_xrPR`, Next **16.3.3**, discriminador do DEV-BRABO **200/404** conferido.
+
+**SHA do merge:** `c433bf3` · **Rollback:** `git revert -m 1 c433bf3` (ou `reset --hard e9fbd42`).
+**Mudou em produção para quem:** **ninguém** em pixel — 0 arquivo de código. Muda para a **operação**:
+o `Security Audit` volta a barrar merge por vulnerabilidade nova, que era o ponto.
+**Ficou aberto:** **9.269** (`/api/admin/reports` 500 sem sessão — **também 500 na produção em 16.2.12**,
+logo anterior ao bump) · **9.270** (`/api/producer/courses/categories` 500 para logado não-staff, onde
+cabe 403; causa provada no código, **única rota da plataforma** com esse padrão contra 100 corretas) ·
+os 2 `high` restantes (`@tiptap/core`, `browserslist`), fora do escopo declarado.
+**Regras conferidas:** §17 ✅ · staging-first ✅ · **gate humano 9/9, resultado colado** ✅ · papelada ✅ ·
+alvo de banco impresso antes de cada escrita ✅ · nenhuma escrita em produção ✅ · palco não contaminado ✅
+· ⚠️ **errata de número:** a mensagem do merge cita "9.264", que é outro item — o item é o **9.267**
+(colisão pega **antes** de escrever, pela varredura de todas as branches).
+
+---
+
 ## 2026-09-08 — 9.238 EM PRODUÇÃO: o conserto foi TEXTO, não código (+ 9.266)
 
 > ⚠️ **Muda pixel SÓ no painel do produtor.** ⛔ **A área do aluno não mudou nada** — 0 arquivos em
