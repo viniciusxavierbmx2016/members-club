@@ -35,6 +35,93 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-08 — 9.238 EM PRODUÇÃO: o conserto foi TEXTO, não código (+ 9.266)
+
+> ⚠️ **Muda pixel SÓ no painel do produtor.** ⛔ **A área do aluno não mudou nada** — 0 arquivos em
+> `(course)/`, 0 em `globals.css`, 0 em `prisma/`. **1 arquivo, +61/−8.** Gate humano aprovado.
+
+**Estado antes:** main `05ee0e3` == origin · integração `dbc4159` · branch `feat/9238-rotulos-cores`
+@ `cb6dd5f` · produção 25/19 · palco `AP-N4cc0_HCIz4HHI1ltm`, alvo 194/0.
+
+**O que foi feito:** os 6 rótulos dos campos de cor da área de membros e 1 linha de ajuda por campo,
+mais o subtítulo da seção de menu.
+
+| coluna | antes | depois |
+|---|---|---|
+| `memberBgColor` | Fundo | **Fundo da página** |
+| `memberHeaderColor` | Cabeçalho | **Barra do topo** |
+| `memberSidebarColor` | Sidebar | **Menu lateral** |
+| `memberCardColor` | Cards | **Caixas e listas** |
+| `memberPrimaryColor` | Primária | **Cor de destaque** |
+| `memberTextColor` | Texto | **Textos** |
+
+⭐ **O achado que fez o conserto ser texto:** existem **duas** `<aside>` na área do aluno — a **barra de
+navegação** (`course-sidebar.tsx:100`), que **é** pintada por `--member-sidebar`, e a **lista de aulas**
+(`lessons-sidebar.tsx:75`, `bg-white dark:bg-gray-900`), que cai em **`--member-card`**. O campo fazia o
+que prometia; o **rótulo** é que prometia outra coisa.
+⭐ E a própria tela já usava **dois nomes** para o mesmo elemento: `<h2>` "Menu lateral do curso" e
+subtítulo "na sidebar do aluno". Unificado no mesmo commit.
+
+⛔ **Não usei `HelpTooltip`, e o motivo é medido:** o card de cor é um `<label>` que embrulha o
+`<input type="color">`, e o tooltip tem `onClick` **sem `preventDefault`** (`help-tooltip.tsx:35`) —
+clicar no "?" abriria o seletor de cor junto. Usei o molde de `<p>` de descrição do bloco de recursos.
+ⓘ E a **tela irmã** (personalizar a vitrine) **já tem `desc` por campo** — o molde não é análogo, é
+praticado na casa.
+
+**Como foi provado:**
+⭐ **O invariante que importava — o mapa rótulo→coluna:** `diff` das `key` contra o pai `05ee0e3`:
+**0 diferenças, 18 = 18 linhas**, com controle que acusa 2 linhas se uma `key` mudar. Trocar rótulo
+arrastando a coluna faria o produtor pintar o campo errado sem saber.
+⚠️ **Falso alarme meu, registrado:** o primeiro gate comparou **shas gerados com formatações
+diferentes** (um com `sed` de indentação, outro sem) e acusou 🔴 divergência. Investiguei **antes** de
+reverter: reproduzindo a sonda original o sha batia. **A prova boa é o `diff` contra o pai**, que não
+depende de como eu formato a saída — passei a usá-la.
+`tsc --noEmit` exit 0 · `npm run build` exit 0 · `npm run build:staging` exit 0.
+**No palco** (`BUILD_ID dY_arBbhNBfW5plItAfQR`, alvo 194/0): os 6 rótulos e as 6 ajudas presentes no
+**chunk servido** (a tela é client component — o HTML SSR não tem nem o título estático, controle
+conferido); `"na sidebar do aluno"` = **0**.
+⚠️ **O controle negativo acusou 3 rótulos antigos no bundle — investiguei os três:** `"Sidebar"` é o
+**nome de um componente React** do painel; `"Cards"` e `"Cabeçalho"` são de **outra tela** (personalizar
+a vitrine); e no meu arquivo são **comentários meus** explicando a troca. Benignos.
+⭐ **Controle vivo:** gravei `#7c3aed` pelo campo agora chamado "Menu lateral" (ref
+`wxynnsyartxcvglqwmdw` impresso) e saiu `:root{--member-sidebar: #7c3aed}` no **mesmo `<aside>`**
+`w-60 h-screen fixed`. **O rótulo mudou; o efeito não.** Palco revertido a `null`.
+**CONTROLES EM PRODUÇÃO, contra linha de base capturada ANTES do deploy:** `/sw.js` **byte-idêntico**
+(`dbf0c4cf…`) · `/api/lessons/[id]/view`, `/api/courses/by-slug/…/init` e `/api/auth/me` com **sha
+idêntico** (`492bf944…`) · `/course/<slug>` **307 → `/producer/login`**, idêntico.
+⭐ **REGRA DE PALCO cumprida:** derrubar → portão `npm run build` (contamina o `.next` de propósito:
+staging 0 / produção 194) → push → `rm -rf .next` → `build:staging` → alvo **194/0** → subir.
+**SHA do merge:** `cb6dd5f` (fatia) → **`485eedd` (main, EM PRODUÇÃO)** · **Rollback:**
+`git revert -m 1 485eedd`, ou Instant Rollback para o deploy de `05ee0e3`.
+**Mudou em produção para quem:** os **produtores**, na tela de personalizar. **Nenhum aluno.**
+
+⭐ **O DADO DO FHO, levantado para a mensagem (9.266)** — ⛔ nada foi escrito no banco de produção; a
+cor é escolha do produtor. `formacao-home-office-fho`, publicado, layout `netflix`, **1.652 matrículas
+ativas**, workspace **não virado**, `forceTheme = null`:
+**Menu lateral** `#000000` · **Cor de destaque** `#ffc845` · **Textos** `#ffffff` ·
+**Fundo da página**, **Barra do topo** e **Caixas e listas** **vazios**.
+**O que o aluno dele vê hoje:** a barra lateral preta, e os cartões e **a lista de aulas no padrão** —
+porque caem em "Caixas e listas", que ele deixou vazio.
+⚠️ **E um segundo ponto, achado de lado e mais sério:** ele tem **Textos `#ffffff`** com **Fundo
+vazio**, e das 10 regras de `--member-text` **4 não têm guarda de modo nenhuma**
+(`globals.css:398,400,403,405`) — valem nos **dois** modos. No **modo claro**, os textos dele viram
+**branco sobre fundo claro**.
+ⓘ Atenuante **com o limite declarado**: o 9.222 mediu **zero contas de produção no modo claro**, mas
+aquilo mediu **contas do painel**; o modo do **aluno** vive no `localStorage` e é **imensurável pelo
+banco**. Não dá para afirmar que nenhum aluno dele está no claro.
+⚠️ **Não dá para dizer QUANDO ele mexeu:** o `Course` só tem `updatedAt` do registro inteiro
+(`2026-06-09T03:39:54`), não por coluna, e o `AuditLog` **não tem nenhuma ação** de curso/cor/tema
+(0 de 3.430 linhas). Declarado, não inventado.
+
+**Ficou aberto:** **9.266** (avisar o produtor — mensagem, não código) · **9.239** (o alcance do
+"Barra do topo"), e a linha de ajuda **descreve a limitação em vez de escondê-la**: *"No computador ela
+só aparece dentro da aula."* Quando o 9.239 fechar, essa frase sai.
+**Regras conferidas:** §17 ✅ · 1 arquivo, nada fora do escopo ✅ · nenhuma escrita em banco de
+produção ✅ · invariante rótulo→coluna provado ✅ · palco reconstruído e alvo provado ✅ · papelada ✅ ·
+**gate humano: APROVADO**.
+
+---
+
 ## 2026-09-08 — 9.254 FECHADO SEM CÓDIGO: o 50% estava certo (e o 9.264, 9.265)
 
 > ⚠️ **Nenhum código foi alterado.** A investigação foi somente leitura, e o veredito é
