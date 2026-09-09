@@ -30,16 +30,62 @@ const EMPTY: Customization = {
   memberLayoutStyle: "netflix",
 };
 
+// 9.238 · os rótulos nomeiam O QUE O PRODUTOR VÊ, não o que o código chama.
+//
+// ⭐ A troca de "Sidebar" para "Menu lateral" não é estética: a MESMA tela já
+// chamava esse elemento de "Menu lateral do curso" no `<h2>` da seção de menu, e
+// de "sidebar" no subtítulo logo abaixo. Eram dois nomes para o mesmo `<aside>`
+// (`course-sidebar.tsx:100`, pintado por `--member-sidebar`, e onde vivem os
+// itens que aquela seção edita). O subtítulo foi unificado no mesmo commit.
+//
+// ⭐ E "Cards" virou "Caixas e listas" porque a LISTA DE AULAS
+// (`lessons-sidebar.tsx:75`, `bg-white dark:bg-gray-900`) cai neste campo, não no
+// de menu lateral — era a confusão que fazia o produtor pintar a barra e ver a
+// lista continuar clara. Medido em produção: 2 cursos preencheram "Sidebar" sem
+// "Cards", um deles com 1.650 alunos ativos.
+//
+// ⛔ AS COLUNAS NÃO MUDARAM. Só `label` e o `help` novo — o `key` de cada campo é
+// o mesmo de antes, na mesma ordem. Trocar rótulo arrastando a coluna junto faria
+// o produtor pintar o campo errado sem saber.
 const COLOR_FIELDS: Array<{
   key: keyof Customization;
   label: string;
+  help: string;
 }> = [
-  { key: "memberBgColor", label: "Fundo" },
-  { key: "memberHeaderColor", label: "Cabeçalho" },
-  { key: "memberSidebarColor", label: "Sidebar" },
-  { key: "memberCardColor", label: "Cards" },
-  { key: "memberPrimaryColor", label: "Primária" },
-  { key: "memberTextColor", label: "Texto" },
+  {
+    key: "memberBgColor",
+    label: "Fundo da página",
+    help: "O fundo atrás de tudo, em todas as telas do curso.",
+  },
+  {
+    key: "memberHeaderColor",
+    label: "Barra do topo",
+    // ⚠️ A ressalva é honesta, não decorativa: das 4 ocorrências de
+    // `--member-header`, 3 são `lg:hidden` ou esqueleto. No computador só sobra a
+    // barra de 52px da página da aula. O alcance é o item 9.239 — quando ele for
+    // resolvido, esta frase sai.
+    help: "A faixa fina no alto. No computador ela só aparece dentro da aula.",
+  },
+  {
+    key: "memberSidebarColor",
+    label: "Menu lateral",
+    help: "A barra da esquerda, com o logo e os atalhos.",
+  },
+  {
+    key: "memberCardColor",
+    label: "Caixas e listas",
+    help: "Os cartões dos módulos, os painéis e a lista de aulas.",
+  },
+  {
+    key: "memberPrimaryColor",
+    label: "Cor de destaque",
+    help: "Botões, links, barra de progresso e o ✓ de aula concluída.",
+  },
+  {
+    key: "memberTextColor",
+    label: "Textos",
+    help: "A cor das letras em geral.",
+  },
 ];
 
 const LAYOUTS = [
@@ -477,7 +523,14 @@ export default function CourseCustomizePage() {
                     </span>
                     <div className="min-w-0">
                       <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-tight">{field.label}</p>
-                      <p className="text-xs font-mono text-gray-400 dark:text-gray-500">{HEX_RE.test(val) ? val : "padrão"}</p>
+                      {/* 9.238 · molde do bloco de recursos logo abaixo (título +
+                          `<p className="text-[11px] text-gray-500">`). ⛔ NÃO é
+                          `HelpTooltip`: este card é um `<label>` que embrulha o
+                          `<input type="color">`, e o tooltip tem `onClick` próprio
+                          sem `preventDefault` (`help-tooltip.tsx:35`) — clicar no
+                          "?" abriria o seletor de cor junto. */}
+                      <p className="text-[10px] text-gray-500 leading-tight mt-0.5">{field.help}</p>
+                      <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-0.5">{HEX_RE.test(val) ? val : "padrão"}</p>
                     </div>
                   </label>
                 );
@@ -782,7 +835,7 @@ export default function CourseCustomizePage() {
               Menu lateral do curso
               <HelpTooltip text="Controla quais itens aparecem no menu lateral da área de membros: home, comunidade, continuar assistindo." />
             </h2>
-            <p className="text-xs text-gray-500 mb-4">Itens que aparecem na sidebar do aluno</p>
+            <p className="text-xs text-gray-500 mb-4">Itens que aparecem no menu lateral do aluno</p>
             <CourseMenuManager courseId={courseId} />
           </div>
 
