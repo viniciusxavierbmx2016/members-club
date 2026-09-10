@@ -35,6 +35,79 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — E4.4 etapa 2 EM PRODUÇÃO: o cadastro público e o resgate na vitrine (9.285, 9.286, 9.287)
+
+> ⚠️ **Muda pixel? SIM** — o card da vitrine, para curso gratuito.
+> ⭐ **Mas SOBE INERTE:** produção tem **0 cursos gratuitos**, então **0 de 73 cards** mudam
+> de comportamento. Nada muda para ninguém até um produtor marcar um curso como gratuito.
+
+**Estado antes:** main em `4464c2d`
+**O que foi feito:** duas fatias, 4 arquivos. **(1)** `POST /api/w/<slug>/register` — cria
+conta + `WorkspaceCredential` + a **marca de pertencimento**, que subira vazia em `a8c718a` e
+**não tinha nenhum escritor**. **(2)** o **resgate passou para a vitrine**, com popup de
+confirmação.
+**Arquivos:** `api/w/[slug]/register/route.ts` (novo) · `lib/validations.ts` ·
+`components/course-card.tsx` · `app/w/[slug]/page.tsx`.
+**As duas perguntas do §9.3 que travavam, medidas no staging ANTES de escrever:**
+> **#5** o projeto **não exige confirmação de e-mail** — `signUp` devolve sessão na hora ⇒ a
+> pessoa sai cadastrada **e logada**, que é o que o resgate exige
+> **#6** para e-mail existente o GoTrue devolve **erro explícito** e `data.user` vazio ⇒ **sem
+> P2002 silencioso** por esse caminho
+**As três provas de que a rota não cria staff:**
+> **(a) artefato** — `role:"STUDENT"`=1, `role:"ADMIN"`=0, `role:"PRODUCER"`=0 no chunk
+> **(b) comportamento** — corpo malicioso de 9 chaves (`role:"ADMIN"`, `permissions`,
+> `workspaceId:"outro"`, `origin:"HACK"`, `isFree`) → a linha saiu **STUDENT**, com o
+> workspace **do slug** e telefone normalizado
+> **(c) contagem** — `ADMIN` 1→1, `PRODUCER` 3→3
+**Corrida** provada com **2 requisições HTTP simultâneas**: uma 201, outra 400, e no banco 1
+User, 1 marca, 1 credencial.
+
+**🔴 O ACHADO DO DIA — o LAÇO FECHADO, e por que ele importa mais que o código.**
+A fatia 1 passou em **todos** os testes de API: cadastro 201 → login 200 → vitrine 200 →
+claim 201 → curso 200. **E o gate humano reprovou na primeira tela.** Causa, provada por
+discriminação (mesma URL, duas personas: só-marca → **404**, com matrícula → **200**): o card
+da vitrine **já dizia** *"Resgatar acesso"*, mas era um `<Link>` para `/course/<slug>`; essa
+página carrega `by-slug/[slug]/init` — a **PORTA 3** —, que a marca **não abre** por decisão
+medida do §12.3; o 404 voltava e `page.tsx:305-308` o traduz em `router.push(backHref)`: **de
+volta à vitrine, em silêncio.** O botão prometia o que não podia cumprir.
+⚠️ E a página **lê errado** o 404: o comentário dela diz *"curso realmente não existe"*, mas a
+rota usa 404 também para *"sem acesso ao tenant"*, de propósito.
+⭐⭐ **A LIÇÃO DE MÉTODO, que fica:** o `curl` do teste chamava `POST /claim` **direto**,
+pulando a página inteira. **Prova de máquina não substitui o percurso de cliques.** Um fluxo
+de produto só está provado quando alguém percorre as telas na ordem em que o usuário percorre.
+
+**A saída, sem abrir nada:** ⛔ a Porta 3 **não** foi tocada — abri-la entregaria a árvore de
+**todo** curso do workspace, publicado ou não (`isPublished` = **0 ocorrências** naquela rota).
+Provado no merge: `by-slug/[slug]/init`, `courses/[id]/claim` e `lib/workspace-access.ts`
+**byte-idênticos** contra a árvore mesclada, com controle positivo nos dois arquivos que a
+fatia muda. **Zero `allowMembership` novo.**
+⭐ **O popup não foi inventado:** `@/components/confirm-modal`, o genérico da casa, escolhido
+com **prova de escopo** (0 `var(--…)`, e a vitrine vive sob o shell do *workspace*, não sob
+`.course-customized`). ⚠️ Há **dois** `ConfirmModal` no repo — usei o de `@/components/`.
+Condição compilada: `w&&u&&c&&!y ? <button> : <Link>` — curso pago cai no Link de sempre.
+
+**Prova em produção** (deploy Vercel `success` amarrado a `03d00a7`):
+> a rota nova: **404 → 400** nos DOIS hosts (domínio e origem exposto), com corpo vazio ⇒
+> **nenhuma conta criada**. Controle: a irmã `/api/w/<slug>/login` já dava 400 antes
+> 8 controles contra a linha de base **idênticos em status e bytes**, `/sw.js` com o mesmo sha
+> ⭐ **a vigia E4.4 continua 0/0/0**: 0 cursos `isFree`, 0 marcas, 0 `FREE_CLAIM`
+> ⭐ **0 de 73** cursos da loja são gratuitos ⇒ **0 cards mudam**
+**SHA do merge:** `03d00a7`  ·  **Rollback:** `git revert -m 1 03d00a7`
+**Mudou em produção para quem:** para **ninguém**, hoje. A rota existe mas nenhum link aponta
+para ela; o card só muda para curso gratuito, e não há nenhum.
+**Ficou aberto:** ⭐ **9.287 — o funil NÃO está no ar.** Faltam **a tela de cadastro** (exige
+tocar `proxy.ts:66`, cujo regex isenta só `login|forgot-password|reset-password`) e **o
+captcha** (🔴 medido: `turnstile` = **0** em todo o `src/`, e `challenges.cloudflare.com` não
+está na CSP — a sonda de 30/08 provou o que é preciso, mas nada foi montado). Sem captcha, o
+único freio de um link público é o `rateLimit` de 100 req/60 s por IP.
+**Palco limpo:** conta `gate-e44` apagada (Prisma + `auth.users`), `curso-pago-palco` de volta
+a `isFree=false`, 0 contas de sonda restantes.
+**Regras conferidas:** `--no-ff` ✅ (3 pais) · portão `tsc` 0 + build verde antes do push ✅ ·
+byte-identidade das rotas congeladas provada contra a árvore mesclada ✅ · palco reconstruído
+pela regra ✅ · gate humano 6/6 pela TELA ✅
+
+---
+
 ## 2026-09-10 — 9.183 + 9.177 EM PRODUÇÃO: escopo nas etiquetas e `select` nas lives (e o 9.184 PARADO na matriz)
 
 > ⚠️ **Muda pixel? Pouco.** Muda **o que cada um enxerga**: o produtor deixa de ver etiqueta
