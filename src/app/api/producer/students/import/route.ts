@@ -125,7 +125,10 @@ export async function POST(request: Request) {
 
     const workspace = await prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { slug: true, name: true, masterPassword: true },
+      // 9.144 — masterPassword NÃO entra no select. O que a rota não busca
+      // ela não pode vazar: a proteção fica estrutural, não depende de
+      // ninguém lembrar da regra ao editar as saídas de e-mail/CSV.
+      select: { slug: true, name: true },
     });
     if (!workspace) {
       return NextResponse.json(
@@ -250,9 +253,18 @@ export async function POST(request: Request) {
         const user = ensured.user;
         const scopedTemp = ensured.tempPassword;
         const isStaff = ensured.isStaff;
-        // Master password (when set) wins because /w/<slug>/login checks
-        // it first via magic link. Otherwise show the scoped password.
-        const tempPassword = workspace.masterPassword || scopedTemp || "";
+        // 9.144 — a senha que sai é SEMPRE a individual do aluno
+        // (mc-XXXXXX, criada por ensureUserByEmail em webhook-helpers).
+        // A senha-mestra do workspace NUNCA sai daqui: ela é o bloco 1 do
+        // /w/<slug>/login e abre a conta de QUALQUER pessoa com matrícula
+        // ativa no workspace, independente do papel — entregá-la por
+        // e-mail/CSV dava a cada importado a chave de todos os outros.
+        // Mesmo molde da rota irmã courses/[id]/students (sharedPassword).
+        // ⚠️ Staff não tem WorkspaceCredential: scopedTemp fica undefined,
+        // tempPassword vira "" e o e-mail cai no staffAccessGranted, sem
+        // bloco de senha. É o comportamento correto — o staff entra com a
+        // senha global dele.
+        const tempPassword = scopedTemp || "";
 
         if (isNewUser) {
           summary.created++;
