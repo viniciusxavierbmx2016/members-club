@@ -62,8 +62,18 @@ export function proxy(request: NextRequest) {
 
   const authed = hasSessionCookie(request);
 
+  // E4.4 etapa 2 — `register` é a QUARTA e última entrada desta lista, e entra
+  // como alternativa NOMEADA, não afrouxando o padrão: o regex segue exigindo
+  // `/w/<slug>/<uma-das-quatro>` e nada mais. Sem ela o visitante sem cookie é
+  // redirecionado em `:75-86` ANTES de a tela abrir — é o requisito R-2 do §9.1
+  // do PLANO-E4.4, e foi medido: `/w/<slug>/register` deslogado dava 307.
+  // ⚠️ Quem JÁ está logado CONTINUA vendo a tela, e isso é derivado das irmãs,
+  // não inventado: das três, só `login` redireciona o autenticado (`:112-119`);
+  // `forgot-password` e `reset-password` abrem — medido 200/200 para aluno e
+  // produtor. A rota de cadastro devolve 409 "você já tem conta, faça login"
+  // com o link, então o caminho se corrige sozinho na tela.
   const isWorkspacePublic =
-    /^\/w\/[^/]+\/(login|forgot-password|reset-password)\/?$/.test(
+    /^\/w\/[^/]+\/(login|forgot-password|reset-password|register)\/?$/.test(
       pathname
     );
   const isPublic =
