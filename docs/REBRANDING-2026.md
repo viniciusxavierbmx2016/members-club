@@ -3303,3 +3303,119 @@ seria métrica.
 Os 6 stops de **superfície** (`from-gray-950`, `via-gray-200`…) seguem sem remap
 e **não são desta família** — o alvo deles é `--member-bg`/`--member-card`.
 São o **9.237**, e não foram tocados (0 no diff).
+
+
+
+> ⓘ **Trazida da branch `feat/aluno-f1-comunidade-quiz` (`dbe161d`) em 10/set/26, pelo item 9.277.**
+> Conferida antes de trazer: **nenhuma afirmação desta seção foi desmentida** pela semana — ela não
+> fala do balão do suporte nem do `text-blue-100/80` (0 ocorrências), que foi onde a premissa da
+> branch caiu (ver **9.243** e **9.275**). O que ela diz sobre o alcance de `.course-customized`
+> (§17, linhas 38-40) é, aliás, a **mesma lição** que o 9.275 provou depois no widget de suporte.
+
+---
+
+## 17. Fatia 1a do aluno — a fatia que NÃO existia, e o defeito que estava embaixo dela (06/set/26)
+
+**Nada foi aplicado. Nenhum branch novo, nenhuma linha de código.** A ordem era remapear 4
+pontos do quiz; a apuração mostrou que **nenhum dos 4 existe como o comando o descreve**, e que
+a família emerald já remapeada **está produzindo um defeito de distinção em produção agora**.
+
+### 17.1 Os 4 pontos, um por um
+
+| pedido | realidade | por que sai |
+|---|---|---|
+| `quiz-player.tsx:187` | **arquivo não existe** — 0 ocorrências em `src/` e `docs/`, e `git log --all --diff-filter=D` não acha nenhuma deleção | o real é `components/lesson-quiz.tsx` |
+| `quiz-player.tsx:226` | idem | idem |
+| `lesson-quiz-editor.tsx:305` | **arquivo não existe**; o análogo é `components/quiz-manager.tsx`, e `:305` lá é `const res = await fetch(url, {` — não há cor nenhuma | ver 17.2 |
+| `lesson-quiz-editor.tsx:372` | idem; `:372` é `type="button"` | ver 17.2 |
+
+Os dois pontos do ALUNO que mais se aproximam são `lesson-quiz.tsx:188` e `:228` — e os dois
+são **pares semânticos**, já registrados como excluídos no `c39bd9e`:
+
+- `:188` — `result.passed ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"`,
+  com o texto `{result.passed ? "Aprovado!" : "Não aprovado"}` em `:189`. **Verde × vermelho.**
+- `:228` — `border-emerald-500 bg-emerald-500` para `correct`, contra `border-red-500 bg-red-500`
+  para `incorrect` (`:230`) e `border-blue-500 bg-blue-500` para `selected` (`:232`).
+
+### 17.2 ⭐ O PORTÃO DO GRAFO — o editor de quiz é do PRODUTOR
+
+Cadeia única, sem ramificação, provada por `grep` de importadores:
+
+```
+quiz-manager.tsx
+  ← lessons-manager.tsx:6           (único importador)
+  ← modules-manager.tsx:22          (único importador)
+  ← app/producer/courses/[id]/edit/page.tsx:10-11   (único importador)
+```
+
+E `.course-customized` só é aplicada em `course-shell.tsx:112` e `:131`, usados só por
+`app/(course)/course/[slug]/layout.tsx:163`. ⇒ **`quiz-manager.tsx` nunca está sob
+`.course-customized`.** Uma regra escrita ali não o alcançaria — além de `producer/` estar no
+PROIBIDO. Sai por dois motivos independentes.
+
+### 17.3 🔴 O que a medição achou embaixo: a distinção JÁ colapsou
+
+A premissa do comando era *"os 4 pontos já são emerald, que é exatamente o que o tema entrega
+⇒ pixel idêntico"*. **Falsa para os cursos com marca:** metade dessas classes **já é remapeada**.
+
+| classe da linha | remap | efeito hoje |
+|---|---|---|
+| `bg-emerald-500` (correct) | `globals.css:368` | vira a marca |
+| `bg-blue-500` (selected) | `globals.css:365` | vira **a mesma** marca |
+| `dark:text-emerald-400` (correct) | `globals.css:388` | vira a marca |
+| `dark:text-blue-400` (selected) | `globals.css:378` | vira **a mesma** marca |
+| `border-blue-500` (selected) | `globals.css:385` | vira a marca |
+| `border-emerald-500` (correct) | **sem remap** | continua `#10b981` |
+
+**Medido em produção (`wyamxwmdgbvqrfcqfbyh`), 14 cursos com `--member-primary`, 3.979 matrículas:**
+
+- `correct` × `selected`: **ΔE = 0,00 em 14 de 14**. Referência nos 54 sem a classe: **108,32**.
+- `formacao-3n-trader` (`#e53935`): `correct` × `incorrect` **ΔE 5,28** (referência 119,45).
+- `kingdomacademy` (`#ffffff`, 1.435 alunos): preenchimento × ponto interno **ΔE 0,00**.
+
+Chrome sobre o chunk servido (`.next/static/chunks/03u46zef_amut.css`, build `c2vK1UTmvjJ2QNAEjsq2j`):
+
+```
+3N Trader #e53935 · CORRECT  fill=rgb(229,57,53)  border=rgb(16,185,129)
+3N Trader #e53935 · SELECTED fill=rgb(229,57,53)  border=rgb(229,57,53)
+Kingdom  #ffffff · SELECTED fill=rgb(255,255,255) border=rgb(255,255,255) ponto=rgb(255,255,255)
+```
+
+⭐ **A borda verde é a última pista de cor que separa "correta" de "marquei essa".** As outras
+duas que sobram são o anel (`ring-emerald-500/30` `#10b9814d` × `ring-blue-500/30` `#3b82f64d`,
+nenhum remapeado — medido no navegador) e o ✓ de `:241`. **A fatia 1a pedia justamente
+`.course-customized .border-emerald-500`** — ou seja, apagar a primeira das três. Por isso parou.
+
+Aberto como **9.244**, **9.245** (crachás ADMIN ≡ EQUIPE) e **9.246** (a bolinha branca do Kingdom).
+
+### 17.4 Os números do comando não batem com o banco
+
+| comando | produção (SELECT, `wyamxwmdgbvqrfcqfbyh`) |
+|---|---|
+| "os 56 sem personalização" | **54** · 25.054 matrículas |
+| "os 15 com" | **19** com `.course-customized` · 4.311 matrículas — dos quais **14 com marca** (3.979) e **5 com a classe mas sem `--member-primary`** (332) |
+
+### 17.5 ⭐ A COMUNIDADE — a premissa cai pela segunda vez
+
+O comando manda tirá-la desta fatia porque *"são AZUIS cravados enquanto o tema entrega VERDE"*.
+Varredura contra o conjunto de 100 classes remapeadas, extraído do próprio `globals.css`:
+
+| arquivo | na família | fora |
+|---|---|---|
+| `community/page.tsx` | 10 | **0** |
+| `post-card.tsx` | 12 | **0** |
+| `lesson-comments.tsx` | 12 | **2** |
+
+Os 2 de fora são `bg-purple-600/30` e `text-purple-300` em `lesson-comments.tsx:33` — o crachá
+**PRODUTOR**, terceiro de um trio semântico de papéis. Não são pontos de marca; são o único
+crachá que **escapou** do remap, e é só por isso que ele ainda se distingue dos outros dois.
+
+⇒ **A comunidade não é pendência da virada.** Ela já segue o tema. O que ela tem é o **9.245**.
+
+### 17.6 A lição
+
+**"Já é emerald" não implica "o tema entrega emerald".** Debaixo de `.course-customized`, emerald
+é a marca — as mesmas 19 regras que fazem o botão seguir o produtor fazem o "acertou" seguir o
+produtor. Antes de somar uma classe a uma família, a pergunta não é *"essa cor combina com a
+família?"*, é **"essa cor está aqui como MARCA ou como SIGNIFICADO?"** — e a resposta se prova
+olhando o `else` do mesmo ternário: se do outro lado tem vermelho, é significado.

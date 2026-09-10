@@ -35,6 +35,77 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — 9.277: a §17 resgatada, e a regra do modal BARRADA no portão (9.278, 9.279)
+
+> ⚠️ **Muda pixel? NÃO.** A parte (a) — a regra de CSS — **não foi aplicada**: o portão de contraste
+> reprovou. Só papelada entrou. **Zero `src/`, zero `prisma/`, zero deploy, zero escrita em produção.**
+
+**Estado antes:** main `c1cb6c4` == origin · integração `8e57277` == origin · árvore limpa ·
+`dbe161d` intocada · tag `7d57c40` intocada · palco de pé · produção **25/19**.
+
+**O que foi feito:** o 9.277 pedia resgatar da branch (a) a regra do modal e (b) as 108 linhas da
+§17. **(b) foi feita. (a) parou no portão.**
+
+### ✅ (b) A §17 está na main
+
+108 linhas trazidas **verbatim** para `docs/REBRANDING-2026.md`, com nota de procedência.
+**Numeração conferida antes e depois:** a main tinha `## 16.` e **nenhuma** `## 17.`; agora tem uma,
+com as **6 subseções** (17.1 a 17.6), e o arquivo foi de 3.306 para **3.422 linhas**. O diff da
+branch era **108 adicionadas, 0 removidas** — acréscimo puro.
+
+⭐ **Conferi o conteúdo antes de trazer, como manda o M6:** **nenhuma afirmação da §17 foi desmentida**
+pela semana. Ela **não** fala do balão do suporte nem do `text-blue-100/80` (**0** ocorrências de
+"balão", "remapeado para a marca", "text-blue-100" e "course-support-widget"; controle positivo:
+"quiz" aparece 9 vezes). Não houve errata a escrever. ⓘ E o que ela diz nas linhas 38-40 sobre o
+alcance de `.course-customized` é a **mesma lição** que o 9.275 provou depois, no widget.
+
+### 🔴 (a) A regra do modal foi BARRADA — e virou o 9.279
+
+**A regra SERVE, e isso foi provado em runtime, não deduzido:** o elemento `.bg-blue-600/20` existe
+(`dislike-feedback-modal.tsx:60`, o estado selecionado do botão de motivo), e
+`closest('.course-customized')` = **true** — cadeia `BUTTON → DIV.mt-4 → DIV.bg-gray-900 → DIV.fixed
+→ MAIN → DIV.h-screen`. **É o oposto do widget de suporte** (9.275). A main tem **0 regras** para essa
+classe, e a família está pela metade: `/10` e `/30` **têm** regra, `/20` não. Hoje, num curso com
+marca, o botão selecionado sai com **borda na marca** (`rgb(255,200,69)`) e **fundo no azul cru**
+(`rgba(37,99,235,0.2)`) — medido.
+
+**Mas o portão do comando reprovou.** Texto: **0 de 15** reprovam (14,66:1 hoje; 9,45 a 18,56 depois).
+Borda, medida **hoje × depois**:
+```
+ESCURO: reprovam HOJE 1/15 → DEPOIS 1/15   ·  14 pioram
+CLARO : reprovam HOJE 14/15 → DEPOIS 15/15  ·  14 pioram
+        e o kingdomacademy CRUZA de aprovado para reprovado: 3,09 → 1,99
+```
+⇒ a regra deixaria um número medido **pior**. **Não apliquei.**
+
+⚠️ **LIMITE HONESTO, registrado no item:** medi a borda contra o fundo **do próprio botão**. Um
+critério igualmente defensável seria a borda contra a **superfície do modal**, ou o fundo do
+selecionado contra o do **não-selecionado**. **Não tenho certeza de qual é o correto** — e por isso
+parei em vez de escolher o que me favorecia.
+
+### 🔴 E o achado embaixo: o 9.278
+
+`dislike-feedback-modal.tsx:44` é `bg-gray-900 dark:bg-card` — ou seja, **no modo CLARO vale a classe
+base, que é ESCURA**. E o 9.251 pinta a borda com `--member-ink` (a marca **escurecida** 45%, feita
+para superfície clara). ⇒ **escuro sobre escuro**: **14 de 15 marcas já reprovam 3,0 HOJE**, de 1,17:1
+a 3,09:1. **É pré-existente** — não veio de nada desta semana, e é a mesma família do 9.275: uma regra
+de tema encontrando uma superfície que não segue o tema.
+
+**Arquivos tocados:** `docs/REBRANDING-2026.md`, `docs/PLANO-MESTRE.md`, `docs/DIARIO-EXECUCAO.md`,
+`docs/SYSTEM-MAP.md`. **Zero em `src/`.**
+**SHA do merge:** sem SHA de código. **Rollback:** `git revert` do commit de docs.
+**Mudou em produção para quem:** **ninguém.**
+**Ficou aberto:** **9.278** (o modal escuro no claro, pré-existente) · **9.279** (a regra do modal,
+barrada, com o limite do critério declarado) · **9.277** segue **aberto e parcialmente resgatado** —
+a §17 entrou, a regra não.
+**⛔ A branch `dbe161d` NÃO foi apagada** — a regra do modal ainda só existe nela, e o comando proíbe
+apagá-la antes do resgate estar em produção e provado.
+**Regras conferidas:** §17 ✅ · somente papelada ✅ · nenhuma escrita em produção ✅ · palco intocado ✅ ·
+numeração varrida nas **14 branches** (maior em uso 9.277; 9.278 e 9.279 livres) ✅ · **nada aplicado
+sem passar no portão** ✅ · **o limite da própria medição declarado** ✅.
+
+---
+
 ## 2026-09-10 — 9.243 + 9.276 EM PRODUÇÃO: cor FIXA no balão do suporte, 2 linhas, 65 cursos (+ errata do 9.276, + 9.277)
 
 > ⚠️ **Muda pixel? SIM** — 2 pontos do balão de suporte, em **todos** os cursos com o widget ligado.
