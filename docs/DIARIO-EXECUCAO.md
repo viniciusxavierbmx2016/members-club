@@ -35,6 +35,81 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — 9.144 EM PRODUÇÃO: a importação por planilha para de entregar a senha-mestra (9.280, 9.281, 9.282)
+
+> ⚠️ **Muda pixel? NÃO.** Nenhum arquivo de UI no diff. Muda **o que a importação entrega**: a
+> coluna "Senha" do CSV e o bloco de credenciais do e-mail passam a trazer a senha individual
+> do aluno (`mc-XXXXXX`) em vez da senha-mestra do workspace.
+
+**Estado antes:** main em `0f0f56a`
+**O que foi feito:** `import/route.ts` parou de buscar (`:128`) e de entregar (`:255`) a
+`masterPassword`. Passa a usar sempre a credencial individual que o `ensureUserByEmail` já
+grava. Molde: a rota irmã `courses/[id]/students:275-281` — mas só **metade** dela: a irmã
+**rotaciona** a credencial de quem já tem uma (`:284-301`), e isso é o que o 9.136 proíbe na
+importação, então essa parte foi deliberadamente **não** copiada.
+**Arquivos tocados:** `src/app/api/producer/students/import/route.ts` (1 arquivo, 2 hunks,
++16/−4). Login **intocado**. `prisma/` **intocado**.
+**Como foi provado:** palco de staging (`S-s8zVPZf-XU546yw9wZu`, alvo 162/0), importação real
+de planilha de 2 linhas com e-mails `@staging.test`, produtor autenticado (JWT emitido por
+`wxynnsyartxcvglqwmdw`). **Gate humano 5/5.** Resultados colados:
+> `summary: {"total":2,"created":1,"alreadyExisted":1,"enrollmentsCreated":2,"errors":[]}`
+> CSV baixado: `FAKE Aluno Novo 9144,...,Criado,mc-49c5dc,...` · `FAKE Aluno Ja Existente,...,Já existia,,`
+> login do aluno novo com `mc-49c5dc` → **HTTP 200** · senha errada → **HTTP 401**
+> credencial do pré-existente: fingerprint `becf274982d4f719` **antes e depois**, `updatedAt` parado em 11/ago
+> corpo do e-mail renderizado pelo código real (`ts.transpileModule`), 3 caminhos × 2 destinatários:
+> aluno recebe `mc-49c5dc` no padrão e no tematizado; **staff não recebe senha em nenhum dos 3**
+> (controle positivo: com senha não-vazia a sonda acende)
+> limpeza: user de teste apagado do Prisma e do `auth.users`, contagens finais **0/0/0/0**,
+> aluno pré-existente restaurado a 2 matrículas
+**Prova em produção:** deploy Vercel `success` amarrado ao SHA `ae9fdf2`. 9 controles contra a
+linha de base — `/sw.js`, `/manifest.json`, `/api/notifications`, `/api/courses`,
+`/api/producer/students/import`, `/api/w/<slug>/login`, `/_next/image`, `/login`, `/` —
+**idênticos em status e bytes**. ⚠️ Os hashes de `/login` e `/` mudaram, e **não é o deploy**:
+o HTML muda a cada requisição (3 hashes diferentes em 3 buscas seguidas da mesma URL). Chunk
+compilado da rota: `select:{slug:!0,name:!0}`, `d=l||""`, `masterPassword` **0 ocorrências**,
+controles positivos `Link de Login` e `Limite de ` = 1 cada.
+**SHA do merge:** `ae9fdf2`  ·  **Rollback:** `git revert -m 1 ae9fdf2`
+**Mudou em produção para quem:** os **11 workspaces com senha-mestra** (de 44). A partir de
+agora, cada aluno importado por planilha recebe a senha **dele**, não a chave do workspace.
+Quem já recebeu a chave **continua com ela** — ver a decisão abaixo. Produtores que
+distribuíam a master pela planilha vão notar que a coluna "Senha" mudou de valor.
+**⭐ DECISÃO DO DONO SOBRE O PASSADO — escolha consciente, não pendência:** com o alcance
+medido em produção e apresentado — **11 workspaces · 9.331 matrículas ativas · 7.618 pessoas
+distintas · 18 contas não-STUDENT · nenhum registro de quem recebeu** — o dono decidiu **NÃO
+rotacionar as senhas-mestras existentes e NÃO avisar os produtores**. As alternativas foram
+enunciadas e recusadas: rotacionar invalidaria o que vazou mas **quebraria quem usa a master
+hoje**; avisar não devolve a chave, porque **não há como dizer a nenhum produtor quem a
+recebeu**. Quem ler isto depois **não deve reabrir como esquecimento**.
+**🔴 Por que não há como saber quem recebeu** (medido, não suposto): a rota **não audita** — o
+`AuditLog` tem 1 único escritor (`lib/audit.ts:12`) e a importação não é um deles; **não existe
+model de log de e-mail** (as 4 ocorrências de `emailLog` em `email-templates.ts` eram
+`emailLogoUrl`, falso positivo por substring); e `Enrollment.origin` — o campo feito para isso —
+está **100% `UNKNOWN` em 29.626 linhas**. A melhor aproximação possível foi um limite superior
+por ausência de webhook: **4.949 de 7.618 (65,0%)** não entraram por compra.
+**⚠️ O que ficou SEM prova comportamental, dito na hora:** nenhum dos 2 workspaces do staging
+tem `masterPassword`, e com ela nula o código velho e o novo são **idênticos** — o teste
+passaria por vacuidade. Criar uma esbarrava no `⛔ tocar em masterPassword de qualquer
+workspace`, então não foi criada. A prova de que a master não sai mais é **estrutural**: ela
+não entra no `SELECT`, logo não existe no objeto em tempo de execução.
+**Ficou aberto:** **9.280** (aluno pré-existente importado para workspace novo fica sem saber a
+senha — pré-existente, e a master o mascarava nos 11) · **9.281** (`buildAccessEmail` sem gate
+de `isStaff` em 2 dos 3 caminhos — fechado pela fonte, um chamador futuro reabre) · **9.282**
+(a fatia de runtime da E4.4 nunca subiu, e é por isso que não se sabe quem recebeu). Anotada
+também no **9.138** a ocorrência espontânea que o dono viu hoje: login de produtor **travado em
+esqueleto** por sessão de aluno no mesmo navegador — sintoma **diferente** do que o item
+descreve, e primeira evidência fora do nosso próprio QA.
+**⚠️ Sonda quebrada no caminho, registrada:** a varredura de branches deu `crux=0` em 15
+branches enquanto `git show main:` direto achava a linha. Causa: em **zsh**, `"$b:src/app/..."`
+é lido como **modificador de parâmetro** (`:s/app/api/`) e o caminho chegou ao git como
+`main/students/import/route.ts`. Um loop irmão com `"$b:prisma/schema.prisma"` funcionou (`:p`
+não é modificador válido), o que escondeu o defeito. Refeito com `"${b}:${P}"` — e foi aí que
+apareceu o escritor `FREE_CLAIM` que a sonda cega tinha ocultado.
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano 5/5 ✅ · papelada ✅ ·
+`--no-ff` ✅ (3 pais) · portão `tsc` 0 + build verde antes do push ✅ · palco reconstruído pela
+regra (`rm -rf .next` → `build:staging` → alvo 162/0 provado) ✅
+
+---
+
 ## 2026-09-10 — 9.277: a §17 resgatada, e a regra do modal BARRADA no portão (9.278, 9.279)
 
 > ⚠️ **Muda pixel? NÃO.** A parte (a) — a regra de CSS — **não foi aplicada**: o portão de contraste
