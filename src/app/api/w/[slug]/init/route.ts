@@ -61,6 +61,9 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
       // PORTA 2 — vitrine.
       const allowed = await hasWorkspaceAccess(user.id, workspace.id, {
         requireMemberPermission: true,
+        // E4.4 §12.3 — PORTA 2, a vitrine. É o objetivo do cadastro: quem tem a
+        // marca vê a LOJA do produtor. O payload daqui é catálogo, não conteúdo.
+        allowMembership: true,
       });
       if (!allowed) {
         return NextResponse.json(
