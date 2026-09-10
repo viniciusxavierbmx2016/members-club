@@ -35,6 +35,79 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — O CONSERTO DO BALÃO DE SUPORTE FOI BARRADO PELO PRÓPRIO PORTÃO, e os 5 itens da branch foram resgatados (9.242 a 9.246, 9.243 reescrito, 9.275, 9.276)
+
+> ⚠️ **Muda pixel? NÃO.** Nenhuma linha de `src/` foi tocada. **Zero código, zero deploy, zero
+> escrita em produção.** O que esta entrada registra é uma medição que **impediu** um conserto.
+
+**Estado antes:** main `eb4063c` == origin · integração `e19f695` == origin · árvore limpa · branch
+`feat/aluno-f1-comunidade-quiz` @ `dbe161d` **intocada** · tag `7d57c40` intocada · `globals.css` com
+**sha idêntico ao `origin/main`** (o revert de ontem) · palco de pé · produção **25/19**.
+
+**O que foi feito:** o comando pedia (a) consertar a hora e o foco do widget de suporte pelo molde do
+9.248, (b) resgatar os 5 itens da branch, (c) marcar a branch como descartável. **O (a) foi barrado
+pelo portão do próprio comando**; o (b) foi feito; o (c) **não** foi feito, por dependência.
+
+### 🔴 Por que o (a) parou
+
+O comando mandava provar, **antes de aplicar**, que o resultado passa 4,5 (texto) e 3,0 (foco) nas
+15 marcas reais de produção. Medido:
+
+```
+HORA seguindo a marca (--member-button-text):  13 de 15 REPROVAM 4,5
+FOCO com --member-primary:                     10 de 15 REPROVAM 3,0
+HORA em cor FIXA (#ffffff):                     0 de 15 reprovam — 5,17:1 sempre
+```
+
+**A causa é estrutural, e é o 9.275:** o `<CourseSupportWidget>` é montado como **IRMÃO** do
+`<CourseShell>` (`(course)/course/[slug]/layout.tsx:222-229`), e a classe `.course-customized` vive
+**dentro** do shell. Provado em runtime: `closest('.course-customized')` = **false**, cadeia de 5
+níveis até o `<body>` sem passar pela classe, e o fundo computado do balão é **`rgb(37,99,235)`** — o
+azul cru — **igual em curso com marca e sem marca**.
+
+⇒ **os fundos do widget são FIXOS.** Derivar a cor do conteúdo da MARCA contra um fundo que não é a
+marca é exatamente o movimento errado — e foi o que o comando prescreveu, de boa-fé, a partir do
+molde do 9.248. **Onde o fundo é fixo, a cor do conteúdo também tem de ser.**
+
+### ⭐ E a premissa do item antigo estava errada
+
+O 9.243, como veio da branch, dizia que o balão *"já era remapeado para a marca"* e que a hora
+media de **1,17 a 3,09** conforme o curso. O remap existe (`globals.css:364`), mas **não alcança o
+widget**. O número real é **3,28:1 FIXO**, para todos — inclusive os cursos **sem** marca, que o item
+antigo nem contava. O item foi **reescrito** com a medição de hoje.
+
+### 🔴 E um achado de carona: o 9.276
+
+Medindo o 9.243, apareceu que o **próprio 9.248** deixou o texto do balão (`:493`) em **3,83:1** nas
+**13 de 15** marcas claras — porque calcula o texto contra a marca e o desenha sobre o azul fixo.
+**Antes do 9.248 era `#ffffff` fixo, ou seja 5,17:1 nos 15.** Neste elemento específico, e só nele, o
+conserto **piorou**. ⛔ **NÃO tocado** — `:493` é linha do 9.248 e o comando proibia mexer nela.
+
+**Arquivos tocados:** `docs/PLANO-MESTRE.md`, `docs/SYSTEM-MAP.md`, `docs/DIARIO-EXECUCAO.md`.
+**Zero em `src/`** — provado por sha: `globals.css` e `course-support-widget.tsx` **byte-idênticos**
+ao `origin/main`.
+
+**Como foi provado:** contraste calculado com a fórmula WCAG sobre os hex **reais** dos 15 cursos com
+marca de produção (SELECT, somente leitura), incluindo a mistura de alpha do `text-blue-100/80` ·
+ancestralidade medida no navegador via CDP, não deduzida · a emissão das vars conferida em
+`layout.tsx:199` (`:root`, e por isso `var()` inline resolve em qualquer lugar — é o que faz o molde
+do 9.248 funcionar onde o seletor descendente falha).
+
+**SHA do merge:** sem SHA de código — papelada. **Rollback:** `git revert` do commit de docs.
+**Mudou em produção para quem:** **ninguém.** Nenhum byte de runtime.
+**Ficou aberto:** **9.242, 9.244, 9.245 e 9.246** (resgatados verbatim da branch) · **9.243**
+reescrito · **9.275** (o widget fora do escopo — a decisão de fundo é de produto) · **9.276** (o
+contraste que o 9.248 deixou para trás) · e o conserto em si, que agora tem alvo e valor definidos:
+**cor fixa**, não derivada da marca.
+**⛔ A branch `feat/aluno-f1-comunidade-quiz` (`dbe161d`) NÃO foi apagada** — o comando só permite
+descartá-la depois do resgate empurrado e provado, e as 3 regras dela seguem sendo a única cópia de
+um caminho que agora sabemos que não funciona para 2 dos 3 alvos.
+**Regras conferidas:** §17 ✅ · nenhuma escrita em produção ✅ · palco não contaminado ✅ ·
+numeração varrida nas **14 branches** antes de escrever (maior em uso 9.274; 9.275 e 9.276 livres) ✅ ·
+**nada aplicado sem passar no portão** ✅.
+
+---
+
 ## 2026-09-10 — LEVANTAMENTO DE VÍDEO (fatos para o produtor) + 2 achados no fim da fila (9.273, 9.274)
 
 > ⚠️ **Muda pixel? NÃO.** Só documentação. Zero `src/`, zero `prisma/`, zero deploy, zero escrita
