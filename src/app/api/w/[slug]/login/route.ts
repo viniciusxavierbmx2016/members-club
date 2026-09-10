@@ -20,6 +20,7 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/workspace-auth";
+import { shouldWriteLastAccess } from "@/lib/last-access";
 
 const MAX_SESSIONS = 3;
 const STAFF_ROLES = new Set<string>([
@@ -286,10 +287,14 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
       }),
-      prisma.user.update({
-        where: { id: user.id },
-        data: { lastAccessAt: new Date() },
-      }),
+      ...(shouldWriteLastAccess(user.lastAccessAt)
+        ? [
+            prisma.user.update({
+              where: { id: user.id },
+              data: { lastAccessAt: new Date() },
+            }),
+          ]
+        : []),
     ]);
 
     if (usedMasterPassword) {

@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { checkLessonAccess } from "@/lib/lesson-access";
 import { processAutomations } from "@/lib/automation-engine";
 import { quizAttemptSchema, validateBody } from "@/lib/validations";
+import { shouldWriteLastAccess } from "@/lib/last-access";
 
 export const dynamic = "force-dynamic";
 
@@ -156,7 +157,9 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       },
     });
 
-    prisma.user.update({ where: { id: user.id }, data: { lastAccessAt: new Date() } }).catch(() => {});
+    if (shouldWriteLastAccess(user.lastAccessAt)) {
+      prisma.user.update({ where: { id: user.id }, data: { lastAccessAt: new Date() } }).catch(() => {});
+    }
 
     if (passed && quiz.lesson) {
       const course = quiz.lesson.module.course;

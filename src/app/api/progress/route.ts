@@ -10,6 +10,7 @@ import { GAMIFICATION, getLevelForPoints } from "@/lib/utils";
 import { createNotification } from "@/lib/notifications";
 import { processAutomations } from "@/lib/automation-engine";
 import { progressSchema, validateBody } from "@/lib/validations";
+import { shouldWriteLastAccess } from "@/lib/last-access";
 
 export async function POST(request: Request) {
   try {
@@ -89,7 +90,9 @@ export async function POST(request: Request) {
     });
     const wasCompleted = existing?.completed ?? false;
 
-    prisma.user.update({ where: { id: user.id }, data: { lastAccessAt: new Date() } }).catch(() => {});
+    if (shouldWriteLastAccess(user.lastAccessAt)) {
+      prisma.user.update({ where: { id: user.id }, data: { lastAccessAt: new Date() } }).catch(() => {});
+    }
 
     // Upsert progress
     await prisma.lessonProgress.upsert({

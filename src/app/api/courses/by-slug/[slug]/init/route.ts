@@ -8,6 +8,7 @@ import {
 } from "@/lib/collaborator";
 import { getAutomationLocks } from "@/lib/automation-locks";
 import { logger } from "@/lib/logger";
+import { shouldWriteLastAccess } from "@/lib/last-access";
 
 const MENU_DEFAULTS = [
   { label: "Home", icon: "home", url: "/course/:slug", isDefault: true },
@@ -241,7 +242,9 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
 
     const automationLocks = isStaffViewer ? {} : await getAutomationLocks(course.id, user.id);
 
-    prisma.user.update({ where: { id: user.id }, data: { lastAccessAt: new Date() } }).catch(() => {});
+    if (shouldWriteLastAccess(user.lastAccessAt)) {
+      prisma.user.update({ where: { id: user.id }, data: { lastAccessAt: new Date() } }).catch(() => {});
+    }
 
     const lessonIdsInCourse = course.modules.flatMap((m) =>
       m.lessons.map((l) => l.id)
