@@ -35,6 +35,82 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — E4.4 fatia 1 EM PRODUÇÃO: a marca de pertencimento (tabela nova e vazia, leitura opt-in)
+
+> ⚠️ **Muda pixel? NÃO.** Tabela nova e vazia; nenhuma porta aberta. A leitura da marca é
+> **opt-in por call-site** e nenhum fluxo existente muda de comportamento.
+
+**Estado antes:** main em `3661c1e` (ponto de retorno declarado antes de começar)
+**O que foi feito:** merge da branch congelada `feat/e4.4-fatia1-marca` (`7d57c40`) +
+`migrate deploy` em produção. Cria `WorkspaceMembership` e o enum
+`WorkspaceMembershipOrigin`, e acrescenta `allowMembership` (opt-in, default `false`) a
+`hasWorkspaceAccess`.
+**Arquivos:** 7 — a migração, `schema.prisma`, `lib/workspace-access.ts` e 4 rotas
+(`courses/[id]/claim`, `producer/students/[id]/tags`, `w/[slug]/init`, `w/[slug]/login`).
+**Como foi provado — antes de tocar em nada:**
+> `merge-tree --write-tree main <branch>` → **exit 0, 0 CONFLICT**; controle positivo:
+> `main × dbe161d` → exit 1 com **2 CONFLICTs** (a sonda enxerga)
+> ⭐ os call-sites que **não** pedem a marca, provados contra a **ÁRVORE MESCLADA** (não
+> contra a branch): 6 arquivos / 7 call-sites **byte-idênticos à main**, com controle
+> positivo em `workspace-access.ts` e `w/[slug]/login`, que **diferem**
+**⚠️ O MÉTODO PRECISOU MUDAR NO MEIO — e é o achado do dia.** O `git diff main...branch`
+(três pontos) dizia **0 linhas** para `courses/by-slug/[slug]/init`, mas os SHAs do arquivo
+**diferiam** entre main e branch. Causa: quem mudou foi a **main**, depois da base. Isso
+expôs o risco real: a `main` andou **195 commits** desde a base e passou a incluir a
+migração `20260907140000_add_workspace_member_brand_default` — ⇒ **o `schema.prisma` da
+branch NÃO era o schema pós-merge**, e um `db push` a partir dela teria tentado **DROPAR a
+coluna `memberBrandDefault`** do staging. Por isso o **merge foi feito localmente ANTES**
+do trabalho de banco, e o `git push` só depois da prova de produção. O runbook foi honrado
+no que ele protege: **banco antes do código**.
+**STAGING:** a tabela já existia (db push antigo) com schema correto, RLS ligada e os 3
+índices. `migrate diff --from-schema-datasource` (⛔ nunca `--shadow-database-url`) →
+**"empty migration"**; `db push` confirmou **"already in sync"**. ⚠️ O log do Prisma diz
+*"Environment variables loaded from .env"* — por isso a **prova dupla** foi refeita logo
+depois: **produção** com tabela=0, enum=0, migração=0 ⇒ **intacta**; **staging** com
+tabela=1, enum=1. ⓘ O staging **não tem `_prisma_migrations`** — é a lacuna que obriga
+`db push` lá.
+**Gate do opt-in no palco (`204IMtPs-fUwmU-9YtfzD`, alvo 160/0), com fixture de dois lados:**
+> `marca-only-f1@staging.test` (marca=1, credencial=1, sem matrícula/colab/posse) →
+> `POST /w/staging-teste/login` **200**
+> `sem-marca-f1@staging.test` (marca=0) → **403**
+> ⭐ o MESMO `marca-only-f1` em `/api/w/staging-teste/lives` (call-site **sem**
+> `allowMembership`) → **403 "Sem acesso"**
+> nada mudou: produtor 200 · aluno 200 · senha errada 401
+⚠️ O build reprovou uma vez com `Property 'workspaceMembership' does not exist` — era o
+Prisma Client não regenerado (usei `--skip-generate` no `db push`). `npx prisma generate`
+(270 referências no client; controle negativo 0) e o build ficou verde.
+**PRODUÇÃO — números esperados DECLARADOS ANTES, 11 de 11 bateram:** tabelas no public
+61→**62** · tabela **1** · colunas **5** · enum **1** tipo/**1** valor · índices **3** ·
+FKs **2** · **RLS true** · policies **0** · grants a `anon`/`authenticated` **0** ·
+⭐⭐ **linhas 0** · `_prisma_migrations` 90→**91**. ⓘ Controle: `PostAttachment` tem
+`relrowsecurity = false` — confirma o precedente que esta migração corrige.
+**Controles pós-deploy do código:** `/sw.js` **byte-idêntico** (mesmo sha
+`16544c870d68`), `/manifest.json`, `/api/notifications`, `/api/courses`,
+`/api/auth/register-producer`, `/api/w/[slug]/login` e `/_next/image` **idênticos em
+status e bytes**; só os 2 HTML mudaram de hash com o mesmo tamanho (nonce por
+requisição). ⭐ **A tabela seguia com 0 linhas depois do deploy.**
+**⭐ A ARMADILHA DO `db push` MORREU, medida nos dois lados:** com o schema anterior
+(`300e43a`), `migrate diff` contra o staging propunha `DROP TABLE "WorkspaceMembership"`
++ `DROP TYPE` + 2 `DROP CONSTRAINT`; com o schema mesclado, **"empty migration"**.
+**Os 4 vigias do documento de pausa, remedidos:** (a) `to_regclass` era `null`, hoje é
+`"WorkspaceMembership"` — **mudou por esta fatia, é o esperado**; (b) `Course isFree` =
+**0** inalterado; (c) `Enrollment FREE_CLAIM` = **0** inalterado; (d) 66/5 → **77/7**,
+orgânico. Controle de não-vacuidade repetido.
+**SHA do merge:** `a8c718a`  ·  **Rollback:** `git revert -m 1 a8c718a` (⚠️ a tabela
+permanece — remover exigiria migração própria; como está vazia e sem leitor, é inócua)
+**Mudou em produção para quem:** para ninguém. Tabela vazia, sem escritor (não existe
+cadastro público) e leitura opt-in que só 6 dos 13 call-sites pedem.
+**Ficou aberto:** o resto da etapa 5 da E4.4 (cadastro público). ⚠️ A tabela do **staging**
+tem 1 linha — a persona `marca-only-f1@staging.test`, fixture de 01/set — e **não foi
+apagada** de propósito: o comando proíbe escrever nessa tabela, e ela é o fixture desta
+feature. Em produção a tabela está **vazia**.
+**Regras conferidas:** runbook de migração na ordem ✅ (arquivo → staging → prova dupla →
+validação → produção → prova → push) · ⛔ `migrate deploy` **nunca** no staging ✅ · ⛔
+`--shadow-database-url` **nunca** ✅ · `--no-ff` ✅ (3 pais) · tag `e4.4-fatia1-congelada`
+(objeto `4ccbc05` → commit `7d57c40`) **intacta** ✅ · papelada ✅
+
+---
+
 ## 2026-09-10 — 9.135 EM PRODUÇÃO: a rota que criava ADMIN sem autenticação foi APAGADA (E3.35 fecha)
 
 > ⚠️ **Muda pixel? NÃO.** Remove um endpoint morto. Nenhum arquivo de UI no diff.
