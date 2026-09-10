@@ -35,6 +35,107 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — TRAVA DE 1 H NO `lastAccessAt`: 63,21% DO TEMPO DE BANCO ATACADO, −90% MEDIDO (9.271, 9.272)
+
+> ⚠️ **Muda pixel? NÃO.** Nenhuma tela muda. O que muda é a granularidade de um carimbo que
+> ninguém lê com precisão melhor que minuto. **6 arquivos, +72/−11, zero `prisma/`, zero migração.**
+
+**Estado antes:** `fix/9271-trava-lastaccess` @ `1944c7d` · main `0e3a448` == origin · integração
+`08b7821` == origin · árvore limpa · tag `7d57c40` e F1 `dbe161d` intocadas · palco de pé
+(`QD2y01pxnEQFoB5oYD3oO`, alvo staging 162 / produção 0) · produção **25 ligados / 19 desligados**.
+
+**O que foi feito:** `User.lastAccessAt` deixou de ser regravado a cada requisição do aluno. 1 helper
+novo (`src/lib/last-access.ts`) + 5 call-sites com a guarda `shouldWriteLastAccess`. Merge `--no-ff`
+`3851b20`, deploy `success`, palco reconstruído pela regra.
+
+**Arquivos tocados:** `src/lib/last-access.ts` (novo) · `api/progress` · `api/courses/by-slug/[slug]/init`
+· `api/lessons/[id]/quiz` · `api/lessons/[id]/view` · `api/w/[slug]/login` — e, só de papelada,
+`docs/PLANO-MESTRE.md`, `docs/SYSTEM-MAP.md`, `docs/DIARIO-EXECUCAO.md`.
+
+═══ **LINHA DE BASE, capturada em 2026-09-10T03:10:34.928Z UTC — é contra ela que a próxima medição compara** ═══
+```
+janela do pg_stat_statements: desde 2026-04-28T22:07:31.169Z (134,2 dias) · dealloc=33
+TOTAL do banco: 174.542.787 chamadas · 181.963.531 ms
+
+ALVO   UPDATE User SET lastAccessAt, updatedAt
+   chamadas 647.496  (4.824/dia)   tempo 115.019.154 ms = 31,95 h   63,21% do tempo de banco
+   min/média/máx 0,04 / 177,64 / 119.808 ms   (desvio 3.054,6)
+
+CONTROLE NEGATIVO   UPDATE User SET lastIpAddress, lastAccessAt  (/api/auth/me, NÃO tocado)
+   chamadas 107.874  (804/dia)   13.807.432 ms (7,59%)   média 128 ms
+
+DENOMINADORES: alunos ativos 24 h = 419 · usuários = 27.992 (com carimbo 8.516, nulos 19.476)
+   11,5 escritas por aluno ativo/dia · banco 390 MB
+```
+
+**Como foi provado:**
+- **A anatomia, antes de editar:** os 6 pontos de escrita foram lidos um a um; **5 já tinham o objeto
+  do usuário em memória** (`getCurrentUser` busca o `User` **sem `select`**, as 22 colunas), então a
+  guarda custou **zero query nova**. O 6º (`/api/auth/me`) grava `lastIpAddress` no **mesmo `UPDATE`**
+  e ficou **fora por ordem**.
+- ⭐ **Molde da casa:** a trava de 1 hora do `AccessLog` em `api/auth/me/route.ts:35-45` **já existia** —
+  quatro linhas abaixo da escrita ofensora. Lá o intervalo custa um `findFirst`; aqui, nada.
+- **Lógica, no ARQUIVO REAL transpilado (não numa cópia da regra): 10/10** — nulo e `undefined`
+  escrevem; agora, 5 min e 59min59s não; 1 h exata, 1h01s, 2 h e 30 dias escrevem; carimbo no futuro não.
+- **Contra a automação, com dado de PRODUÇÃO:** o valor gravado fica até 1 h atrasado, então só troca
+  de lado quem cair na faixa de 1 h após o corte. `inactiveDays=3` → **7.533 pegos, 4 na faixa =
+  0,053%** · `inactiveDays=77` → **783 pegos, 0** · `STUDENT_NEVER_ACCESSED` → **idêntica por
+  construção** (o nulo nunca é adiado).
+- **No palco, ao vivo, 4/4:** nulo → o login escreveu · aula + home dentro da hora **não** escreveram ·
+  carimbo envelhecido para 2 h → escreveu · `POST /api/progress` com carimbo novo **não** escreveu.
+- **GATE HUMANO: `aprovado 4/4` pelo dono** — resultado colado, não afirmado.
+- **Portão:** `tsc --noEmit` exit 0 · `npm run build` exit 0, zero warning · diff de **três pontos: 6
+  arquivos, 0 em `prisma/`**; ⛔ e **0 linhas de `lastIpAddress` em código** (a única menção no diff é
+  o **comentário** do helper dizendo que não cobre; `auth/me` fora do diff).
+- **Controles em produção contra linha de base capturada ANTES do deploy — os 6 byte-idênticos:**
+  `/sw.js` `dbf0c4cfb1…` · `/api/auth/me`, `/api/courses` e `/api/notifications` 401 `492bf9448a…` ·
+  `/api/progress` 405 · `/course/curso` 307 → `/producer/login`. `/_next/image` seguindo `image/avif`.
+
+⭐ **A PROVA EM PRODUÇÃO — 11,8 minutos de tráfego REAL depois do deploy:**
+```
+tráfego no intervalo: +408 requisições autenticadas (34,5/min) · +41 aulas abertas
+ALVO   UPDATE lastAccessAt ....... +4   = 0,34/min   contra 3,35/min do histórico  →  0,10x  (−90%)
+CTRL   UPDATE lastIpAddress ...... +8   = 0,68/min   contra 0,56/min do histórico  →  1,21x
+carimbos: dos 19 usuários ativos acompanhados, 16 INALTERADOS
+```
+⭐ **O controle negativo é o que fecha a prova:** ele **não foi tocado** e estava a **1,21× do próprio
+ritmo histórico** — ou seja, o tráfego estava **normal, não baixo**. A queda de 90% no alvo é da
+**trava**, não da hora da madrugada.
+
+⚠️ **Os 3 carimbos reescritos dentro da hora estão EXPLICADOS, e são esperados.** Enumerando os
+escritores do campo na `main`: existem **6**, e **exatamente 1 não tem a guarda** — o `/api/auth/me`,
+deixado de fora por ordem porque grava `lastIpAddress` no mesmo `UPDATE`. Se o campo mudou dentro da
+hora, **só ele podia ter feito**. Não é defeito: é a fronteira declarada da fatia, e é o que sobra
+para a próxima (os 7,59% restantes).
+
+⚠️ **DOIS ERROS MEUS NESTA FATIA, os dois pegos antes de virarem dano:**
+1. A heurística de "última linha que começa com `import`" inseriu o import **dentro** de um import
+   multi-linha em `w/[slug]/login`, quebrando o arquivo. Corrigido e varrido nos outros 4 conferindo
+   a linha anterior de cada import; `tsc` exit 0 depois.
+2. A primeira leitura da linha de base **não achou o alvo**: eu fiz `LIKE` no texto **cru** do
+   `pg_stat_statements`, e o Prisma emite a query com **quebras de linha** — tem de casar contra o
+   texto **normalizado** (`regexp_replace(query,'\s+',' ','g')`). No mesmo comando eu peguei o
+   "irmão" errado por ler `[0]` de um resultado **sem `ORDER BY`**. Os dois números que eu quase
+   registrei como base estavam errados.
+
+**REGRA DE PALCO cumprida:** derrubar → portão (`tsc` + `npm run build`, que contamina o `.next` de
+propósito) → merge → push → `rm -rf .next` → `build:staging` → **alvo provado** (staging **162** /
+produção **0**; vacuidade 172) → subir. Palco final: `BUILD_ID K-QHT1R8B3DFNXnLvSuX4`, Next 16.3.3,
+discriminador do DEV-BRABO **200/404**.
+
+**SHA do merge:** `3851b20` · **Rollback:** `git revert -m 1 3851b20`.
+**Mudou em produção para quem:** **ninguém em pixel.** Para a operação: o carimbo "Último acesso" na
+ficha do produtor pode ficar **até 1 h atrasado** — combinado com o dono antes de escrever a linha.
+**Ficou aberto:** **9.272** (automação de um produtor configurada com 77 dias onde o nome diz 7 —
+ação de MENSAGEM, não nossa) · os **7,59%** do `lastIpAddress`, fatia própria por decisão do dono ·
+e a **remedição de daqui a 1 semana**, com a consulta e os números esperados no PM 9.271.
+**Regras conferidas:** §17 ✅ · staging-first ✅ · **gate humano 4/4, colado** ✅ · papelada ✅ ·
+alvo impresso antes de cada escrita em banco ✅ · **nenhuma escrita em produção** ✅ · palco não
+contaminado ✅ · numeração varrida em **todas as branches** antes de escrever (9.271 e 9.272 livres,
+maior em uso 9.270) ✅ — **sem errata desta vez**.
+
+---
+
 ## 2026-09-09 — `next` 16.3.3 EM PRODUÇÃO: a advisory CRITICAL fechada, e o gate que reprovou por um PRINT (9.267, 9.268, 9.269, 9.270)
 
 > ⚠️ **Muda pixel? NÃO.** Bump de motor: **2 arquivos, ambos `package*`, 0 de código** no diff de três
