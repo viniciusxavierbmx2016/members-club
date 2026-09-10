@@ -35,6 +35,91 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — LEVANTAMENTO DE VÍDEO (fatos para o produtor) + 2 achados no fim da fila (9.273, 9.274)
+
+> ⚠️ **Muda pixel? NÃO.** Só documentação. Zero `src/`, zero `prisma/`, zero deploy, zero escrita
+> em banco de produção. **Somente leitura + papelada.**
+
+**Estado antes:** main `394226e` == origin · integração `99f1c56` == origin · árvore limpa ·
+tag `7d57c40` e F1 `dbe161d` intocadas · palco `K-QHT1R8B3DFNXnLvSuX4` de pé, alvo staging 162 /
+produção 0 · produção **25 ligados / 19 desligados**.
+
+**O que foi feito:** levantamento completo de como a plataforma trata vídeo, para o dono responder a
+um produtor que precisa decidir onde hospedar. Dois achados do levantamento viraram item, **os dois
+no FIM DA FILA por decisão do dono**.
+
+### O que o campo aceita (fatos, com file:line)
+
+**4 provedores**, detectados por hostname (`lib/video.ts:1`): YouTube (`:64,71`), Vimeo (`:77`),
+Panda — inclusive **qualquer** subdomínio de cliente (`:84-88`) — e VTurb, só `scripts.converteai.net`
+e só https (`:106`). Qualquer outra coisa vira `unknown` (`:110`) e **o player não tem ramo para
+`unknown`** (`video-player.tsx:138,267,281,302`) ⇒ **não toca**. Google Drive, `.mp4` direto e Loom
+foram testados no parser real: os três, `unknown`.
+
+⚠️ **Contradição entre duas partes do código, medida:** o parser aceita **código de incorporação
+colado**, mas só de Panda (`video.ts:46-49`) e VTurb (`:54-57`) — e o campo é `type="url"`
+(`lessons-manager.tsx:341`) dentro de `<form>` **sem `noValidate`** (`:330`), então o navegador
+rejeita antes com *"Insira um URL."*. **Provado no Chrome**, não deduzido. ⓘ Limite honesto: provei o
+comportamento do navegador para essa marcação; **não cliquei "salvar" na tela real do produtor**,
+porque exigiria sessão de produtor (escrita em banco, proibida nesta rodada).
+
+⭐ **DISTRIBUIÇÃO REAL EM PRODUÇÃO (10/set/26):** 2.603 aulas, **2.380 com vídeo de verdade** — as
+outras **223 têm o campo VAZIO** (aula sem vídeo, que é opcional; conferido antes de virar alarme).
+**YouTube 1.223 · Panda 1.041 · VTurb 79 · Vimeo 37.**
+
+### ⭐ A restrição por domínio FUNCIONA — e são TRÊS domínios
+
+O iframe é criado **direto no navegador do aluno**, apontando para o provedor
+(`video-player.tsx:287-288` Panda, `:306-307` VTurb). **Não há proxy nenhum.** E o
+`Referrer-Policy: strict-origin-when-cross-origin` (`next.config.mjs:39`, **confirmado no header
+servido** por `app.mymembersclub.com.br`) **envia a origem** e omite só o caminho; não há
+`<meta name=referrer>` (medido no DOM) nem `referrerPolicy` nos iframes (0 no repo).
+⇒ **o Panda e o Vimeo enxergam o domínio, e a trava deles funciona.**
+
+**Os hostnames que servem o app hoje, conferidos ao vivo:** `app.mymembersclub.com.br` **200** ·
+`mymembersclub.com.br` **200** · `applyfy-mvp.vercel.app` **200** (a origem na Vercel, ativa de
+propósito — SYSTEM-MAP §0). ⚠️ **`membersclub.app` NÃO é o app** (DNS 45.8.224.49, fora da Vercel,
+HTTP 000). **Domínio próprio por workspace** existe no schema (`prisma/schema.prisma:67`) e na tela
+(`info-tab.tsx:178`), mas **não roteia**: `src/proxy.ts` não menciona `customDomain` nem host, e
+`next.config.mjs` tem **0** rewrites/redirects — e **0 de 44** workspaces têm o campo preenchido.
+
+### 🔴 O aluno alcança o endereço do vídeo. Sim.
+
+A API **não** manda a URL crua — `view/route.ts:209` diz `// Masked payload` e envia
+`{provider, videoId, embedHost}` (`:216`); medido no palco, a string `videoUrl` não aparece.
+**Mas isso não esconde o vídeo:** com esses três campos a URL se reconstrói — é literalmente o que o
+player faz (`video-player.tsx:288`) —, e no **VTurb** o `videoId` **é a URL de embed inteira**
+(`video.ts:11`). E o endereço está **no DOM**: medido no navegador, como aluno, `iframes: 1` com o
+`src` completo legível. O clique-direito está desabilitado no player (`video-player.tsx:413`), o que
+não fecha o DevTools. **Hospedagem nativa não existe:** o único `video/mp4` do repo está na lista de
+**materiais** (`materials-constants.ts:21`), bucket **público**, teto de 50 MB — é anexo, não player.
+
+**ITENS ABERTOS (os dois no fim da fila, por decisão do dono):**
+- **9.273** — Vimeo *não listado*: o hash de privacidade é descartado (`video.ts:78-80`) e o vídeo não
+  toca. **Alcance ZERO hoje**: das 37 aulas de Vimeo (2 cursos, 2 ws, 98 matrículas ativas),
+  **0 usam o formato com hash**. Ninguém está quebrado agora.
+- **9.274** — 🔴 **o limite de 3 dispositivos não é aplicado.** `MAX_SESSIONS = 3` existe nas 4 rotas
+  de login e apaga a linha mais antiga, mas a tabela `Session` **nunca é lida como portão**: dos 16
+  usos de `prisma.session.*`, **zero** são `findFirst`/`findUnique` em caminho de auth, e
+  `getCurrentUser` autentica pelo cookie do Supabase (`lib/auth.ts:112-117`). **Quem foi "expulso"
+  segue logado.** Não é defeito cosmético: é a única barreira aparente contra compartilhamento de
+  conta, e ela não existe. Alcance: **os 28.940 alunos ativos**. ⛔ Também não há marca d'água, DRM,
+  URL assinada nem bloqueio de download — varredura por padrão deu 0 nos seis, com controle positivo.
+
+**Como foi provado:** parser rodado de verdade (`ts.transpileModule` de `src/lib/video.ts`, 16
+entradas) · `type="url"` testado no Chrome headless · DOM do aluno inspecionado via CDP no palco ·
+headers conferidos **no servido**, não só no config · 4 hostnames sondados com DNS + HTTP ·
+distribuição de provedores contada por SELECT em produção (somente leitura) · varredura de
+`prisma.session.*` no repositório inteiro, com classificação de cada uso.
+**SHA do merge:** sem SHA de código — papelada. **Rollback:** `git revert` do commit de docs.
+**Mudou em produção para quem:** **ninguém.** Nenhum byte de runtime.
+**Ficou aberto:** 9.273 e 9.274 (fim da fila) · e a resposta ao produtor, que é do dono.
+**Regras conferidas:** §17 ✅ · somente leitura ✅ · nenhuma escrita em banco ✅ · palco intocado ✅ ·
+numeração varrida em **todas as 14 branches** antes de escrever (maior em uso 9.272; 9.273 e 9.274
+livres) ✅ · **nada afirmado por dedução**: cada fato do levantamento tem file:line ou medição ✅.
+
+---
+
 ## 2026-09-10 — TRAVA DE 1 H NO `lastAccessAt`: 63,21% DO TEMPO DE BANCO ATACADO, −90% MEDIDO (9.271, 9.272)
 
 > ⚠️ **Muda pixel? NÃO.** Nenhuma tela muda. O que muda é a granularidade de um carimbo que
