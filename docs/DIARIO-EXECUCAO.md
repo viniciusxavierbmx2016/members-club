@@ -35,6 +35,66 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — 9.135 EM PRODUÇÃO: a rota que criava ADMIN sem autenticação foi APAGADA (E3.35 fecha)
+
+> ⚠️ **Muda pixel? NÃO.** Remove um endpoint morto. Nenhum arquivo de UI no diff.
+
+**Estado antes:** main em `8fe25a7`
+**O que foi feito:** `git rm src/app/api/auth/register/route.ts`. A rota era **pública**
+(zero autenticação, só `rateLimit` de 100 req/60s), **órfã** (0 chamadores) e cravava
+`prisma.user.create({ role: "ADMIN" })` na linha `:57`.
+**Arquivos tocados:** 1 — `src/app/api/auth/register/route.ts` (73 linhas removidas). O irmão
+vivo `register-producer` **não entra no diff**. `prisma/` intocado. `publicRoutes` do proxy
+intocado de propósito (governa páginas; o `/api/` retorna antes, em `:59-61`).
+**Como foi provado — ANTES (o que fechou o veredito de 11 dias):** 1 conta descartável
+autorizada pelo dono, criada e apagada no mesmo comando, em produção:
+> `POST /api/auth/register` pelo **origem** → **HTTP 201**
+> `User` 27.996 → 27.997 · `role=ADMIN` 1 → 2 · linha criada com `role = ADMIN` e
+> `email_confirmed_at` já preenchido (utilizável na hora)
+> limpeza: `getUserById` → **"User not found"** (com controle positivo), contagens de volta
+> a 27.996 e 1
+**⚠️ A borda quase produziu a conclusão errada:** pelo **domínio** a chamada tomou **403 do
+Cloudflare** ("Just a moment…"). A discriminação desfez — o Cloudflare desafia
+`/api/auth/register`, `/api/auth/login` e `/api/auth/producer-login`, mas **deixa
+`/api/w/<slug>/login` passar** (404 da aplicação) ⇒ regra por rota. E o **origem
+`applyfy-mvp.vercel.app` não passa pelo Cloudflare**. ⇒ a proteção existe e **é contornável
+pelo origem** — reforça o item **2.4**, aberto.
+**⭐ O número que dimensiona:** existia **1 única conta ADMIN em produção** — a do dono, de
+12/abr. Varredura da assinatura da rota (User sem `workspaceId`, sem workspace próprio, sem
+matrícula, sem colaboração): **0 ADMINs com essa forma**. ⇒ **vulnerabilidade ABERTA,
+incidente NÃO ocorrido.** ⚠️ E o `AuditLog` **não registra cadastro** — a contagem de ADMINs
+era a única evidência que existia.
+**⭐ Por que APAGAR e não validar:** 0 chamadores em TODO o repositório (controle positivo: o
+irmão `register-producer` aparece em 2 lugares), a página `(auth)/register` **não tem
+`<form>`, nem `useState`/`onSubmit`, e importa só o `Link`**, e o produto cadastra por
+`register-producer`, que cria `PRODUCER`. Validar deixaria viva uma rota que ninguém usa;
+apagar não deixa caminho. 7 Perguntas, Q1/Q2/Q4.
+**Prova em produção depois do deploy** (Vercel `success` amarrado ao SHA `1e10cd0`), pelo
+**origem**, que é por onde ela era alcançável:
+> `POST /api/auth/register` **400 → 404** (nos dois corpos) · `GET` → 404
+> ⭐ controle: `POST /api/auth/register-producer` **segue 400** (mesmo da linha de base)
+> ⭐ controle: `ADMIN` segue **2** · `User total` **27.996** inalterado
+> `/sw.js` **byte-idêntico** (mesmo sha) · `/manifest.json`, `/api/notifications`,
+> `/api/courses`, `/_next/image` idênticos em status e bytes
+> a página `/register` segue **200** com os 4 textos íntegros
+⚠️ Os 3 HTML mudaram de hash **com o mesmo tamanho** — não é o deploy: duas buscas seguidas
+da mesma URL já dão hashes diferentes (nonce por requisição). Mesmo padrão do `ae9fdf2`.
+ⓘ **A sonda pós-deploy usou corpo inválido de propósito** (`{}` → 400 antes, 404 depois):
+mede o mesmo discriminador **sem criar conta nenhuma**.
+**SHA do merge:** `1e10cd0`  ·  **Rollback:** `git revert -m 1 1e10cd0`
+**Mudou em produção para quem:** para ninguém que usa o produto — a rota não tinha chamador,
+tela nem consumidor. Muda para quem **abusaria** dela: o caminho de criar administrador de
+plataforma sem autenticação deixou de existir.
+**Ficou aberto:** nada deste item. ⭐ **O grupo E3.35 FECHA aqui** — 9.144 (`ae9fdf2`) e
+9.135 (`1e10cd0`), os dois em produção no mesmo dia. Segue aberto o **2.4** (origin
+lockdown), que este item reforçou com medição.
+**Regras conferidas:** §17 respondido ✅ · gate humano ✅ · papelada ✅ · `--no-ff` ✅ (3 pais) ·
+portão `tsc` 0 + build verde antes do push ✅ · ⚠️ `rm -rf .next` **antes** do portão, porque o
+`validator.ts` do build velho referencia a rota apagada e reprova o `tsc` (cicatriz do R3) ·
+palco reconstruído pela regra ✅
+
+---
+
 ## 2026-09-10 — 9.144 EM PRODUÇÃO: a importação por planilha para de entregar a senha-mestra (9.280, 9.281, 9.282)
 
 > ⚠️ **Muda pixel? NÃO.** Nenhum arquivo de UI no diff. Muda **o que a importação entrega**: a
