@@ -17,6 +17,7 @@ import {
 } from "@/lib/workspace-block";
 import { parseVideoUrl } from "@/lib/video";
 import { getAutomationLocks } from "@/lib/automation-locks";
+import { shouldWriteLastAccess } from "@/lib/last-access";
 
 export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -185,10 +186,14 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
           lastAccessedAt: new Date(),
         },
       }),
-      prisma.user.update({
-        where: { id: user.id },
-        data: { lastAccessAt: new Date() },
-      }),
+      ...(shouldWriteLastAccess(user.lastAccessAt)
+        ? [
+            prisma.user.update({
+              where: { id: user.id },
+              data: { lastAccessAt: new Date() },
+            }),
+          ]
+        : []),
     ]);
 
     const video = parseVideoUrl(lesson.videoUrl ?? "");
