@@ -35,6 +35,90 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — 9.243 + 9.276 EM PRODUÇÃO: cor FIXA no balão do suporte, 2 linhas, 65 cursos (+ errata do 9.276, + 9.277)
+
+> ⚠️ **Muda pixel? SIM** — 2 pontos do balão de suporte, em **todos** os cursos com o widget ligado.
+> **1 arquivo, 2 linhas.** Zero `prisma/`, zero migração, zero interruptor.
+
+**Estado antes:** `fix/9243-9276-balao-suporte` @ `72c3df1` · main `d396dd4` == origin · integração
+`33b37c6` == origin · árvore limpa · `dbe161d` intocada · tag `7d57c40` intocada · palco de pé ·
+produção **25 ligados / 19 desligados**.
+
+**O que foi feito:**
+```
+:493 texto do balão   var(--member-button-text,#ffffff)  ->  text-white
+:503 a hora           text-blue-100/80                   ->  text-white
+```
+
+⭐ **POR QUE COR FIXA, e não derivada da marca:** o `<CourseSupportWidget>` é montado como **IRMÃO**
+do `<CourseShell>` (`(course)/course/[slug]/layout.tsx:222-229`) e a classe `.course-customized` vive
+**dentro** do shell — é o item **9.275**. As ~121 regras `.course-customized .X` **não alcançam o
+widget**: o fundo do balão é `bg-blue-600` cravado, sempre `#2563eb`.
+
+**Medido em runtime ANTES de escrever código**, A/B no mesmo curso e no mesmo ticket:
+`SEM marca` → `rgb(37,99,235)` · `COM marca #ffc845` escuro → `rgb(37,99,235)` · claro →
+`rgb(37,99,235)`. **Idêntico nos três.** É isso que torna a cor fixa a resposta certa.
+
+**Arquivos tocados:** `src/components/course-support-widget.tsx` (2 linhas) — e, só de papelada,
+`docs/PLANO-MESTRE.md`, `docs/SYSTEM-MAP.md`, `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado:**
+- **As 15 marcas reais de produção:** `:493` antes **13 de 15 reprovam** 4,5 (3,83:1) · `:503` antes
+  **15 de 15 reprovam** (3,28:1) · os dois depois **0 de 15** (5,17:1). E vale para os cursos **sem**
+  marca também, porque o fundo é o mesmo.
+- ⛔ **Opacidade testada e reprovada antes de decidir:** `white/80` = **3,89:1** e `white/90` =
+  **4,49:1**, os dois abaixo de 4,5. Só o branco puro passa. A hierarquia da hora vem do tamanho
+  (`text-[10px]`), não da opacidade.
+- **No palco, 4 passadas** (com marca × sem marca × escuro × claro): texto e hora em
+  `rgb(255,255,255)` sobre `rgb(37,99,235)` nas quatro, **0 erros de console**.
+- **CONTROLES do 9.248 intactos, medidos:** o botão flutuante e o "+ Novo chamado" seguem a marca
+  quando ela existe (`bg rgb(255,200,69)`, `cor rgb(10,10,10)`) e caem no `#3b82f6` quando não.
+  As **7 linhas** do 9.248 (4, 245, 246, 255, 348, 463, 535) conferidas **uma a uma, antes e depois
+  do merge**: byte-idênticas. O diff cobre apenas `@@ 493 @@` e `@@ 503 @@`.
+- **GATE HUMANO: aprovado pelo dono**, nos dois modos, com curso com marca e sem marca.
+- **Portão:** `tsc --noEmit` exit 0 · `npm run build` exit 0, zero warning · diff de **três pontos:
+  1 arquivo**.
+- **Controles em produção contra linha de base capturada ANTES do deploy — os 5 byte-idênticos:**
+  `/sw.js` `dbf0c4cfb1…` · `/api/auth/me`, `/api/courses` e `/api/notifications` 401 `492bf9448a…` ·
+  `/course/curso` 307 → `/producer/login`. `/_next/image` **AVIF byte-idêntico** (`ef801d5b…`) e
+  controle negativo **400**.
+
+⚠️⚠️ **ERRATA DE ATRIBUIÇÃO — o 9.276 culpava o 9.248, e estava errado.** A linha `:493` **não** veio
+do 9.248. `git log -S` aponta um único commit: **`f38ca6c` — o 9.247** (05/set), e o diff dele mostra
+que antes era `text-white`. O diff do 9.248 (`da4fb12`) naquele arquivo **não cita** `bg-blue-600` nem
+`text-blue-100` (**0 e 0**). ⇒ **esta fatia reverteu um ponto do 9.247.** Mantivemos o número e o
+texto com a errata dentro, seguindo o precedente do 9.255. **A causa do engano foi minha:** li o
+alcance do 9.248 no item e **presumi a autoria** em vez de conferir no `git log`.
+
+⛔ **A BRANCH `dbe161d` NÃO FOI APAGADA — e o 9.277 registra por quê.** O comando autorizava descartá-la
+**se** tudo nela já existisse na main. Conferido item por item: os **5 itens de papelada estão
+resgatados** ✅, mas **sobrou** (a) a regra `.course-customized .bg-blue-600\/20` — a **única das três
+que funciona**, porque o modal de "não gostei" é filho do `CourseShell`, dentro do escopo — e a main
+tem **0 regras** para ela; e (b) **108 linhas** da §17 do `REBRANDING-2026.md` (a main tem `## 16.` e
+**não tem `## 17.`**; 3.305 linhas contra 3.413).
+
+**REGRA DE PALCO cumprida:** derrubar → portão (`tsc` + `npm run build`) → merge → push → `rm -rf
+.next` → `build:staging` → **alvo provado** (staging **162** / produção **0**, vacuidade 172) → subir.
+Palco final: `BUILD_ID fYEI-d88RKQVCUzoEJ2xp`, discriminador do DEV-BRABO **200/404**.
+
+**ESCRITA EM STAGING revertida** (`SUPABASE_REF wxynnsyartxcvglqwmdw` impresso antes de cada uma):
+`curso-teste.memberPrimaryColor` voltou a `null`. **Os 5 cursos do palco: 0/6 cores, sem banner.**
+ⓘ O ticket de teste fica — foi criado pelo fluxo do app e é dado obviamente falso.
+
+**SHA do merge:** `61b56e3` · **Rollback:** `git revert -m 1 61b56e3`.
+**Mudou em produção para quem:** **65 cursos com o widget ligado, 25.169 matrículas ativas** — todos,
+porque o fundo é fixo, não só os 8 com marca.
+**Ficou aberto:** **9.275** (o widget fora do tema — decisão de produto: ou ele passa a receber a
+classe e o tema inteiro o alcança, ou cada ponto vira `var()` inline) · os **focos** `:424`, `:438`
+e `:530`, que **dependem** dessa decisão · **9.277** (o resgate da regra do modal e da §17, em 2
+fatias curtas, antes de apagar a branch).
+**Regras conferidas:** §17 ✅ · staging-first ✅ · **gate humano** ✅ · papelada ✅ · alvo de banco
+impresso antes de cada escrita ✅ · **nenhuma escrita em produção** ✅ · palco não contaminado ✅ ·
+numeração varrida nas **14 branches** (maior em uso 9.276; 9.277 livre) ✅ · **errata, não reescrita
+de história** ✅.
+
+---
+
 ## 2026-09-10 — O CONSERTO DO BALÃO DE SUPORTE FOI BARRADO PELO PRÓPRIO PORTÃO, e os 5 itens da branch foram resgatados (9.242 a 9.246, 9.243 reescrito, 9.275, 9.276)
 
 > ⚠️ **Muda pixel? NÃO.** Nenhuma linha de `src/` foi tocada. **Zero código, zero deploy, zero
