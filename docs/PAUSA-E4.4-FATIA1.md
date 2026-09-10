@@ -1,4 +1,53 @@
-# ⏸️ PAUSA — E4.4, etapa 5, fatia 1 (a marca de pertencimento)
+# ✅ RETOMADA E FECHADA — E4.4, etapa 5, fatia 1 (a marca de pertencimento)
+
+> ## ✅ FECHADO EM PRODUÇÃO — merge `a8c718a`, 10/set/26
+>
+> **A pausa acabou.** A fatia foi mesclada e a migração aplicada em produção. O texto
+> abaixo fica **intacto como registro histórico** do congelamento — não o releia como
+> estado atual.
+>
+> **Os 4 invariantes, no fecho:** **I1** branch em `7d57c40` ✅ · **I2** tag
+> `e4.4-fatia1-congelada` (objeto `4ccbc05`) desreferencia para `7d57c40` ✅ **intacta —
+> a tag não foi tocada** · **I3** ⭐ **DEIXOU DE VALER POR DESIGN**: a fatia **está**
+> mesclada agora, é o objetivo deste comando · **I4** remedidos: **(a)** `to_regclass`
+> era `null`, hoje é `"WorkspaceMembership"` — **mudou por esta fatia, é o esperado** ·
+> **(b)** `Course isFree=true` = **0**, inalterado · **(c)** `Enrollment FREE_CLAIM` =
+> **0**, inalterado · **(d)** cursos 66/5 → **77/7**, crescimento orgânico. Controle de
+> não-vacuidade repetido: `to_regclass('Enrollment')` responde, e há 77 cursos e 29.628
+> matrículas — os zeros são zeros de verdade.
+>
+> **Em produção:** tabela criada **vazia** (0 linhas), 5 colunas, 3 índices, 2 FKs, enum
+> com 1 valor, **RLS ligada**, **0 policies** (deny-by-default) e **0 grants** a `anon`
+> e `authenticated`. 11 de 11 números bateram com o esperado, declarado **antes** de
+> aplicar. ⓘ Controle: `PostAttachment` tem `relrowsecurity = false` — confirma o
+> precedente que esta migração corrige de propósito.
+>
+> **⭐ E a armadilha do `db push` no staging MORREU, medida nos dois lados:** com o
+> schema anterior ao merge (`300e43a`), `migrate diff` contra o staging propunha
+> `DROP TABLE "WorkspaceMembership"` + `DROP TYPE` + 2 `DROP CONSTRAINT`; com o schema
+> mesclado, *"This is an empty migration"*.
+>
+> **⚠️ O método precisou mudar no meio, e o porquê fica registrado:** a `main` andou
+> **195 commits** desde a base da fatia e passou a incluir a migração
+> `20260907140000_add_workspace_member_brand_default`. O `schema.prisma` **da branch**
+> já **não** era o schema pós-merge — rodar `db push` a partir dela teria tentado
+> **dropar a coluna `memberBrandDefault`** do staging. Por isso o merge foi feito
+> **localmente antes** do trabalho de banco, e o `push` do código só depois da prova de
+> produção. O runbook foi honrado no que ele protege: **banco antes do código**.
+>
+> **Gate do opt-in, provado no palco com fixture de dois lados:**
+> `marca-only-f1@staging.test` (marca=1, credencial=1, **sem** matrícula/colab/posse) →
+> login do workspace **200**; `sem-marca-f1@staging.test` (marca=0) → **403**; e o
+> mesmo `marca-only-f1` em `/api/w/[slug]/lives` — call-site que **não** passa
+> `allowMembership` — → **403 "Sem acesso"**. A marca vale **exatamente** onde foi pedida.
+>
+> ⚠️ **A tabela do staging tem 1 linha e ela NÃO foi apagada**: é a persona
+> `marca-only-f1@staging.test`, fixture criada em 01/set para validar esta fatia. Em
+> **produção** a tabela nasceu e permanece **vazia**.
+
+---
+
+# ⏸️ PAUSA — E4.4, etapa 5, fatia 1 (a marca de pertencimento)  *(registro histórico)*
 
 **Congelada em 31/ago/26 para dar lugar ao rebranding.**
 Nada foi corrigido, nada foi escolhido, nada foi mesclado, nada foi migrado em produção.

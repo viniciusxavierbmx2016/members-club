@@ -21,13 +21,37 @@ import { MEMBER_AREA_PERMISSION } from "@/lib/collaborator";
  * Ligar a exigência dentro do helper quebraria os dois em silêncio.
  *
  * Matrícula e posse NÃO são afetadas: aluno e dono entram como sempre.
+ *
+ * ─────────────────────────────────────────────────────────────────────────
+ * `allowMembership` (opt-in, default false) — E4.4 etapa 5, fatia 1.
+ * Faz a MARCA DE PERTENCIMENTO (`WorkspaceMembership`) contar como 4ª via.
+ * Decisões canônicas no §12 do `docs/PLANO-E4.4-MINI-CURSO-GRATUITO.md`.
+ *
+ * ⚠️ OPT-IN, e esta é a decisão de desenho mais importante da fatia. Se a
+ * marca contasse SEM distinção, os 13 call-sites deste helper a herdariam de
+ * uma vez — e entre eles está a PORTA 3 (`courses/by-slug/[slug]/init:124`),
+ * que devolve seções, módulos e títulos/descrições de aula de QUALQUER curso
+ * do workspace, sem filtrar `isPublished`. O recém-cadastrado leria a árvore
+ * inteira de todo curso pago. Por isso a marca vale em EXATAMENTE 4 lugares
+ * (§12.3): login do workspace · vitrine · resgate de curso gratuito · as 3
+ * rotas de tags ("esta pessoa é gente minha?"). Como as tags são 3 handlers,
+ * esses 4 lugares são 6 dos 13 call-sites; nos outros 7 o parâmetro não é
+ * passado, o default é false, e o comportamento é o de hoje, byte a byte.
+ *
+ * A forma copia o `requireMemberPermission` acima de propósito: é o precedente
+ * desta casa para exatamente esta tensão — um helper com 13 chamadores que
+ * respondem a perguntas diferentes.
+ *
+ * ⚠️ A marca NÃO substitui a credencial. No login ela resolve o gate de
+ * VÍNCULO (`w/[slug]/login:248`); a autenticação continua exigindo a
+ * `WorkspaceCredential` daquele workspace (`:181-199`). São duas paredes.
  */
 export async function hasWorkspaceAccess(
   userId: string,
   workspaceId: string,
-  opts?: { requireMemberPermission?: boolean }
+  opts?: { requireMemberPermission?: boolean; allowMembership?: boolean }
 ): Promise<boolean> {
-  const [enrollment, collab, ws] = await Promise.all([
+  const [enrollment, collab, ws, membership] = await Promise.all([
     prisma.enrollment.findFirst({
       where: {
         userId,
@@ -44,6 +68,14 @@ export async function hasWorkspaceAccess(
       where: { id: workspaceId },
       select: { ownerId: true },
     }),
+    // Só consulta quando o call-site pediu. Nos outros 7 isto é
+    // `Promise.resolve(null)` — nenhuma consulta a mais no caminho quente.
+    opts?.allowMembership
+      ? prisma.workspaceMembership.findUnique({
+          where: { userId_workspaceId: { userId, workspaceId } },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
   ]);
   if (enrollment) return true;
   if (collab) {
@@ -53,5 +85,9 @@ export async function hasWorkspaceAccess(
     // seguem abrindo, então quem também é aluno entra pelo caminho de aluno.
   }
   if (ws?.ownerId === userId) return true;
+  // A 4ª via, por último de propósito: quem já entra por matrícula, colaboração
+  // ou posse não muda de caminho — a marca só decide quem NÃO tinha nenhuma
+  // das três. ⚠️ `membership` é sempre null quando `allowMembership` não veio.
+  if (membership) return true;
   return false;
 }

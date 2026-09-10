@@ -16,7 +16,15 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
     if (!workspace) {
       return NextResponse.json({ error: "Workspace não encontrado" }, { status: 400 });
     }
-    if (!(await hasWorkspaceAccess(params.id, workspace.id))) {
+    // E4.4 §12.3 — pergunta sobre TERCEIRO ("esta pessoa é gente minha?"), e a
+    // marca é exatamente essa resposta. ⚠️ Aqui NÃO vai `requireMemberPermission`:
+    // perguntar permissão de colaborador sobre o aluno-alvo seria perguntar a
+    // coisa errada sobre a pessoa errada (ver o JSDoc do helper).
+    if (
+      !(await hasWorkspaceAccess(params.id, workspace.id, {
+        allowMembership: true,
+      }))
+    ) {
       return NextResponse.json({ error: "Aluno não encontrado" }, { status: 404 });
     }
     const userTags = await prisma.userTag.findMany({
@@ -46,7 +54,15 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     if (!workspace) {
       return NextResponse.json({ error: "Workspace não encontrado" }, { status: 400 });
     }
-    if (!(await hasWorkspaceAccess(params.id, workspace.id))) {
+    // E4.4 §12.3 — pergunta sobre TERCEIRO ("esta pessoa é gente minha?"), e a
+    // marca é exatamente essa resposta. ⚠️ Aqui NÃO vai `requireMemberPermission`:
+    // perguntar permissão de colaborador sobre o aluno-alvo seria perguntar a
+    // coisa errada sobre a pessoa errada (ver o JSDoc do helper).
+    if (
+      !(await hasWorkspaceAccess(params.id, workspace.id, {
+        allowMembership: true,
+      }))
+    ) {
       return NextResponse.json({ error: "Aluno não encontrado" }, { status: 404 });
     }
 
@@ -90,7 +106,15 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
     if (!workspace) {
       return NextResponse.json({ error: "Workspace não encontrado" }, { status: 400 });
     }
-    if (!(await hasWorkspaceAccess(params.id, workspace.id))) {
+    // E4.4 §12.3 — pergunta sobre TERCEIRO ("esta pessoa é gente minha?"), e a
+    // marca é exatamente essa resposta. ⚠️ Aqui NÃO vai `requireMemberPermission`:
+    // perguntar permissão de colaborador sobre o aluno-alvo seria perguntar a
+    // coisa errada sobre a pessoa errada (ver o JSDoc do helper).
+    if (
+      !(await hasWorkspaceAccess(params.id, workspace.id, {
+        allowMembership: true,
+      }))
+    ) {
       return NextResponse.json({ error: "Aluno não encontrado" }, { status: 404 });
     }
 

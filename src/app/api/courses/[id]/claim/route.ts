@@ -65,7 +65,15 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
     // O curso tem de ser de um workspace que a pessoa alcança. Sem isto,
     // qualquer usuário logado resgataria o gratuito de qualquer produtor.
     const admin = user.role === "ADMIN";
-    if (!admin && !(await hasWorkspaceAccess(user.id, course.workspaceId))) {
+    // E4.4 §12.3 — o RESGATE. Sem a marca aqui o cadastrado nunca converteria
+    // em matrícula por conta própria: o botão "Resgatar acesso" ficaria visível
+    // (course-preview.tsx:128) e responderia 404.
+    if (
+      !admin &&
+      !(await hasWorkspaceAccess(user.id, course.workspaceId, {
+        allowMembership: true,
+      }))
+    ) {
       return naoEncontrado();
     }
 
