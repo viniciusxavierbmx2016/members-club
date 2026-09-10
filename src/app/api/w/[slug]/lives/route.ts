@@ -41,7 +41,29 @@ export async function GET(_request: Request, props: { params: Promise<{ slug: st
         { status: "asc" },
         { scheduledAt: "desc" },
       ],
-      include: {
+      // 9.177 — `select` explícito no lugar do `include`. O `include` sem
+      // `select` no topo devolvia TODOS os 20 escalares de `Live`, incluindo
+      // `externalUrl` (o link da transmissão, NOT NULL em todas) e `embedUrl`.
+      // A tela desta rota (`app/w/[slug]/lives/page.tsx:9-21`) declara 11
+      // campos e NÃO usa nenhum dos dois (grep: 0 ocorrências).
+      // ⚠️ `recordingUrl` FICA: a tela o usa em `:150`, ainda que só como
+      // booleano ("Gravação disponível"). Trocá-lo por um booleano muda o
+      // contrato e o tipo da página — vira item próprio.
+      // ⓘ `visibility` e `courseId` entram porque o FILTRO abaixo depende
+      // deles; são estruturais, não credenciais.
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        platform: true,
+        status: true,
+        scheduledAt: true,
+        startedAt: true,
+        endedAt: true,
+        recordingUrl: true,
+        thumbnailUrl: true,
+        visibility: true,
+        courseId: true,
         course: { select: { id: true, title: true } },
       },
     });

@@ -35,6 +35,78 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-10 — 9.183 + 9.177 EM PRODUÇÃO: escopo nas etiquetas e `select` nas lives (e o 9.184 PARADO na matriz)
+
+> ⚠️ **Muda pixel? Pouco.** Muda **o que cada um enxerga**: o produtor deixa de ver etiqueta
+> de concorrente, e a listagem de lives deixa de entregar o link da transmissão.
+
+**Estado antes:** main em `85dc23f`
+**O que foi feito:** dois predicados. **9.183** — o `findMany` do GET de etiquetas ganhou
+`tag: { workspaceId: workspace.id }`, com short-circuit de ADMIN de plataforma. **9.177** —
+o `include` da listagem de lives virou `select` explícito com 13 campos.
+**Arquivos:** 2. `producer/students/[id]/tags/route.ts` e `w/[slug]/lives/route.ts`.
+**⭐ Os dois moldes já existiam no próprio arquivo** — nada foi inventado: o predicado do
+9.183 é o mesmo `tag.workspaceId !== workspace.id` que o POST (`:79`) e o DELETE (`:129`)
+usam desde sempre; só a leitura não o tinha.
+**MATRIZ DAS 6 PERSONAS — nenhuma de staff muda:**
+> ADMIN idêntico (short-circuit) · ADMIN_COLLABORATOR idêntico (403 do `requireStaff`) ·
+> PRODUCER dono perde **apenas** as etiquetas alheias · COLLABORATOR c/ permissão idem ·
+> COLLABORATOR s/ permissão idêntico (403) · STUDENT puro idêntico (403) ·
+> **STUDENT híbrido** idem COLLABORATOR (o `requireStaff` sintetiza o papel, `auth.ts:236-241`)
+**⭐ O short-circuit de ADMIN é desenho, não descuido:** `staff.role === "ADMIN"` é o **único**
+ponto em que o role decide, autorizado pelo **PLANO-9.74 §2.2** e pelo **princípio 11**.
+**Sem ele o ADMIN passaria a ver menos do que vê hoje** — e a lei da fatia proibia mudar
+qualquer persona de staff.
+**Como foi provado — o controle que faltou ao gate humano:**
+> fixture criado e removido em staging (ref impresso): 2 etiquetas na mesma pessoa
+> **produtor de A → 1** ("FAKE-9183-tag-do-A")            ✅ o fix
+> ⭐ **ADMIN c/ workspace ativo → 2** (as duas)            ✅ **não perdeu nada**
+> **dono-b → 404** "Aluno não encontrado"                 ✅ gate pré-existente
+> **listagem de lives → 13 campos**; removidos `externalUrl`, `embedUrl`, `roomOpen`,
+> `chatEnabled`, `workspaceId`, `savedAsLessonId`, `createdAt`, `updatedAt`
+> limpeza: `Tag` de volta a 1, `UserTag` de volta a 0
+**⭐ Achei um SEGUNDO consumidor da rota de lives** que a leitura anterior não tinha:
+`components/workspace-shell.tsx:107`. Usa **apenas `l.status`** — preservado. Zero regressão.
+⚠️ **`recordingUrl` FICOU:** a tela o usa em `page.tsx:150`, ainda que só como booleano. A
+regra era *"se a tela usa, o campo fica"*. Virar booleano é item próprio.
+**Prova em produção:** deploy Vercel `success` amarrado a `f47ec64`. **10 controles contra a
+linha de base — idênticos em status e bytes**, incluindo as duas rotas-alvo (401/28 e 401/27)
+e `/sw.js` com o **mesmo sha** `16544c870d68`. Só os 2 HTML mudaram de hash com o mesmo
+tamanho (nonce por requisição).
+⚠️ **A rota de lives exige sessão (401 anônimo) e me recusei a usar conta de cliente**, então
+a prova comportamental em produção **não foi feita**. A prova é no **artefato da árvore
+`f47ec64`**, a mesma que a Vercel compilou:
+> `let u="ADMIN"===e.role, ... findMany({where:{userId:i.id, ...u?{}:{tag:{workspaceId:n.id}}}`
+> `select:{id:!0,title:!0,…,recordingUrl:!0,thumbnailUrl:!0,visibility:!0,courseId:!0,…}`
+> `externalUrl` no chunk = **0**; controles `recordingUrl`=1, `thumbnailUrl`=1,
+> `workspaceId`=3, `MANAGE_STUDENTS`=3, `"Aluno não encontrado"`=3; negativo=0
+⚠️ **Duas sondas quebraram e foram refeitas**, ambas por zero-e-zero com o controle positivo
+também zerado: o primeiro chunk grepado não era o da rota, e um `paste -sd+ | bc` falhou no
+gate do 9.184. Nenhuma conclusão saiu de sonda cega.
+**Alcance medido:** das **10 pessoas com etiqueta** em produção (3 produtores usam
+etiquetas), **só 1** tem etiqueta de mais de um workspace ⇒ para as outras **9 a resposta é
+idêntica**, e para o ADMIN é idêntica em **100%**. Nas lives: 5 lives em 1 workspace, 9
+pessoas alcançam a listagem, e a tela **não usa nenhum campo removido**. **Zero regressão.**
+**SHA do merge:** `f47ec64`  ·  **Rollback:** `git revert -m 1 f47ec64`
+**Mudou em produção para quem:** para 1 pessoa cujas etiquetas deixam de circular entre
+produtores, e para os 9 alunos que alcançam a listagem de lives — que deixam de receber o
+link da transmissão num campo que a tela nunca leu.
+**🛑 Ficou aberto — o 9.184, e a parada é o resultado:** os 4 pontos de `role === "STUDENT"`
+seguem **byte-idênticos** (provado contra a árvore mesclada: 1+1+2 = 4). Ele parou porque
+**duas personas de staff mudariam**, e isso é decisão do dono:
+> **(1)** `ADMIN_COLLABORATOR` entra no short-circuit junto com `ADMIN`? Hoje é isento **por
+> acidente** (o teste é `role === "STUDENT"`); com o vínculo **perde** a isenção. **2 pessoas.**
+> **(2)** O `STUDENT` híbrido **ganha** a isenção que o vínculo daria? Hoje **não passa**;
+> com o vínculo passaria — ampliação de acesso. **11 pessoas.**
+> E do outro lado da balança, a população do defeito: **53** contas `PRODUCER`/`COLLABORATOR`
+> matriculadas em workspace alheio, hoje isentas do recorte lá dentro.
+**Regras conferidas:** matriz das 6 personas escrita ANTES do código ✅ · gate humano 4/4 +
+controle de máquina do ADMIN ✅ · `--no-ff` ✅ (3 pais) · portão `tsc` 0 + build verde antes do
+push ✅ · palco reconstruído pela regra ✅ · ⚠️ o palco foi pego contaminado uma vez (o portão
+encadeado reconstruiu o `.next` com o servidor de pé) e refeito do zero.
+
+---
+
 ## 2026-09-10 — E4.4 fatia 1 EM PRODUÇÃO: a marca de pertencimento (tabela nova e vazia, leitura opt-in)
 
 > ⚠️ **Muda pixel? NÃO.** Tabela nova e vazia; nenhuma porta aberta. A leitura da marca é

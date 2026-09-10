@@ -27,8 +27,25 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
     ) {
       return NextResponse.json({ error: "Aluno não encontrado" }, { status: 404 });
     }
+    // 9.183 — ESCOPO DE WORKSPACE no GET. O POST (`:79`) e o DELETE (`:129`)
+    // já recusam tag de outro workspace com `tag.workspaceId !== workspace.id`;
+    // só a leitura não filtrava, e devolvia ao produtor os NOMES das tags de
+    // segmentação que outros produtores aplicaram sobre a mesma pessoa
+    // ("lead frio", "inadimplente"). O molde é o predicado do POST/DELETE deste
+    // mesmo arquivo, escrito aqui como filtro.
+    // ⚠️ O discriminador é o VÍNCULO com o workspace resolvido, NUNCA o role
+    // global — é o erro que o 9.74 descreve. `workspace` vem do
+    // `resolveStaffWorkspace` acima, que já é a autoridade desta rota.
+    // ⭐ Short-circuit de ADMIN de plataforma: é o ÚNICO caso em que o role
+    // decide, por decisão explícita da casa (PLANO-9.74 §2.2 e princípio 11).
+    // Sem ele o ADMIN passaria a ver menos do que vê hoje — mudança de
+    // comportamento de persona de staff, que esta fatia não pode causar.
+    const isPlatformAdmin = staff.role === "ADMIN";
     const userTags = await prisma.userTag.findMany({
-      where: { userId: params.id },
+      where: {
+        userId: params.id,
+        ...(isPlatformAdmin ? {} : { tag: { workspaceId: workspace.id } }),
+      },
       include: { tag: { select: { id: true, name: true, color: true } } },
       orderBy: { createdAt: "desc" },
     });
