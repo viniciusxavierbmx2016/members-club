@@ -41,6 +41,25 @@ export const registerSchema = z
   })
   .passthrough();
 
+// E4.4 etapa 2 — CADASTRO PÚBLICO do workspace.
+// ⚠️ FECHADO DE PROPÓSITO: `z.object()` sem `.passthrough()` DESCARTA campos
+// extras no parse (provado na 4.3.6: `role`, `workspaceId`, `permissions`,
+// `origin` e `isFree` não sobrevivem). O `registerSchema` acima TEM
+// `.passthrough()` — 36 dos 86 schemas deste arquivo têm — e por isso ele NÃO
+// é reusado pela rota pública. O `workspaceId` vem do SLUG da URL.
+// ⓘ Mensagem no 1º argumento: na v4 o `invalid_type_error` é ignorado.
+export const publicSignupSchema = z.object({
+  name: z.string().min(2, "Nome muito curto").max(120),
+  email: z.string().email("Email inválido").max(255),
+  // WhatsApp obrigatório (D7). A régua de dígitos é aplicada na rota, como já
+  // fazem os campos de suporte; aqui o teto evita payload absurdo.
+  phone: z.string().min(8, "WhatsApp inválido").max(20),
+  password: z
+    .string()
+    .min(6, "Senha deve ter pelo menos 6 caracteres")
+    .max(128),
+});
+
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Email inválido").max(255),
   from: z.string().max(50).optional(),
