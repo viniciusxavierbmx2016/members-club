@@ -490,7 +490,7 @@ export function CourseSupportWidget({
                         <div
                           className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
                             isStudent
-                              ? "bg-blue-600 text-[var(--member-button-text,#ffffff)] rounded-br-sm"
+                              ? "bg-blue-600 text-white rounded-br-sm"
                               : "bg-white dark:bg-white/10 text-gray-900 dark:text-white border border-gray-200 dark:border-white/5 rounded-bl-sm"
                           }`}
                         >
@@ -500,7 +500,7 @@ export function CourseSupportWidget({
                           <p
                             className={`text-[10px] mt-1 ${
                               isStudent
-                                ? "text-blue-100/80"
+                                ? "text-white"
                                 : "text-gray-400 dark:text-gray-500"
                             }`}
                           >
