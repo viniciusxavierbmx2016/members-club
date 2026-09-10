@@ -30,6 +30,18 @@ interface CourseCardProps {
   manageHref?: string;
   horizontal?: boolean;
   featured?: boolean;
+  /** E4.4 etapa 2 — O RESGATE ACONTECE NA VITRINE.
+   *  Quando passado, o card de curso GRATUITO bloqueado deixa de navegar para
+   *  `/course/<slug>` e chama isto. ⚠️ O motivo é medido, não estético: a página
+   *  do curso carrega `by-slug/[slug]/init` (a PORTA 3), que a marca de
+   *  pertencimento NÃO abre por decisão do §12.3 — ela devolveria a árvore de
+   *  todo curso do workspace, inclusive não publicado (`isPublished` = 0
+   *  ocorrências naquela rota). Resultado do gate humano: o card prometia
+   *  "Resgatar acesso", a página dava 404 e o `router.push(backHref)` de
+   *  `(course)/course/[slug]/page.tsx:307` devolvia a pessoa para a vitrine.
+   *  Um laço fechado. Com isto, o botão faz o que promete, no lugar onde a
+   *  pessoa já está — e NENHUMA porta é aberta. */
+  onFreeClaim?: () => void;
 }
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -57,6 +69,7 @@ export function CourseCard({
   manageHref,
   horizontal = false,
   featured = false,
+  onFreeClaim,
 }: CourseCardProps) {
   const showRating =
     typeof ratingAverage === "number" &&
@@ -273,6 +286,22 @@ export function CourseCard({
           </Link>
         </div>
       </div>
+    );
+  }
+
+  // E4.4 etapa 2 — o card do gratuito bloqueado abre o popup em vez de navegar.
+  // ⓘ `inner` não contém `<a>` nem `<button>` neste estado: o único `<a>` do
+  // card vive sob `{expired && …}`, e curso da loja não é expirado — conferido
+  // antes de embrulhar, para não gerar aninhamento inválido.
+  if (onFreeClaim && isFree && locked && !manageHref) {
+    return (
+      <button
+        type="button"
+        onClick={onFreeClaim}
+        className={cn(wrapperClassName, "w-full text-left")}
+      >
+        {inner}
+      </button>
     );
   }
 

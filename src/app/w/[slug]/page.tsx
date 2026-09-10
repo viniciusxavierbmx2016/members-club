@@ -11,6 +11,7 @@ import { ContextLockNotice } from "@/components/context-lock-notice";
 import { calculateCourseProgress } from "@/lib/utils";
 import { useUserStore } from "@/stores/user-store";
 import { SkeletonFilters, SkeletonCourseCard } from "@/components/ui/skeleton";
+import { ConfirmModal } from "@/components/confirm-modal";
 
 interface WorkspaceInfo {
   id: string;
@@ -125,6 +126,50 @@ export default function WorkspaceVitrinePage() {
   const [suspendedContact, setSuspendedContact] = useState<BlockContact | null>(null);
   const [blocked, setBlocked] = useState(false);
   const [loadError, setLoadError] = useState(false);
+
+  // E4.4 etapa 2 — O RESGATE ACONTECE AQUI, na vitrine, com confirmação.
+  // ⚠️ NÃO na página do curso: aquela rota é a PORTA 3 (`by-slug/[slug]/init`),
+  // que a marca de pertencimento não abre por decisão medida do §12.3. O gate
+  // humano bateu nesse muro — o card prometia "Resgatar acesso" e a página
+  // devolvia 404, que `(course)/course/[slug]/page.tsx:307` traduz em
+  // `router.push(backHref)`: de volta à vitrine, em silêncio.
+  // ⓘ Nenhuma rota de API foi tocada. `POST /api/courses/[id]/claim` já existe,
+  // já aceita a marca (`claim:74`) e já foi provado: 201, matrícula ACTIVE com
+  // `origin = FREE_CLAIM`, idempotente e 409 para matrícula revogada.
+  const [claimTarget, setClaimTarget] = useState<StoreCourse | null>(null);
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+
+  const confirmarResgate = useCallback(async () => {
+    if (!claimTarget || claiming) return;
+    setClaiming(true);
+    setClaimError(null);
+    try {
+      const res = await fetch(`/api/courses/${claimTarget.id}/claim`, {
+        method: "POST",
+      });
+      // ⚠️ `fetch` falha de DOIS jeitos: rejeita (rede) e resolve com !ok. O
+      // try/catch cobre o primeiro; este ramo, o segundo.
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        // 404 aqui é a porta única de recusa da rota (curso inexistente, de
+        // outro workspace, não publicado ou que deixou de ser gratuito entre a
+        // vitrine carregar e o clique). A frase evita prometer o que sumiu.
+        setClaimError(
+          d.error || "Não foi possível resgatar o acesso. Tente novamente."
+        );
+        setClaiming(false);
+        return;
+      }
+      // Sucesso — inclusive `alreadyEnrolled: true`, que a rota devolve quando
+      // a matrícula já estava ATIVA (duplo clique, ou duas abas). Nos dois
+      // casos o destino é o mesmo: o curso.
+      router.push(`/course/${claimTarget.slug}`);
+    } catch {
+      setClaimError("Falha de conexão. Tente novamente.");
+      setClaiming(false);
+    }
+  }, [claimTarget, claiming, router]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [greeting, setGreeting] = useState(getGreeting);
@@ -580,6 +625,10 @@ export default function WorkspaceVitrinePage() {
                           featured={course.featured}
                           locked={!course.canManage}
                           isFree={course.isFree}
+                          onFreeClaim={() => {
+                            setClaimError(null);
+                            setClaimTarget(course);
+                          }}
                           showAccessBadge={course.showAccessBadge}
                           manageHref={
                             course.canManage
@@ -596,6 +645,35 @@ export default function WorkspaceVitrinePage() {
           </>
         )}
       </div>
+
+      {/* E4.4 etapa 2 — popup de confirmação do resgate.
+          ⭐ Componente da casa (`@/components/confirm-modal`), não inventado:
+          traz `role="dialog"`, `aria-modal`, fecha no Escape, foca o Cancelar e
+          desabilita os dois botões enquanto carrega. ⚠️ E tem ZERO `var(--…)`,
+          o que importa aqui: a vitrine vive sob o shell do WORKSPACE, não sob
+          `.course-customized`, então um modal acoplado ao tema do curso
+          renderizaria fora de escopo. (O `course-preview.tsx:161-198` tem um
+          modal à mão para o mesmo fim, mas ele usa `var(--member-button-text)`
+          e vive na página que a marca não alcança.)
+          ⚠️ Há DOIS componentes chamados `ConfirmModal` no repo — este é o de
+          `@/components/`, não o local de `producer/lives/_components/`. */}
+      <ConfirmModal
+        isOpen={!!claimTarget}
+        onClose={() => {
+          if (claiming) return;
+          setClaimTarget(null);
+          setClaimError(null);
+        }}
+        onConfirm={confirmarResgate}
+        title="Resgatar acesso"
+        message={
+          claimError ??
+          `Você vai receber acesso a ${claimTarget?.title ?? ""}. É gratuito.`
+        }
+        confirmText={claiming ? "Resgatando\u2026" : "Confirmar"}
+        variant={claimError ? "danger" : "info"}
+        loading={claiming}
+      />
     </div>
   );
 }
