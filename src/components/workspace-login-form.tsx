@@ -142,13 +142,40 @@ export function WorkspaceLoginForm({
               Voltar
             </button>
           ) : (
-            <Link
-              href={`/w/${slug}/forgot-password`}
-              className="hover:underline transition-colors"
-              style={{ color: theme.linkColor }}
-            >
-              Esqueci minha senha
-            </Link>
+            <>
+              <Link
+                href={`/w/${slug}/forgot-password`}
+                className="hover:underline transition-colors"
+                style={{ color: theme.linkColor }}
+              >
+                Esqueci minha senha
+              </Link>
+              {/* E4.4 etapa 2 — a porta de entrada de quem vem de fora.
+                  ⭐ Molde do irmão acima, byte a byte: mesmo `<Link>`, mesma
+                  classe, mesmo `theme.linkColor` — o link herda a cor que o
+                  produtor escolheu, como o "Esqueci minha senha" já herdava.
+                  É o par simétrico do rodapé da tela de cadastro, que diz
+                  "Já tem conta? Entrar".
+                  ⚠️ Fica FORA do ramo `requiresMfa`, junto do irmão: durante o
+                  desafio de 2FA a pessoa JÁ tem conta, e oferecer cadastro ali
+                  seria oferecer a saída errada.
+                  ⭐ DECISÃO DO DONO (10/set/26): aparece SEMPRE, mesmo em
+                  workspace sem curso gratuito — consciente de que, sem gratuito,
+                  quem se cadastra vê a vitrine e não tem o que resgatar. Escolha
+                  medida: o alternativo seria consultar `isFree` na tela de
+                  login, o que a faria depender do catálogo para desenhar o
+                  rodapé. */}
+              <p className="mt-2">
+                Não tem conta?{" "}
+                <Link
+                  href={`/w/${slug}/register`}
+                  className="hover:underline font-medium transition-colors"
+                  style={{ color: theme.linkColor }}
+                >
+                  Criar conta
+                </Link>
+              </p>
+            </>
           )}
         </div>
       }
