@@ -35,6 +35,45 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-11 — O e-mail de RECOMPRA em produção (9.291 ✅ · 9.292) e a lista do dono (9.293-9.295)
+
+**Merge:** `6fa8761` (`--no-ff`, 2 pais) · **SHA de volta:** `f83d888` · **1 arquivo:** `src/lib/email-templates.ts`
+**Deployment:** Production `success` às 21:04:57Z (GitHub deployments + check da Vercel)
+
+### O defeito, e por que não era do funil
+`ensureUserByEmail` só cria credencial `if (!existingCred)` — quem já tem senha **mantém a dele**, e o webhook devolve `tempPassword: undefined`. Isso está **certo**. O errado era o e-mail: nos templates da casa o bloco de credenciais **sumia inteiro**; no texto do produtor, `{senha}` virava **string vazia** e sobrava *"Senha:"* seguido de nada.
+
+**Alcance medido em produção:** **3 de 46** workspaces usam `{senha}` em texto próprio · **268** alunos com credencial neles · **111 já compraram 2+ cursos** — 111 pessoas já receberam o rótulo vazio. Os outros **41** ficavam mudos.
+
+### O gate que dava a segurança de mexer
+| caminho | conta nova (antes × depois) | recompra |
+|---|---|---|
+| sem customização | **3106 = 3106** ✅ | difere ✅ |
+| HTML cru do produtor | **84 = 84** ✅ | difere ✅ |
+| tematizado corpo padrão | **2281 = 2281** ✅ | difere ✅ |
+| tematizado `emailBody` | **1947 = 1947** ✅ | difere ✅ |
+
+⭐ **4/4 idênticos onde não pode mudar, 4/4 diferentes onde deve.** Rodado duas vezes: contra a branch (O4) e contra a **árvore mesclada** (P3). Sem a coluna da direita, a da esquerda poderia ser sonda cega.
+
+### ⚠️ O que NÃO se prova, e digo com todas as letras
+**O e-mail real chegando a uma caixa.** `email-templates.ts` é código de **servidor**: as frases não vão para o bundle do cliente (**0** em `.next/static/`, **2 arquivos** em `.next/server/`), e `/api/admin/test-email` **envia de verdade** — proibido nesta rodada, e ele sempre passa `"temp1234"`, ou seja, só renderiza conta nova. **A confirmação final é a próxima recompra real.**
+
+### Método
+- 🔴 **O discriminador de deploy que eu tinha não servia.** Como o commit só toca código de servidor, **a lista de chunks do cliente saiu byte-idêntica** — esperei 7 minutos por uma mudança que nunca viria. O sinal certo era a **fonte autoritativa**: `gh api .../deployments` e o check da Vercel no commit. ⭐ **Quando a mudança é só de servidor, o artefato público não muda — e insistir nele é confundir "não vejo" com "não aconteceu".**
+- ⭐ **Medir antes de escrever o item salvou a premissa do 9.293.** O pedido dizia "o azul vem do `@default` do schema". Medido: **só o login tem `@default`**. E-mail, vitrine e área de membros são `String?` **sem default** — o azul vem de **fallback no código**, e como a maioria está **nula** (39/46 no e-mail, 37/46 na vitrine), mudar o fallback alcança quase todos **na hora**. O login é o inverso: 46 de 46 têm valor **gravado**, então mexer no default não move ninguém. **Dois problemas com o mesmo sintoma e custos opostos.**
+
+### O conserto
+`applyVars` ganhou 3º parâmetro **opcional** `senhaVazia`, passado só nas **duas chamadas de corpo** — assunto e rodapé de fora de propósito (`{senha}` tem 0 ocorrências neles, com controle positivo de 5 ws com `emailTitle`). Os dois ramos `: ""` viraram blocos com o aviso. As frases vivem em 3 constantes no topo. ⛔ Nenhuma senha é enviada a quem já tem conta — o texto aponta para *"Esqueci minha senha"*. ⛔ O texto do produtor não foi reescrito: só a variável, conferida nos **3 textos reais**.
+
+**Gate humano:** o dono leu os **4 e-mails renderizados em texto** e aprovou as palavras.
+
+### Abertos nesta rodada
+- **9.292** — a prévia do produtor usa `SAMPLE.senha = "mc-ABCD"` sempre: ele nunca vê como fica a recompra. Foi por isso que o espelho não precisou mudar, mas a lacuna fica.
+- **9.293** — os azuis padrão nas 4 telas, com a tabela de custo por lugar.
+- **9.294 / 9.295** — a aba "Personalizar tela de cadastro" (2 modelos, vídeo com botão atrasado, popup) e o HTML próprio. Registrados como **pedido**, sem desenho — mas com o que a experiência do e-mail já ensina anotado, para não se redescobrir.
+
+---
+
 ## 2026-09-11 — E4.4 fatia 3 EM PRODUÇÃO: o CAPTCHA, e o funil FECHADO (9.287 ✅ · 9.171 ✅ · 9.289 · 9.290)
 
 **Merge:** `83f7dd5` (`--no-ff`, 2 pais) · **SHA de volta:** `96d800c` · **Branch:** `feat/e4.4-fatia3-captcha`
