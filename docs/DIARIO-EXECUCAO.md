@@ -35,6 +35,67 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-11 — E4.4 fatias 2c+2d EM PRODUÇÃO: a TELA de cadastro e o link "Criar conta" (9.287 metade · 9.288)
+
+**Merge:** `0bc7d82` (`--no-ff`, 2 pais) · **SHA de volta:** `801427a` · **Branch:** `feat/e4.4-fatia2d-link-criar-conta`
+**Commits:** `8d6fcd8` (tela + proxy, 3 arquivos) · `007378d` (o link, 1 arquivo) — **4 arquivos, todos em `src/`, 0 em `prisma/`**
+
+### O que mudou
+O funil de curso gratuito deixou de ser inalcançável. A rota de cadastro (`9.285`) e o resgate na vitrine (`9.286`) já estavam em produção desde `03d00a7`, mas **nenhum caminho de cliques chegava neles**: a conta só nascia por `POST`. Agora a tela `/w/<slug>/register` existe e o rodapé da tela de login dos **45 workspaces** convida com "Criar conta".
+
+**MUDA PIXEL: sim** — é a primeira mudança visível desta frente para o público.
+
+### A isenção do proxy — provada, não afirmada
+```
+antes:  /^\/w\/[^/]+\/(login|forgot-password|reset-password)\/?$/
+depois: /^\/w\/[^/]+\/(login|forgot-password|reset-password|register)\/?$/
+```
+O diff mostra **11 linhas adicionadas** e isso assustou o gate. Discriminei: **10 são comentário, 1 é código**. A prova definitiva não foi contar linhas — foi remover comentários e espaços dos dois arquivos e comparar: `HEAD == main` com `"|register"` inserido **uma única vez**, **delta = 9 bytes = `len("|register")`**. O regex segue ancorado em `$`. E `/register` / `/producer/register` da raiz são `Set.has(pathname)` de path **exato** — li o proxy inteiro para confirmar que não há colisão possível.
+
+### O gate — dois 🔴 que eram expectativa minha, não defeito
+O comando previa **3 arquivos** e o diff deu **4**; previa **1 linha** no proxy e deu **11**. Nos dois casos a régua estava errada, não o código: o "3 arquivos" descrevia a fatia 2c sozinha (a subida leva 2c **+** 2d), e as 11 linhas eram 10 de comentário. **Discriminei antes de seguir em vez de aceitar por semelhança** — e antes de mesclar conferi por `shasum`, com **controle positivo provando a sonda viva**, que seguem byte-idênticos: a rota de cadastro, o claim, a **Porta 3** (`by-slug/[slug]/init`), `workspace-access.ts` e `schema.prisma`. `allowMembership`: a lista de 6 arquivos é **idêntica** antes e depois.
+
+### A prova em produção (SHA `0bc7d82`, 11/set 00:36 UTC)
+| medida | antes | depois |
+|---|---|---|
+| `/w/<slug>/register` (2 workspaces) | **307** → login | **200** ⭐ |
+| `login`, `forgot-password`, `reset-password` | 200/200/200 | **200/200/200** ✅ inalteradas |
+| `/sw.js` · `/_next/image` · 3 rotas de API | 200·200·404/404/401 | **idênticos** ✅ |
+| "Criar conta" na tela de login | **0** | **1**, com `href` do próprio workspace |
+| cursos gratuitos · FREE_CLAIM · marcas | 0/0/0 | **0/0/0** ✅ inerte |
+| interruptor (workspaces ligados) | 25 | **25** ✅ |
+
+A tela nova abre com os 4 campos (Nome, Email, WhatsApp, Senha) na cor do produtor e **0 ocorrências de captcha** — que é o esperado, porque a fatia 3 não subiu.
+
+### ⭐ 9.288 — a cor que parecia fixa era o `@default` do BANCO
+Um observador relatou o link sempre lilás (`#818cf8`) e a hipótese era hardcode. **Morreu no discriminador:** `#818cf8` tem **0 ocorrências em todo o `src/`**, e o default do código é outro (`#3b82f6`). Os dois links do rodapé usam a **mesma expressão byte a byte**.
+
+Provei duas vezes. No palco, com 1 escrita reversível: mudar a cor de um workspace moveu **OS DOIS** links; o controle intocado não moveu nenhum. Em produção, **sem escrever nada**, por discriminação de 3 lados:
+
+| workspace | banco | link servido |
+|---|---|---|
+| `3n-trader` | `#ff6b6b` | **`#ff6b6b`** |
+| `applyfy-cursos` | `#3b82f6` | **`#3b82f6`** |
+| `arkad-select` | `#818cf8` | **`#818cf8`** |
+
+**Por que pareceu fixo:** `prisma/schema.prisma:92` — `loginLinkColor String? @default("#818cf8")`. **45 de 45** workspaces têm o campo preenchido e **31 (69%) nunca customizaram**. A observação era estatisticamente razoável e falsa no mecanismo. **Fechado sem fix, sem tocar em código.**
+
+### ⚠️ O que fica ABERTO, com todas as letras
+**O captcha (9.287, fatia 3) não subiu.** Medido no HTML servido: 0 ocorrências de `turnstile`/`challenges.cloudflare`. Em `src/` há 2 ocorrências e **as duas são comentário** marcando o ponto de instalação.
+
+**Enquanto essa fatia não subir, o ÚNICO freio contra cadastro em massa é o rate-limit de 100 por minuto por IP.** Com 100 IPs são 10.000 contas por minuto. O dano hoje é limitado porque o funil está **inerte** — 0 cursos gratuitos, então conta criada não recebe acesso a nada; o custo é **lixo em `User` + `WorkspaceCredential` + `WorkspaceMembership`**, não conteúdo vazado. ⓘ E a pergunta **#3 do §9.3** (`UPSTASH_*` configurado na Vercel?) ainda decide se o teto é 100 ou 100 × nº de instâncias: **nem o freio único está medido.**
+
+### Método — o que aprendi nesta rodada
+- **Zero-e-zero é sonda quebrada, de novo.** Ao devolver o palco, todos os alvos deram `000` e o controle negativo deu ✅ **falsamente** ("não existe = é o palco"). O palco não tinha subido: `start:staging` **não existe** no `package.json` (só `dev:staging`, `build:staging`, `start`). A versão certa da sonda exige os **dois lados respondendo**: palco `200` × produção `404`.
+- **Dry-run antes de DELETE salvou o elenco.** O padrão `@staging.test` casou **21 contas de agosto** — o elenco permanente de personas. As contas deste épico eram 5, de setembro, identificáveis pela marca `origin=PUBLIC_SIGNUP`. Apaguei por **lista explícita de e-mails**, e conferi o elenco **21 antes e 21 depois**.
+- **Numeração: o padrão importa.** `grep '9\.[0-9]{3}'` devolveu "9.999" como maior item — era ruído de `19.307`, `29.626`, `119.808` e de controles negativos inventados. Com o padrão de item real (`- [ ] **9.NNN —`) o maior é **9.287**, e o **9.288** foi confirmado livre nas **33 branches**.
+
+### Limpeza do palco
+`SUPABASE_REF = wxynnsyartxcvglqwmdw` impresso antes de cada escrita. 5 contas do épico removidas (2 `Enrollment`, 5 `WorkspaceCredential`, 3 `WorkspaceMembership`, 5 `User`), `curso-pago-palco` devolvido a `isFree=false`. Contagem zero: contas-alvo 0 · marcas 0 · FREE_CLAIM 0. **Elenco de agosto: 21 antes, 21 depois.** ⓘ **Declaro o que NÃO limpei:** sobrou `curso-corrida-923` com `isFree=true` no palco — é de **20/ago, do épico 9.23**, não deste. Não toquei por escopo.
+Palco reconstruído: `rm -rf .next` → `build:staging` → `BUILD_ID=E7xP1VjhZ3UThgcq4WwOb`, provado por discriminação.
+
+---
+
 ## 2026-09-10 — E4.4 etapa 2 EM PRODUÇÃO: o cadastro público e o resgate na vitrine (9.285, 9.286, 9.287)
 
 > ⚠️ **Muda pixel? SIM** — o card da vitrine, para curso gratuito.
