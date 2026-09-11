@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { generateSalt, hashPassword } from "@/lib/workspace-auth";
 import { publicSignupSchema, validateBody } from "@/lib/validations";
 import { logger } from "@/lib/logger";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 /**
  * E4.4 etapa 2, FATIA 1 — CADASTRO PÚBLICO do workspace.
@@ -28,6 +29,9 @@ import { logger } from "@/lib/logger";
  *     descartados no parse. ⚠️ O `registerSchema` da casa TEM `.passthrough()`
  *     (36 dos 86 schemas têm) — por isso ele não é reusado aqui.
  *  4. `workspaceId` vem do SLUG da URL, nunca do corpo.
+ *  5. ⭐ FATIA 3 — o CAPTCHA (Cloudflare Turnstile), verificado no servidor
+ *     ANTES de qualquer outra coisa que custe. Até aqui o único freio era o
+ *     `rateLimit` de 100/min por IP: com 100 IPs eram 10.000 contas/minuto.
  *
  * ⭐ Decisão do dono (10/set): e-mail já cadastrado NÃO cria nada — responde
  * "você já tem conta, faça login". ⚠️ Isso revela existência de e-mail por
@@ -49,6 +53,47 @@ export async function POST(
   const params = await props.params;
   try {
     const raw = await request.json().catch(() => ({}));
+
+    // ⭐ O CAPTCHA VEM ANTES DO SCHEMA, e isso é deliberado: quem não passou
+    // pela porta não tem os dados validados, e o parse não se gasta com ele.
+    // O token entra como 5º campo do corpo; o `publicSignupSchema` é FECHADO
+    // (`z.object` sem `.passthrough()`), então ele é descartado no parse e
+    // nunca chega perto do banco.
+    //
+    // ⛔ FAIL-CLOSED nos QUATRO motivos. ⚠️ Isto INVERTE a decisão de 30/08
+    // registrada no §10 do PLANO-E4.4 e no item 9.171 ("o captcha é
+    // FAIL-OPEN: se o Turnstile não carrega, o cadastro passa"). A ordem de
+    // 11/set é explícita — "se o token faltar ou for inválido, recusa" — e é
+    // o lado conservador para uma porta de ACESSO. O custo está registrado no
+    // item: se a Cloudflare cair, ninguém se cadastra enquanto durar.
+    //
+    // ⭐ E cada motivo vira uma linha de log PRÓPRIA — é o 9.171 inteiro: hoje
+    // "configuração errada" e "Cloudflare fora" são indistinguíveis, e as
+    // consequências são opostas (uma precisa de deploy, a outra passa sozinha).
+    const captcha = await verifyTurnstile(
+      (raw as { turnstileToken?: unknown })?.turnstileToken
+    );
+    if (!captcha.ok) {
+      logger.error("public-signup", `captcha recusado: ${captcha.reason}`, {
+        slug: params.slug,
+        reason: captcha.reason,
+        codes: captcha.codes.join(",") || "-",
+      });
+      // A pessoa legítima precisa saber se tenta de novo agora ou daqui a
+      // pouco — são falhas de naturezas diferentes e a frase acompanha.
+      const doLadoDeCa =
+        captcha.reason === "not-configured" ||
+        captcha.reason === "unreachable";
+      return NextResponse.json(
+        {
+          error: doLadoDeCa
+            ? "Não foi possível concluir a verificação de segurança. Tente novamente em alguns instantes."
+            : "Verificação de segurança não concluída. Recarregue a página e tente novamente.",
+        },
+        { status: 403 }
+      );
+    }
+
     const v = validateBody(publicSignupSchema, raw);
     if (!v.success) return v.error;
 
