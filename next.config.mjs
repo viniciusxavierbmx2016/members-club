@@ -45,7 +45,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://player.vimeo.com https://player.pandavideo.com.br https://static.cloudflareinsights.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://player.vimeo.com https://player.pandavideo.com.br https://static.cloudflareinsights.com https://challenges.cloudflare.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
               "font-src 'self' data: https://fonts.gstatic.com",
@@ -62,7 +62,7 @@ const nextConfig = {
               // frame-src sozinho NÃO bastou) não se repetiu aqui.
               // ⚠️ Host EXATO, sem apex e sem wildcard: o parser só aceita
               // `scripts.converteai.net`, e a CSP acompanha esse recorte.
-              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br https://scripts.converteai.net",
+              "frame-src 'self' https://*.youtube.com https://*.vimeo.com https://*.stripe.com https://www.youtube-nocookie.com https://*.tv.pandavideo.com.br https://*.pandavideo.com.br https://scripts.converteai.net https://challenges.cloudflare.com",
               "worker-src 'self' blob:",
               "manifest-src 'self'",
             ].join("; "),

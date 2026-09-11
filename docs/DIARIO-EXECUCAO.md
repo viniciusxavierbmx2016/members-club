@@ -35,6 +35,66 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-11 — E4.4 fatia 3 EM PRODUÇÃO: o CAPTCHA, e o funil FECHADO (9.287 ✅ · 9.171 ✅ · 9.289 · 9.290)
+
+**Merge:** `83f7dd5` (`--no-ff`, 2 pais) · **SHA de volta:** `96d800c` · **Branch:** `feat/e4.4-fatia3-captcha`
+**4 arquivos:** `src/lib/turnstile.ts` (novo, 100 linhas) · `w/[slug]/register/route.ts` · `workspace-register-form.tsx` · `next.config.mjs`
+
+### O que mudou
+O funil de curso gratuito está **completo**. Até ontem o único freio contra cadastro em massa era o rate-limit de 100/min por IP — com 100 IPs, 10.000 contas por minuto.
+
+**⛔ FAIL-CLOSED, invertendo a decisão de 30/08.** O §10 do PLANO-E4.4 e o 9.171 registravam *"o captcha é FAIL-OPEN: se o Turnstile não carrega, o cadastro passa"*. A ordem do dono foi o oposto, e é o lado certo para uma porta de acesso. **Custo escrito no item:** se a Cloudflare cair, ninguém se cadastra enquanto durar.
+
+### A prova em produção (SHA `83f7dd5`, nos DOIS hosts)
+| medida | antes | depois |
+|---|---|---|
+| POST sem token | **400** "Nome muito curto" (schema) | **403** captcha ⭐ |
+| token vazio · token falso · corpo vazio | — | **403 · 403 · 403** |
+| `User` · `WorkspaceCredential` · `WorkspaceMembership` | 28.135 · 29.029 · 0 | **delta 0 · 0 · 0** ✅ |
+| CSP `script-src` / `frame-src` / `connect-src` | 0 / 0 / 0 | **1 / 1 / 0** ✅ |
+| widget no bundle | 0 | **1 chunk**, com a sitekey de 24 chars inlinada |
+| `/sw.js` | sha `16544c87…` | **byte-idêntico** ✅ |
+| 3 telas irmãs | sem widget | **sem widget** (14/14 com marcador positivo) |
+| vigia · interruptor | 0/0/0 · 25 | **0/0/0 · 25** ✅ |
+
+⭐ **O discriminador de 400 → 403 foi o melhor gate desta rodada:** `400 "Nome muito curto"` provava que o **schema** barrava; `403` prova que o **captcha** barra **antes** dele. A ordem do código virou observável de fora.
+
+### ⭐ O 9.171 fechou — e o motivo ficou público
+`verifyTurnstile` devolve resultado **discriminado**: `not-configured` · `missing-token` · `invalid-token` · `unreachable`. Cada um é uma linha de log com os `error-codes`; e a rota escolhe a **frase ao visitante** pelo lado da falha (*"alguns instantes"* = lado de cá · *"Recarregue a página"* = lado do visitante).
+
+**Foi por essa frase que provei, sem acesso a log nenhum, que a secret está certa:** só a segunda apareceu ⇒ não é `not-configured`; e no caso do token falso a Cloudflare **respondeu e recusou** ⇒ a secret é aceita. **O cadastro não está parado.**
+
+### 🔴 O que a fatia deixou aberto — e achei provando, não supondo
+**9.289** — a Cloudflare devolve `success:false` em dois casos **opostos**: `invalid-input-response` (token ruim, culpa do visitante) e `invalid-input-secret` (**secret ruim, bug nosso**). Meu código classifica os dois como `invalid-token`. **`not-configured` só pega env AUSENTE, nunca env ERRADA** — e o episódio da `sk_live_` acabou de mostrar que env errada é bem possível. É o 9.171 num degrau mais fundo: de fora, "secret certa + token falso" e "secret errada" são indistinguíveis.
+
+**9.290** — a secret do widget **v2 foi exposta em conversa**, igual à do v1 (9.169). Trocar quando for conveniente. ⚠️ Com a cicatriz do v1: lá a **rotação não efetivava** (mesmo `sha256` em 3 tentativas), então conferir a efetivação com o discriminador do §10.4 antes de dar por trocada. Risco baixo: a secret do Turnstile só valida tokens — não abre conta, dado nem dinheiro.
+
+### ⭐ O achado que atrasou a fatia — e por isso a salvou
+Antes de subir, o dono viu que `TURNSTILE_SECRET_KEY` na Vercel (Production, 30/ago) continha um valor começando com **`sk_live_`** — chave de API de **produção do Stripe**, no slot do captcha. Investiguei em somente-leitura antes de qualquer escrita:
+
+- **Nada em produção lia aquela variável:** 0 arquivos na `main` (controle: 57 usam `process.env`), 35 refs varridas — só a branch do captcha, não mesclada —, e os **3 commits da sonda de agosto não são ancestrais da main** (controle: `03d00a7` e `0bc7d82` são). ⇒ **o valor errado nunca teve efeito.**
+- **Nunca vazou:** 0 em 14 chunks servidos (com marcador positivo), 0 no repositório (os 2 achados eram placeholders de documentação), 0 nos `.env` locais.
+- **Stripe nunca funcionou aqui:** a rota existe e é alcançável, mas responde *"webhook secret not configured"*; **0 de 31.255** linhas do `WebhookLog` têm marca de Stripe — e os eventos `invoice.*` que pareciam dele são **todos do Hubla** (1.381, discriminados por payload). Os segredos de gateway vivem no **banco** (`WorkspaceGatewaySecret` = 4; `settings.applyfy_token:*` = 26), **nenhum em variável de ambiente**.
+
+⚠️ **Mas o risco era FUTURO:** `turnstile.ts:63` envia o valor dessa variável num POST para `challenges.cloudflare.com`. **Se esta fatia tivesse subido antes da correção, a chave do Stripe teria saído da infraestrutura para um terceiro no primeiro cadastro.** Nunca aconteceu. O dono corrigiu as duas variáveis e acrescentou o domínio principal ao widget antes deste merge.
+
+### ⭐ A lição: "verificação humana pendente" virou "está vazia"
+O diário de 30/08 registrou **certo**, como pendência: *"**Verificação humana na Vercel** (não é lida daqui): `TURNSTILE_SECRET_KEY` **deve estar** vazia"*. O `PAUSA-E4.4-FATIA1.md:275`, de 10/09, afirma como **fato**: *"**`TURNSTILE_SECRET_KEY` está vazia na Vercel**"*. **Ninguém tinha olhado.** O modo verbal se perdeu na cópia entre documentos, e uma expectativa virou medição escrita. Quem descobriu foi o dono, 11 dias depois, abrindo o painel.
+
+⇒ **Estado de painel copiado entre documentos leva o modo verbal junto**, com data e autor da última conferência real. Fato sem carimbo de quem mediu é expectativa disfarçada.
+
+### ⚠️ O que NÃO provei
+Que um cadastro **legítimo** passa em produção — exige token real de navegador. O gate humano 6/6 foi no palco. É a régua *"prova de API ≠ percurso de cliques"*, e digo com todas as letras em vez de deixar implícito.
+
+### Método
+- 🔴 **`echo "$VAR" | grep` corrompe bundle minificado no zsh.** Minha primeira prova do widget deu **0 em 14 chunks** e eu quase reportei que o widget não subiu. O `echo` do zsh interpreta escapes, e chunk minificado é cheio deles. Com `curl -o arquivo` + `grep arquivo`, o mesmo chunk tinha `turnstile`×10. **Conteúdo de arquivo nunca passa por `echo` — vai para arquivo e se grepa lá.**
+- **Dry-run antes do DELETE, de novo:** 1 conta do gate contra **21** do elenco permanente. Apagada por lista explícita, com o elenco contado **21 antes e 21 depois**.
+
+### Limpeza
+`SUPABASE_REF = wxynnsyartxcvglqwmdw` impresso antes de cada escrita. `qa-instant-click@staging.test` removida (1 credencial, 1 marca, 1 user). Contagem zero: alvos 0 · marcas 0 · FREE_CLAIM 0. ⓘ Fica `curso-corrida-923` (`isFree=true`, de 20/ago, épico 9.23) — declarado no J5, não é desta frente. Palco reconstruído: `rm -rf .next` → `build:staging` → `BUILD_ID=vtaA72b0rV4cm_yB9e30N`, provado por discriminação (palco 200 × produção 404) e com fail-closed também lá (403).
+
+---
+
 ## 2026-09-11 — E4.4 fatias 2c+2d EM PRODUÇÃO: a TELA de cadastro e o link "Criar conta" (9.287 metade · 9.288)
 
 **Merge:** `0bc7d82` (`--no-ff`, 2 pais) · **SHA de volta:** `801427a` · **Branch:** `feat/e4.4-fatia2d-link-criar-conta`
