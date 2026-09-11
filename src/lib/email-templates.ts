@@ -117,6 +117,32 @@ export function welcomeStudent(
   };
 }
 
+/**
+ * ⭐ O caso da RECOMPRA — quando `tempPassword` é `undefined`.
+ *
+ * `ensureUserByEmail` (webhook-helpers.ts:113) só cria credencial `if
+ * (!existingCred)`: quem JÁ tem senha naquele workspace mantém a dele, e o
+ * webhook devolve `tempPassword: undefined`. Correto — a senha é do aluno, e
+ * nós só temos o hash dela.
+ *
+ * ⛔ Mas até aqui o e-mail ficava MUDO sobre isso: nos templates da casa o
+ * bloco de credenciais sumia inteiro, e no texto escrito pelo produtor o
+ * `{senha}` virava string vazia — sobrava um rótulo órfão, "Senha:" seguido de
+ * nada. Medido em 11/set/26: 3 dos 46 workspaces usam `{senha}` em texto
+ * próprio, 268 alunos têm credencial neles e 111 já compraram 2+ cursos — ou
+ * seja, 111 pessoas já receberam o rótulo vazio.
+ *
+ * ⚠️ O caminho de CONTA NOVA não muda em nada: o ramo `tempPassword ? ...`
+ * segue byte-idêntico, e a senha continua sendo enviada como sempre.
+ */
+const SENHA_INALTERADA_CURTA =
+  "a mesma que você já usa aqui (se não lembrar, use \u201CEsqueci minha senha\u201D na tela de login)";
+
+const SENHA_INALTERADA_TITULO = "Sua senha continua a mesma";
+
+const SENHA_INALTERADA_TEXTO =
+  "Você já tem uma senha nesta área de membros \u2014 entre com o mesmo e-mail e a mesma senha de sempre. Se não lembrar, use \u201CEsqueci minha senha\u201D na tela de login.";
+
 export function studentAccessGranted(
   name: string,
   courseName: string,
@@ -135,7 +161,9 @@ export function studentAccessGranted(
            <p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Esta senha vale apenas para <strong>${workspaceName}</strong>. Recomendamos alterá-la após o primeiro login.</p>
          </td></tr>
        </table>`
-    : "";
+    : `${divider()}
+       ${paragraph(`<strong style='color:#ffffff;'>${SENHA_INALTERADA_TITULO}</strong>`)}
+       ${paragraph(SENHA_INALTERADA_TEXTO)}`;
 
   const html = baseTemplate(`
     ${heading(`Acesso liberado: ${courseName}`)}
@@ -201,12 +229,22 @@ export interface EmailVariables {
   workspace: string;
 }
 
-function applyVars(text: string, vars: EmailVariables): string {
+function applyVars(
+  text: string,
+  vars: EmailVariables,
+  // ⭐ Só o CORPO pede o fallback. Assunto e rodapé passam sem ele de
+  // propósito: uma frase de 89 caracteres num `subject` seria pior que o
+  // vazio. Medido em 11/set/26: `{senha}` tem 0 ocorrências em `emailTitle`
+  // e em `emailFooter` — o parâmetro existe para que continue assim se
+  // alguém escrever um amanhã.
+  opts?: { senhaVazia?: string }
+): string {
+  const senha = vars.senha || opts?.senhaVazia || "";
   return text
     .replace(/\{nome\}/g, vars.nome)
     .replace(/\{email\}/g, vars.email)
     .replace(/\{curso\}/g, vars.curso)
-    .replace(/\{senha\}/g, vars.senha)
+    .replace(/\{senha\}/g, senha)
     .replace(/\{link\}/g, vars.link)
     .replace(/\{workspace\}/g, vars.workspace);
 }
@@ -224,7 +262,9 @@ export function buildAccessEmail(
   if (config.emailUseCustomHtml && config.emailCustomHtml) {
     return {
       subject: subjectFor(`Seu acesso ao curso ${vars.curso}`),
-      html: applyVars(sanitizeEmailHtml(config.emailCustomHtml), vars),
+      html: applyVars(sanitizeEmailHtml(config.emailCustomHtml), vars, {
+        senhaVazia: SENHA_INALTERADA_CURTA,
+      }),
     };
   }
 
@@ -272,7 +312,9 @@ export function buildAccessEmail(
     ? applyVars(config.emailTitle, vars)
     : `Bem-vindo(a) ao ${vars.curso}!`;
   const bodyHtml = config.emailBody
-    ? applyVars(config.emailBody, vars).replace(/\n/g, "<br>")
+    ? applyVars(config.emailBody, vars, {
+        senhaVazia: SENHA_INALTERADA_CURTA,
+      }).replace(/\n/g, "<br>")
     : `
       <p style="margin:0 0 14px;">Olá <strong>${vars.nome}</strong>,</p>
       <p style="margin:0 0 14px;">Seu acesso ao curso <strong>${vars.curso}</strong> foi liberado!</p>
@@ -281,7 +323,9 @@ export function buildAccessEmail(
           ? `<p style="margin:0 0 6px;">Seus dados de acesso:</p>
              <p style="margin:0 0 4px;"><strong>Email:</strong> ${vars.email}</p>
              <p style="margin:0 0 14px;"><strong>Senha:</strong> ${vars.senha}</p>`
-          : ""
+          : `<p style="margin:0 0 6px;"><strong>${SENHA_INALTERADA_TITULO}</strong></p>
+             <p style="margin:0 0 4px;"><strong>Email:</strong> ${vars.email}</p>
+             <p style="margin:0 0 14px;">${SENHA_INALTERADA_TEXTO}</p>`
       }
     `;
 
