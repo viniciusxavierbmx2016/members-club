@@ -358,7 +358,19 @@ html:not(.dark) .course-customized .hover\:bg-gray-100:hover { background-color:
 .dark .course-customized .text-primary { color: var(--member-primary, #3b82f6) !important; }
 html:not(.dark) .course-customized .bg-card { background-color: var(--member-card, #ffffff) !important; }
 html:not(.dark) .course-customized .bg-primary { background-color: var(--member-primary, #3b82f6) !important; }
-html:not(.dark) .course-customized .text-primary { color: var(--member-primary, #3b82f6) !important; }
+/* FATIA 2/3 · a 10ª regra de TEXTO do modo claro, que ficou fora do padrão.
+   As outras 9 (`:460`, `:461`, `:487-495`) já leem `--member-ink` desde 06/set;
+   esta lia a marca CRUA. Medido em 12/set nas 12 marcas reais de produção:
+   10 delas dão MENOS de 4,5 sobre branco (`#ffffff` dá 1,00; o lime, 1,11), e
+   com o ink nenhuma fica abaixo — 11 melhoram, 1 fica igual, 0 pioram.
+   ⚠️ E o pixel de HOJE não muda: `.text-primary` sem prefixo `dark:` tem ZERO
+   ocorrências dentro de `.course-customized` (medido com controle positivo —
+   `text-blue` tem 19 na mesma árvore). Os 2 pontos que existem vivem na VITRINE
+   e no `course-card`, ambos FORA da classe. É correção PREVENTIVA: alinha a
+   regra às irmãs para que o próximo `.text-primary` na árvore do curso já
+   nasça legível. ⛔ A irmã `:360` NÃO entra: é FUNDO, e o único ponto que ela
+   alcança (`course/[slug]/page.tsx:373`) já usa `--member-button-text`. */
+html:not(.dark) .course-customized .text-primary { color: var(--member-ink, var(--member-primary, #3b82f6)) !important; }
 
 /* Primary color — buttons, links, progress bars, accents */
 .course-customized .bg-blue-600 { background-color: var(--member-primary, #2563eb) !important; }
