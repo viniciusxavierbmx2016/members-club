@@ -35,6 +35,56 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-12 — O botão do e-mail em lime (9.296 ✅) — e o espelho que ficou para trás (9.297)
+
+**Merge:** `f0e3e2d` (`--no-ff`, 2 pais) · **SHA de volta:** `3dacc58` · **1 arquivo:** `src/lib/email-templates.ts`
+**Deployment:** Production `success` às 04:47:13Z — confirmado por `gh api .../deployments` e pelo check da Vercel, **não** pelos chunks (a lição de ontem).
+
+### O par junto
+O azul padrão do botão virou o lime da casa (`#EFFF20`) e o branco **cravado** virou `contrastingTextColor(primaryColor)`. ⛔ **As duas na mesma linha, por construção** — branco sobre lime dá **1,11**, e o lime é uma cor clara que inverte o que o azul fazia. Trocar só o fundo seria criar o defeito que três comandos seguidos vieram consertando.
+
+**Padrão:** `3,68` → **`17,91`**. **Evitado:** `1,11`.
+
+### ⭐ O ganho que não estava no pedido
+Dos **7** workspaces com `emailPrimaryColor` própria, **5 já estavam abaixo de 4,5 hoje** — e ninguém sabia:
+
+| workspace | cor | antes | depois |
+|---|---|---|---|
+| `combo-presets` | `#ffca10` | **1,53** | **12,92** |
+| `formacao-home-office-fho` | `#ffb22e` | **1,80** | **10,99** |
+| `milena-business` | `#26ba12` | **2,59** | **7,65** |
+| `embarque-milionario` | `#af8750` | 3,28 | **6,04** |
+| `3n-trader` | `#e53935` | 4,23 | **4,68** |
+
+**5 melhoram · 2 iguais · 0 pioram.** A cor do produtor continua a dele; só o texto passou a sair dela. E como o helper **segue a cor** (escura → branco, clara → quase-preto), os 2 de cor escura saem **byte-idênticos**.
+
+### O gate, em duas camadas
+**Renderização comparada** contra a árvore mesclada: 3 dos 4 caminhos **idênticos**, e o que difere tem **1 fragmento de 66** — o `<a>` do botão. **Artefato compilado:** `background-color:${z}` e `color:${A}` são **variáveis** (o cravado saiu), e o fallback lê `emailPrimaryColor||PRODUCER_THEME_DEFAULTS.primaryColor`.
+
+### 🔴 E o que eu deixei passar: o espelho
+A prova no artefato encontrou `color:#ffffff;…">Acessar agora` num chunk que **não era** o do e-mail — era `producer/workspaces/[id]/edit`. É o **espelho client-side** (`email-tab.tsx`), o preview do produtor. Medido: **8 ocorrências de `#3b82f6`, 0 de `#EFFF20`**.
+
+⇒ **O produtor abre o editor e vê um botão azul; o e-mail sai lime.** Virou o **9.297**.
+
+⭐ **O erro de método, e ele é fino:** ontem, no gate da fatia do texto, concluí que o espelho "não precisava mudar" — e estava **certo**, para o eixo que eu estava olhando (o caso da recompra, que o preview nem renderiza). Hoje mexi em **outro eixo do mesmo espelho** (a cor) e **reusei a conclusão anterior sem remedir**. Uma conclusão sobre um espelho vale para o eixo em que foi medida, não para o espelho inteiro.
+
+ⓘ **Não reverti**, e digo por quê: o defeito é de **prévia** (cosmético, atinge produtores no editor) e o ganho é **5 botões ilegíveis consertados** para alunos reais. Reverter trocaria um problema grande por um pequeno. O conserto do espelho é item, e vai junto com o **9.292** — os dois vivem no mesmo arquivo.
+
+### E o que fica registrado sem conserto
+**9.298** — outros **4 textos cravados** sobre `emailBgColor`/`emailBoxColor`. **6 workspaces já abaixo de 4,5 hoje**; o pior é `embarque-milionario`, que escolheu fundos claros e tem corpo em **1,61**. Não entrou pelo critério declarado no 9.296 (*entra junto o que ESTA fatia quebraria*) — nenhum é quebrado por ela. E consertar exige **decisão de design**: a hierarquia título-branco / corpo-cinza / rodapé-fraco some se os três virarem a mesma cor calculada.
+
+### O estado da lista do dono
+| pedido | onde está |
+|---|---|
+| **e-mail** | ✅ **feito** (9.296) — falta só a prévia (9.297) |
+| **área de membros** | é a **virada**: 25 ligados, **21 por ligar**. Decisão do dono, não código |
+| **vitrine** | 🔴 **bloqueada** — `--producer-*` veste vitrine **e** painel do produtor; separar antes (9.293) |
+| **login** | ⏸️ decisão pendente: 46 de 46 têm cor **gravada**, o `@default` não alcança ninguém (9.288 · 9.293) |
+| **aba "Personalizar cadastro"** | 📝 registrada (9.294) |
+| **HTML próprio na aba** | 📝 registrado (9.295) |
+
+---
+
 ## 2026-09-11 — O e-mail de RECOMPRA em produção (9.291 ✅ · 9.292) e a lista do dono (9.293-9.295)
 
 **Merge:** `6fa8761` (`--no-ff`, 2 pais) · **SHA de volta:** `f83d888` · **1 arquivo:** `src/lib/email-templates.ts`

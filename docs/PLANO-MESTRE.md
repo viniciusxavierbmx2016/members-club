@@ -1922,6 +1922,33 @@ Cada um: Dev Brabo completo (read-only → proposta → staging → merge `--no-
   ⭐ **É o 9.171 num degrau mais fundo:** `not-configured` só dispara com a env **AUSENTE**, nunca com a env **ERRADA** — e foi exatamente uma env errada que o 9.288-irmão (a `sk_live_`) mostrou ser possível. Consequência medida: **daqui de fora, "secret correta + token falso" e "secret errada" são indistinguíveis**, e no segundo caso o cadastro está PARADO sem que nada diga isso.
   **FIX:** ler `error-codes` e mapear `invalid-input-secret` (e `bad-request`) para `not-configured`. O `codes` já é logado — falta a **classificação**. ⓘ Não consertei na mesma rodada porque o comando era de subida e a papelada era só de docs. → Camada 4 · **E4.4 etapa 2 · fatia 3**
 
+- [x] **9.296 — O botão do e-mail: lime da casa + texto calculado, e 5 produtores consertados de carona** ✅ — **EM PRODUÇÃO em 12/set/26, merge `f0e3e2d`.**
+  **O par junto, e é a fatia.** O azul padrão (`#3b82f6`) virou `PRODUCER_THEME_DEFAULTS.primaryColor` (**`#EFFF20`**) e o branco **cravado** virou `contrastingTextColor(primaryColor)`. ⛔ Trocar só o fundo seria criar o defeito: **branco sobre lime dá 1,11** — o lime é uma cor CLARA e inverte o que o azul fazia. As duas saem da **mesma linha**, por construção.
+  **Contraste do padrão:** `3,68` (branco/azul, só texto grande) → **`17,91`** (`#0a0a0a`/lime). ⛔ O que se evitou: **1,11**.
+  ⭐ **E CONSERTOU QUEM JÁ TINHA COR PRÓPRIA — ganho medido, não escopo novo.** Dos 7 workspaces com `emailPrimaryColor`, **CINCO estavam abaixo de 4,5 hoje** com o branco cravado:
+  | workspace | cor | antes | depois |
+  |---|---|---|---|
+  | `combo-presets` | `#ffca10` | **1,53** 🔴 | **12,92** ✅ |
+  | `formacao-home-office-fho` | `#ffb22e` | **1,80** 🔴 | **10,99** ✅ |
+  | `milena-business` | `#26ba12` | **2,59** 🔴 | **7,65** ✅ |
+  | `embarque-milionario` | `#af8750` | 3,28 ⚠️ | **6,04** ✅ |
+  | `3n-trader` | `#e53935` | 4,23 ⚠️ | **4,68** ✅ |
+  | `mentoria-individual` · `shop-club` | escuras | 12,12 · 12,36 ✅ | **iguais** |
+  ⇒ **5 melhoraram, 2 iguais, ZERO pioraram.** A cor do produtor continua a dele; só o texto passou a ser calculado a partir dela.
+  ⭐ **Segue a cor, não escurece tudo:** marca escura → **branco**; marca clara → quase-preto. É por isso que os 2 de cor escura saem **byte-idênticos**.
+  **GATE contra a árvore mesclada:** sem customização (36 ws) **idêntico** · HTML cru (2 ws) **idêntico** · tematizado com cor escura **idêntico** · tematizado sem cor própria **difere, e o diff do HTML renderizado tem UM fragmento de 66**: o `<a>` do botão. **No artefato compilado:** `background-color:${z}` e `color:${A}` — as duas são **variáveis**, e o fallback lê `emailPrimaryColor||PRODUCER_THEME_DEFAULTS.primaryColor`.
+  ⚠️ **Não se prova por fora que o e-mail chega** — é código de servidor. **A confirmação é a próxima venda.** → Camada 4 · **Identidade visual**
+
+- [ ] **9.297 — 🔴 A prévia do e-mail no painel ficou DIVERGENTE do e-mail real** 🟠 — **DEFEITO CRIADO PELO 9.296, achado na prova do artefato (12/set/26).** O espelho client-side `email-tab.tsx` tem o botão com `#3b82f6` e `color:#ffffff` **cravados** — medido no chunk servido: **8 ocorrências de `#3b82f6`, 0 de `#EFFF20`**.
+  ⇒ **O produtor abre o editor, vê um botão AZUL com texto branco, e o e-mail sai LIME com texto escuro.** Não quebra função; quebra a confiança na prévia.
+  ⓘ **Por que não entrou junto:** o comando da subida proibia tocar em arquivo além de `email-templates.ts` e docs. ⓘ **E por que não foi previsto:** no gate da fatia anterior conclui que o espelho "não precisava mudar" — e estava certo **para o caso da recompra**, que era o que eu estava olhando. A **cor** é outro eixo do mesmo espelho, e não foi medida. Companheiro do **9.292** (a prévia também não mostra a recompra): **os dois se consertam no mesmo lugar.**
+  **FIX:** o espelho precisa importar `PRODUCER_THEME_DEFAULTS` e `contrastingTextColor`, como o template real. → Camada 4 · **Identidade visual**
+
+- [ ] **9.298 — 4 textos cravados sobre a cor de FUNDO do e-mail; 6 workspaces já ilegíveis** 🟠 — **medido ao fazer o 9.296 (12/set/26), sem fix.** Além do botão, há **4 textos com cor cravada** sobre `emailBgColor`/`emailBoxColor`: `:345` (nome do workspace, `#ffffff`), `:351` (título, `#ffffff`), `:352` (corpo, `#d1d5db`) e `:364` (rodapé, `#6b7280`).
+  **Medido em produção — 6 workspaces já abaixo de 4,5 hoje.** O pior é `embarque-milionario`, que escolheu fundos **claros**: `bgColor #e4ccb3` com nome do ws branco = **1,55** · `boxColor #c0a47c` com título branco = **2,37** · com corpo `#d1d5db` = **1,61**. E o rodapé `#6b7280` reprova em **6** workspaces (2,56 a 4,12).
+  ⚠️ **Não entrou no 9.296 pelo critério declarado ali — "entra junto o que ESTA fatia quebraria"** —, e nenhum deles é quebrado por ela: são `bgColor`/`boxColor`, que a fatia não toca. É defeito **pré-existente**.
+  🔴 **E consertar exige DECISÃO DE DESIGN, não só aplicar o helper:** hoje há hierarquia (título branco forte, corpo cinza `#d1d5db`, rodapé cinza fraco). Se os três virarem `contrastingTextColor(fundo)`, viram **a mesma cor** e a hierarquia some. Precisa de gate visual do dono. → Camada 4 · **Identidade visual**
+
 - [ ] **9.293 — As cores padrão ainda são azuis em 4 telas** 🟢 — **PEDIDO DO DONO, 11/set/26. Sem desenho ainda; o que segue é só o que foi MEDIDO.** As 4 telas: *Personalizar login* · *Personalizar vitrine* · *E-mail de acesso* · *Personalizar curso* (área de membros, **incluindo o botão de suporte**).
   ⭐ **O azul NÃO vem de um lugar só — e isso muda o custo de cada um.** Medido em produção (46 workspaces, SELECT-only) e no schema:
   | tela | onde o azul é decidido | alcance de mudar |
