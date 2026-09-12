@@ -35,6 +35,49 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-12 — A 10ª regra do modo claro (9.300) — e o achado de que ela não muda pixel nenhum
+
+**Merge:** `3a2d9ba` (`--no-ff`, 2 pais) · **SHA de volta:** `5febcca` · **1 arquivo:** `src/app/globals.css`
+**Deployment:** Production `success` às 06:05:28Z
+
+### O que era
+`globals.css:361` — `html:not(.dark) .course-customized .text-primary` — lia a **marca crua**. As outras 9 regras de texto do modo claro leem `--member-ink` desde 06/set. Era a última fora do padrão.
+
+### ⭐ O achado: zero pixel, e isso mudou a natureza da fatia
+O 🎯 dizia *"muda pixel: SIM — só no modo claro"*. **A medição disse ZERO.**
+
+`.text-primary` sem prefixo `dark:` tem **0 ocorrências dentro de `.course-customized`**. Os 2 pontos que existem vivem na **vitrine** (`w/[slug]/page.tsx:490`) e no **`course-card.tsx:256`** — e `.course-customized` só é aplicada em `course-shell.tsx:112,131`, com `CourseCard` tendo **0 ocorrências** dentro de `(course)/`.
+
+🔴 **E a primeira sonda mentiu.** Deu zero — mas o **controle positivo também deu zero**, porque um `grep -c "$K" arquivo || echo 0` imprimia duas linhas ("0\n0") quando não achava. Refiz pondo o **controle antes do alvo**: `text-blue-500` acendeu em 9 arquivos, `text-blue` em 19 na árvore do curso. Só então o zero do alvo valeu.
+
+⇒ A fatia virou **preventiva**, e subiu assim — declarado no item, no commit e aqui.
+
+### Por que valeu a pena mesmo assim
+As 12 marcas reais de produção, sobre branco, **se a regra fosse usada**:
+
+| | hoje | com ink |
+|---|---|---|
+| `#ffffff` | **1,00** | 4,74 |
+| `#EFFF20` (lime) | **1,11** | 5,13 |
+| `#e2d546` · `#ffc845` | 1,52 · 1,54 | 6,44 · 6,54 |
+| `#f5b82e` · `#f7b23b` · `#eea9be` | 1,78 · 1,84 · 1,90 | 7,21 · 7,40 · 7,52 |
+| `#c8a15a` · `#526eff` · `#e53935` | 2,41 · 4,17 · 4,23 | 8,77 · 11,78 · 12,09 |
+| `#9e6457` · `#000000` | 4,76 · 21,00 | 12,56 · 21,00 |
+
+**10 das 12 abaixo de 4,5 hoje → nenhuma depois.** 11 melhoram, 1 igual, **0 pioram**.
+
+### ⭐ E isto destrava a leva 4
+Era **o último ponto do modo claro fora do padrão**. Os **22.421 alunos** que faltam estão em 15 workspaces com `forceTheme` **nulo** — todos podem escolher o claro. Sem este conserto, qualquer `.text-primary` que aparecesse na árvore do curso nasceria com 1,00 a 4,23.
+
+### O gate, em duas camadas
+**Fonte:** CSS sem comentários **596 = 596 linhas, UMA única difere** · 9 irmãs **0 sumiram** · modo escuro **66 regras, 0 diferentes** (e são 66, não 0) · **:360 intocada** — e **confirmada protegida antes** de excluí-la, porque o único ponto que ela alcança em `(course)/` já usa `--member-button-text`.
+**Produção:** `member-ink` **9 → 10** no CSS servido · regras do escuro **byte-idênticas** (38 × 38) · `/sw.js` byte-idêntico · 6 rotas inalteradas. ⚠️ O nome do arquivo CSS mudou (`2z-g92hm3y_ft` → `172h63ts7sk3m`) — por isso comparei **conteúdo**, não nome, e o delta foi **+18 bytes**: exatamente `var(--member-ink,` a mais.
+
+### ⚠️ Não houve tela para testar
+Nenhum ponto renderiza `.text-primary` dentro de `.course-customized`. **O gate foi de máquina**, e a razão está medida. ⛔ Não renderizei curso: `/course/<slug>` exige matrícula ativa.
+
+---
+
 ## 2026-09-12 — VIRADA LEVA 3b: os 6 onde ninguém muda de tela (9.299)
 
 **Aplicado por BANCO em produção, 05:21:15Z, sem deploy.** Ligados **25 → 31** · desligados 21 → 15.
