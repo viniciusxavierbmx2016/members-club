@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sanitizeEmailHtml } from "@/lib/sanitize-html";
+import { contrastingTextColor } from "@/lib/color-utils";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 import {
   PERMISSION_LABELS,
   type CollaboratorPermission,
@@ -303,7 +305,28 @@ export function buildAccessEmail(
   // 3. Themed template using the workspace's custom fields.
   const bgColor = config.emailBgColor || "#0a0a1a";
   const boxColor = config.emailBoxColor || "#1a1a2e";
-  const primaryColor = config.emailPrimaryColor || "#3b82f6";
+  /**
+   * ⭐ O PAR. Fundo e texto do botão mudam JUNTOS, e é por isso que estão
+   * calculados no mesmo lugar.
+   *
+   * O azul padrão (`#3b82f6`) virou a marca da casa (`#EFFF20`, o lime de
+   * `PRODUCER_THEME_DEFAULTS`). ⛔ Trocar SÓ o fundo seria o defeito: branco
+   * sobre lime dá **1,11** de contraste — ilegível. O lime é uma cor CLARA e
+   * inverte o que o azul fazia.
+   *
+   * ⚠️ E a cor do texto não é uma constante nova: sai de `contrastingTextColor`,
+   * o helper que a casa já usa para `--member-button-text`. Ele escolhe o lado
+   * de MAIOR contraste, então segue a cor em vez de escurecer tudo — para uma
+   * marca escura ele devolve branco, para uma clara devolve quase-preto.
+   *
+   * ⭐ Isto também CONSERTA quem já tinha cor própria. Medido em produção
+   * (11/set/26): dos 7 workspaces com `emailPrimaryColor`, **5 já estavam
+   * abaixo de 4,5 com o branco cravado** — `#ffca10` dava 1,53 e `#ffb22e`
+   * dava 1,80. Nenhum dos 7 piora; 5 melhoram e 2 ficam iguais.
+   */
+  const primaryColor =
+    config.emailPrimaryColor || PRODUCER_THEME_DEFAULTS.primaryColor;
+  const primaryTextColor = contrastingTextColor(primaryColor);
   const logoUrl = config.emailLogoUrl || null;
   const footerText = config.emailFooter
     ? applyVars(config.emailFooter, vars)
@@ -353,7 +376,7 @@ export function buildAccessEmail(
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
                 <tr>
                   <td align="center">
-                    <a href="${vars.link}" target="_blank" style="display:inline-block;background-color:${primaryColor};border-radius:10px;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Acessar agora</a>
+                    <a href="${vars.link}" target="_blank" style="display:inline-block;background-color:${primaryColor};border-radius:10px;padding:14px 32px;font-size:15px;font-weight:600;color:${primaryTextColor};text-decoration:none;">Acessar agora</a>
                   </td>
                 </tr>
               </table>
