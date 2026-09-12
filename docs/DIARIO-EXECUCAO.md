@@ -35,6 +35,43 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-12 — VIRADA LEVA 3b: os 6 onde ninguém muda de tela (9.299)
+
+**Aplicado por BANCO em produção, 05:21:15Z, sem deploy.** Ligados **25 → 31** · desligados 21 → 15.
+**Os 6:** `shop-club` · `kingdomacademy` · `consultoriaindividual` · `obs-pronto-esoe` · `formacao-home-office-fho` · `cva`
+
+### ⭐ O propósito: escala, não cor
+O maior workspace já ligado tinha **18 alunos ativos**. Os 25 juntos somavam **59 — 0,22% da base**. Nenhum ticket, nenhuma queda de acesso; mas com 59 pessoas, **silêncio não é evidência**. Esta leva leva o mecanismo a **3.563 alunos a mais** e **nenhum vê diferença** — porque **9 dos 10 cursos têm `memberPrimaryColor` própria**, e o `??` de `layout.tsx:162-164` curto-circuita **antes** de olhar a virada.
+
+### O portão, e o que ele quase pegou
+Remedi os 6 às 05:20Z, e o `cva` apareceu com **1 curso sem marca** — o que, no papel, fura o "zero muda". Investiguei antes de ligar: aquele curso tem **0 matrículas ativas** (1 histórica, publicado desde maio). Nos outros 5, **0 cursos sem marca**. ⇒ o risco existe em **1 de 10 cursos**, e só se alguém se matricular ali. **É a lição do 9.257 com nome e endereço**, em vez de escondida numa contagem agregada.
+
+### A prova, depois de ligar
+
+| curso | `--member-primary` antes → depois | |
+|---|---|---|
+| `psv-protocolo-socio-viral` | `#000000` → `#000000` | ✅ |
+| `shop-club` ×3 | `#eea9be` → `#eea9be` | ✅ |
+| `obs-*` ×3 | `#526eff` → `#526eff` | ✅ |
+| `formacao-home-office-fho` | `#ffc845` → `#ffc845` | ✅ |
+| `kingdomacademy` | `#ffffff` → `#ffffff` | ✅ |
+| **`cva/cva`** | **(não emitido) → `#EFFF20`** | 🔴 **muda — 0 ativos** |
+
+`updatedAt` de **nenhum** curso foi tocado (0 na última hora). Contraste do botão+texto de **4,7 a 21,0**.
+
+⭐ **E o botão de suporte não muda** — e isso exigiu ler o mecanismo, não supor: as `--member-*` são emitidas em **`:root{}`** (`layout.tsx:199`), que herda para **todo** o documento. O **9.275** ("o widget vive fora de `.course-customized`") é sobre as **regras de remap**, não sobre as **variáveis**. Como `--member-primary` é a marca do produtor antes e depois, o botão fica igual.
+
+⚠️ **O que não deu para provar:** a tela do curso por HTTP — `/course/<slug>` devolve **307**, exige matrícula ativa. ⛔ Não entrei em conta de aluno de cliente. A prova é por leitura de código + dados, como o comando previa.
+
+### O que observar antes da leva 3a
+1. **Ticket de suporte vindo destes 6** — hoje 0, com controle de 10 na plataforma.
+2. **Queda de acesso** nos 3.563.
+3. **Alguém se matriculando em `cva/cva`** — o único ponto exposto.
+
+**Faltam 15:** os **10 pequenos** da leva 3a (711 alunos que mudam de verdade) e os **5 grandes** (22.421 — `mentoria-juncao-milionaria` sozinho é 48% de tudo).
+
+---
+
 ## 2026-09-12 — O botão do e-mail em lime (9.296 ✅) — e o espelho que ficou para trás (9.297)
 
 **Merge:** `f0e3e2d` (`--no-ff`, 2 pais) · **SHA de volta:** `3dacc58` · **1 arquivo:** `src/lib/email-templates.ts`
