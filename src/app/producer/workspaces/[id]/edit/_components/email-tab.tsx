@@ -114,8 +114,8 @@ function defaultEmailHtml(workspace: string): string {
           <p style="margin:0 0 8px;font-size:13px;color:#9ca3af;">Senha temporária:</p>
           <p style="margin:0;font-size:18px;font-weight:bold;color:#ffffff;font-family:monospace;letter-spacing:2px;">${SAMPLE.senha}</p>
         </td></tr></table>
-        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;"><tr><td style="background-color:#3b82f6;border-radius:10px;">
-          <a href="${SAMPLE.link}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Acessar o curso</a>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;"><tr><td style="background-color:${PRODUCER_THEME_DEFAULTS.primaryColor};border-radius:10px;">
+          <a href="${SAMPLE.link}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:${contrastingTextColor(PRODUCER_THEME_DEFAULTS.primaryColor)};text-decoration:none;">Acessar o curso</a>
         </td></tr></table>
       </td></tr>
       <tr><td align="center" style="padding-top:32px;"><p style="margin:0;font-size:13px;color:#6b7280;">${workspace} &bull; mymembersclub.com.br</p></td></tr>
