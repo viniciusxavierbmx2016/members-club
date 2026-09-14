@@ -35,6 +35,53 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-14 — VIRADA LEVA 3a: a primeira que o aluno VÊ (9.303)
+
+**Aplicado por BANCO em produção, 19:06:48Z, sem deploy.** Ligados **31 → 41** · desligados 16 → 6.
+**Os 10:** `focal-academy` · `conexusdigital` · `vitor-pietro` · `projeto-collares-e-rafael` · `clrs-group` · `funil-oculto` · `milena-business` · `mentoria-gabriel-do-digital` · `wifi-money` · `combo-presets`
+
+### ⭐ A diferença desta leva
+As anteriores foram cautela: a 3b levou **3.654 alunos** para o mecanismo **sem mudar um pixel**. Esta muda: **720 de 945 alunos ativos** passam a ver a área de membros em lime. **15 dos 16 cursos** recebem a marca; **1** (`sistema-de-produtos-em-dolar`, `#e2d546`) mantém a do produtor.
+
+### A base empírica que autorizou
+A 3b rodou **2 dias e 13 horas**:
+
+| sinal | resultado |
+|---|---|
+| ticket de suporte | **1** — e era *"não tem conteúdo para essas aulas"*, num curso de **marca própria** (tela inalterada) |
+| acesso diário | média **47,8 → 74,3** — **subiu** |
+| `cva/cva`, o único curso exposto | **0 matrículas** |
+| vendas | **25 matrículas novas** nos 6 |
+
+ⓘ **E fica dito o limite:** aqueles 3.654 alunos **não viam mudança nenhuma**. O silêncio deles prova que o *mecanismo* aguenta escala — não que a *cor* agrada. **Esta leva é o primeiro teste real.**
+
+### O portão, remedido antes de ligar
+Contra a medição de 12/set 05:01Z: **711 → 721** alunos que mudam (**+10**, vendas normais), **nenhum salto de faixa**, **0 cursos novos** nesses 10 no intervalo, **0 já ligados**. ⭐ A pergunta que a 3b ensinou — *apareceu curso novo sem cor?* — foi feita e respondida com **0**.
+
+### O que muda na tela, medido
+| | |
+|---|---|
+| fundo cheio | **9 regras** com `--member-primary`; o texto por cima sai de `--member-button-text` = `#0a0a0a` (**17,91**) |
+| tinta no claro | `--member-ink` = `#6C730E` (**5,13** sobre branco) |
+| `forceTheme` | **nenhum dos 10** força modo — o aluno escolhe |
+
+⭐ **Por isso a 10ª regra do modo claro (`3a2d9ba`) importava:** sem ela, qualquer `.text-primary` na árvore do curso nasceria com 1,11 sobre branco. Ela subiu **antes** desta leva, e não por acaso.
+
+🔴 **Uma sonda minha mentiu no meio do caminho:** contei "1 regra de texto do modo claro sem ink" e quase reportei uma lacuna. Era a `:360` — `background-color`, não `color`; meu `\bcolor` casou dentro de `background-color`. Refeita com `(\{|;)\s*color:`, deu **0**, com controle positivo de 8.
+
+### A prova depois de ligar
+Os 10 seguem ligados · o curso de marca própria **intacto** · **`updatedAt` de NENHUM curso foi tocado**. ⚠️ `/course/<slug>` devolve **307** (exige matrícula) — ⛔ não entrei em conta de cliente.
+
+### ⭐ O que observar — três sinais da 3b, e um QUARTO que só existe aqui
+1. **Ticket de suporte** nesses 10 — e agora **pesa muito mais**: há **720 pessoas vendo mudança**, não zero.
+2. **Queda de acesso.**
+3. **Curso novo sem cor** aparecendo nesses workspaces.
+4. ⭐ **Reclamação de LEGIBILIDADE no modo claro.** É o cenário que nenhuma leva testou de verdade — o único ligado com `forceTheme=light` (`members-club`) tem **1 aluno**. Agora há 720 que podem escolher o claro.
+
+**Faltam 6:** `ebenezer-2-0` (1.331) · `home-office-lucrativo` (2.115) · `infinityia` (2.804) · `grupo-sm` (5.144) · `mentoria-juncao-milionaria` (**11.027 — 48% de tudo**) · `monetizy-club` (novo).
+
+---
+
 ## 2026-09-14 — O e-mail da plataforma em lime (9.297 ✅) — e o gate que me corrigiu duas vezes
 
 **Merge:** `804e506` (`--no-ff`, 2 pais) · **SHA de volta:** `3bd6b2c` · **2 arquivos**
