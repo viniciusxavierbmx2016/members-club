@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import { contrastingTextColor } from "@/lib/color-utils";
+import { PRODUCER_THEME_DEFAULTS } from "@/lib/theme-constants";
 import { ColorField } from "./color-field";
 import type { EmailConfig } from "../_types";
 
@@ -51,7 +53,16 @@ function buildPreviewHtml(config: EmailConfig, workspace: string): string {
   // Path 3 — themed template with the producer's fields (default fallbacks).
   const bg = config.emailBgColor || "#0a0a1a";
   const box = config.emailBoxColor || "#1a1a2e";
-  const primary = config.emailPrimaryColor || "#3b82f6";
+  // ⭐ MESMA fonte que o template real (`email-templates.ts:327-329`): a
+  // constante, não uma cópia do valor. `theme-constants` e `color-utils` são
+  // módulos PUROS (0 imports, sem `server-only`) e já são importados por
+  // componentes cliente em produção — `course-support-widget.tsx` e
+  // `producer-theme-provider.tsx`. ⛔ O que NÃO pode vir para cá é
+  // `email-templates.ts`, que importa `prisma`: é exatamente por isso que este
+  // espelho existe.
+  const primary =
+    config.emailPrimaryColor || PRODUCER_THEME_DEFAULTS.primaryColor;
+  const primaryText = contrastingTextColor(primary);
   const logo = config.emailLogoUrl || null;
   const footer = config.emailFooter
     ? applyVars(config.emailFooter, workspace)
@@ -78,7 +89,7 @@ function buildPreviewHtml(config: EmailConfig, workspace: string): string {
         <h1 style="margin:0 0 24px;font-size:22px;font-weight:bold;color:#ffffff;text-align:center;">${title}</h1>
         <div style="font-size:15px;color:#d1d5db;line-height:1.6;">${body}</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;"><tr><td align="center">
-          <a href="${SAMPLE.link}" style="display:inline-block;background-color:${primary};border-radius:10px;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Acessar agora</a>
+          <a href="${SAMPLE.link}" style="display:inline-block;background-color:${primary};border-radius:10px;padding:14px 32px;font-size:15px;font-weight:600;color:${primaryText};text-decoration:none;">Acessar agora</a>
         </td></tr></table>
       </td></tr>
       <tr><td align="center" style="padding-top:32px;"><p style="margin:0;font-size:13px;color:#6b7280;">${footer}</p></td></tr>
@@ -103,8 +114,8 @@ function defaultEmailHtml(workspace: string): string {
           <p style="margin:0 0 8px;font-size:13px;color:#9ca3af;">Senha temporária:</p>
           <p style="margin:0;font-size:18px;font-weight:bold;color:#ffffff;font-family:monospace;letter-spacing:2px;">${SAMPLE.senha}</p>
         </td></tr></table>
-        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;"><tr><td style="background-color:#3b82f6;border-radius:10px;">
-          <a href="${SAMPLE.link}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Acessar o curso</a>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;"><tr><td style="background-color:${PRODUCER_THEME_DEFAULTS.primaryColor};border-radius:10px;">
+          <a href="${SAMPLE.link}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:${contrastingTextColor(PRODUCER_THEME_DEFAULTS.primaryColor)};text-decoration:none;">Acessar o curso</a>
         </td></tr></table>
       </td></tr>
       <tr><td align="center" style="padding-top:32px;"><p style="margin:0;font-size:13px;color:#6b7280;">${workspace} &bull; mymembersclub.com.br</p></td></tr>
@@ -239,11 +250,17 @@ export function EmailTab({
 
             {/* Colors */}
             <div className="grid grid-cols-2 gap-3">
+              {/* ⭐ O seletor mostra o `fallback` quando o produtor ainda não
+                  escolheu (`color-field.tsx:18`). Tem de ser o mesmo padrão que
+                  o e-mail REAL usa — senão ele vê azul no campo e recebe lime na
+                  caixa. É a mesma divergência do botão da prévia, num terceiro
+                  ponto. ⓘ Os irmãos (fundo `#0a0a1a`, caixa `#1a1a2e`) já batem
+                  com `email-templates.ts:306-307` e ficam como estão. */}
               <ColorField
                 label="Cor principal (botão)"
                 description="Botão de acesso"
                 value={config.emailPrimaryColor}
-                fallback="#3b82f6"
+                fallback={PRODUCER_THEME_DEFAULTS.primaryColor}
                 onChange={(v) => setField("emailPrimaryColor", v)}
               />
               <ColorField
