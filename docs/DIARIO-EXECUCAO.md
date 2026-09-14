@@ -35,6 +35,54 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-14 — A validação do captcha depois da rotação (9.290): o cadastro NÃO parou — e a chave velha continua aceita
+
+**Validação em produção, SOMENTE LEITURA. ⛔ Nenhuma conta criada — a prova saiu da RECUSA e do tráfego real.**
+
+### A pergunta urgente, e a resposta
+O cadastro é **fail-closed** desde `83f7dd5`: secret errada ⇒ **ninguém se cadastra**. Depois da rotação, a pergunta não era formal — era se a plataforma tinha **parado de receber cadastro**.
+
+**Não parou.** Duas provas independentes:
+
+| prova | resultado |
+|---|---|
+| 6 tentativas sem token válido, nos 2 hosts | **6/6 → 403**, todas com a frase *"Recarregue a página"* |
+| ⭐ tráfego real de produção | **1 cadastro às 20:35Z**, 12 min antes da medição |
+
+⭐ **A frase é o instrumento.** O 403 do lado do visitante (`missing-token`/`invalid-token`) diz *"Recarregue a página"*; o do **nosso** lado (`not-configured`/`unreachable`) diz *"alguns instantes"*. **Nenhuma das 6 respostas trouxe "alguns instantes"** — se a env estivesse ausente, a frase seria a outra. ⚠️ Mas essa metade **sozinha não bastava**, pela fresta do **9.289**: secret *errada* ainda cai em `invalid-token`, indistinguível de token ruim.
+
+### ⭐ A prova que o relatório da fatia 3 tinha dado como impossível
+Aquele relatório dizia, literalmente: *"o que a subida NÃO provou: que um cadastro **legítimo** passa em produção — exige token real de navegador"*. **O tráfego real provou por mim**, e a cadeia fecha em `file:line`:
+
+1. `WorkspaceMembership{origin:"PUBLIC_SIGNUP"}` tem **exatamente 1 escritor** em todo o `src/` — `api/w/[slug]/register/route.ts:207`.
+2. O **único** `POST` (`:46`) chama `verifyTurnstile` na **linha 73**, *antes até do schema*, e devolve 403 em `:76`. As 3 escritas (`:174` `User` · `:198` `WorkspaceCredential` · `:206` a marca) estão **todas depois**.
+3. `turnstile.ts:93` — `if (data.success) return { ok: true }` é o **único** `ok:true` do módulo, e depende do `success` vindo da Cloudflare.
+
+⇒ aquela linha **só pode existir** se a Cloudflare aceitou a secret de produção **e** um token real de navegador. **O funil está vivo de ponta a ponta.** São **6 marcas** no total (a 1ª, de 11/set, tem cara de teste do próprio dono; as outras 5 são de terceiros).
+
+### 🔴 O achado: a rotação não fechou a exposição
+O discriminador do **§10.4** aplicado à secret **anterior** (`sha256[:8]=4fc390fc`, a de 11/set — valor não impresso) devolveu **`invalid-input-response`**. A leitura é dura: `invalid-input-secret` significaria *"esta chave não vale mais"*; `invalid-input-response` significa **"a chave vale — o token é que é falso"**.
+
+E a **sitekey é idêntica** nos três lugares (palco, `mymembersclub.com.br`, `applyfy-mvp.vercel.app`): `sha256[:8]=43e0d22b`, 24 chars. **É o mesmo widget v2.**
+
+⇒ **a chave queimada continua aceita pela Cloudflare.** Duas explicações, e **de fora não consigo separá-las**:
+- **(a)** a rotação **não efetivou** — a cicatriz do **9.169** se repetindo, que é *exatamente* o que o 9.290 mandava conferir ("não confiar no painel"); ou
+- **(b)** a Cloudflare mantém a anterior válida por uma **janela de graça**.
+
+**O discriminador é o TEMPO:** repetir a sonda do §10.4 com a chave antiga daqui a algumas horas. Virou `invalid-input-secret` ⇒ era graça, e fechou. Continuou `invalid-input-response` ⇒ **a rotação não pegou**, e é o 9.169 de novo. → **9.290 segue aberto**, agora com resultado medido em vez de pendência.
+
+### ⭐ E a chave nova também trafegou por conversa
+É o **9.304**. A rotação resolveu a exposição da chave de 11/set **trocando-a por outra que também passou por chat** — o segredo continua queimado, só mudou de valor. A terceira rotação precisa ser feita **sem o valor passar por aqui**.
+
+⭐ **E dá para validar sem nunca ver a chave** — o protocolo saiu provado hoje:
+- que a **nova** vale: um cadastro real passando, ou o 403 continuando a dizer *"Recarregue a página"* (nunca *"alguns instantes"*);
+- que a **velha** morreu: a sonda do §10.4 com a **antiga** devolvendo `invalid-input-secret`.
+
+### O estado, medido
+7 rotas com o status esperado · `/sw.js` **byte-idêntico** (`16544c870d683fdc`) · **0 contas de teste criadas** (provado pela recusa) · interruptor da virada em **41** · vigia E4.4: **1** curso gratuito · **1** resgate · **6** marcas (era 0/0/0 quando a fatia 3 subiu).
+
+---
+
 ## 2026-09-14 — VIRADA LEVA 3a: a primeira que o aluno VÊ (9.303)
 
 **Aplicado por BANCO em produção, 19:06:48Z, sem deploy.** Ligados **31 → 41** · desligados 16 → 6.
