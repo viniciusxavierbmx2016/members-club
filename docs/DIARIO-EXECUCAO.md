@@ -35,6 +35,67 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-14 — O log da recuperação (9.283): o `.catch` era inalcançável, então o log nunca teve como se desmentir
+
+**EM PRODUÇÃO, merge `317d975`.** 1 arquivo. ⚠️ Zero pixel — muda **o que vai para o log**.
+
+### ⭐⭐ O achado maior, que o diagnóstico de 10/set não tinha
+O item dizia: *"o `.catch` só faz `console.error`"*. A verdade é pior.
+
+**`sendEmail` nunca rejeita.** `lib/email.ts` tem **0 `throw` e 4 `return`**, e o único `await` (`:37`) está **dentro do `try`**: os quatro caminhos devolvem objeto resolvido. Logo o `.catch` da rota **nunca rodou uma vez**.
+
+⇒ **o log não só mentia — o único caminho que poderia desmenti-lo não existia.** Provado por sonda em runtime, não por leitura:
+```
+.then rodou?  true   ·   .catch rodou?  false
+valor resolvido: {"success":false,"error":"BREVO_API_KEY not configured"}
+```
+
+🔴 **E o "molde" que o item apontava está quebrado do mesmo jeito** — `w/[slug]/forgot-password:95` e `:169`. São **14 call-sites** de `sendEmail` com `.catch` morto contra **5** que awaitam. Virou o **9.306**.
+
+### O conserto
+O desfecho passa a ser lido no **valor resolvido**. Duas linhas que não afirmam o que não sabem:
+```
+[FORGOT-PASSWORD] recovery email aceito pelo Brevo {"messageId":"<…>","ms":742}
+[FORGOT-PASSWORD] recovery email NAO SAIU {"reason":"credencial-ausente","ms":3}
+```
+
+Motivo com nome próprio, no molde do 9.260: `credencial-ausente` · `destinatario-invalido` · `brevo-<status>` · `brevo-<name>` · `promessa-rejeitada`.
+
+### ⚠️ O instrumento quase nasceu cego
+A primeira versão registrou **`brevo-n-401`**. O `n` era a **classe de erro do Brevo depois do minificador**. O `supabase-js` sobrevive porque atribui `name` como **string** — é por isso que o 9.260 pôde usar o nome. O Brevo não faz isso. **O status numérico virou o discriminador principal**, e isso só apareceu porque testei no **build de produção**; em `dev` o nome viria inteiro e eu teria subido um instrumento que não discrimina nada.
+
+### O que NÃO mudou, provado por chamada
+Os **3 caminhos** deram `sha256 c955e57777ec0d73` **idêntico** — no palco e em produção pelo origin. ⛔ Não virou `await`, o trade-off de `:62-68` está intacto, e a anti-enumeração por resposta continua. `/sw.js` byte-idêntico; as 4 rotas de controle sem mudança.
+
+⛔ E **saiu o e-mail da pessoa do log**: a linha antiga gravava o endereço inteiro.
+
+### ⭐ `after()` em vez de promessa solta
+Sem ele o callback pode não rodar antes de a invocação congelar, e o log sumiria — que é exatamente o que a fatia existe para consertar. É o primitivo **nativo do Next**, roda **depois** da resposta e não altera nem o que a rota devolve nem quando. **Primeiro uso do primitivo no repo.**
+
+### ⚠️ O que fica não provado — e o roteiro que não podia funcionar
+O plano era disparar um pedido para um endereço de teste **inexistente** e ler o log. **A cadeia do código não permite:** `findUnique(:55)` → **`if (!user) return (:60)`** → `generateLink(:82)` → `sendEmail(:108)` → **`after(:130)`**. Um endereço que não existe **sai em `:60`** e nunca alcança o instrumento — a premissa de que *"o `generateLink` falha antes do envio"* não se realiza, porque **o `generateLink` nem é chamado**.
+
+Disparei assim mesmo, 2×: resposta `{"success":true}`, `sha c955e57777ec0d73`, **idêntica**. ⛔ Nenhum e-mail para ninguém — e **zero linhas do instrumento**, como o código prevê.
+
+⇒ **só um e-mail que EXISTE produz linha**, e isso dispara recuperação real para uma pessoa real. **A primeira linha verdadeira virá do primeiro pedido real depois deste deploy** — o fluxo roda ~126×/dia. ⛔ E o log de runtime da Vercel não é legível daqui (sem `vercel` CLI, sem `.vercel/project.json`); a prova ficou no **artefato**: as 4 strings presentes no chunk da rota, a frase velha em **0**, controle negativo **0**.
+
+### 🔴 Os quatro achados que esta fatia abriu
+**9.306** o `.catch` morto em 14 call-sites · **9.307** `email.ts:30/:51` logam o endereço — e o `:51` loga o **erro cru**, que pode ecoar o `htmlContent` com o **action_link** · **9.308** `automation-engine:139` **persiste** o e-mail em `details` · 🔴 **9.309** — e este é de **segurança**:
+
+### 🔴 9.309 — a anti-enumeração por tempo não existe
+| e-mail | tempo |
+|---|---|
+| **existe** | **0,807 s** |
+| **não existe** | **0,082 s** |
+
+**10×.** E a causa desmente o comentário do próprio código: `:62-68` diz que awaitar o envio *"vazaria por timing"* — **mas o vazamento vem do `generateLink`, que é `await`ado em `:82`** e só roda para quem existe. O fire-and-forget protege a metade que não era o problema. Qualquer um mede e **enumera a base de e-mails**, que é exatamente o que os 4 `{"success":true}` idênticos existem para impedir.
+
+ⓘ **Atenuante medido:** em `app.mymembersclub.com.br` a rota está atrás de um **desafio gerenciado da Cloudflare** — POST por `curl` leva **403 "Just a moment…"**. ⚠️ Mas o origin `applyfy-mvp.vercel.app` responde **direto, sem desafio**, e foi por lá que medi. É o mesmo buraco do item **2.4**.
+
+⛔ Não consertado por ordem expressa. A decisão é do dono.
+
+---
+
 ## 2026-09-14 — O anexo do suporte (9.130): o funil criou o vetor, e o molde certo teria trancado 77% dos produtores
 
 **EM PRODUÇÃO, merge `975295c`.** 3 arquivos. ⚠️ Zero pixel — muda **quem consegue enviar anexo**.
