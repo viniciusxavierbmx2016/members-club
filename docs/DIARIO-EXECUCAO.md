@@ -35,6 +35,68 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-14 — O anexo do suporte (9.130): o funil criou o vetor, e o molde certo teria trancado 77% dos produtores
+
+**EM PRODUÇÃO, merge `975295c`.** 3 arquivos. ⚠️ Zero pixel — muda **quem consegue enviar anexo**.
+
+### O vetor que o funil criou
+`api/support/attachments/upload` tinha **um único portão**: `if (!user) 401`, com o comentário dizendo *"Auth: any authenticated user"*. Quando o item nasceu (27/ago), isso significava **quem comprou, foi convidado ou é staff**. Desde `83f7dd5` (11/set) significa outra coisa: o cadastro público está aberto em **47 workspaces** e — nas palavras do próprio código (`w/[slug]/register:122-126`) — *"a pessoa sai daqui já logada… o projeto NÃO exige confirmação"*.
+
+⇒ **"qualquer usuário autenticado" virou "qualquer pessoa da internet"**, com tipo declarado pelo cliente, 10 MB, no bucket privado. É a lição do **9.74**: a feature inofensiva não usou um vetor — **criou** um.
+
+### ⛔ O molde estava certo e mesmo assim não servia
+A ordem era copiar `hasRealPlatformLink`, o gate da comunidade — padrão provado, 4 rotas usando. **Medi antes de aplicar**, e ele erra **nas duas pontas**:
+
+| cláusula | o que faria | gente real |
+|---|---|---|
+| PRODUCER exige `workspaces>0 \|\| courses>0` | **RECUSA** produtor sem workspace | 🔴 **105 de 137 (77%)** |
+| qualquer matrícula ACTIVE | **ACEITA** todo aluno | 🔴 **27.430** |
+
+Os 105 são conta nova — **exatamente quem mais abre chamado**. Copiar por obediência teria trancado 77% dos legítimos, que é pior que o buraco.
+
+⭐ **A pergunta que salvou:** *quantas pessoas reais cada cláusula do molde deixa de fora?* Uma consulta respondeu, e ela vale mais que a instrução.
+
+### A régua certa já existia — nas rotas irmãs
+Duas leituras decidiram tudo:
+- `POST /api/support/tickets:80` → `if (user.role !== "PRODUCER") 403` — **o ticket de plataforma é do produtor**;
+- `course-support-widget.tsx:17`, literal: *"the API accepts them but this widget doesn't surface upload"* — **o aluno não tem tela de anexo**.
+
+E `canAccessTicket` (`ticket-access.ts:6-16`) já governava a **LEITURA** em `signed-url:43`. A **escrita** é que estava sem nada. `canUploadSupportAttachment` nasceu ao lado das irmãs com as **mesmas três cláusulas**, reusando `adminHasPerm`. **Nenhuma régua nova.**
+
+### O tipo: a metade do molde que serve
+`lib/file-signatures.ts` = `SIGNATURES` + `sniff` **verbatim** de `community/upload:21-59`. O tipo **deduzido** decide o allowlist, vira `contentType` e forma a extensão — o que mata o `file.name.split(".").pop()`.
+⚠️ **Uma linha não veio de lá:** `application/pdf` (`%PDF-`). A comunidade só aceita imagem; o suporte aceita PDF desde sempre e tirá-lo trancaria quem envia. **Dado na mesma tabela, não mecanismo novo** — e está escrito no cabeçalho do arquivo.
+
+### ⭐ A prova que fecha
+No palco, **a mesma sessão** da conta do funil:
+- `/api/auth/me` → **200** — e esse `getCurrentUser()` era o **único** portão de antes
+- upload → **403** *"Você não tem permissão para enviar anexos."*
+
+O 403 **não é falta de login**: é falta de permissão. Antes do fix ela teria recebido 200.
+
+| caso | resultado |
+|---|---|
+| PRODUCER com workspace · **sem workspace** · ADMIN | **200 · 200 · 200** |
+| PNG · JPG (`image/jpg` → gravado `image/jpeg`) · GIF · PDF | **200** |
+| ⭐ conta do FUNIL (PUBLIC_SIGNUP, 0 matrículas) | **403** |
+| EXE disfarçado de `image/png` · SVG com `<script>` · `.png` corrompido | **400** |
+| anônimo | **401** |
+
+⭐ O discriminador do palco foi `sem-vinculo@staging.test` — **PRODUCER com 0 workspaces**. Sem essa persona, a diferença entre os dois desenhos seria **invisível no teste**.
+
+### Em produção
+Rota sem sessão **401** nos 2 hosts (idêntico à linha de base) · `/sw.js` **byte-idêntico** (`dbf0c4cfb179f839`) · 4 rotas de tela sem mudança. No artefato do servidor: função nova em **5** arquivos, frase do 403 em **1**, assinaturas em **3** (+2 do PDF), controle negativo **0** — e o gate velho, `ALLOWED.has(file.type)`, em **ZERO**.
+
+⚠️ **O que fica NÃO provado:** um **produtor real anexando em produção**. Exige sessão de gente; ⛔ não criei conta nem enviei arquivo. **Só o uso confirma** — e o roteiro do gate humano rodou no palco, incluindo o produtor sem workspace.
+
+### 🔴 A dívida que esta fatia DECLAROU (9.305)
+A tabela de assinaturas ficou **duplicada** entre `lib/file-signatures.ts` e `community/upload`. **Assinatura nova entra nas DUAS ou em nenhuma.** Está no cabeçalho do arquivo e virou item — com o detalhe que decide o fix: o módulo tem **5** assinaturas e a comunidade aceita **4**, então importar cru **passaria a aceitar PDF na comunidade**. O gate do 9.305 é provar que ela continua recusando PDF.
+
+### ⚠️ A única mudança de comportamento para quem é legítimo
+Arquivo **corrompido ou truncado** com tipo declarado válido agora recebe **400** em vez de ir para o bucket. É o endurecimento pretendido, mas fica dito.
+
+---
+
 ## 2026-09-14 — A validação do captcha depois da rotação (9.290): o cadastro NÃO parou — e a chave velha continua aceita
 
 **Validação em produção, SOMENTE LEITURA. ⛔ Nenhuma conta criada — a prova saiu da RECUSA e do tráfego real.**
