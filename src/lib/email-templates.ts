@@ -54,11 +54,37 @@ function baseTemplate(content: string, brandName?: string): string {
 </html>`;
 }
 
-function ctaButton(text: string, url: string, color: string = "#3b82f6"): string {
+/**
+ * ⭐ O BOTÃO DOS E-MAILS DA PLATAFORMA.
+ *
+ * A cor PADRÃO é a marca da casa (`#EFFF20`). Quem passa cor EXPLÍCITA não é
+ * alcançado — e isso é o recorte, não acaso: o convite de colaborador (`#10b981`)
+ * e os avisos de assinatura (`#ef4444` / `#f59e0b`) usam cor **semântica**, que
+ * não deve virar identidade.
+ *
+ * ⇒ VIRAM lime as 9 chamadas sem cor: welcomeProducer · welcomeStudent ·
+ *   studentAccessGranted · staffAccessGranted · passwordReset ·
+ *   workspacePasswordReset · subscriptionActivated · subscriptionRenewed ·
+ *   studentWorkspacesList.
+ * ⇒ NÃO viram: collaboratorInvite · subscriptionExpiring/Suspended/Cancelled ·
+ *   ticketReplyToProducer e adminCollaboratorInvite (estes dois passam
+ *   `#3b82f6` explícito — mantidos por esse critério, e anotados para o dono).
+ *
+ * ⛔ O TEXTO É CALCULADO, nunca cravado. Medido em 12/set: o `#ffffff` que
+ * estava aqui dava menos de 4,5 sobre TODAS as cores em uso — `#f59e0b` 2,15 ·
+ * `#10b981` 2,54 · `#3b82f6` 3,68 · `#ef4444` 3,76 — e sobre o lime daria
+ * **1,11**. Com `contrastingTextColor` nenhuma fica abaixo de 5,2, e nenhuma
+ * piora: o âmbar vai a 9,22 e o verde a 7,80 de carona.
+ */
+function ctaButton(
+  text: string,
+  url: string,
+  color: string = PRODUCER_THEME_DEFAULTS.primaryColor
+): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 0;">
   <tr>
     <td style="background-color:${color};border-radius:10px;">
-      <a href="${url}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">
+      <a href="${url}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:${contrastingTextColor(color)};text-decoration:none;">
         ${text}
       </a>
     </td>
