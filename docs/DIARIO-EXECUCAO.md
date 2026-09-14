@@ -35,6 +35,58 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-14 — O e-mail da plataforma em lime (9.297 ✅) — e o gate que me corrigiu duas vezes
+
+**Merge:** `804e506` (`--no-ff`, 2 pais) · **SHA de volta:** `3bd6b2c` · **2 arquivos**
+**Pilha:** `020e5bf` (a prévia) + `568f652` (o modelo padrão) · **Deployment:** Production `success` às 18:48:13Z
+
+### O que aconteceu, na ordem
+A fatia 1 alinhou o **espelho** (`email-tab.tsx`) ao e-mail real. O gate humano **reprovou**: sem escolher cor, a prévia mostrava botão **azul**. Investiguei antes de consertar (comando Y) — e a resposta inverteu a premissa:
+
+> **A prévia estava CERTA.** Ela reproduzia fielmente o e-mail real, que para **36 dos 46 workspaces** usa o modelo **PADRÃO** (`ctaButton`), o qual **nunca passou pelo `emailPrimaryColor`**. O 9.296 tinha mudado só o caminho **tematizado** — que alcança **3** workspaces.
+
+⇒ A fatia 2 foi para a raiz: o `ctaButton` ganhou `color = PRODUCER_THEME_DEFAULTS.primaryColor` e texto calculado.
+
+### ⭐ O recorte saiu de graça do `default`
+| | |
+|---|---|
+| ✅ **viram lime** (9 chamadas **sem** cor) | welcomeProducer · welcomeStudent · studentAccessGranted · staffAccessGranted · passwordReset · workspacePasswordReset · subscriptionActivated · subscriptionRenewed · studentWorkspacesList |
+| ⛔ **não viram** (6 passam cor **explícita**) | collaboratorInvite `#10b981` · subscriptionExpiring `#f59e0b`/`#ef4444` · Suspended/Cancelled `#ef4444` · ticketReplyToProducer e adminCollaboratorInvite `#3b82f6` |
+
+**Nenhum precisou de caminho próprio.** Quem passa cor não é alcançado pelo default — o recorte é a própria linguagem.
+
+### ⛔ E o texto calculado consertou os outros de carona
+O `#ffffff` cravado dava **menos de 4,5 sobre TODAS** as cores em uso:
+
+| e-mail | cor | contraste |
+|---|---|---|
+| subscriptionExpiring | `#f59e0b` mantida | **2,15 → 9,22** |
+| collaboratorInvite | `#10b981` mantida | **2,54 → 7,80** |
+| subscriptionSuspended/Cancelled | `#ef4444` mantida | **3,76 → 5,26** |
+| ticketReplyToProducer | `#3b82f6` mantida | **3,68 → 5,38** |
+| os 9 do default | → **`#EFFF20`** | **3,68 → 17,91** |
+
+### ⭐ O erro que eu cometi, e como ele se resolveu sozinho
+Na fatia 1 mudei o `fallback` do seletor *"Cor principal (botão)"* para lime. A investigação mostrou que aquilo **mentia**: sem personalizar, o e-mail ia pelo modelo padrão, **azul**. Mas o campo é **ambíguo por construção** — o efeito dele depende de **outros campos** estarem preenchidos:
+
+| caso | campo azul | campo lime |
+|---|---|---|
+| não personaliza nada | ✅ verdade | 🔴 mente |
+| personaliza só o fundo | 🔴 mente | ✅ verdade |
+
+⇒ Nenhum valor era certo. **Com os dois modelos em lime, a ambiguidade acabou** e o campo passou a dizer a verdade nos dois casos. **Não precisei reverter — a fatia 2 consertou o que a 1 tinha errado.**
+
+### Os gates
+Contra a árvore mesclada: os **5** com cor própria **byte-idênticos** (2226 bytes cada), controle positivo no config vazio. **No artefato compilado:** `background-color:${v}` e `color:${w}` — as duas são **variáveis**; o branco cravado tem **0** ocorrências em `.js`; `#ef4444`, `#10b981` e `#f59e0b` seguem presentes. Contra a linha de base: **7 rotas idênticas** e `/sw.js` **byte-idêntico**.
+
+⚠️ **Não se prova por fora que o e-mail chega.** É código de servidor; a rota de teste envia de verdade. **A confirmação é a próxima venda.**
+
+### As duas observações do gate, viradas item
+- **9.301** — tocar em **qualquer** campo (até escolhendo a cor que já estava) faz a prévia saltar do modelo padrão para o tematizado. É **coerente com o real** (`hasVisualCustom`, os mesmos 7 campos dos dois lados), mas surpreende. Decisão de **produto**.
+- **9.302** — `ticketReplyToProducer` e `adminCollaboratorInvite` passam `#3b82f6` **explícito**. Mantidos pelo critério *explícito = intencional*, mas pode ser cópia do default antigo. **Pergunta de identidade, devolvida ao dono.**
+
+---
+
 ## 2026-09-12 — A 10ª regra do modo claro (9.300) — e o achado de que ela não muda pixel nenhum
 
 **Merge:** `3a2d9ba` (`--no-ff`, 2 pais) · **SHA de volta:** `5febcca` · **1 arquivo:** `src/app/globals.css`
