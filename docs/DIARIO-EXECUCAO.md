@@ -35,6 +35,50 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-15 — O webhook passa a dizer se o e-mail de acesso saiu (9.313, fatia 1 de 5)
+
+**EM PRODUÇÃO, merge `a9b6d34`.** 3 arquivos. ⚠️ Muda pixel: a tela de logs ganha o motivo em vermelho.
+
+### 🔴 O defeito era de receita, e o mecanismo é curto
+`await sendCustomAccessEmail(…)` com o **retorno descartado**, e 12 linhas depois `logWebhook({ status: "SUCCESS" })` **hardcoded, sem nenhum `if` no meio**. A dedup lê esse SUCCESS dentro de **60 s** ⇒ **um e-mail que falhou em silêncio fazia o retry do gateway PULAR o envio.** O aluno pagava, era matriculado, e a única chance de receber a senha era consumida por um log que só significa *"o webhook rodou"*.
+
+📏 **A janela é exercitada:** **685 pares de reenvio em 60 s** nos últimos 90 dias, **539 de compra aprovada**, **357 pessoas**.
+
+⚠️ **Quantas perderam o e-mail: não dá para saber** — e é exatamente isso que a fatia conserta. O melhor teste disponível (controle pareado, mesma janela) deu **29,1% × 25,6%** de nunca-acessaram: **razão 1,14×, estatisticamente igual**, e com n=357 **sem poder para descartar dano baixo**. Ausência de sinal não é ausência de dano quando o instrumento é grosso.
+
+### O conserto — e o schema já bastava
+Nada de migração. O desfecho vai em **`errorMessage`** — que a tela do produtor **já pinta de vermelho em QUALQUER linha** (`applyfy/page.tsx:608-612`), sem depender do selo — e em **`_emailAcesso`** dentro do `rawPayload`, o mesmo padrão de campo livre que o `_idempotency` já usava ali.
+
+### ⭐ A decisão que segurou a fatia no lugar
+**O `status` continua `SUCCESS`.** Reprovei antes de decidir: em todo o repo há **4 `findFirst` que filtram por status, e os 4 são a mesma dedup**. Mudá-lo para `ERROR` faria a dedup **parar de achar a linha** e o retry reenviar — **que é o comportamento da fatia 2**.
+
+⇒ aqui é **observabilidade, não comportamento**. E o pixel que muda é **a frase vermelha**, não o selo.
+
+### ⛔ O `.catch` que quase virou armadilha
+Contagem idêntica nos 3 (**2 · 6 · 5**). `sendCustomAccessEmail` **pode rejeitar** (`email-templates.ts:442` e `:472`, `await` fora de `try`) — tirá-lo viraria *unhandled rejection* **no caminho da matrícula**. Ele só ganhou um `return`, para a rejeição chegar na mesma forma que a falha resolvida. ⭐ **Foi um cético de subagente que apontou isso**, e eu confirmei abrindo o arquivo.
+
+### A prova, com webhook real no palco
+```
+[1] SUCCESS · _emailAcesso="falhou"
+    errorMessage="e-mail de acesso NAO enviado: BREVO_API_KEY not configured"
+[2] SUCCESS · _emailAcesso="pulado-duplicata" · errorMessage=null
+```
+**HTTP 200 nos dois** · ⭐ **a matrícula foi criada (ACTIVE) mesmo com o e-mail falhando** · o disparo 2 prova que **a dedup continua pulando exatamente como antes**. E confirmei **por curl autenticado** que a API da tela entrega o `errorMessage` — não mandei o dono procurar o que a máquina não tinha confirmado.
+
+**Gate do que não muda**, por shasum contra `012ad2f`: dedup **byte-idêntica** · matrícula **byte-idêntica** · `.catch` e logs idênticos · `json200`/`status:200` idêntico. Controle positivo: `_emailAcesso` de 0 → 2.
+
+⚠️ **Não provado no palco: o ramo `enviado`** — sem `BREVO_API_KEY` lá. Mesma limitação do 9.283.
+
+### ⚠️ A lição de sequência, que custou um comando inteiro
+No primeiro ciclo eu **limpei o palco ao fim e pedi gate visual sobre o que tinha apagado**. Gate visual e contagem-zero **não convivem no mesmo comando**.
+
+⭐ **A ordem é: armar → gate → subir → provar → limpar.** Foi assim desta vez, e o palco só foi desfeito depois do merge.
+
+### As outras quatro fatias, já medidas
+**9.314** a dedup exigir `_emailAcesso="enviado"` — ⚠️ muda comportamento, e o gate obrigatório é a duplicata (provar que quem recebeu **não** recebe de novo) · **9.315** o `/resend` mente, e ⭐ o `accessLink` que salvaria **já é devolvido e tem 0 usos na tela** · **9.316** os outros 5 call-sites, ⛔ sem tirar os `.catch` · **9.317** não existe reprocessamento — 🔴 decisão de produto.
+
+---
+
 ## 2026-09-15 — A bolinha do quiz (9.246 ✅) — e os outros três da família viram decisão de desenho
 
 **EM PRODUÇÃO, merge `9f1d080`. 1 arquivo, 1 LINHA.** ⚠️ Muda pixel: 1 ponto, 5 cursos, **551 alunos**.
