@@ -23,6 +23,23 @@ import {
 import { shouldWriteLastAccess } from "@/lib/last-access";
 
 const MAX_SESSIONS = 3;
+
+/* 9.309 · TEMPO CONSTANTE PARA QUEM NÃO EXISTE.
+   ⭐ MEDIDO antes de existir: e-mail que existe (aluno puro, senha errada)
+   levava ~0,576 s e e-mail inexistente ~0,248 s — as faixas **não se tocavam**,
+   então UMA requisição por endereço dizia, com 100% de acerto, quem é cliente
+   da plataforma. A resposta sempre foi a mesma (`{"error":"Senha incorreta"}`,
+   sha 2f3e341da51e1724); quem denunciava era o relógio.
+   ⚠️ O padrão clássico (hash falso) NÃO bastaria aqui: o scrypt custa ~38 ms de
+   uma folga de ~328 ms. O grosso são as IDAS AO BANCO que o caminho real faz e
+   o caminho curto pulava. Por isso o alvo falso REPETE as consultas — medido:
+   com id inexistente elas custam o mesmo (112→120 ms e 122→116 ms).
+   ⛔ Não é piso de tempo artificial: é o MESMO trabalho, não uma espera. */
+const ALVO_FALSO_ID = "00000000-0000-0000-0000-000000000000";
+// 64 bytes em hex — o comprimento que `verifyPassword` deriva, para o scrypt
+// rodar inteiro e não sair pelo atalho de tamanho (`workspace-auth.ts:31`).
+const HASH_FALSO = "0".repeat(128);
+const SALT_FALSO = "0".repeat(64);
 const STAFF_ROLES = new Set<string>([
   "PRODUCER",
   "ADMIN",
@@ -68,6 +85,30 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
       select: { id: true, role: true },
     });
     if (!target) {
+      /* 9.309 · o mesmo trabalho do caminho "existe, senha errada", com um alvo
+         que não existe. ⛔ NADA MUDA NA RESPOSTA — o 401 abaixo é byte a byte o
+         mesmo de antes. E este bloco é alcançável APENAS por quem não tem linha
+         `User`: ninguém que hoje consegue entrar passa por aqui.
+         ⚠️ Se o caminho real ganhar uma consulta nova, esta lista precisa
+         acompanhar — senão a folga volta a abrir. */
+      await getWorkspaceBlock(workspace.id).catch(() => null);
+      await prisma.collaborator
+        .findFirst({
+          where: { userId: ALVO_FALSO_ID, status: "ACCEPTED" },
+          select: { id: true },
+        })
+        .catch(() => null);
+      await prisma.workspaceCredential
+        .findUnique({
+          where: {
+            userId_workspaceId: {
+              userId: ALVO_FALSO_ID,
+              workspaceId: workspace.id,
+            },
+          },
+        })
+        .catch(() => null);
+      verifyPassword(password, HASH_FALSO, SALT_FALSO);
       return NextResponse.json({ error: "Senha incorreta" }, { status: 401 });
     }
 
