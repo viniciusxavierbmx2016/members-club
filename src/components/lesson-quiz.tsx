@@ -233,7 +233,7 @@ export function LessonQuiz({ lessonId }: Props) {
                         : "border-gray-300 dark:border-gray-600"
                     }`}>
                       {(state === "selected" || state === "correct" || state === "incorrect") && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--member-button-text,#ffffff)]" />
                       )}
                     </div>
                     {o.text}
