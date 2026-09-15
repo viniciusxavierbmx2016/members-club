@@ -217,6 +217,21 @@ async function grant(
       }
     }
 
+    /* 9.313 · OBSERVABILIDADE DO E-MAIL DE ACESSO.
+       ⭐ O `status: "SUCCESS"` desta linha significa "o webhook rodou" — e é
+       assim que ele FICA. Quem o lê para decidir é só a dedup daqui a algumas
+       linhas (reprovado: 4 `findFirst` filtram por status em todo o repo, e os
+       4 são esta mesma dedup); mudar o status mudaria o comportamento dela em
+       silêncio, e isso é a fatia 2.
+       ⇒ o desfecho do e-mail vai em DOIS lugares que já existem, sem migração:
+       `errorMessage` (que a tela do produtor já pinta de vermelho em QUALQUER
+       linha — `applyfy/page.tsx:608-612`, não só nas de erro) e `_emailAcesso`
+       dentro do `rawPayload`, do mesmo jeito que o `_idempotency` já é gravado.
+       ⛔ Nada aqui muda a matrícula, a dedup, ou o 200 devolvido ao gateway. */
+    let emailAcesso: "enviado" | "falhou" | "pulado-duplicata" | "nao-tentado" =
+      "nao-tentado";
+    let emailMotivo: string | null = null;
+
     // ⚠️ `!blockedWs` é UMA condição a mais no if que já existia — nada reordenado.
     if (adapter.capabilities.sendAccessEmail && !blockedWs) {
       // Dedup do email de acesso (escopada [slug]:367-381, janela de 60s no CÓDIGO).
@@ -256,9 +271,17 @@ async function grant(
           idempotencyKey,
           txId,
         });
+        emailAcesso = "pulado-duplicata";
       } else {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-        await sendCustomAccessEmail({
+        /* ⛔ O `.catch` abaixo CONTINUA — `sendCustomAccessEmail` PODE rejeitar
+           (`email-templates.ts:442` e `:472` têm `await` fora de try). Tirá-lo
+           viraria unhandled rejection no caminho da MATRÍCULA. Ele só ganhou um
+           `return`, para que a rejeição e a falha resolvida cheguem na MESMA
+           forma ao código abaixo.
+           ⭐ A falha de verdade não vem por exceção: vem no VALOR RESOLVIDO
+           (`{ success: false }`), que até agora era descartado. */
+        const envio = await sendCustomAccessEmail({
           workspaceId: ctx.workspaceId,
           studentName: f.name || f.email!,
           studentEmail: f.email!,
@@ -266,9 +289,23 @@ async function grant(
           tempPassword,
           loginUrl: `${appUrl}/w/${ctx.slug}/login`,
           isStaff,
-        }).catch((err) =>
-          console.error("[" + adapter.id + "] access email to:", f.email, err?.message || err)
-        );
+        }).catch((err) => {
+          console.error("[" + adapter.id + "] access email to:", f.email, err?.message || err);
+          return { success: false as const, error: err };
+        });
+        if (envio?.success === true) {
+          emailAcesso = "enviado";
+        } else {
+          emailAcesso = "falhou";
+          const e = (envio as { error?: unknown } | undefined)?.error;
+          emailMotivo =
+            "e-mail de acesso NAO enviado: " +
+            (envio === undefined
+              ? "workspace nao encontrado"
+              : typeof e === "string"
+                ? e
+                : (e as { name?: string } | undefined)?.name || "motivo desconhecido");
+        }
       }
     }
 
@@ -286,7 +323,11 @@ async function grant(
       courseId: course.id,
       workspaceId: ctx.workspaceId,
       status: "SUCCESS",
-      rawPayload: logPayload,
+      errorMessage: emailMotivo,
+      rawPayload:
+        logPayload && typeof logPayload === "object"
+          ? { ...(logPayload as Record<string, unknown>), _emailAcesso: emailAcesso }
+          : logPayload,
     });
     results.push({ externalId: p.externalId, courseId: course.id, granted: true });
   }
