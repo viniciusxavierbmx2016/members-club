@@ -407,7 +407,17 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
         // De-dup the access email per (transaction, email) within 24h.
         // Enrolment + producerTransaction above are idempotent — we still
         // re-run them on retry — but the email must not duplicate.
-        let alreadyEmailed = false;
+      /* 9.313 · OBSERVABILIDADE DO E-MAIL DE ACESSO — gêmeo de
+         `lib/gateways/process-webhook.ts`. O `status: "SUCCESS"` continua
+         significando "o webhook rodou": mudá-lo alteraria a dedup em silêncio,
+         e isso é a fatia 2. O desfecho vai no `errorMessage` (que a tela já
+         pinta de vermelho em qualquer linha) e no `_emailAcesso` do rawPayload.
+         ⛔ Nada muda na matrícula, na dedup, nem no 200 ao gateway. */
+      let emailAcesso: "enviado" | "falhou" | "pulado-duplicata" | "nao-tentado" =
+        "nao-tentado";
+      let emailMotivo: string | null = null;
+
+      let alreadyEmailed = false;
         if (txId && email) {
           const prior = await prisma.webhookLog.findFirst({
             where: {
@@ -437,6 +447,7 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
             email,
             txId,
           });
+          emailAcesso = "pulado-duplicata";
         } else {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
           const loginUrl = `${appUrl}/w/${workspace.slug}/login`;
@@ -444,7 +455,11 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
           // isStaff to buildAccessEmail, which picks the right default
           // template when the workspace hasn't customized (so behaviour
           // stays identical for the empty-config case).
-          await sendCustomAccessEmail({
+          /* ⛔ O `.catch` CONTINUA — `sendCustomAccessEmail` pode rejeitar
+             (`email-templates.ts:442` e `:472`). Ele só ganhou um `return`, para
+             a rejeição chegar na mesma forma que a falha resolvida.
+             ⭐ A falha de verdade vem no VALOR RESOLVIDO, que era descartado. */
+          const envio = await sendCustomAccessEmail({
             workspaceId: workspace.id,
             studentName: name || email,
             studentEmail: email,
@@ -452,7 +467,23 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
             tempPassword,
             loginUrl,
             isStaff,
-          }).catch((err) => console.error("[EMAIL_ERROR] access email to:", email, err?.message || err));
+          }).catch((err) => {
+            console.error("[EMAIL_ERROR] access email to:", email, err?.message || err);
+            return { success: false as const, error: err };
+          });
+          if (envio?.success === true) {
+            emailAcesso = "enviado";
+          } else {
+            emailAcesso = "falhou";
+            const e = (envio as { error?: unknown } | undefined)?.error;
+            emailMotivo =
+              "e-mail de acesso NAO enviado: " +
+              (envio === undefined
+                ? "workspace nao encontrado"
+                : typeof e === "string"
+                  ? e
+                  : (e as { name?: string } | undefined)?.name || "motivo desconhecido");
+          }
         }
 
         await logWebhook({
@@ -462,9 +493,14 @@ export async function POST(request: Request, props: { params: Promise<{ slug: st
           courseId: course.id,
           workspaceId,
           status: "SUCCESS",
+          errorMessage: emailMotivo,
           // Store the full body so the idempotency guard at the top can
           // match by transaction.id on retry.
-          rawPayload: body,
+          // 9.313 · `_emailAcesso` carrega o desfecho do e-mail, sem coluna nova.
+          rawPayload:
+            body && typeof body === "object"
+              ? { ...(body as Record<string, unknown>), _emailAcesso: emailAcesso }
+              : body,
         });
         results.push({ externalId: lookupId, courseId: course.id, granted: true });
       }
