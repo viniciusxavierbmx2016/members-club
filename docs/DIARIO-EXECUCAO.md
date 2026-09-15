@@ -35,6 +35,45 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-15 — O 2FA ganhou procedimento (9.111) — e continua ABERTO, de propósito
+
+**1 documento, zero código.** `docs/RUNBOOK-RECUPERACAO-2FA.md`, com ponteiro no **topo do SYSTEM-MAP** e seção própria (4.1) lá dentro.
+
+### ⚠️ O gatilho já tinha disparado, e há meses
+O item previa subir para 🔴 urgente *"no dia em que alguém habilitar 2FA em produção"*. Medido: **2 fatores verificados** — **1 ADMIN desde 19/mai** (de apenas **2** que existem) e **1 PRODUTOR desde 28/ago**, este com **1 workspace e 1 curso próprios**. É cliente: travá-lo é travar o negócio dele. **42 desafios** registrados — está em uso.
+
+### ⭐⭐ O achado: existe uma saída que não precisa de ninguém
+Quem ainda tiver **sessão que já passou pelo desafio** em qualquer aparelho **desliga o próprio 2FA pelo painel** — o `unenroll` exige AAL2, e aquela sessão tem AAL2.
+
+⭐ É a **única** saída que a plataforma **registra** (`AuditLog`, `mfa_disabled`) e a **única que não exige a chave de serviço**. **Não estava escrita em lugar nenhum** — virou o passo 1 do runbook, antes de tudo.
+
+### ⚠️ E ela fecha com o tempo — medido, não suposto
+O comando pediu para provar se o AAL2 sobrevive ao *refresh*. **Não deu para provar por leitura:** o `currentLevel` sai do claim `aal` do JWT (`GoTrueClient.js:4513-4515`) e o token novo é cunhado pelo **GoTrue**, cujo código Go não está neste repositório.
+
+**Mas os dados respondem.** O ADMIN foi desafiado **39 vezes em 22 dias distintos ao longo de 119 dias**, com intervalo mediano de **22,2 h**. Se o AAL2 caísse a cada *refresh* (~1 h de token), seriam **dezenas de desafios por dia**.
+
+⇒ o desafio acontece no **login**, não a cada refresh · **e a janela é de HORAS, não de dias.**
+
+⭐ O runbook escreve as duas coisas: *"aja hoje"* e *"não é garantia do fornecedor — tente primeiro, pode não funcionar"*. **Prova por comportamento não vira promessa.**
+
+### A verificação de identidade — só o que a plataforma tem
+⛔ O comando proibiu escrever *"o suporte remove quando pedirem"*, e com razão: **remover 2FA é, por definição, um jeito de burlar o 2FA**.
+
+O runbook exige **confirmação por um canal DIFERENTE** de onde veio o pedido, e lista só dados medidos: **telefone cadastrado** (as duas contas têm) · data de criação · workspaces/cursos que a pessoa possui · histórico no `AuditLog` (110 e 11 linhas) · quando o 2FA foi ativado.
+
+⭐ A regra que ficou gravada: **ligar para o telefone CADASTRADO, nunca para o número que veio no pedido** — e se forem diferentes, **parar**.
+
+### 🔴 Por que o item NÃO fecha
+**Ter procedimento não é estar resolvido.** Três coisas continuam de pé:
+
+1. **A remoção administrativa não deixa rastro nenhum.** O `AuditLog` só é escrito pelo código das rotas, e o **`auth.audit_log_entries` do Supabase está VAZIO (0 linhas)**. Os dois caminhos — `admin.auth.admin.mfa.deleteFactor` (provado existente no SDK 2.105.3) e `DELETE FROM auth.mfa_factors` (permissão provada com transação revertida, 0 linhas, os 2 fatores intactos) — são **invisíveis**. O registro manual do runbook é **remendo, não conserto**.
+2. **Não existe ferramenta na tela** — nenhum ADMIN remove o 2FA de outra pessoa pela interface.
+3. ⭐ **A dívida real é a INDISPONIBILIDADE DO DONO, não a quantidade de gente com 2FA.** Hoje são 2 pessoas e ele resolve. **O gatilho para construir códigos de backup não é o número de fatores — é o dia em que ele não puder atender.** Com 139 produtores, oferecer 2FA a todos vira fila.
+
+⚠️ E o conserto de verdade segue caro: o **SDK não oferece códigos de backup** (nada de `backup`/`recovery` em `supabase.auth.mfa`; o `enroll` só aceita `totp`). ⛔ Recuperação por e-mail está **fora** — rebaixaria o 2FA à caixa postal.
+
+---
+
 ## 2026-09-15 — O oráculo por tempo fechou nos dois pontos (9.309) — e o número que eu tinha registrado estava errado
 
 **EM PRODUÇÃO, merge `3adfefc`.** 2 arquivos. ⚠️ Zero pixel — muda **quando as coisas acontecem**. E mexe na porta de **29 mil alunos pagantes**.
