@@ -1,5 +1,9 @@
 # SYSTEM MAP — referência de arquitetura (ler no início de toda sessão)
 
+> 🚨 **EMERGÊNCIA — alguém perdeu o autenticador de 2FA e não entra:**
+> **[docs/RUNBOOK-RECUPERACAO-2FA.md](RUNBOOK-RECUPERACAO-2FA.md)**
+> ⚠️ O passo 1 resolve sozinho e **fecha em horas** — leia antes de qualquer outra coisa.
+
 > Objetivo: nunca mais confundir os conceitos do Members Club. Fonte: código + PLANO-MESTRE + memória das investigações (BUG B, BUG C, inventários). Onde não foi lido no código, está marcado **CONFIRMAR**.
 > Plataforma: Next 16 / React 19 / Supabase Auth / Prisma / Vercel (gru1) atrás de Cloudflare. Produto: "Members Club".
 
@@ -107,6 +111,28 @@ STAFF_ROLES = { PRODUCER, ADMIN, COLLABORATOR, ADMIN_COLLABORATOR }
 **A MASTER PASSWORD** (`Workspace.masterPassword`, plaintext — skeleton-key do produtor) é um 3º caminho no ws-login (bloco 1, prioridade máxima). ⚠️ **Gate = VÍNCULO DE ALUNO, não role** (corrigido em `1fdfd1e`/PM 7.8): `Enrollment ACTIVE não-expirado no ws` (`isEnrollmentActive`), qualquer role — **nunca** owner/collab sem matrícula (esses usam a global). Antes gateava `role === "STUDENT"` → cega p/ 14 híbridos reais (produtor que é aluno de outro produtor). Sessão nasce via magic-link (AAL1); híbrido **com MFA** é rejeitado pelo `getCurrentUser` AAL-gate (limitação declarada). Não rotaciona senha nenhuma. ⭐ **INVARIANTE desde `ae9fdf2` (10/set/26, PM 9.144): a master NUNCA sai do servidor.** As duas portas de matrícula manual entregam **só** a credencial individual (`mc-XXXXXX` do `WorkspaceCredential`) — `courses/[id]/students` sempre entregou, e `producer/students/import` passou a entregar; lá ela nem entra mais no `select`. **Quem for criar uma terceira porta que devolva senha ao produtor: é este o contrato.** ⚠️ Os 11 workspaces que tinham master configurada em 10/set já a distribuíram a até 7.618 pessoas — **decisão registrada do dono: não rotacionar, não avisar** (o porquê está no item 9.144).
 
 ---
+
+## 4.1) 2FA — e o beco sem saída de quem perde o autenticador
+
+**Quem pode ativar:** só ADMIN e PRODUCER (`lib/auth.ts:191`). **Hoje são 2
+pessoas** com fator TOTP verificado em produção: 1 ADMIN e 1 PRODUTOR.
+
+**O beco, medido (15/set/26):** trocar a senha **não remove** o fator
+(`api/auth/reset-password` só troca a senha, e o comentário `:59` avisa que o MFA
+volta a ser exigido) · desativar **exige AAL2** (`api/auth/mfa/unenroll:43-53`
+devolve 403) · **não existem códigos de backup** (0 ocorrências no `src/`, com
+controle positivo) · e sem AAL2 o `getCurrentUser` devolve **`null`**
+(`lib/auth.ts:196-198`), então a plataforma inteira trata a pessoa como deslogada.
+
+🚨 **O que fazer quando acontecer:** **[RUNBOOK-RECUPERACAO-2FA.md](RUNBOOK-RECUPERACAO-2FA.md)**.
+⭐ O passo 1 (a pessoa desliga sozinha de um aparelho ainda logado) resolve sem
+ninguém mexer em nada — **e a janela é de horas**: medido, a mesma pessoa é
+desafiada de novo a cada ~22 h.
+
+⚠️ **A remoção administrativa não deixa rastro:** o `AuditLog` só é escrito pelo
+código das rotas, e `auth.audit_log_entries` está **vazio**. Por isso o runbook
+exige **registro manual**. Item **9.111** — segue **ABERTO**: ter procedimento
+não é o mesmo que estar resolvido.
 
 ## 5) ESTADO (puxado do PLANO-MESTRE)
 
