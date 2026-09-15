@@ -79,37 +79,31 @@ export async function POST(req: Request) {
     const qs = params.toString();
     const redirectTo = `${origin}/reset-password${qs ? `?${qs}` : ""}`;
 
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: "recovery",
-      email: user.email,
-      options: {
-        redirectTo,
-      },
-    });
-
-    if (error || !data?.properties?.action_link) {
-      console.error("[FORGOT-PASSWORD] generateLink error:", error?.message);
-      return NextResponse.json({ success: true });
-    }
-
-    const template = passwordReset(user.name || "Usuário", data.properties.action_link);
+    /* 9.309 · O `generateLink` SAI DO CAMINHO DA RESPOSTA.
+       ⭐ MEDIDO: ele é a totalidade do vazamento por tempo. A etapa comum aos
+       dois casos (`prisma.user.findUnique`) custa 87 ms para quem existe E para
+       quem não existe — diferença ZERO; o `generateLink` custa ~58 ms e só roda
+       para quem existe. Resultado: as faixas não se tocavam (0,124–1,084 s
+       contra 0,085–0,093 s) e UMA requisição por endereço dizia quem tem conta.
+       ⛔ O comentário logo abaixo protegia a metade errada: o fire-and-forget
+       cuidava do ENVIO, mas quem denunciava era esta chamada, `await`ada.
+       ⭐ `after()` é o mesmo primitivo que o 9.283 instalou nesta rota: roda
+       DEPOIS da resposta, então não muda o que a rota devolve nem quando.
+       ⛔ Não é atraso artificial — é a mesma chamada, em outro momento.
+       ⓘ O `recovery_sent_at` continua sendo gravado: o `generateLink` acontece,
+       só que ~58 ms mais tarde. */
 
     // Fire-and-forget so the response time stays constant whether or
     // not Brevo is healthy. If we awaited here, a slow/down Brevo would
     // (a) hang the request and (b) leak whether the email exists via
     // timing (fast = unknown user/early-return, slow = email sent).
-    // The recovery link is already minted on Supabase's side by the
-    // awaited `generateLink` above — if the email send fails, the user
-    // simply retries and gets a fresh link.
-    // A promessa começa AQUI, no mesmo instante de antes — o tempo de
-    // resposta continua constante e o trade-off de :62-68 fica INTACTO.
-    // ⛔ Isto NÃO virou `await`.
+    // ⚠️ 9.309 ATUALIZOU ESTE PARÁGRAFO: o `generateLink` NÃO é mais "awaited
+    // above" — ele desceu para dentro do `after()`, porque era ELE que vazava
+    // o tempo. O link continua sendo cunhado do lado do Supabase, só que
+    // depois da resposta; se o envio falhar, a pessoa tenta de novo e recebe
+    // um link novo. ⛔ E o trade-off do parágrafo acima segue valendo: nada
+    // disto virou `await` no caminho da resposta.
     const t0 = Date.now();
-    const enviando = sendEmail({
-      to: { email: user.email, name: user.name },
-      subject: template.subject,
-      htmlContent: template.htmlContent,
-    });
 
     /* 9.283 · O DESFECHO VAI PARA O LOG — depois da resposta, nunca antes.
        ⭐ O defeito era MAIOR do que o item dizia: `sendEmail` **nunca
@@ -128,10 +122,33 @@ export async function POST(req: Request) {
        ⓘ O `.catch` fica como rede de segurança para o dia em que
        `email.ts` passar a lançar — hoje é inalcançável, e está dito. */
     after(async () => {
-      let r: Awaited<typeof enviando> | null = null;
+      const { data, error } = await supabase.auth.admin.generateLink({
+        type: "recovery",
+        email: user.email,
+        options: { redirectTo },
+      });
+      if (error || !data?.properties?.action_link) {
+        logger.error("FORGOT-PASSWORD", "generateLink falhou — e-mail NAO SAIU", {
+          reason: "generate-link",
+          name: (error as { name?: string } | null)?.name || "SemNome",
+          ms: Date.now() - t0,
+        });
+        return;
+      }
+
+      const template = passwordReset(
+        user.name || "Usuário",
+        data.properties.action_link
+      );
+
+      let r: Awaited<ReturnType<typeof sendEmail>> | null = null;
       let rejeitou: unknown = null;
       try {
-        r = await enviando;
+        r = await sendEmail({
+          to: { email: user.email, name: user.name },
+          subject: template.subject,
+          htmlContent: template.htmlContent,
+        });
       } catch (err) {
         rejeitou = err;
       }

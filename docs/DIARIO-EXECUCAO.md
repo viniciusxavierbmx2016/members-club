@@ -35,6 +35,58 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-15 — O oráculo por tempo fechou nos dois pontos (9.309) — e o número que eu tinha registrado estava errado
+
+**EM PRODUÇÃO, merge `3adfefc`.** 2 arquivos. ⚠️ Zero pixel — muda **quando as coisas acontecem**. E mexe na porta de **29 mil alunos pagantes**.
+
+### ⚠️ Primeiro, a errata
+O item dizia **10×**. **Refeito com rigor — N=20 por caso, intercalado A/B, aquecimento descartado — é 1,5×.** Os 0,807 s de onde saiu o "10×" eram **arranque a frio**: aparecem na amostra nova como o `max` de 1,084 s contra mediana de 0,133 s. **O item nasceu de duas medidas, e duas medidas não bastavam.**
+
+⭐ **Mas o que decide não é a razão — é a separação.** As faixas **não se tocavam**: o mais rápido que existe (0,124 s) era maior que o mais lento que não existe (0,093 s). **Uma amostra por endereço, 100% de acerto.** A razão pequena tornava o achado mais *discreto*, não menos grave.
+
+### (1) Recuperação — o `generateLink` era a totalidade do vazamento
+Medido **por etapa**: `prisma.user.findUnique` custa **87 ms para quem existe e para quem não existe — diferença ZERO**. O `generateLink` custa **58 ms** e **só roda para quem existe**.
+
+⛔ O comentário `:62-68` protegia a metade errada: o fire-and-forget cuidava do *envio*; quem denunciava era esta chamada, `await`ada. Ela desceu para dentro do `after()` que o 9.283 já tinha instalado nesta rota.
+
+| | antes | depois |
+|---|---|---|
+| existe × não existe | 0,133 s × 0,089 s | **0,075 s × 0,074 s** |
+| razão · faixas | separação **TOTAL** 🔴 | **1,01×** · **sobrepostas** ✅ |
+
+⭐ De carona: **44% mais rápida** para quem é legítimo. E o **`recovery_sent_at` continua sendo gravado** — provado: `03:44:12` → `03:44:36`.
+
+### (2) Login do aluno — ⚠️ o padrão clássico resolveria 11%
+O manual manda "verificar um hash falso". **Medi antes de aplicar:** o scrypt custa **38 ms** de uma folga de **328 ms**.
+
+**O grosso são as idas ao banco** que o caminho curto pulava — `getWorkspaceBlock` **210 ms**, `collaborator.findFirst` **112 ms**, `workspaceCredential.findUnique` **122 ms**. Por isso o alvo falso **repete as consultas** antes do `verifyPassword`; e medi que **com id inexistente elas custam o mesmo** (112→120 e 122→116 ms).
+
+⛔ **Não é piso de tempo artificial** — é o **mesmo trabalho**, não uma espera.
+
+| | antes | depois |
+|---|---|---|
+| existe × não existe | 0,576 s × 0,248 s | **0,542 s × 0,545 s** |
+| razão · faixas | folga 0,199 s · **TOTAL** 🔴 | **0,99×** · **sobrepostas** ✅ |
+
+### ⭐ Por que isto não pode trancar aluno
+O bloco novo vive **dentro de `if (!target)`** — alcançável **apenas por quem não tem linha `User`**. **Ninguém que hoje entra passa por ali.** Não é promessa do teste: é a **forma do código**.
+
+**Matriz de 11 personas, por chamada real: 11/11 iguais** — incluindo as 3 linhas de **master password** (definida no palco só para o teste e **restaurada para `null`**).
+
+⚠️ **E o meu primeiro comparador deu falso alarme — corrigi em vez de confiar nele.** Eu comparava o `sha` do corpo, e o corpo de um login **bem-sucedido contém a sessão nova**: 3 chamadas na mesma build deram **3 shas distintos**. O `sha` que serve é o da **recusa**, `2f3e341da51e1724`, idêntico antes e depois. **Foi o segundo comparador meu a falhar nesta frente** — o outro quebrou num `cut -d:` porque o JSON tem `:`.
+
+### ✅ Em produção — a previsão falseável
+⭐ O lado **"não existe" do login TINHA de ficar mais lento** (passou a fazer 3 consultas + scrypt). **Medido pelo origin, N=15: 0,166 → 0,245 s (+0,079 s).** E a recuperação, cujo lado "não existe" **não foi tocado**, ficou onde estava (0,122 → 0,111 s). **As duas previsões bateram** — é o que prova que o código novo está mesmo rodando lá.
+
+Controles: `sha` da recusa **idêntico** · 3 caminhos da recuperação **idênticos** · `/sw.js` **byte-idêntico** · 4 rotas de controle sem mudança.
+
+⚠️ **NÃO PROVADO em produção: o lado "existe"** dos dois oráculos. Medi-lo exigiria disparar recuperação — ou tentativa de login — **contra uma pessoa real**. ⛔ Não fiz. O que sustenta a conclusão é o **mesmo código provado dos dois lados no palco**, mais a previsão falseável do lado que eu podia medir.
+
+### 🔴 Os três itens que ficaram
+**9.310** — a equalização é por **réplica**, e réplica envelhece: se o caminho real ganhar uma consulta nova, a folga reabre **em silêncio** (nenhum teste quebra). · **9.311** — em workspace **bloqueado** o login ainda denuncia **por conteúdo** (503 × 401); é pré-existente e o conflito é de produto. · **9.312** — `producer-login` (1,4×) e `w/<slug>/forgot-password` (1,2×) seguem vazando, com sobreposição — alcançam 139 produtores e os alunos de um workspace, contra os 28.147 que o login do aluno alcançava.
+
+---
+
 ## 2026-09-14 — O log da recuperação (9.283): o `.catch` era inalcançável, então o log nunca teve como se desmentir
 
 **EM PRODUÇÃO, merge `317d975`.** 1 arquivo. ⚠️ Zero pixel — muda **o que vai para o log**.
