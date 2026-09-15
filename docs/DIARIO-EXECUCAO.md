@@ -35,6 +35,46 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-15 — A bolinha do quiz (9.246 ✅) — e os outros três da família viram decisão de desenho
+
+**EM PRODUÇÃO, merge `9f1d080`. 1 arquivo, 1 LINHA.** ⚠️ Muda pixel: 1 ponto, 5 cursos, **551 alunos**.
+
+### ⭐⭐ A descoberta que corrige o item: atingia os DOIS modos
+O item dizia que o escuro era o caso ruim, porque `bg-white` só é remapeado em `html:not(.dark)` (`globals.css:337`). **Verdade pela metade.** No claro a regra troca o ponto por `var(--member-card, #ffffff)` — **mas nos cursos que recebem o lime pela VIRADA o `--member-card` nem é emitido**: o `layout.tsx` só emite `--member-primary`, `--member-button-text` e `--member-ink` quando não há campos próprios.
+
+⇒ o fallback `#ffffff` voltava a valer, e **o ponto sumia igualmente no claro**. Medido: **1,11 nos dois modos**.
+
+### O conserto e a prova
+
+| | círculo | ponto | contraste |
+|---|---|---|---|
+| **ANTES** | `#efff20` | `#ffffff` | 🔴 **1,11** |
+| **DEPOIS** | `#efff20` | `#0a0a0a` | ✅ **17,91** |
+
+⭐ O palco foi armado pelo **caminho real**: liguei a virada do `staging-teste`, porque **3 dos 6 cursos reais com quiz recebem o lime pela virada**, sem cor própria. Não inventei uma marca.
+
+**Os três controles:** curso **sem marca** → `.course-customized=false`, círculo `#3b82f6` cru, ponto `#ffffff`, **3,68 — byte-idêntico** · o **✓** da resposta certa **intacto**, com a borda `rgb(16,185,129)` = emerald-500 **CRU** · marca **escura** → ponto **BRANCO** (17,06), o conserto **adapta**.
+
+⛔ **E o estado `incorrect` nunca piora** — prova por **exaustão**: o círculo dele é `bg-red-500`, não remapeado, e o ponto novo só pode assumir dois valores, `#ffffff` (idêntico) ou `#0a0a0a` (3,76 → 5,26).
+
+### ⚠️ Duas sondas minhas falharam, e as duas eu consertei
+1. **`grep` no artefato** deu "7 chunks com `rounded-full bg-white`" e parecia que o fix não pegara. Discriminei pelo marcador *"Enviar respostas"*: o chunk do quiz tem a classe nova ×1 e a velha ×0 — os 7 eram **outros componentes** (course-card, module-carousel, push-toggle…).
+2. **A prova em produção deu ZERO-E-ZERO** — a regra nova *e* o controle positivo. ⭐ Pela régua da casa, **zero-e-zero é sonda quebrada, não ausência**: minha regex escapava errado o `\,` e o `\#` do Tailwind. Com busca **literal**, a regra está lá, 1 = 1 contra o build local.
+
+### ⚠️ O que fica não provado
+**Um aluno real fazendo o quiz em produção.** O chunk é carregado sob demanda atrás de login, e os hashes da Vercel **diferem** dos do build local — não deu para baixá-lo por nome. A prova pública ficou no **CSS**, que é determinístico; o comportamento ponta a ponta foi provado **no palco**, com gate humano 4/4.
+
+### 🔴 Os outros três NÃO são conserto de CSS
+⭐ **A raiz não é a mesma**, e provei camada a camada (controle: o vermelho do `incorrect` tem **0 de 7** classes remapeadas — a sonda discrimina):
+
+- **9.245 — alcance ZERO.** Dos **104 comentários** nos 63 cursos sob o tema, os autores são **STUDENT (40) e PRODUCER (4)**: **nenhum ADMIN, nenhum EQUIPE**. O crachá que colide **nunca foi renderizado**; o único que aparece é o **roxo**, que não é remapeado. É barreira de **acaso** — some no dia em que um colaborador responder.
+- **9.242 — zero manifestações, e o item está desatualizado.** Ele previa que *fazer* o texto seguir a marca quebraria o `#000000`; **o texto já segue** (`globals.css:390`), e aquele curso **não tem quiz**. Nos 6 que têm, **0 abaixo de 3,0**. No claro não há problema: `text-blue-700` não é remapeado.
+- **9.244 — colapsa só no escuro, e sobrevivem 3 pistas:** o anel, a borda **emerald crua** e o **✓**. ⛔ O conserto "óbvio" seria remapear a borda ou o anel — **exatamente as pistas que sobrevivem**. Mexer nelas **remove distinção**, o oposto do objetivo.
+
+⇒ **os três viram decisão de desenho**, não fatia de CSS: como marcar "certa" × "marcada", e como distinguir dois papéis, quando a paleta **semântica** foi entregue à marca.
+
+---
+
 ## 2026-09-15 — O 2FA ganhou procedimento (9.111) — e continua ABERTO, de propósito
 
 **1 documento, zero código.** `docs/RUNBOOK-RECUPERACAO-2FA.md`, com ponteiro no **topo do SYSTEM-MAP** e seção própria (4.1) lá dentro.
