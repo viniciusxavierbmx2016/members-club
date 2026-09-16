@@ -35,6 +35,28 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-16 — O aviso de cobrança que se carimbava sozinho (9.318, fatia 1A)
+
+**Estado antes:** main em `0f1aa51`
+**O que foi feito:** os TRÊS avisos anteriores ao vencimento (`before_3d`, `before_1d`, `due_today`) passam a só gravar o `BillingReminder` quando o e-mail realmente saiu, e a registrar o motivo quando não sai. Antes, `sendBillingEmail` descartava o retorno de `sendEmail` e só podia falhar por um `catch` que **nunca abre** — então o lembrete era gravado mesmo com o aviso não enviado, entrava no `sentTypes` e **carimbava o aviso como entregue para sempre**. A promessa estava escrita desde `4052d2e` (31/mai/26), um commit que criou o portão e os três comentários no mesmo diff e **nasceu no-op**.
+**Arquivos tocados:** `src/app/api/cron/billing/route.ts` (1 arquivo, +78/−13; a mudança funcional são 12 linhas)
+**Como foi provado:**
+- ⭐ **Gate de MÁQUINA, e por necessidade:** não existe tela de cobrança em lugar nenhum (0 ocorrências de `BillingReminder` em `.tsx`, controle positivo 57/15/4 em campos irmãos; nenhuma API o devolve; as linhas COM e SEM carimbo são indistinguíveis campo a campo por curl autenticado). Virou o item **9.319**.
+- ⭐ **Palco, discriminador dos DOIS LADOS na mesma rodada**, com o código-fonte real da função e os argumentos parseados do próprio `route.ts`. Os quatro bonecos tiveram o **mesmo e-mail falhando** (palco sem `BREVO_API_KEY`):
+  `before_3d` / `before_1d` / `due_today` (`exigirEnvio=true`) → **`ret=false`, BillingReminder 0, `reason:"credencial-ausente"`**
+  `after_1d` (default `false`, **CONTROLE**) → **`ret=true`, BillingReminder 1, log `"Sent after_1d to…"`**
+- ✅ **Gate de escopo reprovado NA ÁRVORE MESCLADA**, por shasum de trecho: degrau +3 `f77afc85` · `sendSuspendEmail` `d97f2197` · `after_1d` `9aeaa593` · `after_7d` `221e7ad9` · `after_15d` `765192b8` · as 3 travas `1be2c39e` — todos idênticos. `try`/`catch`/`console.error` 3→3.
+- ⭐ **Produção, pelo artefato do servidor:** 3 chamadas com `,!0)` e 3 sem o 4º argumento; assinatura `async function o(e,i,s,l=!1)` e corpo `return l&&!u?.success?(…"NAO SAIU"…)`. Controles: `Sent suspend to` presente, controle negativo 0.
+- Controles pós-deploy iguais à base: `/sw.js` `dbf0c4cfb179f839` byte-idêntico · `/producer/login` 200 · `/admin/login` 200 · `/api/auth/me` 401 · 404 na rota falsa · **cron recusando igual: 401 na ORIGEM**.
+**SHA do merge:** `e7dff3c`  ·  **Rollback:** `git revert -m 1 e7dff3c`
+**Mudou em produção para quem:** ⚠️ **para ninguém, hoje.** O cron roda 1×/dia (`0 9 * * *`) e **não age**: 135 subscriptions, **135 com `currentPeriodEnd` NULL**, 0 elegíveis, 0 `BillingReminder` na história inteira. Muda para o **primeiro produtor pagante de verdade** — e é por isso que este era ao mesmo tempo o momento mais seguro (efeito observável nulo) e o mais urgente (o defeito subiria junto com a feature).
+**Ficou aberto:** **9.319** (🔴 não existe tela de cobrança — quando a suspensão cortar os alunos, ninguém tem onde olhar) · **9.320** (fatia 1B: os 3 pós-vencimento, que precisam de limite de tentativa antes) · **9.321** (fatia 2: a suspensão, com a decisão de produto pendente entre *não suspende* / *suspende e registra* / *suspende após N*).
+⚠️ **Não provado, e declarado:** o cron **rodando de verdade**. Só a primeira assinatura paga real exercita o caminho — e ela não existe hoje.
+⚠️ **Nota de leitura da linha de base:** pelo domínio, `/api/cron/billing` devolve **403 do Cloudflare** ("you have been blocked"); é regra de WAF em `/api/cron/*` e **não diz nada sobre o app**. O discriminador do app é a **origem**, que dá 401 `{"error":"Unauthorized"}`.
+⭐ **Lição de método, registrada porque quase virou conclusão errada:** a sonda do "valor fixo nos 3 pós-vencimento" deu **0** porque meu regex exigia `)` no fim da linha e elas terminam em `);`. O irmão acendeu (3) e o zero não — **zero com o irmão aceso é sonda quebrada, não ausência**. Corrigi antes de escrever qualquer veredito. Na limpeza, o mesmo tipo de armadilha: `NOT { externalId: { startsWith } }` **perde as linhas com `externalId` NULL** (SQL: `NOT NULL LIKE …` é NULL), e a contagem do "que não pode morrer" veio **0** em vez de 4. Só a soma `0+4+4=8` bateu contra o total e expôs o erro — antes de apagar.
+
+---
+
 ## 2026-09-15 — O webhook passa a dizer se o e-mail de acesso saiu (9.313, fatia 1 de 5)
 
 **EM PRODUÇÃO, merge `a9b6d34`.** 3 arquivos. ⚠️ Muda pixel: a tela de logs ganha o motivo em vermelho.
