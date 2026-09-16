@@ -35,6 +35,25 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-16 — VIRADA, LEVA 4a: 6.296 alunos passam a ver o lime (9.322) — e a leva achou dois defeitos vivos
+
+**Estado antes:** main em `90113ee` · ligados 41 · desligados 6
+**O que foi feito:** ligados **4 workspaces** por banco, sem deploy: `Monetizy Club` (0 mudam), `Ebenézer 2.0` (1.354), `Home Office Lucrativo` (2.145) e `InfinityIA` (2.805). Ligados **41 → 45**, desligados **6 → 2**. ⛔ Os dois gigantes — `Mentoria Junção Milionária` (11.065) e `Grupo SM` (5.140) — **ficaram de fora por decisão do dono** e foram reconferidos em `false` depois da escrita.
+**Arquivos tocados:** nenhum de código. `UPDATE` em `Workspace.memberBrandDefault` nos 4 ids.
+**Como foi provado:**
+- **Dry-run** com 5 travas, e o `updateMany` com **guarda dupla** (`id IN (...) AND memberBrandDefault = false`) → **4 linhas afetadas**.
+- ⭐ **União × soma:** a soma por workspace dá 6.304 e a união dá **6.296**; a diferença são **8 pessoas em 2+ dos quatro**. O número honesto é a união. ⚠️ Eu quase reportei isso como "matrícula expirando" — medi e **0 expiraram em 24h**; a causa era método, não dado.
+- ⭐ **C3, a leva anterior com 43,2 h de observação** (não "poucas horas"): **0 tickets** antes e depois · acesso da coorte **3,01% → 8,61%** (2,86×) contra **0,86% → 1,78%** do controle (2,06×) · progresso de aula da própria coorte em 5 janelas iguais: **277 · 327 · 144 · 256 · 256** — o pós-virada **dentro da faixa**. ⚠️ Minha 1ª leitura comparou janelas de tamanhos diferentes e sugeriu queda; com janelas iguais é 256 → 256.
+- ⭐ **C4:** nos 4 há **0 quiz, 0 lives, 4 posts, 0 comentários, 0 overrides, `forceTheme` NULL**. O drip (1 módulo no Home Office, 1 no InfinityIA com 2.805 expostas) é **imune**: o card bloqueado é `bg-black/65 + text-white` (`module-carousel.tsx:397-411`), sem `--member-*`.
+**SHA do merge:** — (não há; é `UPDATE` de banco)  ·  **Rollback:** `UPDATE "Workspace" SET "memberBrandDefault"=false WHERE id IN ('9d5bfd31-5d69-45ab-bacd-ad118b82fe74','96d0f48e-e72d-48be-81db-be50489b9d7d','cdf6c8a2-d96e-48f3-a36e-b75bfac9bdbd','92b62754-4f00-4936-a3ec-e4a6484833d0');`
+**Mudou em produção para quem:** **6.296 alunos** passam a ver a área do curso em lime. Exposição total da virada: **788 → 7.076 (9,0×)**. ⚠️ Nenhum campo `member*` de curso foi escrito: 1 curso com marca (o do Monetizy, que já tinha) e 8 ainda `NULL`.
+**Ficou aberto:** 🔴 **9.323** — `.course-customized` liga `opacity: .55–.85` em texto secundário de cursos que nunca customizaram, porque `--member-text` só sai com `memberTextColor` (0 de 9 nos novos, **56 de 70** na plataforma ligada). Calculado por mim: `text-gray-500` **4,83 → 2,33** no claro. ⭐ A **vitrine já resolveu isso com gate duplo** (`w/[slug]/layout.tsx:53-61` + `globals.css:568-578`); o member tem gate único. 🔴 **9.324** — `rich-text-editor.tsx:353/:431/:641`: `#ffffff` sobre o lime = **1,11:1**, porque `--producer-button-text` não existe na rota do aluno.
+⚠️ **OS DOIS DEFEITOS NÃO SÃO DA 4a — já estavam vivos nos 41 desde 07/set.** Desligar a 4a não os conserta; só reduz a exposição. ⭐ **Mas a 4a multiplicou por 9× quem os vê, e por isso a LEVA 4b (+16.187) não deve sair antes do 9.323.**
+⚠️ **Não provado:** a tela de produção. `/course/**` exige sessão e não me autentico como cliente.
+⭐ **Lição de método:** o agente adversarial achou os dois defeitos DEPOIS de eu ter escrito — eu decidi escrever sem esperá-lo, com o argumento (que se sustenta) de que qualquer achado seria pré-existente ao mecanismo. O argumento estava certo, **mas o custo de esperar 2 minutos seria zero e o do erro seria 6.296 pessoas**. Em escrita de produção, esperar o cético é mais barato que a aposta.
+
+---
+
 ## 2026-09-16 — O aviso de cobrança que se carimbava sozinho (9.318, fatia 1A)
 
 **Estado antes:** main em `0f1aa51`
