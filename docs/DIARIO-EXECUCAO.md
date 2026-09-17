@@ -35,6 +35,34 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-17 — A papelada da família de cobrança, e a decisão do dono que só existia num comentário
+
+**Estado antes:** main em `a5add00` · a decisão do 9.321 tomada em 16/set e registrada em **lugar nenhum**
+
+**O que foi feito:** fatia **100% documental** — zero arquivo de código tocado. Registrei no PLANO-MESTRE tudo o que as rodadas de 16 e 17/set provaram sobre a família de cobrança (9.318, 9.319, 9.320, 9.321), com a decisão do dono do **9.321** transcrita do comentário da branch local, e carimbei a branch `fix/9319-suspensao-prazo-final` como **NÃO MESCLAR NO ESTADO ATUAL**. O 9.318, em produção desde 16/set, **nunca tinha sido carimbado na §5 do SYSTEM-MAP** — foi agora.
+
+**Arquivos tocados:** `docs/PLANO-MESTRE.md` (+105/−0) · `docs/SYSTEM-MAP.md` (+4/−0) · `docs/DIARIO-EXECUCAO.md` (esta entrada). **Nenhum arquivo de código.**
+
+**Como foi provado:**
+- ⭐ **Backup REAL da branch, com restauração executada** — `~/mc-backups/fix-9319-suspensao-prazo-final-0c87a11.bundle`, sha256 `ea5d21226079bcb3185052c3823c0c72525698380cc659f24a090ce19c2fdb63`, 6.027.216 bytes. `git bundle verify` → *"records a complete history"*; clone do bundle → `rev-parse HEAD` = `0c87a113…`, `diff --name-status a5add00...HEAD` = **1 linha**, `cmp` idêntico ao blob (controle negativo: `cmp` contra `main` discrimina). A rodada anterior tratava uma cópia em `/tmp` como backup — **não era**.
+- **Reconferência antes de escrever, com 4 agentes somente-leitura** (leitor + cético em duas frentes) e **hash agregado igual antes e depois** (`aeb79a3bad7269a6`). Todo achado de agente foi confirmado por mim abrindo o arquivo.
+- **Medição em produção, somente leitura** (`SUPABASE_REF` `wyamxwmdgbvqrfcqfbyh`, `SET TRANSACTION READ ONLY` provado por `SHOW transaction_read_only = on`, ROLLBACK por sentinela): **137 subscriptions — 100 PENDING não isentas, 37 ACTIVE isentas · 0 com `currentPeriodEnd` · 0 `BillingReminder` · 2 com `suspendedAt` · 2 com `externalId` · 2 `Invoice`, ambas REFUNDED**. Bateu número por número com a base do dossiê.
+- **Controle positivo no staging** (`wxynnsyartxcvglqwmdw`, mesma sonda): **4** com vencimento e **8** `BillingReminder` ⇒ o zero de produção é real, não sonda cega.
+
+**SHA do merge:** o merge desta fatia (registrado no relatório da execução; esta entrada é escrita **antes** dele, como manda a ordem do gate) · **Rollback:** `git revert -m 1 <sha do merge>`
+
+**Mudou em produção para quem:** ⚠️ **para ninguém.** Nenhuma linha de código mudou, e o subsistema que os documentos descrevem **não tem sujeito hoje**: 0 assinaturas elegíveis para o cron, por redundância tripla.
+
+**Ficou aberto:** **9.325** (módulo `lib/subscription.ts` morto, com escrita de `SUSPENDED` dentro de um getter — é o *"item próprio"* que o `:771` pediu) · **9.326** (régua dos 3 dias em três lugares, com um dia de divergência) · **9.327** (gate do produtor falha aberto no cliente) · **9.328** (`findMany` do cron sem `catch`) · **9.329** (assunto *"vence em 1 dias"*) · **9.330** (`BrevoTimeoutError` sem `statusCode`) · **9.331** (ação `extend` do admin sem checar `exempt`) · **9.332** (`WebhookLog` sem campo de rota) · **9.333** (lições de método). E, como antes: **9.319**, **9.320** e **9.321**.
+
+🔴 **O QUE ESTA FATIA EXISTE PARA CONSERTAR:** a decisão do dono sobre o 9.321 — suspender depois de um prazo mesmo sem conseguir avisar, prazo `+15` — foi tomada em 16/set e ficou **só** em `src/app/api/cron/billing/route.ts:11-24` de uma branch local que nunca foi ao origin. Enquanto isso o item seguia `- [ ]` e a entrada anterior deste diário dizia *"decisão de produto pendente"*. É o item-fantasma pela face menos óbvia: não é o código que ficou sem papel, é a **decisão**.
+
+⚠️ **NÃO PROVADO:** se o e-mail do Brevo pode ter saído mesmo quando `sendEmail` devolve `success:false`. O abort do timeout é 100% client-side e não manda cancelamento, mas o que o servidor do Brevo faz com um POST já recebido **não está em nenhum arquivo instalado**. Fica como hipótese declarada, não como fato.
+
+⭐ **Lição de método, e eu cometi o erro dentro do próprio commit que o registra:** as referências de linha que escrevi para o PLANO-MESTRE envelheceram **durante a própria inserção** — o bloco novo empurrou o alvo. Corrigi medindo cada âncora depois de inserir e trocando só nas linhas que o `git diff` acusou como novas. ⭐ A regra que fica: **citar pelo NOME (o item, a guarda, o trecho) sobrevive; citar pela linha, não.** Virou o ponto (8) do **9.333**.
+
+---
+
 ## 2026-09-16 — VIRADA, LEVA 4a: 6.296 alunos passam a ver o lime (9.322) — e a leva achou dois defeitos vivos
 
 **Estado antes:** main em `90113ee` · ligados 41 · desligados 6
