@@ -4,6 +4,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { logAudit, getRequestMeta } from "@/lib/audit";
 import { mfaChallengeSchema, validateBody } from "@/lib/validations";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 const MAX_SESSIONS = 3;
 
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
       where: { email: userResp.user.email.toLowerCase() },
     });
     if (!user) {
-      return NextResponse.json({ verified: true });
+      return clearWorkspaceContext(NextResponse.json({ verified: true }));
     }
 
     await prisma.session.deleteMany({
@@ -91,7 +92,7 @@ export async function POST(req: Request) {
       ...meta,
     });
 
-    return NextResponse.json({ verified: true });
+    return clearWorkspaceContext(NextResponse.json({ verified: true }));
   } catch (error) {
     console.error("[MFA_CHALLENGE]", error);
     return NextResponse.json(

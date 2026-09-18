@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { rateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { impersonateSessionSchema, validateBody } from "@/lib/validations";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 export async function POST(request: Request) {
   const limited = await rateLimit(request);
@@ -98,13 +99,15 @@ export async function POST(request: Request) {
       `Success: ${impToken.admin.email} → ${impToken.user.email}`
     );
 
-    return NextResponse.json({
-      access_token: otpData.session.access_token,
-      refresh_token: otpData.session.refresh_token,
-      expires_in: otpData.session.expires_in,
-      expires_at: otpData.session.expires_at,
-      email: impToken.user.email,
-    });
+    return clearWorkspaceContext(
+      NextResponse.json({
+        access_token: otpData.session.access_token,
+        refresh_token: otpData.session.refresh_token,
+        expires_in: otpData.session.expires_in,
+        expires_at: otpData.session.expires_at,
+        email: impToken.user.email,
+      })
+    );
   } catch (err) {
     console.error(
       "[IMPERSONATE-SESSION] Error:",
