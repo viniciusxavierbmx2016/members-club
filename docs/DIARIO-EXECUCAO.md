@@ -35,6 +35,54 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-18 — O 9.138 fechado nas três camadas, e o que o gate humano ensinou sobre o próprio método
+
+**Estado antes:** main em `1f24baa` · o 9.138 aberto desde 28/ago com **veredito em aberto** e uma pergunta
+que ele mesmo chamava de primeiro passo — *"medir quantos usuários de produção são PRODUCER e têm matrícula
+ativa"* — nunca respondida.
+
+**O que aconteceu.** O dono subiu o palco **no terminal dele** e fez o gate humano por cliques: entrou pela
+tela de login do próprio workspace com a conta de produtor **dono**, o cookie `active_workspace_slug` foi
+gravado com **Max-Age de 30 dias e `Secure`**, e a tela final foi a **área de aluno** — *"Boa tarde, Producer"*,
+*"Você ainda não está matriculado em nenhum curso"*. O dono do workspace terminou na vitrine de aluno, e o
+texto da própria tela prova que ele não é aluno de curso nenhum ali.
+
+O passo de digitar `/` **não pôde ser capturado no navegador**: o service worker responde a toda navegação
+(`public/sw.js:31`) e o 307 intermediário não aparece no DevTools. Fechei esse passo **por máquina e sem
+login** — com um cookie de sessão sintético, possível porque `src/proxy.ts:30-43` só olha presença. Quatro
+potes montados à mão deram sessão sintética + slug válido → `/w/staging-teste`; sessão sintética sem slug →
+`/producer`; slug sem sessão → `/producer/login`; pote vazio → `/producer/login`. E o **controle de vacuidade**
+— sessão sintética com slug inválido — deu `/producer`, provando que quem decide é o valor **passar na
+validação**, não a presença do cookie.
+
+**O que fechou.** O 9.138 sai de *veredito em aberto* para **CONFIRMADO, conserto pendente**. A pergunta do
+primeiro passo está respondida: **62 dos 141 PRODUCER (44%) têm matrícula ativa** — é atrito real de produto,
+não conveniência de QA. A direção do conserto está escolhida e sem código: cada porta que instala identidade
+apaga o cookie de contexto da anterior.
+
+**O que abriu.** Quatro itens vizinhos, todos medidos: **9.334** (o cookie `active_workspace_id` sem nenhum
+apagador, com dois escritores de prazos diferentes), **9.335** (o botão da trava do `/admin` que não resolve
+o destino), **9.336** (o aluno de senha-mestra mandado para a porta errada) e **9.337** (alunos com sessão
+válida e sem contexto — **445** medidos hoje, **433** pelo caminho independente).
+
+**O que NÃO abriu, e é o achado de processo:** a página de offline inalcançável **já tinha item** — o
+**9.228**. Ia abrir um número novo para ela; o cético da rodada apontou o registro existente antes de eu
+escrever. Entrou como atualização do 9.228, não como item-fantasma por duplicação. Pela mesma razão, o
+**9.336** cita o candidato sem número que já estava registrado na abertura da FASE 4, e o **9.334** cita o
+9.74 e o 9.75, corrigindo de passagem uma frase do 9.74 que dizia haver validação de posse em três caminhos
+quando um deles não tem.
+
+**Lições.** Seis, registradas em item próprio — três delas de erro meu. A que mais custou: relatório que não
+separa o **observado** do **deduzido** não vale como medição, por mais tabela e número que tenha. E a que
+mais vai mudar a rotina: **palco para gate humano é subido pelo dono, no terminal dele** — três servidores
+que esta sessão iniciou morreram junto com ela, os três com o log parando na linha de arranque, sem erro.
+
+**Prova:** o merge desta fatia. ⛔ Zero código, zero deploy de aplicação, zero escrita em banco — só os três
+documentos. Todas as consultas de produção em transação somente-leitura, com `SUPABASE_REF` impresso antes,
+e só contagens.
+
+---
+
 ## 2026-09-17 — A papelada da família de cobrança, e a decisão do dono que só existia num comentário
 
 **Estado antes:** main em `a5add00` · a decisão do 9.321 tomada em 16/set e registrada em **lugar nenhum**
