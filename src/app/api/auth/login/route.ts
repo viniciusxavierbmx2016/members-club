@@ -6,6 +6,7 @@ import { observeOrigin } from "@/lib/origin-lock";
 import { loginSchema, validateBody } from "@/lib/validations";
 import { logAudit, getRequestMeta } from "@/lib/audit";
 import { trackLoginFailure } from "@/lib/security-alerts";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 const MAX_SESSIONS = 3;
 
@@ -70,10 +71,12 @@ export async function POST(request: Request) {
     const verifiedFactors =
       factorsData?.totp?.filter((f) => f.status === "verified") ?? [];
     if (verifiedFactors.length > 0) {
-      return NextResponse.json({
-        requiresMfa: true,
-        factorId: verifiedFactors[0].id,
-      });
+      return clearWorkspaceContext(
+        NextResponse.json({
+          requiresMfa: true,
+          factorId: verifiedFactors[0].id,
+        })
+      );
     }
 
     if (user) {
@@ -123,13 +126,15 @@ export async function POST(request: Request) {
       ...getRequestMeta(request),
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Login realizado com sucesso",
-      redirect: "/",
-      user: data.user,
-      session: data.session,
-    });
+    return clearWorkspaceContext(
+      NextResponse.json({
+        success: true,
+        message: "Login realizado com sucesso",
+        redirect: "/",
+        user: data.user,
+        session: data.session,
+      })
+    );
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

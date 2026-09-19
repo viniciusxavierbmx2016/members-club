@@ -6,6 +6,7 @@ import { generateSalt, hashPassword } from "@/lib/workspace-auth";
 import { publicSignupSchema, validateBody } from "@/lib/validations";
 import { logger } from "@/lib/logger";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 /**
  * E4.4 etapa 2, FATIA 1 — CADASTRO PÚBLICO do workspace.
@@ -215,7 +216,9 @@ export async function POST(
       if (!existente) throw e;
     }
 
-    return NextResponse.json({ ok: true, slug: params.slug }, { status: 201 });
+    return clearWorkspaceContext(
+      NextResponse.json({ ok: true, slug: params.slug }, { status: 201 })
+    );
   } catch (error) {
     logger.error("public-signup", "erro inesperado", {
       slug: params.slug,

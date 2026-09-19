@@ -7,6 +7,7 @@ import { welcomeProducer } from "@/lib/email-templates";
 import { rateLimit } from "@/lib/rate-limit";
 import { registerSchema, validateBody } from "@/lib/validations";
 import { encrypt } from "@/lib/encryption";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 export async function POST(request: Request) {
   const limited = await rateLimit(request);
@@ -231,9 +232,11 @@ export async function POST(request: Request) {
       sendEmail({ to: { email, name }, ...template }).catch((err) => console.error("[EMAIL_ERROR] welcomeProducer to:", email, err?.message || err));
     }
 
-    return NextResponse.json(
-      { message: "Conta de produtor criada", user: data.user },
-      { status: 201 }
+    return clearWorkspaceContext(
+      NextResponse.json(
+        { message: "Conta de produtor criada", user: data.user },
+        { status: 201 }
+      )
     );
   } catch (error) {
     console.error("POST /api/auth/register-producer error:", error);

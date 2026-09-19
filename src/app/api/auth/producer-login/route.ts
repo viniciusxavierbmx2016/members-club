@@ -9,6 +9,7 @@ import { trackLoginFailure } from "@/lib/security-alerts";
 import { hasAcceptedCollaborator } from "@/lib/auth";
 import { verifyPassword } from "@/lib/workspace-auth";
 import { getStudentWorkspaces } from "@/lib/student-workspaces";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 const MAX_SESSIONS = 3;
 
@@ -121,13 +122,15 @@ export async function POST(request: Request) {
     const verifiedFactors =
       factorsData?.totp?.filter((f) => f.status === "verified") ?? [];
     if (verifiedFactors.length > 0) {
-      return NextResponse.json({
-        requiresMfa: true,
-        factorId: verifiedFactors[0].id,
-        // A página guarda e usa PÓS-challenge (antes o client hardcodava "/",
-        // que pousaria admin na Trava do /producer).
-        redirect: destination,
-      });
+      return clearWorkspaceContext(
+        NextResponse.json({
+          requiresMfa: true,
+          factorId: verifiedFactors[0].id,
+          // A página guarda e usa PÓS-challenge (antes o client hardcodava "/",
+          // que pousaria admin na Trava do /producer).
+          redirect: destination,
+        })
+      );
     }
 
     await prisma.session.deleteMany({
@@ -164,13 +167,15 @@ export async function POST(request: Request) {
       ...getRequestMeta(request),
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Login realizado com sucesso",
-      redirect: destination,
-      user: data.user,
-      session: data.session,
-    });
+    return clearWorkspaceContext(
+      NextResponse.json({
+        success: true,
+        message: "Login realizado com sucesso",
+        redirect: destination,
+        user: data.user,
+        session: data.session,
+      })
+    );
   } catch (error) {
     console.error("Producer login error:", error);
     return NextResponse.json(
