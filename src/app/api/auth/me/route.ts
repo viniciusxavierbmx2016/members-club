@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createAdminClient, AVATAR_BUCKET } from "@/lib/supabase-admin";
 import { getAdminPermissions } from "@/lib/admin-permissions-server";
 import { logger } from "@/lib/logger";
+import { setWorkspaceContext } from "@/lib/workspace-context";
 
 const MAX_BYTES = 2 * 1024 * 1024;
 const ALLOWED = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
       user.workspaceId
         ? prisma.workspace.findUnique({
             where: { id: user.workspaceId },
-            select: { slug: true, name: true, logoUrl: true },
+            select: { slug: true, name: true, logoUrl: true, isActive: true },
           })
         : Promise.resolve(null),
     ]);
@@ -74,7 +75,25 @@ export async function GET(req: NextRequest) {
       "API /api/auth/me",
       `auth:${t1 - t0}ms query:${t2 - t1}ms total:${t2 - t0}ms`
     );
-    return NextResponse.json({ user, collaborator, workspace, adminPermissions });
+    const res = NextResponse.json({ user, collaborator, workspace, adminPermissions });
+    // 9.337 — REINSTALA o contexto de workspace do aluno. O cookie dura 30 dias,
+    // a sessão dura 400, e `src/proxy.ts:122-129` rebate o aluno autenticado da
+    // única tela que o grava (`api/w/[slug]/login/route.ts:361`): o gravador é
+    // inalcançável enquanto a sessão viver, e o `GET /` passa a mandar o aluno
+    // para a área do produtor (`src/proxy.ts:108-109`).
+    // ⭐ Aqui a consulta JÁ foi feita acima — reinstalar custa ZERO consulta, e
+    //    a leitura do cookie do pedido vem do próprio `req`, sem tocar o banco.
+    // ⛔ Só para ALUNO PURO. Discriminador = role + vínculo, o mesmo de
+    //    `api/auth/producer-login/route.ts:103` e `app/producer/layout.tsx:30-33`
+    //    (`collaborator` acima já é a linha ACCEPTED), nunca "tem credencial".
+    // ⛔ Só com workspace ATIVO: `app/w/[slug]/layout.tsx:36` faz `notFound()`
+    //    para workspace desligado.
+    const alunoPuro = user.role === "STUDENT" && !collaborator;
+    const jaNoPedido = req.cookies.get("active_workspace_slug")?.value;
+    if (alunoPuro && workspace?.isActive && workspace.slug !== jaNoPedido) {
+      return setWorkspaceContext(res, workspace.slug);
+    }
+    return res;
   } catch (error) {
     console.error("Me error:", error);
     return NextResponse.json(
