@@ -35,6 +35,58 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-19 — O 9.337 corrigido: o contexto do aluno volta sozinho, na próxima carga de página
+
+**Estado antes:** main em `bcb0b7e` · o 9.337 medido e aberto: **445** pessoas com sessão válida e
+sem o cookie de contexto, mandadas pelo `GET /` à área do produtor.
+
+**O que foi feito.** O conserto não criou rota nem tocou o `/`. Passou a gravar o cookie em
+`GET /api/auth/me`, que **já roda em toda carga de página** (`src/components/auth-provider.tsx:32`,
+no layout raiz) e **já fazia a consulta** que resolve o workspace (`src/app/api/auth/me/route.ts:55-66`)
+— reinstalar o contexto custa **zero consulta**. A gravação tem quatro condições (`:91-93`): aluno
+puro pelo discriminador da casa (role + vínculo, nunca "tem credencial"), workspace resolvido,
+workspace ativo, e valor diferente do que veio no pedido. A função `setWorkspaceContext`
+(`src/lib/workspace-context.ts:42-51`) é espelho da que apaga, com as cinco flags idênticas às do
+gravador original. Junto, o resolvedor `src/app/api/student/workspace/route.ts` ganhou o filtro de
+workspace ativo e passou a enxergar as vias de aluno que a vitrine já aceitava.
+
+**Arquivos tocados:** `src/lib/workspace-context.ts` · `src/app/api/auth/me/route.ts` ·
+`src/app/api/student/workspace/route.ts` · e os três documentos. `src/proxy.ts`, o gravador do login
+do workspace e os três leitores do cookie ficaram **fora do diff**.
+
+**Como foi provado.** Por percurso de máquina no palco, com alvo de staging provado pelos dois
+procedimentos e **5 logins** com personas `@staging.test`. O cerne: remove-se do pote apenas o cookie
+de contexto — simulação declarada do vencimento —, o `GET /` cai em `/producer`, e então
+`/api/auth/me` devolve o `Set-Cookie` com 30 dias e o `GET /` seguinte termina na área do aluno, com
+o título servido do workspace. **Zero cliques.** Uma segunda chamada não reemite. Produtor, admin e
+o **híbrido aluno-com-colaboração-aceita** recebem zero cookies. A vacuidade foi fechada: em `main`
+a rota não mencionava o cookie em lugar nenhum, e o artefato servido carrega a função nova.
+Contabilidade: `OriginLockLog` subiu exatamente 5, o número de logins.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1` do merge desta fatia
+
+**Mudou em produção para quem:** os alunos que hoje caem na área do produtor ao abrir o app — o
+cookie volta sozinho na primeira carga de página, onde quer que ela seja. **Marco zero: 445 pessoas
+em 19/set/2026, com ritmo de 73 por semana.** Para staff nada muda. ⭐ E muda a **semântica do
+destino**, aprovada pelo dono: passa a ser a **casa** do aluno (`User.workspaceId`) e não a matrícula
+mais recente — 43 pessoas medidas, que hoje caem no painel do produtor e passam a pousar na casa.
+
+**Ficou aberto:** o **9.338**, aberto nesta rodada — o login do workspace recusa com 403 e deixa a
+sessão criada, que é uma das fábricas do estado do 9.337; a decisão de não derrubar a sessão está
+declarada no próprio código, e a população não foi medida. Seguem abertos também a **face B do
+9.138**, o **9.334** e o **9.335**. ⭐ E fica registrado como **escolha, não pendência**: o aluno sem
+nenhuma via de acesso **recebe** o cookie e vai à vitrine, onde vê o aviso — medido, sem laço, em
+dois saltos. Acrescentar uma quinta condição custaria uma consulta nova na rota mais quente do
+sistema, e o dono recusou esse custo.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · **gate humano visual NÃO houve — por
+decisão do dono**; a validação foi por percurso de máquina, e o palco não tinha persona de workspace
+inativo, de matrícula só EXPIRED, de marca de pertencimento, nem de COLLABORATOR puro — as quatro
+ficaram cobertas só por leitura de código, e isso está declarado em vez de presumido ✅ ·
+papelada ✅
+
+---
+
 ## 2026-09-19 — O 9.138 face A corrigido: cada porta de login limpa o contexto da identidade anterior
 
 **Estado antes:** main em `28f7807` · o 9.138 confirmado nas três camadas em 18/set, com o conserto
