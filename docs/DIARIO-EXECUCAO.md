@@ -35,6 +35,57 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-19 — O 9.138 face A corrigido: cada porta de login limpa o contexto da identidade anterior
+
+**Estado antes:** main em `28f7807` · o 9.138 confirmado nas três camadas em 18/set, com o conserto
+pendente e a direção já escolhida ("cada porta que instala identidade apaga o cookie da anterior").
+
+**O que foi feito.** Nasceu `src/lib/workspace-context.ts:18` — uma função que recebe um
+`NextResponse`, apaga `active_workspace_slug` com `maxAge: 0` e `path: "/"` e devolve a mesma
+resposta, no molde do `api/auth/logout/route.ts:22-25`. Ela é chamada em **10 pontos**, em **7
+portas de servidor** que instalam identidade. Duas dessas chamadas são as saídas `requiresMfa`, que
+entraram porque os comentários das próprias rotas dizem que os cookies AAL1 **ficam**
+(`api/auth/login/route.ts:68` e `api/auth/producer-login/route.ts:120`). O gravador do cookie, o
+`src/proxy.ts` e os três leitores **não foram tocados**.
+
+**Arquivos tocados:** `src/lib/workspace-context.ts` (novo) · `api/auth/login/route.ts` ·
+`api/auth/producer-login/route.ts` · `api/auth/mfa/challenge/route.ts` ·
+`api/w/[slug]/register/route.ts` · `api/auth/register-producer/route.ts` ·
+`api/auth/impersonate-session/route.ts` · `api/auth/callback/route.ts` · e os três documentos.
+
+**Como foi provado.** Por **percurso de máquina** no palco (`127.0.0.1:3001`, alvo de staging
+provado pelos dois procedimentos), com cabeçalhos de Chrome, `Content-Type` igual ao do formulário
+e `-L` até a página final. **4 logins**, todos com personas `@staging.test`. O aluno entra pela
+porta do workspace e o `GET /` vai para `/w/staging-teste`; no **mesmo pote**, o produtor entra pela
+porta do produtor, a resposta traz `active_workspace_slug=; Path=/` e o `GET /` passa a ir para
+`/producer`. Logo depois, `/api/auth/me` responde **200 com `role: PRODUCER`** — a sessão
+sobreviveu à limpeza. A prova mais limpa foi o **isolamento da variável**: na MESMA sessão de admin,
+replantar o cookie à mão devolve o destino antigo, e esvaziá-lo devolve o novo. A **vacuidade** foi
+fechada mostrando que, em `main`, a rota não menciona o cookie em lugar nenhum (controle positivo: o
+gravador menciona). Contabilidade: `OriginLockLog` subiu exatamente 4, o número de logins.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1` do merge desta fatia
+
+**Mudou em produção para quem:** quem troca de identidade no mesmo navegador — o produtor que
+também é aluno, o admin que impersona, e quem se cadastra num workspace tendo sessão de outro.
+Antes, o `/` os levava ao workspace da identidade **anterior**; agora leva ao destino da sessão
+atual. Para quem **não** troca de identidade, nada muda: o aluno que entra pela porta do workspace
+continua com o cookie de 30 dias intacto.
+
+**Ficou aberto:** a **face B do 9.138** — o dono que entra pela porta do próprio workspace continua
+caindo na vitrine de aluno, porque ali o cookie é verdadeiro e quem erra é o `/`, que honra o
+contexto sem olhar o papel da sessão. Não foi aberto item novo: o bloco de 18/set do 9.138 já
+carrega o mecanismo, a população e a alternativa descartada, e o item segue `[ ]` por causa dela.
+Reservado e não usado: 9.338.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · **gate humano visual NÃO houve — por
+decisão do dono**, registrada aqui e no PLANO-MESTRE; a validação foi por percurso de máquina, que
+identificou `/producer` e `/admin` **pela URL** (os dois entregam esqueleto de cliente) e deixou o
+caminho de segundo fator coberto **só por leitura de código**, por não haver fator no palco ✅
+declarado · papelada ✅
+
+---
+
 ## 2026-09-18 — O 9.138 fechado nas três camadas, e o que o gate humano ensinou sobre o próprio método
 
 **Estado antes:** main em `1f24baa` · o 9.138 aberto desde 28/ago com **veredito em aberto** e uma pergunta
