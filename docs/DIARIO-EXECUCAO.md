@@ -35,6 +35,45 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-19 — A métrica do 9.337 não media a cura, e o registro foi corrigido
+
+**Estado antes:** main em `14cb1b0` · o registro do 9.337 chamava a população de "marco zero do
+monitoramento", em dois documentos.
+
+**O que foi feito.** Só papelada — nenhum arquivo de código mudou. Ficou provado, e está escrito,
+que aquele número **não mede a cura**: a definição da população exige `MAX(Session.createdAt) < 30
+dias`, e a tabela `Session` só é escrita pelas **quatro rotas de login**
+(`api/auth/mfa/challenge:77`, `api/auth/producer-login:154`, `api/auth/login:113`,
+`api/w/[slug]/login:326`), enquanto a rota da cura tem **0** `session.create` — ela grava só o
+cookie (`src/app/api/auth/me/route.ts:94`). Curar uma pessoa não a remove da contagem, e o número
+não vai cair por causa do conserto. O que a população continua valendo é o retrato do defeito
+**antes** da fatia.
+
+**Arquivos tocados:** `docs/PLANO-MESTRE.md` · `docs/SYSTEM-MAP.md` · `docs/DIARIO-EXECUCAO.md`.
+
+**Como foi provado.** Varredura dos escritores de `Session` com controle positivo (6 usos de
+`prisma.` no arquivo da cura) e negativo (nome inventado = 0); leitura de `src/lib/logger.ts:1` e
+`:18`, que mostram que o nível usado hoje naquela rota é **silencioso em produção**; e medição em
+produção, somente leitura, com a trava recusando escrita: **445 às 12:27**, contra 444 às 11:22 e
+446 às 11:50 — oscilou três vezes em pouco mais de uma hora, porque é fluxo e não estoque.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1` do merge desta fatia
+
+**Mudou em produção para quem:** ninguém — é fatia de registro. O comportamento do produto é o
+mesmo de antes.
+
+**Ficou aberto:** o sinal de monitoramento. Cinco formas foram avaliadas contra seis regras escritas
+antes de olhar o código, e **nenhuma passou**: a de log cai na contabilidade, porque a retenção da
+Vercel é **NÃO PROVADA** — não há número em documento nenhum — e o repositório já a julgou volátil
+duas vezes; as de banco caem por escreverem a cada carga no caso de falha do cookie, sem guarda
+possível sem consulta nova, e por exigirem identificador de pessoa. **Decisão do dono: não abrir
+fatia de sinal agora**, e a cura fica com o estado **"provada no palco, não observável em produção"**.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first — não se aplica, nada de código ✅ · gate
+humano — não se aplica, fatia documental ✅ · papelada ✅
+
+---
+
 ## 2026-09-19 — O 9.337 corrigido: o contexto do aluno volta sozinho, na próxima carga de página
 
 **Estado antes:** main em `bcb0b7e` · o 9.337 medido e aberto: **445** pessoas com sessão válida e
