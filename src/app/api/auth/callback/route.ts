@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
+import { clearWorkspaceContext } from "@/lib/workspace-context";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -125,8 +126,10 @@ export async function GET(request: Request) {
 
     const destination =
       nextPath || (slug ? `/w/${slug}` : "/");
-    return clearIntentCookies(
-      NextResponse.redirect(new URL(destination, url.origin))
+    return clearWorkspaceContext(
+      clearIntentCookies(
+        NextResponse.redirect(new URL(destination, url.origin))
+      )
     );
   } catch (error) {
     console.error("GET /api/auth/callback error:", error);
