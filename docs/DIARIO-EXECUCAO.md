@@ -35,6 +35,63 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-20 — Os pontinhos do carrossel passam a obedecer a quem monta a tela
+
+**Estado antes:** main em `682b7d1` · o conserto da fatia anterior cravou `bottom-16` (64 px) dentro
+do componente do carrossel para limpar o cartão de informações do curso. O componente tem **dois**
+montadores e só um foi medido: a página de vendas não tem cartão nenhum e usa `aspectRatio` fixo
+(1125/350), então a 390 px a faixa dela cai para **111 px** e os mesmos 64 px punham os pontinhos a
+**37%** da altura — sobre a arte do banner. Erro de desenho meu, reconhecido pelo dono.
+
+**O que foi feito:** o afastamento virou prop. `dotsOffsetClass` nasce com padrão **no rodapé**
+(`bottom-2`, o valor de antes do conserto anterior) e a área de conteúdo — a única com elemento
+sobreposto — passa `bottom-16`, com o motivo escrito no próprio call-site. Nada mais mudou: tempo de
+troca, crossfade, deslize por toque, teto de slides, comportamento de menos movimento e tamanho dos
+pontinhos ficaram intocados, e o ramo de **um slide** não teve uma linha alterada.
+
+**Arquivos tocados:** `src/components/course-banner-carousel.tsx` (+12 −7) ·
+`src/app/(course)/course/[slug]/page.tsx` (+5 −0). Nenhum outro — o portão exigia exatamente 2.
+
+**Como foi provado:** **sem gate humano visual, por decisão do dono — a validação é por captura.**
+Quatro telas (área de conteúdo e página de vendas, a 1280 e a 390 px), duas personas de staging
+(uma com matrícula no curso, outra sem). **(1)** Posição medida em % da altura da faixa, antes e
+depois: a área de conteúdo ficou **igual** (68% nas duas larguras, folga de 64 px) e a página de
+vendas **desceu ao rodapé** (de 81% para 96% a 1280, e de **37% para 87%** a 390 — folga de 8 px).
+**(2)** `document.elementFromPoint` devolveu o próprio botão em **12 de 12** pontinhos.
+**(3)** Com **um** slide, as quatro telas saíram **byte-idênticas** à main: 331.248 e 186.163 bytes
+na área de conteúdo, 153.730 e 74.807 na página de vendas, `cmp` idêntico, com controle positivo do
+comparador. **(4)** Removidos e recolocados os extras, as capturas de três slides se repetiram
+idênticas. Cada palco foi reconstruído do zero, com alvo provado por refs no artefato, por código no
+artefato e pela prova viva invertida. ⚠️ O portão `npm run build` deixou **167** arquivos com a ref
+de produção no `.next` — a lição 9.258 medida de novo, e por isso o palco foi refeito antes de
+qualquer captura.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1` do merge desta fatia
+
+**Mudou em produção para quem:** **nenhum aluno, hoje** — 0 de 79 cursos de produção têm banner
+extra (medido no dia, em transação somente-leitura), e com um slide nada muda em tela nenhuma. O
+efeito aparece no primeiro produtor que subir o segundo banner: a partir daí os pontinhos ficam no
+rodapé da faixa na página de vendas, e acima do cartão na área de conteúdo.
+
+**Ficou aberto:** **9.342** — o cadastro público é inexercitável no palco (captcha real, recusa
+provada por duas sondas) e a marca de pertencimento não conta na rota que a página do curso consome;
+**9.343** — tirar aluno pelo painel cancela em vez de apagar, e a rota de matrícula cria credencial
+de workspace de carona. Seguem abertos por decisão do dono: **9.339** e **9.340**. Fechado nesta
+rodada: **9.341**.
+
+**🧹 Lista de limpeza acumulada do palco** (nada apagado por SQL, por regra): as 3 imagens órfãs em
+`thumbnails/banners/3e1b93b2-87c6-430c-a324-d143c2e6bb3e-` · `Enrollment
+d96a764b-c281-4f93-b391-46c86d15da5a` (CANCELLED em `curso-corrida-923`) · `WorkspaceCredential
+ed218169-b8cb-4017-bbb7-e22819445b09` (persona × `staging-teste`) · `Notification e3564a63` e
+`a9ea1758` (ENROLLMENT). O curso do cenário está com banner e extras **nulos**, conferido.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ (palco com alvo provado nas duas árvores) ·
+**gate humano — NÃO HOUVE, por decisão do dono**, e é por isso que a prova é captura + medida em % da
+faixa + teste de acerto de clique ⚠️ · papelada ✅ (esta entrada e os blocos do PLANO-MESTRE e do
+SYSTEM-MAP, escritos **antes** do merge).
+
+---
+
 ## 2026-09-20 — O carrossel de banner do curso (9.7): a branch de 2026 virou feature, com prova por imagem
 
 **Estado antes:** main em `141a4d4` · o 9.7 aberto desde 13/jul/2026 como *"feature DESEJADA, a fazer"*,
