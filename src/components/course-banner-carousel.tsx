@@ -130,7 +130,13 @@ export function CourseBannerCarousel({
           aria-hidden={i === current ? undefined : true}
         />
       ))}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+      {/* bottom-16 (64px), e não bottom-2: o cartão de informações do curso
+          sobe sobre a faixa com `-mt-12 sm:-mt-14` (48px/56px, em
+          app/(course)/course/[slug]/page.tsx:504) e ocupa todo o rodapé do
+          banner. Os pontinhos têm z-20 contra o z-10 do cartão, então não
+          sumiam — pintavam POR CIMA do título. 64px > 56+6, então limpam a
+          faixa coberta nas duas quebras (medido: 1280→cartão em y=217, 390→171). */}
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
         {slides.map((s, i) => (
           <button
             key={s.url}
