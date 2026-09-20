@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireStaff, canEditCourse, getCurrentUser } from "@/lib/auth";
 import { collaboratorCanActOnCourse } from "@/lib/collaborator";
@@ -297,6 +298,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
       thumbnailPosition,
       bannerUrl,
       bannerPosition,
+      bannerExtra,
       checkoutUrl,
       price,
       priceCurrency,
@@ -414,6 +416,9 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
         ...(thumbnailPosition !== undefined && { thumbnailPosition }),
         ...(bannerUrl !== undefined && { bannerUrl }),
         ...(bannerPosition !== undefined && { bannerPosition }),
+        ...(bannerExtra !== undefined && {
+          bannerExtra: bannerExtra === null ? Prisma.DbNull : bannerExtra,
+        }),
         /* ⭐ 9.112 — a GUARDA GÊMEA do recorte do GET. Ver o comentário lá.
 
            Sem ela, o fix seria PIOR que o problema: o colaborador deixa de
