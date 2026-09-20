@@ -87,6 +87,19 @@ e esta fatia não a tomou; a apagada foi a de trabalho, `feat/9-7-carrossel-bann
 byte + teste de acerto de clique ⚠️ · papelada ✅ (esta entrada, os blocos do PLANO-MESTRE, a correção
 do ROADMAP e a linha do SYSTEM-MAP, todos escritos **antes** do merge).
 
+**⚠️ CORREÇÃO, escrita minutos depois, antes do push:** a lista de arquivos acima erra nas duas
+pontas e uma terceira superfície ficou sem prova. **(1)** Falta `src/components/course-preview.tsx`
+(**+4 −6**): a **vitrine** — a página de vendas de quem não tem acesso — também troca o `<Image>` pelo
+carrossel, e recebe os extras (`page.tsx:404`). **(2)** Sobra `prisma/schema.prisma`: tem diff **zero**
+contra a main; foi tocado no transplante, não no resultado. **(3)** 🔴 **A prova por imagem cobriu só a
+página do matriculado.** Tentei provar a vitrine antes do push e não consegui: das 25 personas de
+staging, as 12 sem matrícula na casa do curso têm linha de colaborador, e a única STUDENT sem matrícula
+e sem colaborador é de **outra casa** — ao abrir o curso ela é devolvida para a própria área, com e sem
+o cookie de contexto. Criar persona está proibido neste comando, então **parei**. O que sustenta a
+mudança na vitrine é código, não imagem: o ramo de 1 slide é o mesmo `<Image>` (mesmos `fill`, `sizes`,
+`object-cover`, `objectPosition`, `priority`) e **0 dos 79 cursos de produção têm extras**, então hoje
+toda vitrine cai nesse ramo. Risco medido como **nulo hoje**, e **não** como provado. Abriu o **9.341**.
+
 ---
 
 ## 2026-09-19 — A métrica do 9.337 não media a cura, e o registro foi corrigido
