@@ -35,6 +35,73 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-20 — O carrossel de banner do curso (9.7): a branch de 2026 virou feature, com prova por imagem
+
+**Estado antes:** main em `141a4d4` · o 9.7 aberto desde 13/jul/2026 como *"feature DESEJADA, a fazer"*,
+com o desenho preso numa branch (`feat/course-banner-carousel`) hoje **808 commits atrás** da main, e a
+coluna `Course.bannerExtra` **em produção desde 12/jun/2026 sem fiação nenhuma** — órfã de escrita, mas
+com um leitor de carona desde `4e7a09d` (item 9.81, 17/ago/2026), que a pôs no `select` do GET.
+
+**O que foi feito:** o caminho recomendado pelo próprio item — `cherry-pick` seletivo dos 2 commits, e
+não rebase. Três conflitos resolvidos à mão, cada um preservando a main: o comentário do schema, a
+**guarda de receita** do `PUT` (`src/app/api/courses/[id]/route.ts:446-447`) e a troca do componente no
+editor. A fiação de escrita e de render foi refeita contra o código de hoje. Um texto envelhecido veio
+junto e foi corrigido no transplante: a dica dizia *"máx. 5MB"* e o teto virou **10** no 7.14. E o
+controle da feature — os pontinhos do carrossel — estava quebrado e **foi consertado antes de subir**.
+
+**Arquivos tocados:** `src/components/course-banner-carousel.tsx` (novo, 154 linhas) ·
+`src/components/banner-carousel-upload.tsx` (novo, 327) · `src/components/course-form.tsx` ·
+`src/app/(course)/course/[slug]/page.tsx` · `src/app/api/courses/[id]/route.ts` ·
+`src/lib/validations.ts` · `prisma/schema.prisma` (comentário; a coluna já existia).
+
+**Como foi provado:** **sem gate humano visual — decisão do dono; a validação foi por máquina.**
+(1) A promessa central do desenho: com **1 slide** a página do aluno saiu **byte-idêntica** à de hoje —
+diferença de **0 byte**, e a comparação foi **refeita depois** do conserto dos pontinhos, porque prova
+byte a byte só vale para a árvore que ela mediu. (2) Com 2+ slides o autoplay de **6000 ms** avançou
+sozinho para o slide 2. (3) O teto é do servidor: `PUT` com 5 extras devolveu **400** —
+`Too big: expected array to have <=4 items`. (4) Os pontinhos: `bottom-2` → `bottom-16`, e o
+diagnóstico fácil estava **errado** — eles não sumiam atrás do cartão do curso, **pintavam por cima do
+título** (têm `z-20` contra o `z-10` do cartão). Medido no palco: a 1280 px o cartão começa em y=217; a
+390 px, em y=171. E a imagem sozinha não bastou: `document.elementFromPoint` devolveu **o próprio
+pontinho** nos três, nas duas larguras — o alvo de clique é deles. 📊 Produção no dia do merge, em
+transação somente-leitura com `ROLLBACK` e só contagens: **79** cursos, **41** com capa, **0 com
+extras**, **47** workspaces (**43** ativos).
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1` do merge desta fatia
+
+**Mudou em produção para quem:** **nenhum aluno, hoje.** Com 0 de 79 cursos usando extras, todo aluno
+continua na página byte-idêntica de sempre; o carrossel só aparece quando um produtor subir o segundo
+banner. Quem sente a mudança agora é o **produtor**, no editor do curso: a capa vira uma tira de
+miniaturas com arrastar-para-ordenar, contador *"N de 5"* e botão de remover.
+
+**Ficou aberto:** **9.339** — um slide com URL inválida é aceito com 200 e vira imagem quebrada (o Zod
+valida `url: z.string().min(1)`, isto é, qualquer texto não-vazio), e a **capa tem o furo pior e
+pré-existente**: `bannerUrl` não aparece em `validations.ts`. **9.340** — o alvo de toque dos pontinhos
+tem 6 px de altura, herdado do desenho original, abaixo dos 24 px da WCAG 2.2 AA. Registradas também as
+**lições de método de 20/set/2026** como item próprio. ⛔ A branch de referência
+`feat/course-banner-carousel` **não foi apagada** — a condição do 9.6 caiu, mas apagar é decisão própria
+e esta fatia não a tomou; a apagada foi a de trabalho, `feat/9-7-carrossel-banner`.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ (palco de staging, alvo provado no artefato) ·
+**gate humano — NÃO HOUVE, por decisão do dono**, e é por isso que a prova é imagem + comparação byte a
+byte + teste de acerto de clique ⚠️ · papelada ✅ (esta entrada, os blocos do PLANO-MESTRE, a correção
+do ROADMAP e a linha do SYSTEM-MAP, todos escritos **antes** do merge).
+
+**⚠️ CORREÇÃO, escrita minutos depois, antes do push:** a lista de arquivos acima erra nas duas
+pontas e uma terceira superfície ficou sem prova. **(1)** Falta `src/components/course-preview.tsx`
+(**+4 −6**): a **vitrine** — a página de vendas de quem não tem acesso — também troca o `<Image>` pelo
+carrossel, e recebe os extras (`page.tsx:404`). **(2)** Sobra `prisma/schema.prisma`: tem diff **zero**
+contra a main; foi tocado no transplante, não no resultado. **(3)** 🔴 **A prova por imagem cobriu só a
+página do matriculado.** Tentei provar a vitrine antes do push e não consegui: das 25 personas de
+staging, as 12 sem matrícula na casa do curso têm linha de colaborador, e a única STUDENT sem matrícula
+e sem colaborador é de **outra casa** — ao abrir o curso ela é devolvida para a própria área, com e sem
+o cookie de contexto. Criar persona está proibido neste comando, então **parei**. O que sustenta a
+mudança na vitrine é código, não imagem: o ramo de 1 slide é o mesmo `<Image>` (mesmos `fill`, `sizes`,
+`object-cover`, `objectPosition`, `priority`) e **0 dos 79 cursos de produção têm extras**, então hoje
+toda vitrine cai nesse ramo. Risco medido como **nulo hoje**, e **não** como provado. Abriu o **9.341**.
+
+---
+
 ## 2026-09-19 — A métrica do 9.337 não media a cura, e o registro foi corrigido
 
 **Estado antes:** main em `14cb1b0` · o registro do 9.337 chamava a população de "marco zero do

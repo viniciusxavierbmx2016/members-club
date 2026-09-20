@@ -286,6 +286,9 @@ redesenho da comunidade) · **9.53** · **9.12** (Playwright) · **9.13** · **9
 
 **🔴 DUAS DECISÕES QUE SÃO DO DONO — não avanço sem elas:**
 1. **9.7** — a branch `feat/course-banner-carousel` está **128 commits atrás** (medido em 07/13, hoje é mais). Rebase custa caro e cresce todo dia. **Rebase agora, ou abandonar a branch?** Enquanto não se decide, o custo só sobe.
+
+⚠️ **CORREÇÃO 20/set/2026 — a decisão 1 já não é decisão: o 9.7 está FEITO.** O texto acima fica intacto; o que vale hoje: **(a)** a pergunta *"rebase agora, ou abandonar?"* foi respondida **duas vezes** — em 17/ago/2026 o dono decidiu **nenhum dos dois** (a feature é desejada; PLANO-MESTRE, item **9.7**), e em **20/set/2026** ela foi **feita**, por `cherry-pick` seletivo, e entrou em main pelo merge da fatia `feat/9-7-carrossel-banner`. **(b)** O número envelheceu como se previa: **"128 commits atrás"** (medido em 13/jul) é **808** hoje (`git rev-list --count feat/course-banner-carousel..main`, medido em 20/set/2026) — e é exatamente por isso que o caminho escolhido **não** foi rebase. **(c)** Nesta lista resta **uma** decisão do dono, a **2** (9.16).
+
 2. **9.16** — backfill de phone/CPF + `UPDATE` do preço do Plan **no banco de PRODUÇÃO**. Os scripts existem. ⚠️ É escrita em produção sobre dado de cliente: precisa de dry-run, contagem esperada declarada antes, e sua autorização explícita.
 
 **⇒ IMPACTO NA ESTIMATIVA:** a Camada 3 tinha 8 grupos / **8–10 sessões**. Com o E3.13 e o E3.14
