@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ThumbnailUpload } from "./thumbnail-upload";
-import { BannerUpload } from "./banner-upload";
 import { BannerCarouselUpload, type BannerImage } from "./banner-carousel-upload";
 import { slugify } from "@/lib/utils";
 import { HelpTooltip } from "@/components/help-tooltip";
