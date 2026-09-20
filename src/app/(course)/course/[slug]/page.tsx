@@ -465,6 +465,11 @@ export default function CourseHomePage() {
             slides={toBannerSlides(course.bannerUrl, course.bannerPosition, course.bannerExtra)}
             alt={course.title}
             sizes="100vw"
+            /* bottom-16 (64px) só AQUI: o cartão de informações do curso sobe
+               sobre o rodapé da faixa com `-mt-12 sm:-mt-14` (48px/56px, :504)
+               e tem z-10 contra o z-20 dos pontinhos — sem o afastamento eles
+               pintam POR CIMA do título. 64px > 56+6 limpa as duas quebras. */
+            dotsOffsetClass="bottom-16"
           />
           {/* Fade parametrizado (7.12) — espelha o molde da vitrine w/[slug]/page.tsx.
               Default (enabled + sem cor) = os 2 gradientes de hoje (byte-idêntico). */}

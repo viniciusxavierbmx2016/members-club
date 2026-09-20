@@ -44,10 +44,18 @@ export function CourseBannerCarousel({
   slides,
   alt,
   sizes,
+  dotsOffsetClass = "bottom-2",
 }: {
   slides: BannerSlide[];
   alt: string;
   sizes: string;
+  /** Distância dos pontinhos até o rodapé da faixa. O padrão é o rodapé
+   *  (`bottom-2`); só quem tem elemento SOBREPOSTO ao rodapé passa outro
+   *  valor. A faixa muda de altura por superfície — 219/222px na área de
+   *  conteúdo contra 373px (1280) e 111px (390) na página de vendas —, então
+   *  um afastamento fixo aqui acerta numa tela e erra na outra: quem monta
+   *  conhece a altura e o que há por cima, o componente não. */
+  dotsOffsetClass?: string;
 }) {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -130,13 +138,10 @@ export function CourseBannerCarousel({
           aria-hidden={i === current ? undefined : true}
         />
       ))}
-      {/* bottom-16 (64px), e não bottom-2: o cartão de informações do curso
-          sobe sobre a faixa com `-mt-12 sm:-mt-14` (48px/56px, em
-          app/(course)/course/[slug]/page.tsx:504) e ocupa todo o rodapé do
-          banner. Os pontinhos têm z-20 contra o z-10 do cartão, então não
-          sumiam — pintavam POR CIMA do título. 64px > 56+6, então limpam a
-          faixa coberta nas duas quebras (medido: 1280→cartão em y=217, 390→171). */}
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+      {/* O afastamento vem de fora (`dotsOffsetClass`, padrão no rodapé): a
+          altura da faixa muda por superfície, e um valor fixo aqui só pode
+          servir a uma delas. */}
+      <div className={`absolute ${dotsOffsetClass} left-1/2 -translate-x-1/2 z-20 flex gap-1.5`}>
         {slides.map((s, i) => (
           <button
             key={s.url}
