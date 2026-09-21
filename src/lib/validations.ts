@@ -614,7 +614,15 @@ export const updateWorkspaceSchema = z
     // que é o precedente da casa para HTML de produtor. As OUTRAS quatro
     // regras (botão marcado, sem formulário, sem senha) não cabem no zod:
     // exigem interpretar o HTML, e vivem em `inspecionarHtmlDeCadastro`.
-    registerCustomHtml: z.string().max(50000).optional().nullable(),
+    registerCustomHtml: z
+      .string()
+      // ⭐ Mensagem própria: sem ela o zod responde em inglês e em jargão
+      // ("Too big: expected string to have <=50000 characters"), e o
+      // produtor veria três recusas em português e esta em inglês.
+      // 2º argumento posicional é o molde da casa (ver `:446`).
+      .max(50000, "O HTML passou de 50.000 caracteres. Reduza o tamanho e salve de novo.")
+      .optional()
+      .nullable(),
   })
   .passthrough();
 
