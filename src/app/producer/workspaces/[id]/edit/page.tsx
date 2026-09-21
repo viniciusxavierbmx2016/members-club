@@ -83,6 +83,7 @@ export default function EditWorkspacePage() {
   const [registerSubtitleEnabled, setRegisterSubtitleEnabled] = useState(true);
   const [registerTitleAlign, setRegisterTitleAlign] =
     useState<RegisterTitleAlign>("left");
+  const [registerCustomHtml, setRegisterCustomHtml] = useState("");
   const [uploadingBg, setUploadingBg] = useState(false);
   const [uploadingLoginLogo, setUploadingLoginLogo] = useState(false);
 
@@ -184,6 +185,7 @@ export default function EditWorkspacePage() {
           setRegisterTitleAlign(
             (found.registerTitleAlign as RegisterTitleAlign) || "left"
           );
+          setRegisterCustomHtml(found.registerCustomHtml || "");
           setAccentColor(found.accentColor || "");
           setWsBannerUrl(found.bannerUrl || null);
           setWsBannerPos(parsePosition(found.bannerPosition));
@@ -450,6 +452,7 @@ export default function EditWorkspacePage() {
       payload.registerSubtitle = registerSubtitle.trim() || null;
       payload.registerSubtitleEnabled = registerSubtitleEnabled;
       payload.registerTitleAlign = registerTitleAlign;
+      payload.registerCustomHtml = registerCustomHtml.trim() || null;
 
       // Access-email customization. Colors only when valid hex (server rejects
       // malformed); text trimmed → null when empty. Defaults restore on empty.
@@ -673,6 +676,8 @@ export default function EditWorkspacePage() {
             setRegisterSubtitleEnabled={setRegisterSubtitleEnabled}
             registerTitleAlign={registerTitleAlign}
             setRegisterTitleAlign={setRegisterTitleAlign}
+            registerCustomHtml={registerCustomHtml}
+            setRegisterCustomHtml={setRegisterCustomHtml}
             onGoToLoginTab={() => setTab("login")}
           />
         )}
