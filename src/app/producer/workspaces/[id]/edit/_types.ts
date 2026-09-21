@@ -1,5 +1,10 @@
 export type LoginLayout = "central" | "lateral-left" | "lateral-right";
 
+/** Modelo da tela de cadastro. "classico" = a tela de hoje, byte a byte. */
+export type RegisterTemplate = "classico" | "video";
+/** Alinhamento do título — vale SÓ no modelo Vídeo. */
+export type RegisterTitleAlign = "left" | "center";
+
 export interface Workspace {
   id: string;
   slug: string;
@@ -18,6 +23,15 @@ export interface Workspace {
   loginLinkColor: string | null;
   loginTextColor: string | null;
   loginSecondaryTextColor: string | null;
+  // Tela de cadastro (fatia 1/2 — só painel; o aluno ainda não lê nada disto)
+  registerTemplate: RegisterTemplate;
+  registerVideoUrl: string | null;
+  registerButtonDelaySec: number;
+  registerButtonText: string | null;
+  registerTitle: string | null;
+  registerSubtitle: string | null;
+  registerSubtitleEnabled: boolean;
+  registerTitleAlign: RegisterTitleAlign;
   masterPassword: string | null;
   accentColor: string | null;
   bannerUrl: string | null;
@@ -43,7 +57,7 @@ export interface Workspace {
   emailUseCustomHtml: boolean;
 }
 
-export type TabKey = "info" | "login" | "appearance" | "email";
+export type TabKey = "info" | "login" | "register" | "appearance" | "email";
 
 export interface ImagePosition {
   x: number;

@@ -35,6 +35,63 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-20 — A tela de cadastro ganha campos e aba no painel (fatia 1 de 2)
+
+**Estado antes:** main em `1ad25cf` · a tela de cadastro do workspace (`/w/<slug>/register`) sem nenhuma
+personalização própria: o título vinha do `loginTitle` com um sufixo colado, o subtítulo era literal
+cravado no componente, e não havia modelo, vídeo nem texto de botão. Produção com 47 workspaces, 43
+ativos, e **nenhuma** das 8 colunas desta fatia.
+
+**O que foi feito:** as 8 colunas em `Workspace` e a aba **"Personalizar Cadastro"** no editor, entre
+"Personalizar Login" e "Personalizar Vitrine". A aba tem as seções Modelo (Clássico e Vídeo), Vídeo
+(link, tempo até o botão, texto do botão) e Textos (título, texto abaixo do título com interruptor,
+alinhamento), mais um cartão dizendo que cor, logo e imagem de fundo continuam vindo da aba
+"Personalizar Login" — porque são os campos `login*`, compartilhados pelas quatro telas de auth.
+⛔ **A tela do aluno não foi tocada:** os 3 componentes de auth e as 4 páginas de `/w/<slug>/*`
+saíram com **0 linhas** no diff, medido com controle positivo.
+
+**Arquivos tocados:** `prisma/schema.prisma` · a migração
+`20260920211832_add_workspace_register_fields/migration.sql` (8 `ADD COLUMN`, nada mais) ·
+`_types.ts` · `_lib/tabs.tsx` · `_components/register-tab.tsx` (novo) · `page.tsx` ·
+`api/workspaces/[id]/route.ts` · `src/lib/validations.ts`. Oito arquivos, +513 −2.
+
+**Como foi provado:** **sem gate humano visual — a validação é por captura.** A aba aparece na posição
+certa, com o rótulo certo e as seções na ordem aprovada, a 1280 e a 390 px. Gravei os **8 campos com
+valores não-padrão**: `PATCH` 200, `GET` devolvendo 8 de 8, o banco confirmando 8 de 8, e a tela
+recarregada mostrando o cartão Vídeo selecionado, o interruptor desligado e "Centro" marcado. As 4 abas
+antigas saíram com **conteúdo idêntico 4 de 4** (pelo recorte abaixo da barra de abas — a foto inteira
+não podia passar, porque a barra ganhou um item). As 4 telas do aluno saíram **byte-idênticas em 7 de
+8**, e a oitava foi refutada por controle de determinismo: três capturas do mesmo build de main dão dois
+resultados, por causa do widget de verificação. ⭐ **A MIGRAÇÃO, nos dois sentidos:** primeiro só no
+staging (8 de 8 no `information_schema`, **0 de 8** em produção na mesma consulta), com a impressão
+digital dos campos antigos idêntica antes e depois; depois em **produção, ANTES do push**, por
+`migrate deploy`, com as 8 colunas conferidas uma a uma, a contagem de linhas inalterada e a impressão
+digital de produção também idêntica.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1` do merge desta fatia
+⚠️ **A reversão do código NÃO desfaz as colunas** — e isso é seguro: elas são aditivas e todas com
+padrão igual ao comportamento de hoje, então ficam inertes, sem leitor.
+
+**Mudou em produção para quem:** **nenhum aluno.** Os 47 workspaces nasceram com
+`registerTemplate = "classico"`, que é a tela de hoje, e os textos em NULL, que caem nos literais que a
+tela já usa. Quem vê diferença agora é o **produtor**, no editor do workspace: uma aba nova.
+
+**Ficou aberto:** **9.345** — o modelo **HTML próprio** saiu desta fatia por decisão do dono, e o desenho
+mudou: moldura isolada, **sem** sanitizar na nossa origem. **9.346**, **9.347** e **9.348** — a política
+que permite script embutido, o cookie de sessão legível por script e a tela de cadastro alcançável por
+quem já está logado; os três são **pré-existentes** e inofensivos isolados, e é a **soma** deles que
+explica por que o HTML próprio mudou de desenho. **9.349** — o subtítulo do produtor não chega ao
+cadastro, e a fatia resolveu com campo próprio para não mudar três telas que ninguém pediu. **9.350** —
+lições de método, incluindo o registro de que **dois PARE foram ultrapassados por diagnóstico na fase 1**:
+os achados foram aceitos pelo dono, e a regra foi reafirmada — parar e reportar, não decidir.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ (a migração foi ao staging primeiro, e a prova
+dupla mostrou produção ainda sem as colunas) · runbook de migração ✅ (produção **antes** do push) ·
+**gate humano — NÃO HOUVE, por decisão do dono** ⚠️ · papelada ✅ (esta entrada e os blocos do
+PLANO-MESTRE e do SYSTEM-MAP, escritos **antes** do merge).
+
+---
+
 ## 2026-09-20 — Os pontinhos do carrossel passam a obedecer a quem monta a tela
 
 **Estado antes:** main em `682b7d1` · o conserto da fatia anterior cravou `bottom-16` (64 px) dentro
