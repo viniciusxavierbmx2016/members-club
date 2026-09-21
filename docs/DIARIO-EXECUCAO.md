@@ -35,6 +35,71 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+
+## 2026-09-21 — A tela de cadastro do aluno ganha os modelos Clássico e Vídeo (fatia 2 de 2)
+
+**Estado antes:** main em `108b18f` · as 8 colunas e a aba "Personalizar Cadastro" já em produção desde
+a fatia 1 (9.344), e a **tela do aluno ainda sem nenhum leitor delas**: nenhum dos 8 campos era lido em
+`/w/<slug>/register`, e a aba do painel descrevia por escrito uma tela que não existia. Produção com 47
+workspaces, 43 ativos, **47 de 47** em `classico` e **0** fora do padrão em qualquer dos 8 campos.
+
+**O que foi feito:** a tela do aluno passou a obedecer aos campos. Dois modelos: **Clássico**, que é a
+tela de hoje com título, texto de apoio e alinhamento configuráveis; e **Vídeo**, com o vídeo no topo
+pelo player da casa, um botão que **nasce depois** do tempo configurado e o cadastro num popup. O botão
+**não existe no HTML** antes do tempo — ausência de nó, não `display:none`. O popup é `<dialog>` nativo
+aberto por `showModal()`, por decisão do dono, e monta o **mesmo** formulário com a prop `semMoldura`:
+nada é duplicado, e o formulário só existe enquanto o diálogo está aberto. Faltando link ou provedor
+reconhecido, a tela **cai para o Clássico** em vez de mostrar caixa vazia. ⚠️ **A fase 1 achou um
+defeito em si mesma:** o ramo sem moldura devolvia o miolo sem o invólucro de tema, e o estilo dos
+campos e do botão **mora dentro dele** — o popup nascia com o botão sem fundo e os campos sem borda.
+Corrigido exportando o invólucro `ThemedRoot` e envolvendo o ramo com ele. E as frases da aba do painel,
+que estavam em produção prometendo *"o vídeo aparece acima do formulário"* e *"abaixo do título"*,
+foram trocadas pelos textos ditados pelo dono — só texto, nada de lógica.
+
+**Arquivos tocados:** `src/app/w/[slug]/register/page.tsx` · `src/components/workspace-register-video.tsx`
+(novo, 221 linhas) · `src/components/workspace-register-form.tsx` · `src/components/workspace-auth-shell.tsx` ·
+`src/app/producer/workspaces/[id]/edit/_components/register-tab.tsx`. Cinco arquivos. ⛔ **Sem migração:**
+`prisma/` sai com **0** arquivos no diff, com controle positivo.
+
+**Como foi provado:** **sem gate humano visual — a validação foi por captura, medição de estilo calculado
+e comparação byte a byte** (decisão do dono). **Antes do tempo:** com 8 s configurados, o botão conta
+**0** aos 2 s a 1280 e a 390, com a região do vídeo já presente — o que prova que a página hidratou, e
+portanto que o zero não é de tela vazia. **Depois do tempo:** o **mesmo** seletor conta **1**, e o botão
+fica **24 px** abaixo do vídeo nas duas larguras. **Popup:** centralizado com desvio **(0,0)** nos dois
+eixos, a 1280 (416×619) e a 390 (352×619); **Esc, clique no fundo e X, os três**, devolvem o foco ao
+botão que abriu; o campo preenchido com `REMONTA-TESTE` volta **vazio** ao reabrir, provando a
+remontagem. **Menos movimento:** prova por discriminação, efeito **oposto** nos dois ambientes —
+`opacity 0.2s` + `fadeIn 0.2s` no normal contra `none`/`none` com `prefers-reduced-motion: reduce`.
+**O popup vestido:** as **7 de 7** propriedades de estilo calculado batendo uma a uma com as da tela de
+login, contra **5 divergências de 7** antes do conserto. **A aba:** as frases velhas em 0 e as novas em
+1, e o arquivo provado como **só texto** por esqueleto normalizado, com três mutações de lógica de
+mentira todas acusando. **E o padrão não mudou:** as **quatro** telas de `/w/<slug>/*` a 1280 e a 390,
+**8 de 8 byte-idênticas**, em **três rodadas seguidas**, com controle do comparador nos dois sentidos.
+**Rastro no staging:** `User` com **0** criados, nenhuma matrícula, credencial ou vínculo novo, 1 login
+de um teto de 3, pote de cookies apagado com prova dupla.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1 <o merge desta fatia>`
+
+**Mudou em produção para quem:** **para ninguém, hoje.** A mudança só aparece para workspaces que
+escolherem o modelo Vídeo ou preencherem os textos, e em 21/set/2026 são **47 de 47** em `classico`,
+com 0 fora do padrão. Quem já usa a tela de cadastro continua vendo exatamente a mesma tela — provado
+byte a byte. O produtor que abrir a aba "Personalizar Cadastro" vê **frases diferentes**, e elas agora
+descrevem o que a tela faz de verdade.
+
+**Ficou aberto:** **9.352** (o `<dialog>` nativo duplica o que o modal de confirmação faz à mão) ·
+**9.353** (a ajuda do texto de apoio ficou com a mesma frase nos dois ramos do ternário, por decisão do
+dono) · **9.354** (o palco de staging cai sozinho no meio das rodadas, causa não determinada) ·
+**9.355** (lições de método da fatia) · e a **errata** da lição (2) do **9.350**, que atribuía ao widget
+de terceiro uma variação que era, na verdade, da captura esperando por tempo. Seguem abertos de antes:
+**9.342** (o cadastro é inexercitável no palco por causa do captcha real) e **9.345** (o modelo "HTML
+próprio", que mudou de desenho).
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ⛔ *(não houve; a validação foi
+por captura, medição de estilo calculado e comparação byte a byte, por decisão escrita do dono)* ·
+papelada ✅ · sem migração ✅
+
+---
+
 ## 2026-09-20 — A tela de cadastro ganha campos e aba no painel (fatia 1 de 2)
 
 **Estado antes:** main em `1ad25cf` · a tela de cadastro do workspace (`/w/<slug>/register`) sem nenhuma
