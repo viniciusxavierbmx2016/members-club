@@ -595,6 +595,19 @@ export const updateWorkspaceSchema = z
     emailUseCustomHtml: z.boolean().optional(),
     supportEmail: z.string().max(255).optional().nullable(),
     supportWhatsapp: z.string().max(50).optional().nullable(),
+    // Tela de cadastro (fatia 1/2). Tetos de tamanho aqui, no padrão dos
+    // vizinhos; o FORMATO (template, alinhamento, faixa do atraso e provedor
+    // do vídeo) é validado na rota, como já acontece com loginLayout e as
+    // cores. ⚠️ O esquema termina em `.passthrough()`, então quem decide o
+    // que persiste é a lista de campos aceitos da rota — não este objeto.
+    registerTemplate: z.string().max(20).optional(),
+    registerVideoUrl: z.string().max(2000).optional().nullable(),
+    registerButtonDelaySec: z.number().optional(),
+    registerButtonText: z.string().max(40).optional().nullable(),
+    registerTitle: z.string().max(80).optional().nullable(),
+    registerSubtitle: z.string().max(120).optional().nullable(),
+    registerSubtitleEnabled: z.boolean().optional(),
+    registerTitleAlign: z.string().max(10).optional(),
   })
   .passthrough();
 

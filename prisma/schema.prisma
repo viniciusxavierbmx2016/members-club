@@ -92,6 +92,21 @@ model Workspace {
   loginLinkColor    String?  @default("#818cf8")
   loginTextColor    String?
   loginSecondaryTextColor String?
+  // Tela de CADASTRO (/w/<slug>/register) — família própria, separada da
+  // `login*` de propósito: aquela é lida pelas QUATRO telas de auth (login,
+  // cadastro, recuperação e redefinição), então reaproveitá-la mudaria três
+  // telas que ninguém pediu. ⓘ `registerTitleAlign` vale SÓ no modelo Vídeo;
+  // no Clássico o título segue centralizado como hoje. ⓘ Texto nulo = o
+  // comportamento de hoje (os literais que a tela já usa), então os padrões
+  // abaixo não mudam pixel para quem não escolher outro modelo.
+  registerTemplate  String   @default("classico")
+  registerVideoUrl  String?
+  registerButtonDelaySec Int  @default(0)
+  registerButtonText String?
+  registerTitle     String?
+  registerSubtitle  String?
+  registerSubtitleEnabled Boolean @default(true)
+  registerTitleAlign String  @default("left")
   accentColor       String?
   bannerUrl         String?
   bannerPosition    String?  @default("{\"x\":50,\"y\":50}")
