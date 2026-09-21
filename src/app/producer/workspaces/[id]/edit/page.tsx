@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import type { LoginLayout, Workspace, TabKey, ImagePosition, EmailConfig } from "./_types";
+import type {
+  LoginLayout,
+  Workspace,
+  TabKey,
+  ImagePosition,
+  EmailConfig,
+  RegisterTemplate,
+  RegisterTitleAlign,
+} from "./_types";
 import {
   compressImage,
   parsePosition,
@@ -20,6 +28,7 @@ import { TABS } from "./_lib/tabs";
 import { InfoTab } from "./_components/info-tab";
 import { AppearanceTab } from "./_components/appearance-tab";
 import { LoginTab } from "./_components/login-tab";
+import { RegisterTab } from "./_components/register-tab";
 import { EmailTab } from "./_components/email-tab";
 import { PreviewModal } from "./_components/preview-modal";
 
@@ -63,6 +72,17 @@ export default function EditWorkspacePage() {
   const [loginLinkColor, setLoginLinkColor] = useState(DEFAULT_LINK);
   const [loginTextColor, setLoginTextColor] = useState("");
   const [loginSecondaryTextColor, setLoginSecondaryTextColor] = useState("");
+  // Tela de cadastro (fatia 1/2 — só grava; o aluno ainda não lê)
+  const [registerTemplate, setRegisterTemplate] =
+    useState<RegisterTemplate>("classico");
+  const [registerVideoUrl, setRegisterVideoUrl] = useState("");
+  const [registerButtonDelaySec, setRegisterButtonDelaySec] = useState(0);
+  const [registerButtonText, setRegisterButtonText] = useState("");
+  const [registerTitle, setRegisterTitle] = useState("");
+  const [registerSubtitle, setRegisterSubtitle] = useState("");
+  const [registerSubtitleEnabled, setRegisterSubtitleEnabled] = useState(true);
+  const [registerTitleAlign, setRegisterTitleAlign] =
+    useState<RegisterTitleAlign>("left");
   const [uploadingBg, setUploadingBg] = useState(false);
   const [uploadingLoginLogo, setUploadingLoginLogo] = useState(false);
 
@@ -148,6 +168,22 @@ export default function EditWorkspacePage() {
           setLoginLinkColor(found.loginLinkColor || DEFAULT_LINK);
           setLoginTextColor(found.loginTextColor || "");
           setLoginSecondaryTextColor(found.loginSecondaryTextColor || "");
+          setRegisterTemplate(
+            (found.registerTemplate as RegisterTemplate) || "classico"
+          );
+          setRegisterVideoUrl(found.registerVideoUrl || "");
+          setRegisterButtonDelaySec(
+            typeof found.registerButtonDelaySec === "number"
+              ? found.registerButtonDelaySec
+              : 0
+          );
+          setRegisterButtonText(found.registerButtonText || "");
+          setRegisterTitle(found.registerTitle || "");
+          setRegisterSubtitle(found.registerSubtitle || "");
+          setRegisterSubtitleEnabled(found.registerSubtitleEnabled !== false);
+          setRegisterTitleAlign(
+            (found.registerTitleAlign as RegisterTitleAlign) || "left"
+          );
           setAccentColor(found.accentColor || "");
           setWsBannerUrl(found.bannerUrl || null);
           setWsBannerPos(parsePosition(found.bannerPosition));
@@ -405,6 +441,16 @@ export default function EditWorkspacePage() {
       payload.loginTextColor = loginTextColor || null;
       payload.loginSecondaryTextColor = loginSecondaryTextColor || null;
 
+      // Tela de cadastro. Texto vazio vira null = comportamento de hoje.
+      payload.registerTemplate = registerTemplate;
+      payload.registerVideoUrl = registerVideoUrl.trim() || null;
+      payload.registerButtonDelaySec = registerButtonDelaySec;
+      payload.registerButtonText = registerButtonText.trim() || null;
+      payload.registerTitle = registerTitle.trim() || null;
+      payload.registerSubtitle = registerSubtitle.trim() || null;
+      payload.registerSubtitleEnabled = registerSubtitleEnabled;
+      payload.registerTitleAlign = registerTitleAlign;
+
       // Access-email customization. Colors only when valid hex (server rejects
       // malformed); text trimmed → null when empty. Defaults restore on empty.
       payload.emailLogoUrl = emailConfig.emailLogoUrl.trim() || null;
@@ -606,6 +652,28 @@ export default function EditWorkspacePage() {
             setLoginTitle={setLoginTitle}
             loginSubtitle={loginSubtitle}
             setLoginSubtitle={setLoginSubtitle}
+          />
+        )}
+
+        {tab === "register" && (
+          <RegisterTab
+            registerTemplate={registerTemplate}
+            setRegisterTemplate={setRegisterTemplate}
+            registerVideoUrl={registerVideoUrl}
+            setRegisterVideoUrl={setRegisterVideoUrl}
+            registerButtonDelaySec={registerButtonDelaySec}
+            setRegisterButtonDelaySec={setRegisterButtonDelaySec}
+            registerButtonText={registerButtonText}
+            setRegisterButtonText={setRegisterButtonText}
+            registerTitle={registerTitle}
+            setRegisterTitle={setRegisterTitle}
+            registerSubtitle={registerSubtitle}
+            setRegisterSubtitle={setRegisterSubtitle}
+            registerSubtitleEnabled={registerSubtitleEnabled}
+            setRegisterSubtitleEnabled={setRegisterSubtitleEnabled}
+            registerTitleAlign={registerTitleAlign}
+            setRegisterTitleAlign={setRegisterTitleAlign}
+            onGoToLoginTab={() => setTab("login")}
           />
         )}
 

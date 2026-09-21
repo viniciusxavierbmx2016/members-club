@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/auth";
 import { requireWorkspaceOwner } from "@/lib/workspace";
 import { updateWorkspaceSchema, validateBody } from "@/lib/validations";
+import { parseVideoUrl } from "@/lib/video";
 
 // Fonte própria da tela de edição do workspace. Antes ela buscava a LISTA
 // inteira (GET /api/workspaces) e filtrava no client — o que obrigava as outras
@@ -50,6 +51,14 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
         loginLinkColor: true,
         loginTextColor: true,
         loginSecondaryTextColor: true,
+        registerTemplate: true,
+        registerVideoUrl: true,
+        registerButtonDelaySec: true,
+        registerButtonText: true,
+        registerTitle: true,
+        registerSubtitle: true,
+        registerSubtitleEnabled: true,
+        registerTitleAlign: true,
         accentColor: true,
         bannerUrl: true,
         bannerPosition: true,
@@ -122,6 +131,72 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       data.loginLayout = body.loginLayout;
     }
 
+    // ─── Tela de cadastro ────────────────────────────────────────────────
+    // ⛔ Fatia 1/2: a tela do aluno ainda não lê nada disto. Aqui só se grava.
+    const allowedTemplates = new Set(["classico", "video"]);
+    if (typeof body?.registerTemplate === "string") {
+      if (!allowedTemplates.has(body.registerTemplate)) {
+        return NextResponse.json(
+          { error: "registerTemplate inválido" },
+          { status: 400 }
+        );
+      }
+      data.registerTemplate = body.registerTemplate;
+    }
+
+    const allowedAligns = new Set(["left", "center"]);
+    if (typeof body?.registerTitleAlign === "string") {
+      if (!allowedAligns.has(body.registerTitleAlign)) {
+        return NextResponse.json(
+          { error: "registerTitleAlign inválido" },
+          { status: 400 }
+        );
+      }
+      data.registerTitleAlign = body.registerTitleAlign;
+    }
+
+    // Teto de 10 minutos: acima disso o visitante já foi embora, e sem teto o
+    // produtor inutilizaria o próprio cadastro. Espelha a régua do
+    // loginBoxOpacity abaixo — inteiro, faixa fechada, erro 400 explícito.
+    if (typeof body?.registerButtonDelaySec === "number") {
+      const v = body.registerButtonDelaySec;
+      if (!Number.isInteger(v) || v < 0 || v > 600) {
+        return NextResponse.json(
+          {
+            error:
+              "registerButtonDelaySec deve ser inteiro entre 0 e 600 segundos",
+          },
+          { status: 400 }
+        );
+      }
+      data.registerButtonDelaySec = v;
+    }
+
+    if (typeof body?.registerSubtitleEnabled === "boolean")
+      data.registerSubtitleEnabled = body.registerSubtitleEnabled;
+
+    // ⭐ O link do vídeo reusa o parser das aulas (`lib/video.ts`) em vez de uma
+    // lista nova: os provedores aceitos são os mesmos que a CSP já libera em
+    // `frame-src` (next.config.mjs:65). `unknown` = recusa.
+    if (body?.registerVideoUrl === null) {
+      data.registerVideoUrl = null;
+    } else if (typeof body?.registerVideoUrl === "string") {
+      const raw = body.registerVideoUrl.trim();
+      if (!raw) {
+        data.registerVideoUrl = null;
+      } else if (parseVideoUrl(raw).provider === "unknown") {
+        return NextResponse.json(
+          {
+            error:
+              "Link de vídeo não reconhecido. Use YouTube, Vimeo, Panda ou VTurb.",
+          },
+          { status: 400 }
+        );
+      } else {
+        data.registerVideoUrl = raw;
+      }
+    }
+
     for (const key of [
       "loginBgColor",
       "loginPrimaryColor",
@@ -176,6 +251,9 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       "emailBody",
       "emailFooter",
       "emailCustomHtml",
+      "registerButtonText",
+      "registerTitle",
+      "registerSubtitle",
     ] as const) {
       if (body?.[key] === null) {
         data[key] = null;
