@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { WorkspaceRegisterForm } from "@/components/workspace-register-form";
+import { WorkspaceRegisterVideo } from "@/components/workspace-register-video";
+import { parseVideoUrl } from "@/lib/video";
 import type {
   LoginLayout,
   WorkspaceAuthInfo,
@@ -42,6 +44,15 @@ export default async function WorkspaceRegisterPage({
       loginTextColor: true,
       loginSecondaryTextColor: true,
       accentColor: true,
+      // 9.344 fatia 2 — os campos do modelo de cadastro.
+      registerTemplate: true,
+      registerVideoUrl: true,
+      registerButtonDelaySec: true,
+      registerButtonText: true,
+      registerTitle: true,
+      registerSubtitle: true,
+      registerSubtitleEnabled: true,
+      registerTitleAlign: true,
     },
   });
 
@@ -55,5 +66,47 @@ export default async function WorkspaceRegisterPage({
     loginLayout: workspace.loginLayout as LoginLayout | null,
   };
 
-  return <WorkspaceRegisterForm workspace={workspaceForForm} slug={slug} />;
+  // Texto de apoio: o interruptor manda, e ele vale nos DOIS modelos.
+  const apoioLigado = workspace.registerSubtitleEnabled !== false;
+  const textoDeApoio = apoioLigado ? workspace.registerSubtitle : null;
+
+  // ⭐ QUEDA PARA O CLÁSSICO, e é deliberada: modelo "video" sem link salvo, ou
+  // com link que o interpretador não reconhece, NÃO mostra caixa vazia — serve
+  // a tela de hoje. Caixa vazia numa página pública de cadastro custa uma
+  // conversão; a tela de sempre não custa nada.
+  const video = workspace.registerVideoUrl
+    ? parseVideoUrl(workspace.registerVideoUrl)
+    : null;
+  const usarVideo =
+    workspace.registerTemplate === "video" &&
+    !!video &&
+    video.provider !== "unknown" &&
+    !!video.videoId;
+
+  if (usarVideo) {
+    return (
+      <WorkspaceRegisterVideo
+        workspace={workspaceForForm}
+        slug={slug}
+        video={video}
+        titulo={workspace.registerTitle || "Criar conta"}
+        alinharTituloAoCentro={workspace.registerTitleAlign === "center"}
+        textoDoBotao={workspace.registerButtonText || "Criar conta"}
+        segundosAteOBotao={workspace.registerButtonDelaySec ?? 0}
+        textoDeApoio={textoDeApoio}
+      />
+    );
+  }
+
+  // CLÁSSICO. ⛔ Sem campo preenchido, tudo abaixo é `null`/`undefined` e o
+  // formulário cai exatamente no texto de hoje — é o que o V6 prova.
+  return (
+    <WorkspaceRegisterForm
+      workspace={workspaceForForm}
+      slug={slug}
+      titulo={workspace.registerTitle}
+      subtitulo={textoDeApoio}
+      esconderSubtitulo={!apoioLigado}
+    />
+  );
 }
