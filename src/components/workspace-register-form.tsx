@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   WorkspaceAuthShell,
+  ThemedRoot,
   WorkspaceAuthInfo,
   getLoginTheme,
   authInputCls,
@@ -305,11 +306,16 @@ export function WorkspaceRegisterForm({
   // ⭐ Sem moldura: o popup do modelo Vídeo recebe o MESMO miolo e o MESMO
   // rodapé — mesma rota, mesmo estado, mesmo submit. ⛔ Nada é duplicado.
   if (semMoldura) {
+    // ⭐ O INVÓLUCRO vem junto. As classes `wa-*` que o miolo usa
+    // (`authInputCls`, `authLabelCls`, `authSubmitCls`) só existem DENTRO do
+    // `ThemedRoot` — ele é quem emite o `<style>` e as variáveis `--wa-*`.
+    // Sem ele o popup saía com o botão sem fundo e os campos sem borda: medido,
+    // `background-image: none` contra o gradiente da tela de login.
     return (
-      <>
+      <ThemedRoot theme={theme}>
         {miolo}
         {rodape}
-      </>
+      </ThemedRoot>
     );
   }
 

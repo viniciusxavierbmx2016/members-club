@@ -311,7 +311,19 @@ export function WorkspaceAuthShell({
   );
 }
 
-function ThemedRoot({
+/**
+ * ⭐ O INVÓLUCRO do tema (9.344, fatia 2): as variáveis `--wa-*` e o bloco de
+ * estilo de `.wa-input`, `.wa-label`, `.wa-submit` e `.wa-link`.
+ *
+ * A moldura o usa por DENTRO, como sempre usou (`WorkspaceAuthShell`, no fecho
+ * do `formPane`). ⛔ Nenhuma linha do corpo mudou ao exportá-lo, então a saída
+ * da moldura é a mesma de antes — quem não importa nada daqui não vê diferença.
+ *
+ * O export existe porque as classes `wa-*` só têm efeito DENTRO dele: o ramo
+ * sem moldura do formulário (o popup do modelo Vídeo) precisa se vestir igual,
+ * e sem isso saía com o botão sem fundo e os campos sem borda.
+ */
+export function ThemedRoot({
   theme,
   children,
 }: {
