@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   WorkspaceAuthShell,
+  ThemedRoot,
   WorkspaceAuthInfo,
   getLoginTheme,
   authInputCls,
@@ -39,6 +40,15 @@ const TURNSTILE_SCRIPT_ID = "cf-turnstile-script";
 interface WorkspaceRegisterFormProps {
   workspace: WorkspaceAuthInfo;
   slug: string;
+  /** ⭐ ADITIVO (9.344 fatia 2). Omitir TODOS = a tela de hoje, byte a byte.
+   *  `titulo`/`subtitulo` vêm dos campos `registerTitle`/`registerSubtitle`;
+   *  `esconderSubtitulo` some com a linha de apoio; `semMoldura` devolve só o
+   *  MIOLO (formulário + rodapé), para o popup do modelo Vídeo reusar este
+   *  MESMO componente — nada é duplicado. */
+  titulo?: string | null;
+  subtitulo?: string | null;
+  esconderSubtitulo?: boolean;
+  semMoldura?: boolean;
 }
 
 /**
@@ -55,6 +65,10 @@ interface WorkspaceRegisterFormProps {
 export function WorkspaceRegisterForm({
   workspace,
   slug,
+  titulo,
+  subtitulo,
+  esconderSubtitulo,
+  semMoldura,
 }: WorkspaceRegisterFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -188,28 +202,21 @@ export function WorkspaceRegisterForm({
 
   const theme = getLoginTheme(workspace);
 
-  return (
-    <WorkspaceAuthShell
-      ws={workspace}
-      title={
-        workspace.loginTitle
-          ? `${workspace.loginTitle} · Criar conta`
-          : "Criar conta"
-      }
-      subtitle="Preencha seus dados para acessar a área de membros"
-      footer={
-        <p className="mt-6 text-center text-sm text-white/70">
-          Já tem conta?{" "}
-          <Link
-            href={`/w/${slug}/login`}
-            className="hover:underline font-medium transition-colors"
-            style={{ color: theme.linkColor }}
-          >
-            Entrar
-          </Link>
-        </p>
-      }
-    >
+  const rodape = (
+    <p className="mt-6 text-center text-sm text-white/70">
+      Já tem conta?{" "}
+      <Link
+        href={`/w/${slug}/login`}
+        className="hover:underline font-medium transition-colors"
+        style={{ color: theme.linkColor }}
+      >
+        Entrar
+      </Link>
+    </p>
+  );
+
+  const miolo = (
+    <>
       {error && <div className={authErrorCls}>{error}</div>}
 
       {jaTemConta ? (
@@ -293,6 +300,39 @@ export function WorkspaceRegisterForm({
           </button>
         </form>
       )}
+    </>
+  );
+
+  // ⭐ Sem moldura: o popup do modelo Vídeo recebe o MESMO miolo e o MESMO
+  // rodapé — mesma rota, mesmo estado, mesmo submit. ⛔ Nada é duplicado.
+  if (semMoldura) {
+    // ⭐ O INVÓLUCRO vem junto. As classes `wa-*` que o miolo usa
+    // (`authInputCls`, `authLabelCls`, `authSubmitCls`) só existem DENTRO do
+    // `ThemedRoot` — ele é quem emite o `<style>` e as variáveis `--wa-*`.
+    // Sem ele o popup saía com o botão sem fundo e os campos sem borda: medido,
+    // `background-image: none` contra o gradiente da tela de login.
+    return (
+      <ThemedRoot theme={theme}>
+        {miolo}
+        {rodape}
+      </ThemedRoot>
+    );
+  }
+
+  return (
+    <WorkspaceAuthShell
+      ws={workspace}
+      title={
+        titulo ||
+        (workspace.loginTitle
+          ? `${workspace.loginTitle} · Criar conta`
+          : "Criar conta")
+      }
+      subtitle={subtitulo || "Preencha seus dados para acessar a área de membros"}
+      hideSubtitle={esconderSubtitulo}
+      footer={rodape}
+    >
+      {miolo}
     </WorkspaceAuthShell>
   );
 }

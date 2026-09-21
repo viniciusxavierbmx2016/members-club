@@ -114,7 +114,7 @@ export function RegisterTab({
         </h2>
         <p className="text-xs text-gray-500 mb-4">
           {isVideo
-            ? "O vídeo aparece acima do formulário"
+            ? "O vídeo aparece no topo da página. O cadastro abre em popup quando o aluno clica no botão."
             : "Preencha para usar no modelo Vídeo — no Clássico estes campos ficam guardados e não aparecem"}
         </p>
         <div className="grid sm:grid-cols-2 gap-4">
@@ -197,13 +197,13 @@ export function RegisterTab({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className={cn(labelClass, "mb-0")}>
-                Texto abaixo do título
+                Texto de apoio
               </label>
               <button
                 type="button"
                 role="switch"
                 aria-checked={registerSubtitleEnabled}
-                aria-label="Mostrar o texto abaixo do título"
+                aria-label="Mostrar o texto de apoio"
                 onClick={() => setRegisterSubtitleEnabled((v) => !v)}
                 className={cn(
                   "relative w-9 h-5 rounded-full transition-colors shrink-0",
@@ -236,8 +236,8 @@ export function RegisterTab({
             />
             <p className="text-[11px] text-gray-500 mt-1">
               {registerSubtitleEnabled
-                ? "Em branco = o texto padrão de hoje"
-                : "Desligado — nada aparece abaixo do título"}
+                ? "No Clássico aparece abaixo do título; no Vídeo, abaixo do botão. Desligado, some da tela — o texto continua salvo."
+                : "No Clássico aparece abaixo do título; no Vídeo, abaixo do botão. Desligado, some da tela — o texto continua salvo."}
             </p>
           </div>
           <div className="sm:col-span-2">

@@ -191,17 +191,27 @@ export function WorkspaceAuthShell({
   subtitle,
   children,
   footer,
+  hideSubtitle,
 }: {
   ws: WorkspaceAuthInfo | null;
   title?: string | null;
   subtitle?: string | null;
   children: ReactNode;
   footer?: ReactNode;
+  /** ⭐ ADITIVO: some com o subtítulo por completo. Omitir = comportamento
+   *  de sempre (o encadeamento de fallback logo abaixo). Só a tela de
+   *  cadastro passa isto, e só quando o produtor desliga o texto de apoio. */
+  hideSubtitle?: boolean;
 }) {
   const theme = getLoginTheme(ws);
   const displayTitle = title || ws?.loginTitle || theme.name;
-  const displaySubtitle =
-    subtitle || ws?.loginSubtitle || "Acesse sua conta";
+  // ⭐ ADITIVO (9.344 fatia 2): `hideSubtitle` é a ÚNICA forma de a tela ficar
+  // sem subtítulo — o `||` abaixo sempre tinha um fallback, então passar vazio
+  // não bastava. ⛔ Quem NÃO passa a opção cai exatamente na expressão de
+  // antes: as telas de login, recuperação e redefinição não a passam.
+  const displaySubtitle = hideSubtitle
+    ? undefined
+    : subtitle || ws?.loginSubtitle || "Acesse sua conta";
 
   const bgStyle: React.CSSProperties = theme.bgImageUrl
     ? {
@@ -301,7 +311,19 @@ export function WorkspaceAuthShell({
   );
 }
 
-function ThemedRoot({
+/**
+ * ⭐ O INVÓLUCRO do tema (9.344, fatia 2): as variáveis `--wa-*` e o bloco de
+ * estilo de `.wa-input`, `.wa-label`, `.wa-submit` e `.wa-link`.
+ *
+ * A moldura o usa por DENTRO, como sempre usou (`WorkspaceAuthShell`, no fecho
+ * do `formPane`). ⛔ Nenhuma linha do corpo mudou ao exportá-lo, então a saída
+ * da moldura é a mesma de antes — quem não importa nada daqui não vê diferença.
+ *
+ * O export existe porque as classes `wa-*` só têm efeito DENTRO dele: o ramo
+ * sem moldura do formulário (o popup do modelo Vídeo) precisa se vestir igual,
+ * e sem isso saía com o botão sem fundo e os campos sem borda.
+ */
+export function ThemedRoot({
   theme,
   children,
 }: {
@@ -381,7 +403,9 @@ function FormCard({
   logoUrl: string | null;
   name: string;
   title: string;
-  subtitle: string;
+  // ⭐ ADITIVO: aceita ausência para o caso de `hideSubtitle`. O render em
+  // `{subtitle && …}` abaixo já tratava vazio; só o TIPO não permitia.
+  subtitle?: string;
   boxBackground: string;
   children: ReactNode;
 }) {
