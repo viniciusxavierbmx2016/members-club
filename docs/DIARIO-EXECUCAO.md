@@ -36,6 +36,72 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
 
+## 2026-09-23 — O HTML próprio da tela de cadastro, fatia 1 de 2: o painel e a moldura isolada
+
+**Estado antes:** main em `096b311` · o modelo "HTML próprio" estava **adiado e redesenhado** desde o
+9.345: decidido que o HTML do produtor **não** seria sanitizado e renderizado na nossa origem, e sim
+dentro de uma moldura isolada — mas nada disso existia no código. A tela de cadastro tinha dois
+modelos (Clássico e Vídeo) e nenhuma coluna para HTML. Produção com 47 workspaces, **47 em
+`classico`**, e a coluna desta fatia ausente nos dois bancos.
+
+**O que foi feito:** o terceiro modelo, **só no painel**. Uma coluna nova (`registerCustomHtml`,
+texto, anulável) — e **só uma**, por decisão do dono: quem manda usar o HTML é
+`registerTemplate = "html"`, não existe interruptor separado. O produtor escolhe o cartão "HTML
+próprio", cola o HTML num editor monoespaçado, vê a prévia dentro da moldura isolada e salva pelo
+botão de sempre. ⭐ **A moldura tem `sandbox="allow-scripts"` e nada mais** — cada permissão ausente
+foi medida em laboratório antes de uma linha ser escrita. O produtor **não escreve JavaScript**: ele
+põe `data-mc-cadastro` num elemento, e o nosso script — montado no **início** do documento e
+escutando o clique em **fase de captura**, para não depender de o HTML dele estar bem formado —
+avisa a página de cima, que valida a mensagem por `ev.source`. ⚠️ **A tela do aluno não foi tocada:**
+com o modelo "html" gravado, ela continua servindo o Clássico, por decisão, até a fatia 2.
+
+**Arquivos tocados:** `prisma/schema.prisma` · a migração
+`20260921153352_add_workspace_register_custom_html` (1 `ADD COLUMN`) ·
+`api/workspaces/[id]/route.ts` · `src/lib/validations.ts` ·
+`src/components/workspace-html-frame.tsx` (novo) · `_types.ts` · `register-tab.tsx` ·
+`edit/page.tsx`. Oito arquivos. ⭐ Em `edit/page.tsx` foram **+5 −0**, em exatamente quatro pontos
+(estado, carga do GET, montagem do envio, passagem para a aba), e **toda** linha nova contém o nome
+do campo.
+
+**Como foi provado:** **sem gate humano visual — a validação foi por captura, leitura do DOM, medição
+em laboratório e comparação byte a byte** (decisão do dono). ⭐ **Antes de escrever**, o laboratório
+respondeu a dúvida que travava o desenho: de dentro da moldura com `allow-scripts`, o cookie de
+sessão **não acompanha nenhuma** das quatro combinações (GET/POST × same-origin/include), nos dois
+motores — e os dois controles (página de cima e a variante proibida com `allow-same-origin`)
+entregaram o cookie em **8 de 8**, o que dá valor aos zeros. **No palco:** o atributo `sandbox` lido
+do DOM renderizado é **exatamente** `"allow-scripts"`, nas duas larguras · os cinco itens do quadro
+conferidos **palavra por palavra**, 5 de 5 · o indicador muda nos dois sentidos e o clique **dentro
+da moldura** mostra o aviso · **as sete recusas pelo botão real "Salvar alterações"** (sem botão, com
+formulário, senha em quatro grafias, e acima do limite) todas **400 com o motivo na tela**, e o banco
+intacto em todas · salvar e voltar pelo botão real, provado no banco **e** na tela depois de
+recarregar · salvar por outra aba não mexeu no HTML · a tela do aluno continua Clássica com o HTML
+salvo, com controle mostrando que ele **está** no banco · e as **quatro telas do aluno** saíram
+**byte-idênticas** às fotos do ANTES, 8 de 8. **Regressão do painel:** três das quatro abas antigas
+byte-idênticas, e a quarta (Informações) refutada por controle de determinismo — três capturas do
+mesmo palco deram dois valores, e o texto é idêntico dos dois lados.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1 <o merge desta fatia>`
+⚠️ Reverter o código **não** desfaz a coluna, e isso é seguro: ela é aditiva, anulável e nasce nula —
+sem o código, nada a lê e nada a escreve.
+
+**Mudou em produção para quem:** **para o produtor que abrir a aba "Personalizar Cadastro"** — ele
+passa a ver um terceiro cartão. Para o aluno, **ninguém**: a tela dele não mudou, e nenhum dos 47
+workspaces está no modelo novo. A coluna nasceu **nula em todos**.
+
+**Ficou aberto:** **9.357** (o laboratório da moldura, com a tabela das variantes) · **9.358** (a
+tabela do cookie) · **9.359** (as 14 rotas que aceitam envio sem sessão, registro de superfície) ·
+**9.360** (lições de método) · e a **errata de método** sob o 9.351, com três correções: o HTML de
+produção não é determinístico porque chega em pedaços, a aba Informações do painel também não é, e
+citação de linha em documento vivo envelhece. Segue aberto de antes o **9.345**, que esta fatia
+começa a fechar — a fatia 2 é a tela do aluno.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ *(migração no staging por `db push`, prova
+dupla, e só depois em produção por `migrate deploy` antes do push)* · gate humano ⛔ *(não houve; ver
+acima)* · papelada ✅
+
+---
+
+
 ## 2026-09-21 — A tela de cadastro do aluno ganha os modelos Clássico e Vídeo (fatia 2 de 2)
 
 **Estado antes:** main em `108b18f` · as 8 colunas e a aba "Personalizar Cadastro" já em produção desde
