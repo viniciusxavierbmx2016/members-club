@@ -504,14 +504,30 @@ export default function EditWorkspacePage() {
         }),
       ]);
 
+      // ⭐ 401 não é falha de permissão: é a sessão que sumiu. A frase que a API
+      // devolve ("Não autorizado") é jargão e não diz o que fazer — quem lê
+      // entende que perdeu acesso ao próprio workspace. Medido: a frase tem
+      // fonte única em `lib/auth.ts:208`, e só dispara quando não há usuário na
+      // sessão; o dono com sessão válida salva com 200. ⛔ Nenhuma trava de
+      // autorização muda aqui: só o texto que a pessoa lê.
+      const FRASE_SESSAO =
+        "Sua sessão expirou. Abra o login em outra aba, entre de novo e clique em Salvar alterações — o que você preencheu continua aqui.";
       if (!resWorkspace.ok) {
         const b = await resWorkspace.json().catch(() => ({}));
-        setError(b?.error || "Erro ao salvar workspace");
+        setError(
+          resWorkspace.status === 401
+            ? FRASE_SESSAO
+            : b?.error || "Erro ao salvar workspace"
+        );
         return;
       }
       if (!resVitrine.ok) {
         const b = await resVitrine.json().catch(() => ({}));
-        setError(b?.error || "Erro ao salvar vitrine");
+        setError(
+          resVitrine.status === 401
+            ? FRASE_SESSAO
+            : b?.error || "Erro ao salvar vitrine"
+        );
         return;
       }
       showToast("Workspace atualizado");

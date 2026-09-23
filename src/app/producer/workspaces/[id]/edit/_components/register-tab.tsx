@@ -166,6 +166,15 @@ export function RegisterTab({
         </div>
       </div>
 
+      {/* ⭐ A tela mostra só o que vale para o modelo escolhido. Esconder NÃO
+          apaga: os campos dos outros modelos continuam gravados e voltam
+          inteiros quando o produtor trocar de volta — daí este aviso, para que
+          ninguém pense que trocar de modelo perdeu o que já tinha escrito. */}
+      <p className="text-[11px] text-gray-500 -mt-6 mb-8">
+        Os campos dos outros modelos continuam guardados: trocar de modelo não
+        apaga nada.
+      </p>
+
       {/* HTML próprio — só quando este modelo está escolhido. */}
       {isHtml && (
         <div className="mb-8">
@@ -257,7 +266,10 @@ export function RegisterTab({
         </div>
       )}
 
-      {/* Vídeo */}
+      {/* Vídeo — só no modelo que a usa. ⛔ Esconder NÃO limpa: o valor
+          segue no estado e continua sendo enviado no salvar, então quem
+          volta para o modelo Vídeo reencontra o link como deixou. */}
+      {isVideo && (
       <div className="mb-8">
         <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-0.5">
           Vídeo
@@ -320,8 +332,11 @@ export function RegisterTab({
           </div>
         </div>
       </div>
+      )}
 
-      {/* Textos */}
+      {/* Textos — no HTML próprio quem escreve os textos é o próprio HTML,
+          então estes campos não valem ali. Continuam guardados. */}
+      {!isHtml && (
       <div className="mb-8">
         <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-0.5">
           Textos
@@ -391,6 +406,7 @@ export function RegisterTab({
                 : "No Clássico aparece abaixo do título; no Vídeo, abaixo do botão. Desligado, some da tela — o texto continua salvo."}
             </p>
           </div>
+          {isVideo && (
           <div className="sm:col-span-2">
             <label className={labelClass}>Alinhamento do título</label>
             <div className="flex gap-2">
@@ -419,8 +435,10 @@ export function RegisterTab({
               Vale só no modelo Vídeo — no Clássico o título segue centralizado
             </p>
           </div>
+          )}
         </div>
       </div>
+      )}
 
       {/* De onde vêm as cores */}
       <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-4">

@@ -36,6 +36,58 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
 
+## 2026-09-23 — O painel do cadastro passa a mostrar só o que vale para o modelo, e o "não autorizado" era sessão
+
+**Estado antes:** main em `18c977c` · a aba "Personalizar Cadastro" tinha os três modelos, mas mostrava
+**todas** as seções em todos eles: no Clássico apareciam a seção de Vídeo e o Alinhamento do título,
+nenhum dos dois com efeito ali. E havia um relato do dono, em produção, no workspace `combo-presets`:
+escolher o modelo Vídeo, colar um link, clicar em "Salvar alterações" e receber **"não autorizado"**.
+
+**O que foi feito:** duas coisas, e a segunda só depois de medir. **(A)** A aba passa a mostrar por
+modelo — Clássico tem Modelo, Textos e o cartão das cores; Vídeo acrescenta a seção de Vídeo e o
+Alinhamento; HTML próprio tem o editor, as regras, o indicador e a prévia, sem Vídeo e sem Textos,
+porque ali quem escreve os textos é o próprio HTML. ⛔ **Esconder não limpa:** as seções saem por
+renderização condicional, o estado continua com os valores do banco e o salvar segue mandando os 31
+campos — e uma linha de ajuda diz isso ao produtor. **(B)** O "não autorizado" **não era falha de
+permissão**: a frase tem fonte única no código e só aparece quando não há usuário na sessão. O
+conserto foi a frase que a pessoa lê.
+
+**Arquivos tocados:** `register-tab.tsx` (as três condições e a linha de ajuda) e `edit/page.tsx` (o
+401 deixa de repassar o jargão). Dois arquivos. ⛔ Sem migração, sem tocar banco.
+
+**Como foi provado:** **sem gate humano visual — captura, leitura do DOM e comparação byte a byte**
+(decisão do dono). ⭐ **O diagnóstico veio antes do conserto:** mapeadas todas as respostas 401/403
+alcançáveis pelo salvar, com a condição de cada uma; reproduzido no palco com **três papéis** (dono,
+colaborador aceito e admin de plataforma) — o **dono salvou com 200** nas duas rotas, e nenhum dos
+três produziu a frase; então medido sem cookie e com cookie inválido, e aí sim vieram os **401
+`{"error":"Não autorizado"}`**, a frase exata do relato. Em produção, somente leitura: `combo-presets`
+ativo, dono PRODUCER e dono do workspace, **0 colaboradores**, campos no padrão — o salvamento não
+passou mesmo, e ele passaria em todos os gates se tivesse sessão. **No palco, depois do conserto:** as
+seções por modelo conferidas por **contagem no DOM, 48 de 48** nas duas larguras · nada se perde,
+provado no banco e na tela · salvar e voltar pelo botão real nos três modelos · as quatro recusas do
+HTML seguem 400 com o motivo · a tela do aluno correta nos três casos · as **quatro telas do aluno
+byte-idênticas** às do ANTES (8 de 8) · e as **quatro abas antigas sem regressão** (4 de 4), medindo
+duas capturas de cada lado por causa do não-determinismo já registrado.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1 <o merge desta fatia>`
+
+**Mudou em produção para quem:** **para o produtor que abrir a aba "Personalizar Cadastro"** — ele
+deixa de ver seções que não valem para o modelo dele, e passa a ler uma frase útil se a sessão
+expirar no meio do trabalho. Para o aluno, **ninguém**: a tela dele não mudou, e os **47** workspaces
+seguem no modelo padrão.
+
+**Ficou aberto:** **9.362** (o diagnóstico do "não autorizado", com a lacuna de *por que* a sessão
+sumiu) · **9.363** (20 telas ainda mostram o jargão da resposta quando a sessão expira — 43 workspaces
+ativos e 154 contas de produtor alcançam essas telas; fatia própria, por decisão do dono) ·
+**9.364** (colaborador lê "Workspace não encontrado" e admin não alcança a tela) · **9.365** (a ajuda
+do alinhamento ficou redundante) · e a **errata de premissa** sob o 9.356.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ⛔ *(não houve; ver acima)* ·
+papelada ✅ · sem migração ✅
+
+---
+
+
 ## 2026-09-23 — O HTML próprio da tela de cadastro, fatia 1 de 2: o painel e a moldura isolada
 
 **Estado antes:** main em `096b311` · o modelo "HTML próprio" estava **adiado e redesenhado** desde o
