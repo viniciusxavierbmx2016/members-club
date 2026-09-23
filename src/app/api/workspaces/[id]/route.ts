@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/auth";
 import { requireWorkspaceOwner } from "@/lib/workspace";
-import { updateWorkspaceSchema, validateBody } from "@/lib/validations";
+import {
+  updateWorkspaceSchema,
+  validateBody,
+  inspecionarHtmlDeCadastro,
+} from "@/lib/validations";
 import { parseVideoUrl } from "@/lib/video";
 
 // Fonte própria da tela de edição do workspace. Antes ela buscava a LISTA
@@ -59,6 +63,7 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
         registerSubtitle: true,
         registerSubtitleEnabled: true,
         registerTitleAlign: true,
+        registerCustomHtml: true,
         accentColor: true,
         bannerUrl: true,
         bannerPosition: true,
@@ -133,7 +138,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
 
     // ─── Tela de cadastro ────────────────────────────────────────────────
     // ⛔ Fatia 1/2: a tela do aluno ainda não lê nada disto. Aqui só se grava.
-    const allowedTemplates = new Set(["classico", "video"]);
+    const allowedTemplates = new Set(["classico", "video", "html"]);
     if (typeof body?.registerTemplate === "string") {
       if (!allowedTemplates.has(body.registerTemplate)) {
         return NextResponse.json(
@@ -195,6 +200,44 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       } else {
         data.registerVideoUrl = raw;
       }
+    }
+
+    // ⭐ HTML PRÓPRIO — as quatro regras do dono, no SERVIDOR.
+    //
+    // Quando validar: quando o modelo EFETIVO depois deste PATCH for "html".
+    // Isso é `body.registerTemplate` quando ele vem, e o valor já gravado
+    // quando não vem — senão o produtor salvaria HTML inválido só por não
+    // reenviar o modelo, ou seria barrado ao voltar para o Clássico com um
+    // HTML velho no banco.
+    const modeloChega = typeof body?.registerTemplate === "string";
+    const htmlChega =
+      body?.registerCustomHtml === null ||
+      typeof body?.registerCustomHtml === "string";
+    if (modeloChega || htmlChega) {
+      const atual = await prisma.workspace.findUnique({
+        where: { id: params.id },
+        select: { registerTemplate: true, registerCustomHtml: true },
+      });
+      const modeloEfetivo = modeloChega
+        ? (body.registerTemplate as string)
+        : atual?.registerTemplate ?? "classico";
+      if (modeloEfetivo === "html") {
+        const htmlEfetivo = htmlChega
+          ? String(body.registerCustomHtml ?? "")
+          : atual?.registerCustomHtml ?? "";
+        const veredito = inspecionarHtmlDeCadastro(htmlEfetivo);
+        if (!veredito.ok) {
+          return NextResponse.json(
+            { error: veredito.motivo },
+            { status: 400 }
+          );
+        }
+      }
+    }
+    if (htmlChega) {
+      data.registerCustomHtml = body.registerCustomHtml
+        ? String(body.registerCustomHtml)
+        : null;
     }
 
     for (const key of [
