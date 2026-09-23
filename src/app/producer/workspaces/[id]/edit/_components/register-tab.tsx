@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { HelpTooltip } from "@/components/help-tooltip";
 import { inputClass, labelClass } from "../_lib/helpers";
 import type { RegisterTemplate, RegisterTitleAlign } from "../_types";
+import { useMemo, useState } from "react";
+import { WorkspaceHtmlFrame } from "@/components/workspace-html-frame";
 
 /**
  * Aba "Personalizar Cadastro" — irmã da de login, mesma estrutura de seções.
@@ -38,10 +40,41 @@ interface RegisterTabProps {
   setRegisterSubtitleEnabled: Dispatch<SetStateAction<boolean>>;
   registerTitleAlign: RegisterTitleAlign;
   setRegisterTitleAlign: Dispatch<SetStateAction<RegisterTitleAlign>>;
+  registerCustomHtml: string;
+  setRegisterCustomHtml: Dispatch<SetStateAction<string>>;
   /** Leva para a aba "Personalizar Login" — a aba é estado do cliente, então
    *  não dá para linkar por URL; quem sabe trocar é a página. */
   onGoToLoginTab: () => void;
 }
+
+/** As cinco regras do quadro aprovado, no texto exato decidido pelo dono. */
+const REGRAS_DO_HTML: Array<{ titulo: string; detalhe: string }> = [
+  {
+    titulo: "Um botão com data-mc-cadastro",
+    detalhe:
+      "É ele que abre o popup de cadastro. Pode haver mais de um na página.",
+  },
+  {
+    titulo: "Vídeo só destes quatro",
+    detalhe:
+      "YouTube, Vimeo, Panda e VTurb. Player de outro domínio é bloqueado pelo navegador, e a página fica com um buraco no lugar dele.",
+  },
+  {
+    titulo: "Sem script de fora",
+    detalhe:
+      "Pixel, chat e rastreador de outro domínio não carregam aqui. Deixe para a sua página de vendas.",
+  },
+  {
+    titulo: "Sem formulário e sem campo de senha",
+    detalhe:
+      "Os campos, a senha e a verificação são nossos. Se o HTML tiver formulário ou campo de senha, o salvar recusa.",
+  },
+  {
+    titulo: "Links não abrem",
+    detalhe:
+      "A página é só para o cadastro. Link para fora fica desativado, para o aluno não sair antes de criar a conta.",
+  },
+];
 
 const TEMPLATES: Array<{
   key: RegisterTemplate;
@@ -50,6 +83,7 @@ const TEMPLATES: Array<{
 }> = [
   { key: "classico", label: "Clássico", hint: "O formulário como é hoje" },
   { key: "video", label: "Vídeo", hint: "Vídeo acima, botão que aparece depois" },
+  { key: "html", label: "HTML próprio", hint: "Você cola o HTML da página" },
 ];
 
 export function RegisterTab({
@@ -69,9 +103,35 @@ export function RegisterTab({
   setRegisterSubtitleEnabled,
   registerTitleAlign,
   setRegisterTitleAlign,
+  registerCustomHtml,
+  setRegisterCustomHtml,
   onGoToLoginTab,
 }: RegisterTabProps) {
   const isVideo = registerTemplate === "video";
+  const isHtml = registerTemplate === "html";
+  const [avisoDoBotao, setAvisoDoBotao] = useState("");
+
+  /**
+   * O indicador usa o parser do PRÓPRIO NAVEGADOR (`DOMParser`), que é o mesmo
+   * que vai montar a moldura — então ele enxerga exatamente o que o aluno verá.
+   * ⚠️ A régua que DECIDE é a do servidor (`inspecionarHtmlDeCadastro`), e ela
+   * lê por `sanitize-html`. Os dois foram confrontados em 6 amostras (maiúsculas,
+   * espaços, quebra de linha, sem aspas, aspas simples) com o mesmo veredito nas
+   * 6; se algum dia divergirem, o servidor vence e a mensagem dele aparece aqui
+   * em cima, no mesmo lugar dos outros erros de salvar.
+   */
+  const achouBotao = useMemo(() => {
+    if (!registerCustomHtml.trim()) return false;
+    try {
+      const doc = new DOMParser().parseFromString(
+        registerCustomHtml,
+        "text/html"
+      );
+      return doc.querySelector("[data-mc-cadastro]") !== null;
+    } catch {
+      return false;
+    }
+  }, [registerCustomHtml]);
 
   return (
     <div>
@@ -105,6 +165,97 @@ export function RegisterTab({
           ))}
         </div>
       </div>
+
+      {/* HTML próprio — só quando este modelo está escolhido. */}
+      {isHtml && (
+        <div className="mb-8">
+          <h2 className="text-sm font-medium text-gray-900 dark:text-white mb-0.5">
+            HTML próprio
+          </h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Você cola o HTML da página. O cadastro abre em popup quando o aluno
+            clica no seu botão.
+          </p>
+
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Seu HTML</label>
+              <textarea
+                value={registerCustomHtml}
+                onChange={(e) => setRegisterCustomHtml(e.target.value)}
+                rows={16}
+                spellCheck={false}
+                maxLength={50000}
+                placeholder={'<div>\n  <h1>Entre para a turma</h1>\n  <button data-mc-cadastro>Quero me inscrever</button>\n</div>'}
+                className={cn(
+                  inputClass,
+                  "font-mono text-[12px] leading-relaxed resize-y"
+                )}
+              />
+              <p
+                className={cn(
+                  "text-[11px] mt-1",
+                  achouBotao ? "text-emerald-600" : "text-amber-600"
+                )}
+              >
+                {achouBotao
+                  ? "Achamos o botão. Pode salvar."
+                  : "Não achamos nenhum botão com data-mc-cadastro."}
+              </p>
+              <p className="text-[11px] text-gray-500 mt-1">
+                {registerCustomHtml.length} de 50.000 caracteres
+              </p>
+            </div>
+
+            <div>
+              <label className={labelClass}>Pré-visualização</label>
+              <div className="rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white">
+                {/* A MESMA moldura que a tela do aluno vai usar: sandbox só com
+                    allow-scripts. ⭐ Aqui o clique no botão marcado NÃO abre o
+                    cadastro de verdade — mostra o aviso, porque esta é a tela do
+                    produtor, não a do aluno. */}
+                <WorkspaceHtmlFrame
+                  html={registerCustomHtml}
+                  title="Pré-visualização do HTML do produtor"
+                  aoPedirCadastro={() =>
+                    setAvisoDoBotao(
+                      "Botão reconhecido — no aluno, este botão abre o cadastro."
+                    )
+                  }
+                />
+              </div>
+              {avisoDoBotao && (
+                <p className="text-[11px] text-emerald-600 mt-2">
+                  {avisoDoBotao}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-gray-200 dark:border-white/10 p-4">
+            <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              O que o seu HTML precisa ter
+            </p>
+            <ol className="space-y-2">
+              {REGRAS_DO_HTML.map((r, i) => (
+                <li key={r.titulo} className="flex gap-2">
+                  <span className="text-[11px] text-gray-400 shrink-0 mt-0.5">
+                    {i + 1}.
+                  </span>
+                  <span>
+                    <span className="text-[12px] font-medium text-gray-900 dark:text-white">
+                      {r.titulo}
+                    </span>
+                    <span className="block text-[11px] text-gray-500">
+                      {r.detalhe}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
 
       {/* Vídeo */}
       <div className="mb-8">

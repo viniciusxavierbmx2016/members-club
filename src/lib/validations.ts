@@ -1,4 +1,6 @@
 import { z } from "zod";
+// Leitor de HTML, não sanitizador: ver `inspecionarHtmlDeCadastro` no fim.
+import sanitizeHtmlLib from "sanitize-html";
 import { MAX_ACCESS_DAYS, MIN_ACCESS_DAYS } from "@/lib/days-input";
 import { NextResponse } from "next/server";
 
@@ -608,6 +610,19 @@ export const updateWorkspaceSchema = z
     registerSubtitle: z.string().max(120).optional().nullable(),
     registerSubtitleEnabled: z.boolean().optional(),
     registerTitleAlign: z.string().max(10).optional(),
+    // ⭐ HTML próprio: o teto de 50.000 espelha o `emailCustomHtml` (:594),
+    // que é o precedente da casa para HTML de produtor. As OUTRAS quatro
+    // regras (botão marcado, sem formulário, sem senha) não cabem no zod:
+    // exigem interpretar o HTML, e vivem em `inspecionarHtmlDeCadastro`.
+    registerCustomHtml: z
+      .string()
+      // ⭐ Mensagem própria: sem ela o zod responde em inglês e em jargão
+      // ("Too big: expected string to have <=50000 characters"), e o
+      // produtor veria três recusas em português e esta em inglês.
+      // 2º argumento posicional é o molde da casa (ver `:446`).
+      .max(50000, "O HTML passou de 50.000 caracteres. Reduza o tamanho e salve de novo.")
+      .optional()
+      .nullable(),
   })
   .passthrough();
 
@@ -961,4 +976,82 @@ export function validateBody<T>(
     };
   }
   return { success: true, data: result.data };
+}
+
+// ─── HTML próprio da tela de cadastro (9.352) ─────────────────────────────
+/**
+ * As quatro regras do quadro aprovado, decididas pelo dono, medidas no
+ * SERVIDOR — o painel repete a checagem só para dar retorno imediato.
+ *
+ * ⭐ A leitura é por PARSER, nunca por busca de texto. `sanitize-html` já é
+ * dependência direta (`package.json:43`) e é usada aqui só como leitor: a
+ * saída sanitizada é descartada, o que interessa são as tags e os atributos
+ * que ela entrega já normalizados. Isso torna a regra imune a maiúsculas,
+ * espaços, quebras de linha e ao tipo de aspas — um `<INPUT TYPE=PASSWORD>`
+ * e um `<input  type = 'password' >` caem no mesmo lugar.
+ *
+ * ⓘ `< form >` (com espaço depois do `<`) NÃO é detectado, e está certo: pela
+ * especificação isso é texto, não tag, e os dois motores confirmaram — o
+ * elemento não existe no DOM, então não há formulário para bloquear.
+ */
+export function inspecionarHtmlDeCadastro(
+  html: string
+): { ok: true } | { ok: false; motivo: string } {
+  if (html.length > 50000) {
+    return {
+      ok: false,
+      motivo: `O HTML tem ${html.length} caracteres e o limite é 50.000.`,
+    };
+  }
+
+  const tags: string[] = [];
+  const atributos: Record<string, string>[] = [];
+  sanitizeHtmlLib(html, {
+    allowedTags: false,
+    allowedAttributes: false,
+    // ⛔ Não sanitizamos nada aqui: a saída é jogada fora. O aviso da
+    // biblioteca sobre `script`/`style` não se aplica a um uso de LEITURA,
+    // e a moldura isolada (`sandbox="allow-scripts"`, sem `allow-same-origin`)
+    // é quem contém o script do produtor — não esta função.
+    allowVulnerableTags: true,
+    transformTags: {
+      "*": (tagName: string, attribs: Record<string, string>) => {
+        tags.push(tagName);
+        atributos.push(attribs);
+        return { tagName, attribs };
+      },
+    },
+  });
+
+  if (tags.includes("form")) {
+    return {
+      ok: false,
+      motivo:
+        "O HTML tem um formulário (<form>). O formulário de cadastro é sempre o nosso — use um botão com data-mc-cadastro.",
+    };
+  }
+
+  const temSenha = atributos.some(
+    (a) => String(a.type || "").trim().toLowerCase() === "password"
+  );
+  if (temSenha) {
+    return {
+      ok: false,
+      motivo:
+        "O HTML tem um campo de senha. Pedir senha é sempre da nossa tela — use um botão com data-mc-cadastro.",
+    };
+  }
+
+  const temBotao = atributos.some((a) =>
+    Object.keys(a).some((k) => k.toLowerCase() === "data-mc-cadastro")
+  );
+  if (!temBotao) {
+    return {
+      ok: false,
+      motivo:
+        "Falta o botão de cadastro: inclua pelo menos um elemento com o atributo data-mc-cadastro.",
+    };
+  }
+
+  return { ok: true };
 }

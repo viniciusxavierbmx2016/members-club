@@ -107,6 +107,11 @@ model Workspace {
   registerSubtitle  String?
   registerSubtitleEnabled Boolean @default(true)
   registerTitleAlign String  @default("left")
+  // ⭐ HTML próprio (9.352 fatia 1): a ÚNICA chave para esta coluna ser lida é
+  // `registerTemplate == "html"`. Não existe coluna "usar HTML" — o modelo
+  // escolhido é a única fonte de verdade, para não haver dois interruptores
+  // capazes de discordar. Fica inerte enquanto o modelo for outro.
+  registerCustomHtml String?  @db.Text
   accentColor       String?
   bannerUrl         String?
   bannerPosition    String?  @default("{\"x\":50,\"y\":50}")

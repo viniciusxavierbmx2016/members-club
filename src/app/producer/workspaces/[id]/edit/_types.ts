@@ -1,7 +1,7 @@
 export type LoginLayout = "central" | "lateral-left" | "lateral-right";
 
 /** Modelo da tela de cadastro. "classico" = a tela de hoje, byte a byte. */
-export type RegisterTemplate = "classico" | "video";
+export type RegisterTemplate = "classico" | "video" | "html";
 /** Alinhamento do título — vale SÓ no modelo Vídeo. */
 export type RegisterTitleAlign = "left" | "center";
 
@@ -32,6 +32,8 @@ export interface Workspace {
   registerSubtitle: string | null;
   registerSubtitleEnabled: boolean;
   registerTitleAlign: RegisterTitleAlign;
+  // O HTML do produtor. Só é lido quando registerTemplate === "html".
+  registerCustomHtml: string | null;
   masterPassword: string | null;
   accentColor: string | null;
   bannerUrl: string | null;
