@@ -112,6 +112,10 @@ model Workspace {
   // escolhido é a única fonte de verdade, para não haver dois interruptores
   // capazes de discordar. Fica inerte enquanto o modelo for outro.
   registerCustomHtml String?  @db.Text
+  // ⭐ Vale SÓ no modelo "video": é a linha do logo e do nome no topo da
+  // página de cadastro. Padrão VERDADEIRO porque é assim que a tela é hoje —
+  // quem não mexer no interruptor não vê diferença nenhuma.
+  registerShowBrand  Boolean  @default(true)
   accentColor       String?
   bannerUrl         String?
   bannerPosition    String?  @default("{\"x\":50,\"y\":50}")

@@ -609,6 +609,8 @@ export const updateWorkspaceSchema = z
     registerTitle: z.string().max(80).optional().nullable(),
     registerSubtitle: z.string().max(120).optional().nullable(),
     registerSubtitleEnabled: z.boolean().optional(),
+    // Só o modelo Vídeo lê este; padrão verdadeiro no banco.
+    registerShowBrand: z.boolean().optional(),
     registerTitleAlign: z.string().max(10).optional(),
     // ⭐ HTML próprio: o teto de 50.000 espelha o `emailCustomHtml` (:594),
     // que é o precedente da casa para HTML de produtor. As OUTRAS quatro

@@ -31,6 +31,8 @@ export interface Workspace {
   registerTitle: string | null;
   registerSubtitle: string | null;
   registerSubtitleEnabled: boolean;
+  // Só o modelo Vídeo lê este.
+  registerShowBrand: boolean;
   registerTitleAlign: RegisterTitleAlign;
   // O HTML do produtor. Só é lido quando registerTemplate === "html".
   registerCustomHtml: string | null;
