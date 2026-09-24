@@ -38,6 +38,8 @@ interface RegisterTabProps {
   setRegisterSubtitle: Dispatch<SetStateAction<string>>;
   registerSubtitleEnabled: boolean;
   setRegisterSubtitleEnabled: Dispatch<SetStateAction<boolean>>;
+  registerShowBrand: boolean;
+  setRegisterShowBrand: Dispatch<SetStateAction<boolean>>;
   registerTitleAlign: RegisterTitleAlign;
   setRegisterTitleAlign: Dispatch<SetStateAction<RegisterTitleAlign>>;
   registerCustomHtml: string;
@@ -101,6 +103,8 @@ export function RegisterTab({
   setRegisterSubtitle,
   registerSubtitleEnabled,
   setRegisterSubtitleEnabled,
+  registerShowBrand,
+  setRegisterShowBrand,
   registerTitleAlign,
   setRegisterTitleAlign,
   registerCustomHtml,
@@ -330,6 +334,38 @@ export function RegisterTab({
               className={inputClass}
             />
           </div>
+          {/* ⭐ A marca no topo. Vale SÓ neste modelo, por isso mora aqui dentro
+              — e o padrão é LIGADO, que é exatamente a tela de hoje. */}
+          <div className="sm:col-span-2">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className={cn(labelClass, "mb-0")}>
+                Mostrar logo e nome no topo
+              </label>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={registerShowBrand}
+                aria-label="Mostrar logo e nome no topo"
+                onClick={() => setRegisterShowBrand((v) => !v)}
+                className={cn(
+                  "relative w-9 h-5 rounded-full transition-colors shrink-0",
+                  registerShowBrand
+                    ? "bg-primary"
+                    : "bg-gray-300 dark:bg-gray-600"
+                )}
+              >
+                <span
+                  className={cn(
+                    "absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform",
+                    registerShowBrand ? "translate-x-[16px]" : "translate-x-0"
+                  )}
+                />
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1">
+              Desligado, a página começa direto pelo título e o vídeo.
+            </p>
+          </div>
         </div>
       </div>
       )}
@@ -432,7 +468,7 @@ export function RegisterTab({
               ))}
             </div>
             <p className="text-[11px] text-gray-500 mt-1">
-              Vale só no modelo Vídeo — no Clássico o título segue centralizado
+              Vale para o título desta tela.
             </p>
           </div>
           )}

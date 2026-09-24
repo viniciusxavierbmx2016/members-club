@@ -35,6 +35,61 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-24 — A marca no topo da tela de cadastro virou interruptor do produtor
+
+**Estado antes:** main em `d04ad87` · no modelo **Vídeo** da tela de cadastro, a página sempre abria
+com uma linha no topo — o logo (ou a inicial do workspace) e o nome. Não havia como desligar. E a
+ajuda do alinhamento do título ainda repetia, em texto, uma condição que a própria tela já garantia
+desde o **9.361** (item **9.365**).
+
+**O que foi feito:** nasceu a coluna `Workspace.registerShowBrand Boolean @default(true)` e o
+interruptor **"Mostrar logo e nome no topo"** no fim da seção Vídeo do painel, com a ajuda
+**"Desligado, a página começa direto pelo título e o vídeo."**. O padrão é **ligado** de propósito:
+a tela de hoje não muda para ninguém. Desligado, a linha da marca some inteira e **nenhuma peça muda
+de forma nem de posição horizontal — o bloco sobe a altura da linha removida mais o espaçamento,
+68 px medidos** (44 da linha + 24 do `gap-6`). O interruptor vale **só no modelo Vídeo**: no Clássico
+não tem efeito e no HTML próprio nem aparece no painel. De carona, a ajuda do alinhamento virou
+**"Vale para o título desta tela."**, fechando o 9.365.
+
+**Arquivos tocados:** `prisma/schema.prisma` · `prisma/migrations/20260924115740_add_workspace_register_show_brand/migration.sql`
+· `src/lib/validations.ts` · `src/app/api/workspaces/[id]/route.ts` · `src/app/producer/workspaces/[id]/edit/_types.ts`
+· `src/app/producer/workspaces/[id]/edit/page.tsx` · `src/app/producer/workspaces/[id]/edit/_components/register-tab.tsx`
+· `src/components/workspace-register-video.tsx` · `src/app/w/[slug]/register/page.tsx` — **9 arquivos, +74/−2**.
+
+**Como foi provado:** palco de staging nos dois lados, com prova de alvo pelo discriminador da própria
+fatia (`registerShowBrand` no `.next`: **main 0 · branch 10**). ⭐ **A régua nova (item 9.367):** a tela
+do Vídeo carrega a miniatura de um vídeo do YouTube, então a comparação foi feita capturando **os dois
+lados no mesmo momento** — LADO-MAIN às 12:30:38 e LADO-BRANCH às 12:32:46 — e deu **2 de 2 larguras
+byte-idênticas**, com o comparador controlado nos dois sentidos. Essa régua nasceu de uma **parada
+escrita** na fase 1: a comparação contra a foto guardada acusou diferença, a medição mostrou **477
+pixels de uma unidade de cor** e provou que **main contra si mesmo reproduzia os mesmos 477** — era a
+foto que tinha envelhecido, não o código. Desligado: contagem do seletor da marca **1 → 0** (com
+controle positivo em 1) e título, vídeo, botão e texto de apoio **todos presentes**, com delta de
+**−68 px** e forma idêntica. Salvar e voltar provado pelo botão real nos dois sentidos, pela tela e
+pela consulta. O valor **sobreviveu a três trocas de modelo**. Clássico com o interruptor desligado e
+as quatro telas do aluno: **8 de 8 byte-idênticas** às fotos do ANTES. Quatro abas antigas do editor:
+três byte-idênticas e a **"Informações"** diferindo por ruído de antialiasing — medido e registrado no
+**9.369** (a mesma branch, no mesmo build, produziu os dois valores). **Migração aplicada em PRODUÇÃO
+ANTES do push**, pelo runbook, com prova no `information_schema` e todas as linhas nascendo verdadeiras.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1 <sha do merge>` — ⚠️ devolve o
+código, **mas não desfaz a coluna**: ela fica em produção, **inerte**, porque depois do revert nenhum
+código de main a lê e o padrão `true` mantém toda linha no estado de hoje.
+
+**Mudou em produção para quem:** para o **produtor**, que ganha um interruptor novo no painel — muda
+pixel na aba "Personalizar Cadastro". Para o **aluno**, **ninguém muda hoje**: dos 48 workspaces,
+**47 estão no Clássico** (43 ativos) e **1 no Vídeo** (`combo-presets`, ativo), e ele nasce com o
+interruptor **ligado**, que é a tela que já existia. Só muda para quem o produtor desligar.
+
+**Ficou aberto:** **9.367** (a régua nova para telas com conteúdo de terceiro) · **9.368** (o "não
+autorizado" também nasce de queda de rede — causa candidata que falta medir, irmã do 9.362) ·
+**9.369** (a aba "Informações" não é determinística na captura) · **9.370** (lições de método).
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ⛔ **NÃO HOUVE** (registrado por
+decisão do dono) · papelada ✅
+
+---
+
 
 ## 2026-09-23 — O painel do cadastro passa a mostrar só o que vale para o modelo, e o "não autorizado" era sessão
 

@@ -30,6 +30,10 @@ interface Props {
   textoDoBotao: string;
   segundosAteOBotao: number;
   textoDeApoio: string | null;
+  /** ⭐ A linha do logo e do nome no topo. Padrão VERDADEIRO: com ela ligada
+   *  a tela é byte a byte a de hoje — provado por comparação com a foto do
+   *  antes. Só desligando é que algo some, e só esta linha some. */
+  mostrarMarca: boolean;
 }
 
 export function WorkspaceRegisterVideo({
@@ -41,6 +45,7 @@ export function WorkspaceRegisterVideo({
   textoDoBotao,
   segundosAteOBotao,
   textoDeApoio,
+  mostrarMarca,
 }: Props) {
   const theme = getLoginTheme(workspace);
 
@@ -95,7 +100,10 @@ export function WorkspaceRegisterVideo({
       style={{ backgroundColor: theme.bgColor, color: theme.textColor }}
     >
       <div className="w-full max-w-3xl flex flex-col gap-6">
-        {/* Logo e nome do workspace */}
+        {/* Logo e nome do workspace — some inteiro quando o produtor desliga.
+            ⛔ Nada mais se move: o `gap-6` do container é quem dava o espaço,
+            e sem este filho ele simplesmente não existe. */}
+        {mostrarMarca && (
         <div className="flex items-center justify-center gap-3">
           {theme.logoUrl ? (
             <Image
@@ -120,6 +128,7 @@ export function WorkspaceRegisterVideo({
           )}
           <span className="text-base font-medium">{theme.name}</span>
         </div>
+        )}
 
         <h1
           className="text-2xl sm:text-3xl font-bold leading-tight"

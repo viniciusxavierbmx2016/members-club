@@ -81,6 +81,7 @@ export default function EditWorkspacePage() {
   const [registerTitle, setRegisterTitle] = useState("");
   const [registerSubtitle, setRegisterSubtitle] = useState("");
   const [registerSubtitleEnabled, setRegisterSubtitleEnabled] = useState(true);
+  const [registerShowBrand, setRegisterShowBrand] = useState(true);
   const [registerTitleAlign, setRegisterTitleAlign] =
     useState<RegisterTitleAlign>("left");
   const [registerCustomHtml, setRegisterCustomHtml] = useState("");
@@ -182,6 +183,7 @@ export default function EditWorkspacePage() {
           setRegisterTitle(found.registerTitle || "");
           setRegisterSubtitle(found.registerSubtitle || "");
           setRegisterSubtitleEnabled(found.registerSubtitleEnabled !== false);
+          setRegisterShowBrand(found.registerShowBrand !== false);
           setRegisterTitleAlign(
             (found.registerTitleAlign as RegisterTitleAlign) || "left"
           );
@@ -451,6 +453,7 @@ export default function EditWorkspacePage() {
       payload.registerTitle = registerTitle.trim() || null;
       payload.registerSubtitle = registerSubtitle.trim() || null;
       payload.registerSubtitleEnabled = registerSubtitleEnabled;
+      payload.registerShowBrand = registerShowBrand;
       payload.registerTitleAlign = registerTitleAlign;
       payload.registerCustomHtml = registerCustomHtml.trim() || null;
 
@@ -690,6 +693,8 @@ export default function EditWorkspacePage() {
             setRegisterSubtitle={setRegisterSubtitle}
             registerSubtitleEnabled={registerSubtitleEnabled}
             setRegisterSubtitleEnabled={setRegisterSubtitleEnabled}
+            registerShowBrand={registerShowBrand}
+            setRegisterShowBrand={setRegisterShowBrand}
             registerTitleAlign={registerTitleAlign}
             setRegisterTitleAlign={setRegisterTitleAlign}
             registerCustomHtml={registerCustomHtml}
