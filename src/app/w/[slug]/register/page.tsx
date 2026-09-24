@@ -53,6 +53,7 @@ export default async function WorkspaceRegisterPage({
       registerSubtitle: true,
       registerSubtitleEnabled: true,
       registerTitleAlign: true,
+      registerShowBrand: true,
     },
   });
 
@@ -94,6 +95,7 @@ export default async function WorkspaceRegisterPage({
         textoDoBotao={workspace.registerButtonText || "Criar conta"}
         segundosAteOBotao={workspace.registerButtonDelaySec ?? 0}
         textoDeApoio={textoDeApoio}
+        mostrarMarca={workspace.registerShowBrand !== false}
       />
     );
   }

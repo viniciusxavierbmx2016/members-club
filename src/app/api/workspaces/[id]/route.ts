@@ -62,6 +62,7 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
         registerTitle: true,
         registerSubtitle: true,
         registerSubtitleEnabled: true,
+        registerShowBrand: true,
         registerTitleAlign: true,
         registerCustomHtml: true,
         accentColor: true,
@@ -179,6 +180,8 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
 
     if (typeof body?.registerSubtitleEnabled === "boolean")
       data.registerSubtitleEnabled = body.registerSubtitleEnabled;
+    if (typeof body?.registerShowBrand === "boolean")
+      data.registerShowBrand = body.registerShowBrand;
 
     // ⭐ O link do vídeo reusa o parser das aulas (`lib/video.ts`) em vez de uma
     // lista nova: os provedores aceitos são os mesmos que a CSP já libera em
