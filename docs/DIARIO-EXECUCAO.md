@@ -35,6 +35,64 @@ Copie o bloco abaixo e preencha todos os campos. Campo sem resposta = etapa não
 
 <!-- As entradas começam abaixo desta linha, da mais recente para a mais antiga. -->
 
+## 2026-09-25 — A tela do aluno no modelo HTML próprio: a frente do cadastro personalizado fecha
+
+**Estado antes:** main em `90a95fe` · o modelo **HTML próprio** existia no painel desde o **9.356**, com a
+moldura isolada e a prévia, mas a **tela do aluno** continuava servindo o Clássico de propósito: o campo
+`registerCustomHtml` nem era buscado pela página. Faltava a segunda metade.
+
+**O que foi feito:** com o modelo `html`, a página do produtor passa a **ocupar a tela inteira**, dentro
+da moldura isolada de sempre — `sandbox="allow-scripts"` e nada mais —, sem nenhuma moldura nossa em
+volta e sem nenhuma marca nossa por cima. O clique no elemento com `data-mc-cadastro` abre o **popup de
+cadastro**, que nesta fatia saiu de dentro do componente do modelo Vídeo e virou componente próprio,
+compartilhado pelos dois modelos. Onde haveria dois diálogos iguais, há um. E a tela tem **reserva para
+o Clássico** em três casos, conferindo por conta própria sem confiar no salvar: sem HTML gravado, HTML
+que não passa na mesma régua do salvar, e qualquer falha ao montar a moldura — esta última numa
+fronteira de erro, porque só ela vê um filho não montar.
+
+**Arquivos tocados:** `src/components/workspace-register-popup.tsx` (novo) ·
+`src/components/workspace-register-html.tsx` (novo) · `src/components/workspace-register-video.tsx` ·
+`src/app/w/[slug]/register/page.tsx` — **4 arquivos, +256 −60**. **Sem migração:** a coluna já estava em
+produção desde o 9.356.
+
+**Como foi provado:** palco de staging nos dois lados, alvo provado pelo artefato e pela prova viva, com
+um discriminador da própria fatia (`Página de cadastro de` no `.next`: branch 1, main 0).
+⭐ **O modelo Vídeo não mudou, e a prova é dupla:** no fonte, desfazendo a extração em memória o arquivo
+volta **byte a byte** ao de main (8.157 = 8.157); na tela, pela régua do **9.367**, main e branch
+capturados no mesmo momento (12:43:01 e 12:44:36) deram **2 de 2 larguras byte-idênticas**.
+⭐ **A moldura:** `sandbox` lido do DOM é exatamente `"allow-scripts"`; o HTML do produtor está dentro do
+`srcdoc` e o nosso script vem **antes** dele; marca, nome e `h1` nossos contam **0** na tela — e o
+controle positivo no modelo Vídeo, com as mesmas sondas, conta **1 em cada**.
+⭐ **O botão do produtor:** o clique dentro da moldura abre o diálogo **centralizado** (432 px de cada
+lado em 1280; 140,5 em cima e embaixo em 900), com o formulário dentro (1 `form`, 5 campos); **Esc, o X
+e o clique no fundo** fecham; e o formulário **remonta** a cada reabertura.
+⭐ **A altura:** HTML mais alto que a tela → moldura de **2.367 px** e a página rola; HTML curto →
+**900 px**, enchendo a tela. Nosso espaço extra: **0** nos dois.
+⭐ **A reserva:** os três casos caem no Clássico (moldura 0, formulário clássico 1), mais o caso extra do
+`<form>`, com controle positivo mostrando a moldura aparecer quando o HTML é válido. O terceiro caso foi
+provado pelo precedente do **9.262**: `throw` injetado na moldura (12 arquivos do artefato), a tela
+devolvendo **HTTP 200 e o Clássico** — não a tela de erro, não página em branco —, e revertido com **0**
+resíduos no fonte e no artefato.
+**Regressão:** as quatro telas do aluno **8/8 byte-idênticas** ao ANTES; as quatro abas antigas do
+editor, os dois lados capturados agora, **4/4 idênticas**. **Interruptor do 9.366 no modelo HTML:**
+ligado e desligado, captura **byte-idêntica**.
+
+**SHA do merge:** o merge desta fatia  ·  **Rollback:** `git revert -m 1 <sha do merge>` — devolve o
+código e **não há coluna nova para desfazer**.
+
+**Mudou em produção para quem:** **para ninguém, hoje.** Medido em 25/set/2026, somente leitura: dos 48
+workspaces, **47 no Clássico** (43 ativos), **1 no Vídeo** e **0 no HTML**. Muda pixel só para quem
+escolher o modelo HTML.
+
+**Ficou aberto:** **9.373** (o endereço da página principal, fixado por escrito) · **9.374** (lições de
+método) · e o **9.352** recebeu **errata** e continua aberto — a extração resolveu a duplicação entre os
+dois modelos de cadastro, mas o `confirm-modal.tsx` feito à mão continua lá.
+
+**Regras conferidas:** §17 respondido ✅ · staging-first ✅ · gate humano ⛔ **NÃO HOUVE** (registrado por
+decisão do dono) · papelada ✅
+
+---
+
 ## 2026-09-24 — A marca no topo da tela de cadastro virou interruptor do produtor
 
 **Estado antes:** main em `d04ad87` · no modelo **Vídeo** da tela de cadastro, a página sempre abria
