@@ -6,7 +6,7 @@ import {
   getLoginTheme,
   type WorkspaceAuthInfo,
 } from "@/components/workspace-auth-shell";
-import { WorkspaceRegisterForm } from "@/components/workspace-register-form";
+import { WorkspaceRegisterPopup } from "@/components/workspace-register-popup";
 import { VideoPlayer } from "@/components/video-player";
 import type { ParsedVideo } from "@/lib/video";
 
@@ -60,7 +60,6 @@ export function WorkspaceRegisterVideo({
   const [popupAberto, setPopupAberto] = useState(false);
 
   const botaoRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -77,17 +76,6 @@ export function WorkspaceRegisterVideo({
     );
     return () => clearTimeout(id);
   }, [segundosAteOBotao]);
-
-  // ⭐ `showModal()` do <dialog> NATIVO: ele traz de graça o topo da pilha, o
-  // fundo escurecido (::backdrop), a armadilha de foco e o Esc. O `close` do
-  // próprio elemento é quem devolve o foco ao botão — um só caminho de volta,
-  // valendo para o X, para o Esc e para o clique no fundo.
-  useEffect(() => {
-    const d = dialogRef.current;
-    if (!d) return;
-    if (popupAberto && !d.open) d.showModal();
-    if (!popupAberto && d.open) d.close();
-  }, [popupAberto]);
 
   function aoFechar() {
     setPopupAberto(false);
@@ -188,43 +176,17 @@ export function WorkspaceRegisterVideo({
         </div>
       </div>
 
-      {/* O POPUP. ⭐ O formulário só é MONTADO quando o diálogo abre e some ao
-          fechar: assim o widget de verificação nasce junto com a tela que a
-          pessoa vai usar, em vez de ficar de pé desde o carregamento — e um
-          token do captcha vale uma vez só. */}
-      <dialog
-        ref={dialogRef}
-        onClose={aoFechar}
-        onClick={(e) => {
-          // Clique no FUNDO fecha: o alvo do clique é o próprio <dialog> só
-          // quando se acerta o ::backdrop, nunca quando se acerta o conteúdo.
-          if (e.target === dialogRef.current) dialogRef.current?.close();
-        }}
-        aria-label={`Criar conta em ${theme.name}`}
-        className="m-auto w-[min(92vw,26rem)] rounded-2xl p-0 backdrop:bg-black/60"
-        style={{ backgroundColor: theme.boxColor, color: theme.textColor }}
-      >
-        {popupAberto && (
-          <div className="p-6">
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => dialogRef.current?.close()}
-                aria-label="Fechar"
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xl leading-none"
-                style={{ color: theme.textColorMuted }}
-              >
-                ×
-              </button>
-            </div>
-            <WorkspaceRegisterForm
-              workspace={workspace}
-              slug={slug}
-              semMoldura
-            />
-          </div>
-        )}
-      </dialog>
+      {/* O POPUP, agora em componente próprio (9.371) e compartilhado com o
+          modelo HTML próprio. ⛔ A extração NÃO mudou nada aqui: mesmo
+          diálogo, mesmo formulário montado só na abertura, mesmas formas de
+          fechar e o mesmo retorno de foco — quem devolve o foco continua
+          sendo o `aoFechar` daqui, porque só esta tela sabe qual botão abriu. */}
+      <WorkspaceRegisterPopup
+        workspace={workspace}
+        slug={slug}
+        aberto={popupAberto}
+        aoFechar={aoFechar}
+      />
     </div>
   );
 }
