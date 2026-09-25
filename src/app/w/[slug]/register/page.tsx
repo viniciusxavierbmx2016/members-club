@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { WorkspaceRegisterForm } from "@/components/workspace-register-form";
 import { WorkspaceRegisterVideo } from "@/components/workspace-register-video";
+import { WorkspaceRegisterHtml } from "@/components/workspace-register-html";
 import { parseVideoUrl } from "@/lib/video";
+import { inspecionarHtmlDeCadastro } from "@/lib/validations";
 import type {
   LoginLayout,
   WorkspaceAuthInfo,
@@ -54,6 +56,9 @@ export default async function WorkspaceRegisterPage({
       registerSubtitleEnabled: true,
       registerTitleAlign: true,
       registerShowBrand: true,
+      // 9.372 — o HTML do produtor. A tela do aluno precisa dele para montar a
+      // moldura isolada; sem isto no `select`, o campo some em silêncio.
+      registerCustomHtml: true,
     },
   });
 
@@ -84,6 +89,35 @@ export default async function WorkspaceRegisterPage({
     video.provider !== "unknown" &&
     !!video.videoId;
 
+  // ⭐ RESERVA PARA O CLÁSSICO no modelo HTML, e a tela CONFERE POR CONTA
+  // PRÓPRIA — não confia em o salvar ter validado, porque o valor pode ter
+  // entrado por outro caminho ou a régua pode ter mudado depois. São três
+  // casos, decididos pelo dono:
+  //   (a) modelo "html" sem HTML salvo (nulo ou só espaço);
+  //   (b) HTML que não passa na MESMA régua do salvar — inclusive o caso "sem
+  //       elemento com data-mc-cadastro", que deixaria a pessoa numa página
+  //       bonita e sem nenhum jeito de se cadastrar;
+  //   (c) qualquer falha ao MONTAR a moldura — essa é do componente, numa
+  //       fronteira de erro, porque só ela vê o filho não montar.
+  // ⛔ Nada é sanitizado nem reescrito: a régua é a do salvar, lida de novo.
+  const htmlSalvo = (workspace.registerCustomHtml ?? "").trim();
+  const usarHtml =
+    workspace.registerTemplate === "html" &&
+    htmlSalvo.length > 0 &&
+    inspecionarHtmlDeCadastro(htmlSalvo).ok;
+
+  // O CLÁSSICO montado uma vez só: é o que a página devolve por padrão E é a
+  // reserva que o modelo HTML recebe para o caso (c).
+  const classico = (
+    <WorkspaceRegisterForm
+      workspace={workspaceForForm}
+      slug={slug}
+      titulo={workspace.registerTitle}
+      subtitulo={textoDeApoio}
+      esconderSubtitulo={!apoioLigado}
+    />
+  );
+
   if (usarVideo) {
     return (
       <WorkspaceRegisterVideo
@@ -100,15 +134,18 @@ export default async function WorkspaceRegisterPage({
     );
   }
 
-  // CLÁSSICO. ⛔ Sem campo preenchido, tudo abaixo é `null`/`undefined` e o
+  if (usarHtml) {
+    return (
+      <WorkspaceRegisterHtml
+        workspace={workspaceForForm}
+        slug={slug}
+        html={htmlSalvo}
+        reserva={classico}
+      />
+    );
+  }
+
+  // CLÁSSICO. ⛔ Sem campo preenchido, tudo acima é `null`/`undefined` e o
   // formulário cai exatamente no texto de hoje — é o que o V6 prova.
-  return (
-    <WorkspaceRegisterForm
-      workspace={workspaceForForm}
-      slug={slug}
-      titulo={workspace.registerTitle}
-      subtitulo={textoDeApoio}
-      esconderSubtitulo={!apoioLigado}
-    />
-  );
+  return classico;
 }
