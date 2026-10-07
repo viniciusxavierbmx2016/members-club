@@ -12,12 +12,12 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
 
     const course = await prisma.course.findUnique({
       where: { id: params.id },
-      select: { termsContent: true },
+      select: { termsContent: true, termsFileUrl: true },
     });
     if (!course) {
       return NextResponse.json({ error: "Curso não encontrado" }, { status: 404 });
     }
-    if (!course.termsContent) {
+    if (!course.termsContent && !course.termsFileUrl) {
       return NextResponse.json({ error: "Este curso não possui termos" }, { status: 400 });
     }
 
