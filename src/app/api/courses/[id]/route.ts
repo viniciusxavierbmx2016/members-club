@@ -380,8 +380,20 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
 
     const termsData: Record<string, unknown> = {};
     if (termsContent !== undefined || termsFileUrl !== undefined) {
-      const newText = typeof termsContent === "string" ? termsContent.trim() || null : termsContent ?? undefined;
-      const newFile = typeof termsFileUrl === "string" ? termsFileUrl.trim() || null : termsFileUrl ?? undefined;
+      /* ⭐ null = "limpar o campo". Antes, `null ?? undefined` virava undefined
+         e o campo era ignorado: o produtor apagava o texto, salvava e ele voltava. */
+      const newText =
+        termsContent === undefined
+          ? undefined
+          : typeof termsContent === "string"
+            ? termsContent.trim() || null
+            : null;
+      const newFile =
+        termsFileUrl === undefined
+          ? undefined
+          : typeof termsFileUrl === "string"
+            ? termsFileUrl.trim() || null
+            : null;
 
       const current = await prisma.course.findUnique({
         where: { id: params.id },
