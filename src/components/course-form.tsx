@@ -36,8 +36,8 @@ interface CourseFormData {
   category: string;
   supportEmail: string;
   supportWhatsapp: string;
-  termsContent: string;
-  termsFileUrl: string;
+  termsContent: string | null;
+  termsFileUrl: string | null;
 }
 
 interface CourseFormProps {

@@ -890,6 +890,10 @@ export const updateCourseSchema = z
       .max(4)
       .optional()
       .nullable(),
+    /* ⭐ TERMOS DE USO: ambos são opcionais. Permite PDF-only ou Texto-only.
+       Validação de "pelo menos um" mora na rota, não aqui. */
+    termsContent: z.string().max(50000).optional().nullable(),
+    termsFileUrl: z.string().max(2000).optional().nullable(),
   })
   .passthrough();
 
